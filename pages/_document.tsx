@@ -15,6 +15,11 @@ export default function Document() {
         {/* Licensed under the MIT license - http://opensource.org/licenses/MIT */}
         {/* Copyright (c) 2015 Daniel Eden */}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" />
+        {/* Tailwind CSS CDN for utility classes */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.4/dist/tailwind.min.css"
+        />
         <script dangerouslySetInnerHTML={{ __html: "var RentioApp = { env: 'production' };" }} />
       </Head>
       <body>
