@@ -60,9 +60,7 @@ export default function ChatBot() {
         {messages.map((m, idx) => (
           <div
             key={idx}
-            className={`${
-              m.from === "bot" ? "text-left" : "text-right"
-            } animate__animated animate__fadeIn`}
+            className={m.from === "bot" ? "text-left" : "text-right"}
           >
             <div
               className={
