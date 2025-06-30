@@ -156,16 +156,18 @@ export default function HomePage() {
       </Head>
 
       {/* トップバー（今週限定サービスなど） */}
-      <div className="bg-yellow-300 text-black text-center py-2 text-sm">
+      <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm animate__animated animate__pulse">
         🎉 今週限定：初回レンタル30%OFF + 新着モデル入荷！
       </div>
 
       {/* ヘッダー */}
-      <header className="border-b shadow-md bg-white">
-        <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
-          {/* ロゴ + 検索 */}
-          <div className="flex items-center gap-4">
-            <div className="text-xl font-bold text-red-600">yasukari</div>
+      <header className="bg-white shadow-md border-b-2 border-red-600 animate__animated animate__fadeInDown">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+          {/* ロゴ */}
+          <Link href="/" className="text-2xl font-extrabold text-red-600 tracking-wide">yasukari</Link>
+
+          <div className="flex items-center gap-6">
+            {/* 検索 */}
             <div className="relative">
               <input
                 type="text"
@@ -201,14 +203,15 @@ export default function HomePage() {
             </div>
         </div>
 
-        {/* ナビゲーションボタン */}
-        <nav className="flex items-center gap-4 text-sm">
-          <NavItem icon={<FaUser />} label="ログイン" />
-          <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
-          <NavItem icon={<FaMotorcycle />} label="ジャンル" />
-          <NavItem icon={<FaShoppingCart />} label="カート" />
-          <NavItem label="ヘルプ" />
-        </nav>
+            {/* ナビゲーションボタン */}
+            <nav className="flex items-center gap-6 text-sm font-medium">
+              <NavItem icon={<FaUser />} label="ログイン" />
+              <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
+              <NavItem icon={<FaMotorcycle />} label="ジャンル" />
+              <NavItem icon={<FaShoppingCart />} label="カート" />
+              <NavItem label="ヘルプ" />
+            </nav>
+          </div>
         </div>
       </header>
 
@@ -305,7 +308,7 @@ export default function HomePage() {
 
 function NavItem({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (
-    <button className="flex items-center gap-1 text-gray-700 hover:text-black">
+    <button className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors">
       {icon && <span>{icon}</span>}
       <span>{label}</span>
     </button>
