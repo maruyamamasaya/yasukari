@@ -7,7 +7,7 @@ export default function ChatBotWidget() {
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {open ? (
-        <div className="relative">
+        <div className="relative animate__animated animate__fadeInUp shadow-xl">
           <button
             onClick={() => setOpen(false)}
             className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
