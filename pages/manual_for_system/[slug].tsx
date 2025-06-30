@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { GetStaticPaths, GetStaticProps } from 'next';
+import CalendarWidget from '../../components/CalendarWidget';
+import DirectoryTree, { DirNode } from '../../components/DirectoryTree';
+import { getDirTree } from '../../lib/getDirTree';
 
 function renderMarkdown(md: string): string {
   const lines = md.split(/\r?\n/);
@@ -21,11 +24,17 @@ function renderMarkdown(md: string): string {
     .join('\n');
 }
 
-type Props = { html: string };
+type Props = { html: string; tree: DirNode[] };
 
-export default function ManualPost({ html }: Props) {
+export default function ManualPost({ html, tree }: Props) {
   return (
-    <div className="prose mx-auto p-4" dangerouslySetInnerHTML={{ __html: html }} />
+    <div className="max-w-4xl mx-auto p-4 flex gap-6">
+      <article className="prose flex-1" dangerouslySetInnerHTML={{ __html: html }} />
+      <div className="w-64 space-y-4">
+        <CalendarWidget />
+        <DirectoryTree tree={tree} />
+      </div>
+    </div>
   );
 }
 
@@ -41,5 +50,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const filePath = path.join(process.cwd(), 'manual_for_system', `${slug}.md`);
   const md = fs.readFileSync(filePath, 'utf8');
   const html = renderMarkdown(md);
-  return { props: { html } };
+  const tree: DirNode[] = getDirTree(process.cwd(), 2);
+  return { props: { html, tree } };
 };
