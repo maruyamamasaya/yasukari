@@ -6,6 +6,7 @@ import { IoMdSearch } from "react-icons/io";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
+import Footer from "../components/Footer";
 
 export default function HomePage() {
   const blogCards = [
@@ -146,6 +147,7 @@ export default function HomePage() {
       </section>
 
       <BikeModelCarousel items={bikeModels} />
+      <Footer />
     </>
   );
 }
