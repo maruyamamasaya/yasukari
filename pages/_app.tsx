@@ -4,6 +4,7 @@ import '../styles/global.css';
 import ChatBotWidget from '../components/ChatBotWidget';
 import MobileNav from '../components/MobileNav';
 
+
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>

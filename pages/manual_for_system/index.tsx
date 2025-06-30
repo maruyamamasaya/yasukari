@@ -50,7 +50,7 @@ export default function ManualIndex({ posts, tree }: Props) {
   const pagePosts = posts.slice(start, start + perPage);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 flex gap-6">
+    <div className="max-w-6xl mx-auto p-4 flex flex-col md:flex-row gap-6">
       <div className="flex-1">
         <h1 className="text-2xl font-bold mb-6">サイト更新ブログ</h1>
         <div className="space-y-4">
