@@ -25,7 +25,7 @@ type Props = { html: string };
 
 export default function ManualPost({ html }: Props) {
   return (
-    <div className="prose mx-auto" dangerouslySetInnerHTML={{ __html: html }} />
+    <div className="prose mx-auto p-4" dangerouslySetInnerHTML={{ __html: html }} />
   );
 }
 
