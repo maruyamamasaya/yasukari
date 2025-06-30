@@ -20,7 +20,7 @@ export default function Footer() {
               バイクのレンタル・サブスク専門サイトです。原付から大型・EVバイクまで豊富なラインナップをご用意。
               1日からレンタルでき、月額プランや法人向けサービスも充実しています。
             </p>
-            <Link href="/contact" className="text-blue-600 hover:underline">
+            <Link href="/contact" className="text-teal-600 hover:underline">
               お問い合わせはこちら
             </Link>
           </div>

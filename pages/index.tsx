@@ -156,15 +156,15 @@ export default function HomePage() {
       </Head>
 
       {/* トップバー（今週限定サービスなど） */}
-      <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm animate__animated animate__pulse">
+      <div className="bg-gradient-to-r from-teal-600 to-teal-500 text-white text-center py-2 text-sm animate__animated animate__pulse">
         🎉 今週限定：初回レンタル30%OFF + 新着モデル入荷！
       </div>
 
       {/* ヘッダー */}
-      <header className="bg-white shadow-md border-b-2 border-red-600 animate__animated animate__fadeInDown">
+      <header className="bg-white shadow-md border-b-2 border-teal-600 animate__animated animate__fadeInDown">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
           {/* ロゴ */}
-          <Link href="/" className="text-2xl font-extrabold text-red-600 tracking-wide">yasukari</Link>
+          <Link href="/" className="text-2xl font-extrabold text-teal-600 tracking-wide">yasukari</Link>
 
           <div className="flex items-center gap-6">
             {/* 検索 */}
@@ -284,7 +284,7 @@ export default function HomePage() {
                   <div className="relative w-fit mx-auto">
                     <img src={item.img} alt={item.title} width={70} height={73} className="object-cover" />
                     {item.badge && (
-                      <div className="absolute top-1 left-1 bg-red-400 text-white text-xs px-1 py-0.5 rounded">
+                      <div className="absolute top-1 left-1 bg-teal-500 text-white text-xs px-1 py-0.5 rounded">
                         {item.badge}
                       </div>
                     )}
@@ -308,7 +308,7 @@ export default function HomePage() {
 
 function NavItem({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (
-    <button className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors">
+    <button className="flex items-center gap-1 text-gray-700 hover:text-teal-600 transition-colors">
       {icon && <span>{icon}</span>}
       <span>{label}</span>
     </button>
