@@ -14,7 +14,7 @@ interface Category {
 
 const categories: Category[] = (faqData as any).categories;
 
-export default function ChatBot() {
+export default function ChatBot({ className = "" }: { className?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<"survey" | "free">("survey");
   const [selectedCategory, setSelectedCategory] =
@@ -55,7 +55,7 @@ export default function ChatBot() {
   }
 
   return (
-    <div className="w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-lg shadow-lg bg-white">
+    <div className={`w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-lg shadow-lg bg-white ${className}`}>
       <div className="flex-1 overflow-y-auto space-y-2 mb-2 pr-1">
         {messages.map((m, idx) => (
           <div
