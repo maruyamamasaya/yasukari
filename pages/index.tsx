@@ -76,12 +76,12 @@ export default function HomePage() {
       </Head>
 
       {/* トップバー（今週限定サービスなど） */}
-      <div className="bg-yellow-300 text-black text-center py-2 text-sm">
+      <div className="bg-yellow-300 text-black text-center py-2 text-sm animate__animated animate__pulse">
         🎉 今週限定：初回レンタル30%OFF + 新着モデル入荷！
       </div>
 
       {/* ヘッダー */}
-      <header className="flex items-center justify-between p-4 border-b shadow-md bg-white">
+      <header className="flex items-center justify-between p-4 border-b shadow-md bg-white animate__animated animate__fadeInDown">
         {/* ロゴ + 検索 */}
         <div className="flex items-center gap-4">
           <div className="text-xl font-bold text-red-600">Rebikele</div>
@@ -106,7 +106,7 @@ export default function HomePage() {
       </header>
 
       {/* カルーセル（新着ブログカード） */}
-      <section className="py-6 px-4">
+      <section className="py-6 px-4 animate__animated animate__fadeIn">
         <h2 className="text-lg font-semibold mb-4">新着ブログ・お知らせ</h2>
         <Swiper spaceBetween={20} slidesPerView={2.5}>
           {blogCards.map((card, index) => (
@@ -123,7 +123,7 @@ export default function HomePage() {
       </section>
 
       {/* おすすめのジャンルセクション（バイク） */}
-      <section className="py-6 px-4">
+      <section className="py-6 px-4 animate__animated animate__fadeIn">
         <h2 className="text-lg font-semibold mb-4">今借りたい！おすすめのジャンル</h2>
         <Swiper spaceBetween={12} slidesPerView={4}>
           {genreItems.map((item, index) => (
