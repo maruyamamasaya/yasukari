@@ -29,7 +29,11 @@ type Props = { html: string; tree: DirNode[] };
 export default function ManualPost({ html, tree }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-col md:flex-row gap-6">
-      <article className="prose flex-1" dangerouslySetInnerHTML={{ __html: html }} />
+      <article
+        className="prose flex-1"
+        style={{ marginLeft: "1rem" }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
       <div className="w-64 space-y-4">
         <CalendarWidget />
         <DirectoryTree tree={tree} />
