@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle, FaClock, FaTruck, FaStar } from "react-icons/fa";
@@ -134,6 +134,21 @@ export default function HomePage() {
     },
   ];
 
+  const suggestItems = [
+    "ホンダ CB400",
+    "ヤマハ MT-25",
+    "カワサキ Ninja",
+    "スズキ GSX-S125",
+    "人気モデルランキング",
+    "ブログ:メンテナンス入門",
+  ];
+
+  const [query, setQuery] = useState("");
+  const [showSuggest, setShowSuggest] = useState(false);
+  const filteredSuggest = suggestItems.filter((s) =>
+    s.toLowerCase().includes(query.toLowerCase())
+  );
+
   return (
     <>
       <Head>
@@ -152,13 +167,38 @@ export default function HomePage() {
           <div className="flex items-center gap-4">
             <div className="text-xl font-bold text-red-600">yasukari</div>
             <div className="relative">
-            <input
-              type="text"
-              placeholder="バイク名・キーワード"
-              className="border rounded-full px-4 py-2 pl-10 w-64"
-            />
-            <IoMdSearch className="absolute left-3 top-2.5 text-gray-500 text-lg" />
-          </div>
+              <input
+                type="text"
+                placeholder="バイク名・キーワード"
+                className="border rounded-full px-4 py-2 pl-10 w-64"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setShowSuggest(true);
+                }}
+                onFocus={() => setShowSuggest(true)}
+                onBlur={() => setTimeout(() => setShowSuggest(false), 100)}
+              />
+              <IoMdSearch className="absolute left-3 top-2.5 text-gray-500 text-lg" />
+              {showSuggest && (
+                <ul className="absolute left-0 mt-1 w-64 bg-white border rounded shadow z-10">
+                  {filteredSuggest.map((s) => (
+                    <li key={s}>
+                      <button
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setQuery(s);
+                          setShowSuggest(false);
+                        }}
+                      >
+                        {s}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
         </div>
 
         {/* ナビゲーションボタン */}
