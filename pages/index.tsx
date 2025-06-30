@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle } from "react-icons/fa";
+import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle, FaClock, FaTruck, FaStar } from "react-icons/fa";
 import { IoMdSearch } from "react-icons/io";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
@@ -146,11 +146,12 @@ export default function HomePage() {
       </div>
 
       {/* ヘッダー */}
-      <header className="flex items-center justify-between p-4 border-b shadow-md bg-white animate__animated animate__fadeInDown">
-        {/* ロゴ + 検索 */}
-        <div className="flex items-center gap-4">
-          <div className="text-xl font-bold text-red-600">yasukari</div>
-          <div className="relative">
+      <header className="border-b shadow-md bg-white animate__animated animate__fadeInDown">
+        <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
+          {/* ロゴ + 検索 */}
+          <div className="flex items-center gap-4">
+            <div className="text-xl font-bold text-red-600">yasukari</div>
+            <div className="relative">
             <input
               type="text"
               placeholder="バイク名・キーワード"
@@ -168,7 +169,36 @@ export default function HomePage() {
           <NavItem icon={<FaShoppingCart />} label="カート" />
           <NavItem label="ヘルプ" />
         </nav>
+        </div>
       </header>
+
+      {/* ヒーローセクション */}
+      <section
+        className="relative h-[60vh] flex items-center justify-center text-white bg-cover bg-center"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504203700661-56077a803b6c?auto=format&fit=crop&w=1200&q=80')" }}
+      >
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="relative z-10 text-center px-4">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 animate__animated animate__fadeInUp">
+            Ride the Future
+          </h1>
+          <p className="mb-6 max-w-xl mx-auto animate__animated animate__fadeInUp animate__delay-1s">
+            最新モデルからクラシックまで、多彩なバイクを簡単レンタル。
+          </p>
+          <Link href="/products" className="btn-primary inline-block animate__animated animate__zoomIn animate__delay-2s">
+            バイクを探す
+          </Link>
+        </div>
+      </section>
+
+      {/* 特徴紹介 */}
+      <section className="py-8 bg-gray-50">
+        <div className="max-w-5xl mx-auto grid gap-6 md:grid-cols-3 text-center px-4">
+          <FeatureItem icon={<FaClock size={28} />} title="24時間予約" text="スマホからいつでも申し込み" />
+          <FeatureItem icon={<FaTruck size={28} />} title="配送対応" text="ご自宅やホテルへお届け" />
+          <FeatureItem icon={<FaStar size={28} />} title="整備済み車両" text="プロメカニックによる点検済み" />
+        </div>
+      </section>
 
       {/* カルーセル（新着ブログカード） */}
       <section className="py-6 px-4 animate__animated animate__fadeIn">
@@ -239,6 +269,24 @@ function NavItem({ icon, label }: { icon?: React.ReactNode; label: string }) {
       {icon && <span>{icon}</span>}
       <span>{label}</span>
     </button>
+  );
+}
+
+function FeatureItem({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="bg-white rounded shadow-sm p-4">
+      <div className="text-primary mb-2">{icon}</div>
+      <h3 className="font-semibold mb-1">{title}</h3>
+      <p className="text-sm text-gray-600">{text}</p>
+    </div>
   );
 }
 
