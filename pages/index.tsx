@@ -10,6 +10,14 @@ import "swiper/css/navigation";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import Footer from "../components/Footer";
 
+type GenreItem = {
+  title: string;
+  keywords?: string;
+  img: string;
+  href: string;
+  badge?: string;
+};
+
 export default function HomePage() {
   const blogSlides = [
     {
@@ -64,30 +72,40 @@ export default function HomePage() {
     },
   ];
 
-  const genreItems = [
+  const genreItems: GenreItem[] = [
     {
       title: "ネイキッドバイク",
+      keywords: "街乗り・初心者向け",
       img: "https://fastly.rentio.jp/storage/70wiuv60d6h3y0rsl7fwvgaz0n7i?fit=crop&height=73&width=70",
       href: "/t/genre/naked?click_from=top_genres",
       badge: "人気No.1",
     },
     {
       title: "アドベンチャー",
+      keywords: "長距離・ツーリング",
       img: "https://fastly.rentio.jp/storage/cmjolgp2t7mmpepnd0i7498j32ek?fit=crop&height=73&width=70",
       href: "/t/genre/adventure?click_from=top_genres",
       badge: "10%OFF",
     },
     {
       title: "スクーター",
+      keywords: "通勤通学に最適",
       img: "https://fastly.rentio.jp/storage/pqsolpklt9uvn3fgefol8hl4gqz6?fit=crop&height=73&width=70",
       href: "/t/genre/scooter?click_from=top_genres",
       badge: null,
     },
     {
       title: "大型バイク",
+      keywords: "迫力・高速走行",
       img: "https://fastly.rentio.jp/storage/hnkdjqth7yvm2ri83w7mlowcxprf?fit=crop&height=73&width=70",
       href: "/t/genre/large?click_from=top_genres",
       badge: "免許サポートあり",
+    },
+    {
+      title: "全ての機種を見る",
+      img: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=70&q=60",
+      href: "/products",
+      badge: null,
     },
   ];
 
@@ -199,6 +217,9 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="text-sm mt-1 truncate">{item.title}</div>
+                  {item.keywords && (
+                    <div className="text-xs text-gray-500 truncate">{item.keywords}</div>
+                  )}
                 </div>
               </Link>
             </SwiperSlide>
