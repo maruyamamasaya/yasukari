@@ -6,6 +6,13 @@ export default function Document() {
       <Head>
         {/* External styles and icons */}
         <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        {/* Google Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+          rel="stylesheet"
+        />
         {/* Tailwind CSS CDN for utility classes */}
         <link
           rel="stylesheet"

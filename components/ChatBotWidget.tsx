@@ -10,7 +10,7 @@ export default function ChatBotWidget() {
         <div className="relative shadow-xl">
           <button
             onClick={() => setOpen(false)}
-            className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+            className="absolute -top-3 -right-3 bg-teal-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
           >
             ×
           </button>
@@ -19,7 +19,7 @@ export default function ChatBotWidget() {
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="bg-blue-600 text-white p-3 rounded-full shadow-lg"
+          className="bg-teal-600 text-white p-3 rounded-full shadow-lg"
         >
           <FaComments className="w-5 h-5" />
         </button>
