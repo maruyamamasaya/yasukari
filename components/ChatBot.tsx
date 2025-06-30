@@ -17,7 +17,8 @@ const categories: Category[] = (faqData as any).categories;
 export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<"survey" | "free">("survey");
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] =
+    useState<Category | null>(null);
 
   function addMessage(from: "bot" | "user", text: string) {
     setMessages((prev) => [...prev, { from, text }]);
@@ -54,15 +55,20 @@ export default function ChatBot() {
   }
 
   return (
-    <div className="max-w-md mx-auto p-4 border rounded shadow-sm bg-white">
-      <div className="h-64 overflow-y-auto mb-4 space-y-2">
+    <div className="w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-lg shadow-lg bg-white">
+      <div className="flex-1 overflow-y-auto space-y-2 mb-2 pr-1">
         {messages.map((m, idx) => (
-          <div key={idx} className={m.from === "bot" ? "text-left" : "text-right"}>
+          <div
+            key={idx}
+            className={`${
+              m.from === "bot" ? "text-left" : "text-right"
+            } animate__animated animate__fadeIn`}
+          >
             <div
               className={
                 m.from === "bot"
                   ? "inline-block bg-gray-100 p-2 rounded"
-                  : "inline-block bg-blue-100 p-2 rounded"
+                  : "inline-block bg-blue-500 text-white p-2 rounded"
               }
             >
               {m.text}
@@ -107,14 +113,14 @@ export default function ChatBot() {
       )}
 
       {step === "free" && (
-        <form onSubmit={handleFreeSubmit} className="flex gap-2">
+        <form onSubmit={handleFreeSubmit} className="mt-2 flex gap-2">
           <input
             type="text"
             name="free"
-            className="flex-1 border rounded p-2"
+            className="flex-1 border rounded-full p-2 px-3"
             placeholder="質問を入力してください"
           />
-          <button type="submit" className="btn-primary">
+          <button type="submit" className="btn-primary rounded-full px-4">
             送信
           </button>
         </form>
