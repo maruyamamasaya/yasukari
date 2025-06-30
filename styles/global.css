@@ -1,5 +1,5 @@
 :root {
-  --primary-color: #009bd1;
+  --primary-color: #e60023;
   --secondary-color: #f7f7f7;
   --font-family-base: Arial, Helvetica, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "\30e1\30a4\30ea\30aa", Meiryo, sans-serif;
 }
@@ -44,7 +44,7 @@ a:hover {
 }
 
 .btn-primary:hover {
-  background-color: #007bb0;
+  background-color: #b5001a;
 }
 
 .card {
