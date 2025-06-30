@@ -20,6 +20,11 @@ export default function Document() {
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.4/dist/tailwind.min.css"
         />
+        {/* Swiper styles for carousels */}
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/swiper@10/swiper-bundle.min.css"
+        />
         <script dangerouslySetInnerHTML={{ __html: "var RentioApp = { env: 'production' };" }} />
       </Head>
       <body>
