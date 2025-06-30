@@ -204,7 +204,9 @@ export default function HomePage() {
 
             {/* ナビゲーションボタン */}
             <nav className="flex items-center gap-6 text-sm font-medium">
-              <NavItem icon={<FaUser />} label="ログイン" />
+              <Link href="/login">
+                <NavItem icon={<FaUser />} label="ログイン" />
+              </Link>
               <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
               <NavItem icon={<FaMotorcycle />} label="ジャンル" />
               <NavItem icon={<FaShoppingCart />} label="カート" />
