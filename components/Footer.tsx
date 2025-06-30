@@ -10,8 +10,9 @@ export default function Footer() {
         <div className="mb-10">
           <p>
             <strong>Rebikele（リバイクル）</strong>は、バイクのレンタル・サブスク専門サイトです。<br />
-            原付から大型、EV、ビジネス用途まで幅広く対応。<br />
-            最短1日〜法人向け長期契約まで、安心のサポート付きで全国対応。
+            原付から大型バイク、ビジネス用スクーター、ツーリングバイク、EVバイクまで豊富なラインナップをご用意。<br />
+            1日からレンタル可能で、月額プランや法人向けも対応。<br />
+            はじめての方にも安心のサポートと充実の車種解説で、あなたにぴったりのバイクが見つかります。
           </p>
         </div>
 
@@ -20,12 +21,36 @@ export default function Footer() {
           <div>
             <h4 className="font-bold mb-2">サイトポリシー</h4>
             <ul className="space-y-1">
-              <li><Link href="/tokusyouhou" className="hover:underline">特定商取引法</Link></li>
-              <li><Link href="/terms" className="hover:underline">利用規約</Link></li>
-              <li><Link href="/privacy" className="hover:underline">プライバシーポリシー</Link></li>
-              <li><Link href="/external" className="hover:underline">情報の外部送信</Link></li>
-              <li><Link href="/company" className="hover:underline">運営会社</Link></li>
-              <li><Link href="/support-policy" className="hover:underline">お問い合わせ方針</Link></li>
+              <li>
+                <Link href="/tokusyouhou" className="hover:underline">
+                  特定商取引法に基づく表記
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:underline">
+                  利用規約
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:underline">
+                  プライバシーポリシー
+                </Link>
+              </li>
+              <li>
+                <Link href="/external" className="hover:underline">
+                  情報の外部送信について
+                </Link>
+              </li>
+              <li>
+                <Link href="/company" className="hover:underline">
+                  運営会社情報
+                </Link>
+              </li>
+              <li>
+                <Link href="/support-policy" className="hover:underline">
+                  お問い合わせ・サポートポリシー
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -33,12 +58,31 @@ export default function Footer() {
           <div>
             <h4 className="font-bold mb-2">サービス案内</h4>
             <ul className="space-y-1">
-              <li><Link href="/genre/50cc" className="hover:underline">原付（50cc以下）</Link></li>
-              <li><Link href="/genre/250cc" className="hover:underline">250ccバイク</Link></li>
-              <li><Link href="/genre/large" className="hover:underline">大型バイク</Link></li>
-              <li><Link href="/genre/ev" className="hover:underline">EV・電動バイク</Link></li>
-              <li><Link href="/guide" className="hover:underline">ご利用ガイド</Link></li>
-              <li><Link href="/faq" className="hover:underline">よくあるご質問</Link></li>
+              <li>
+                <Link href="/popular" className="hover:underline">
+                  人気カテゴリ：原付・250cc・大型バイク・EVバイク
+                </Link>
+              </li>
+              <li>
+                <Link href="/guide" className="hover:underline">
+                  はじめての方へ（ガイド）
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:underline">
+                  よくある質問（FAQ）
+                </Link>
+              </li>
+              <li>
+                <Link href="/shipping" className="hover:underline">
+                  配送・返却について
+                </Link>
+              </li>
+              <li>
+                <Link href="/maintenance" className="hover:underline">
+                  メンテナンス体制について
+                </Link>
+              </li>
             </ul>
           </div>
 
