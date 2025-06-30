@@ -1,7 +1,7 @@
 :root {
-  --primary-color: #0d9488;
-  --primary-color-light: #14b8a6;
-  --secondary-color: #f0f7f9;
+  --primary-color: #b91c1c;
+  --primary-color-light: #f43f5e;
+  --secondary-color: #fdf2f2;
   --font-family-base: "Inter", "Noto Sans JP", Arial, Helvetica, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "\30e1\30a4\30ea\30aa", Meiryo, sans-serif;
 }
 
@@ -78,4 +78,26 @@ a:hover {
 .swiper-button-prev {
   color: #fff;
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile bottom navigation */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  padding: 0.25rem 0.5rem;
+  z-index: 40;
+}
+.mobile-nav a {
+  color: #555;
+  text-align: center;
+  font-size: 0.75rem;
+}
+.mobile-nav a:hover {
+  color: var(--primary-color);
 }
