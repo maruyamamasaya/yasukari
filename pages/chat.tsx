@@ -7,9 +7,9 @@ export default function ChatPage() {
       <Head>
         <title>チャットサポート | yasukari</title>
       </Head>
-      <main className="min-h-screen bg-gray-50 py-8">
+      <main className="min-h-screen bg-gray-50 py-8 flex flex-col items-center">
         <h1 className="text-center text-xl font-bold mb-4">チャットサポート</h1>
-        <ChatBot />
+        <ChatBot className="w-full max-w-md h-[70vh]" />
       </main>
     </>
   );
