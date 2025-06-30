@@ -9,3 +9,6 @@ yasukari公式ホームページリニューアル
 - BikeModelCarousel コンポーネント追加
 - Footer コンポーネント追加
 - グローバルスタイルとアニメーションを導入
+
+## manual_for_system
+サイトの更新情報や運用マニュアルをMarkdown形式で記録するディレクトリです。`/manual_for_system` 配下の `.md` ファイルはサイト上でも閲覧できます。
