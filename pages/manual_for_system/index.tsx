@@ -85,7 +85,7 @@ export default function ManualIndex({ posts, tree }: Props) {
         )}
       </div>
       <div className="w-64 space-y-4">
-        <CalendarWidget />
+        <CalendarWidget posts={posts} />
         <DirectoryTree tree={tree} />
       </div>
     </div>
