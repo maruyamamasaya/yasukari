@@ -9,7 +9,7 @@ export default function Footer() {
         {/* 1. ブランド紹介・SEO対策 */}
         <div className="mb-10">
           <p>
-            <strong>Rebikele（リバイクル）</strong>は、バイクのレンタル・サブスク専門サイトです。<br />
+            <strong>yasukari（リバイクル）</strong>は、バイクのレンタル・サブスク専門サイトです。<br />
             原付から大型バイク、ビジネス用スクーター、ツーリングバイク、EVバイクまで豊富なラインナップをご用意。<br />
             1日からレンタル可能で、月額プランや法人向けも対応。<br />
             はじめての方にも安心のサポートと充実の車種解説で、あなたにぴったりのバイクが見つかります。
@@ -101,8 +101,8 @@ export default function Footer() {
 
         {/* 5. ロゴ＋コピーライト */}
         <div className="text-center mt-10">
-          <img src="/logo-rebikele.svg" alt="Rebikele ロゴ" width={120} className="mx-auto" />
-          <p className="text-gray-400 mt-2">© 2025 Rebikele Inc.</p>
+          <img src="/logo-rebikele.svg" alt="yasukari ロゴ" width={120} className="mx-auto" />
+          <p className="text-gray-400 mt-2">© 2025 yasukari Inc.</p>
         </div>
       </div>
     </footer>

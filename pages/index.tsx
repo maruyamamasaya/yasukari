@@ -72,7 +72,7 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>Rebikele - バイクレンタルサイト</title>
+        <title>yasukari - バイクレンタルサイト</title>
       </Head>
 
       {/* トップバー（今週限定サービスなど） */}
@@ -84,7 +84,7 @@ export default function HomePage() {
       <header className="flex items-center justify-between p-4 border-b shadow-md bg-white animate__animated animate__fadeInDown">
         {/* ロゴ + 検索 */}
         <div className="flex items-center gap-4">
-          <div className="text-xl font-bold text-red-600">Rebikele</div>
+          <div className="text-xl font-bold text-red-600">yasukari</div>
           <div className="relative">
             <input
               type="text"
