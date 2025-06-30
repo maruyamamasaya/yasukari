@@ -5,6 +5,7 @@ import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle } from "react-ic
 import { IoMdSearch } from "react-icons/io";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
+import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 
 export default function HomePage() {
   const blogCards = [
@@ -39,6 +40,31 @@ export default function HomePage() {
       img: "https://fastly.rentio.jp/storage/hnkdjqth7yvm2ri83w7mlowcxprf?fit=crop&height=73&width=70",
       href: "/t/genre/large?click_from=top_genres",
       badge: "免許サポートあり",
+    },
+  ];
+
+  const bikeModels: BikeItem[] = [
+    {
+      modelName: "CT125 \u30CF\u30F3\u30BF\u30FC\u30AB\u30D6",
+      modelCode: "ct125",
+      img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=220&q=60",
+      badge: "\u4EBA\u6C17",
+    },
+    {
+      modelName: "Rebel 250",
+      modelCode: "rebel250",
+      img: "https://images.unsplash.com/photo-1527059815533-5e3217fe272b?auto=format&fit=crop&w=220&q=60",
+      badge: "\u65B0\u7740",
+    },
+    {
+      modelName: "Monkey 125",
+      modelCode: "monkey125",
+      img: "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=220&q=60",
+    },
+    {
+      modelName: "GB350",
+      modelCode: "gb350",
+      img: "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=220&q=60",
     },
   ];
 
@@ -118,6 +144,8 @@ export default function HomePage() {
           ))}
         </Swiper>
       </section>
+
+      <BikeModelCarousel items={bikeModels} />
     </>
   );
 }
