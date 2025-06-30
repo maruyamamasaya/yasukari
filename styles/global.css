@@ -1,0 +1,60 @@
+:root {
+  --primary-color: #009bd1;
+  --secondary-color: #f7f7f7;
+  --font-family-base: Arial, Helvetica, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "\30e1\30a4\30ea\30aa", Meiryo, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 0.5rem;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #fff;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #007bb0;
+}
+
+.card {
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  display: block;
+}
