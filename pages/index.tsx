@@ -3,18 +3,65 @@ import Head from "next/head";
 import Link from "next/link";
 import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle } from "react-icons/fa";
 import { IoMdSearch } from "react-icons/io";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import Footer from "../components/Footer";
 
 export default function HomePage() {
-  const blogCards = [
-    { title: "最新モデル入荷！", content: "今週の注目バイクをご紹介", genre: "new-models" },
-    { title: "レンタルガイド", content: "初めての方への安心サポート", genre: "guide" },
-    { title: "ユーザーインタビュー", content: "実際に使った人の声", genre: "interview" },
-    { title: "キャンペーン情報", content: "今週の特価セール！", genre: "campaign" },
-    { title: "整備のこだわり", content: "安全・快適なレンタルのために", genre: "maintenance" },
+  const blogSlides = [
+    {
+      title: "最新モデル入荷！",
+      img: "https://images.unsplash.com/photo-1586216586175-8aa98895d72b?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "レンタルガイド",
+      img: "https://images.unsplash.com/photo-1558981403-c5f9891deab2?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "ユーザーインタビュー",
+      img: "https://images.unsplash.com/photo-1600788907411-28fe8e361f25?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "キャンペーン情報",
+      img: "https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "整備のこだわり",
+      img: "https://images.unsplash.com/photo-1558980664-10abf19c5c99?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "ツーリング特集",
+      img: "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd9d?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "最新アクセサリ",
+      img: "https://images.unsplash.com/photo-1596991367806-58714a22747c?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "スタッフブログ",
+      img: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "バイクの保管方法",
+      img: "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
+    {
+      title: "イベントレポート",
+      img: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=60",
+      href: "#",
+    },
   ];
 
   const genreItems = [
@@ -108,13 +155,26 @@ export default function HomePage() {
       {/* カルーセル（新着ブログカード） */}
       <section className="py-6 px-4 animate__animated animate__fadeIn">
         <h2 className="text-lg font-semibold mb-4">新着ブログ・お知らせ</h2>
-        <Swiper spaceBetween={20} slidesPerView={2.5}>
-          {blogCards.map((card, index) => (
+        <Swiper
+          modules={[Autoplay, Navigation]}
+          spaceBetween={12}
+          slidesPerView={3}
+          navigation
+          autoplay={{ delay: 3000 }}
+          loop
+        >
+          {blogSlides.map((card, index) => (
             <SwiperSlide key={index}>
-              <Link href={`/t/genre/${card.genre}?click_from=top_mainvisual`}>
-                <div className="cursor-pointer bg-white rounded-lg shadow-md p-4 h-[250px] flex flex-col justify-center hover:bg-gray-50 transition">
-                  <h3 className="text-md font-bold mb-2">{card.title}</h3>
-                  <p className="text-sm text-gray-600">{card.content}</p>
+              <Link href={card.href}>
+                <div className="relative rounded-lg overflow-hidden shadow-md cursor-pointer">
+                  <img
+                    src={card.img}
+                    alt={card.title}
+                    className="w-full h-56 object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm p-2 text-center">
+                    {card.title}
+                  </div>
                 </div>
               </Link>
             </SwiperSlide>
