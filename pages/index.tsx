@@ -181,13 +181,13 @@ export default function HomePage() {
       >
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 text-center px-4">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 animate__animated animate__fadeInUp">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">
             Ride the Future
           </h1>
-          <p className="mb-6 max-w-xl mx-auto animate__animated animate__fadeInUp animate__delay-1s">
+          <p className="mb-6 max-w-xl mx-auto">
             最新モデルからクラシックまで、多彩なバイクを簡単レンタル。
           </p>
-          <Link href="/products" className="btn-primary inline-block animate__animated animate__zoomIn animate__delay-2s">
+          <Link href="/products" className="btn-primary inline-block">
             バイクを探す
           </Link>
         </div>
@@ -203,7 +203,7 @@ export default function HomePage() {
       </section>
 
       {/* カルーセル（新着ブログカード） */}
-      <section className="py-6 px-4 animate__animated animate__fadeIn">
+      <section className="py-6 px-4">
         <h2 className="text-lg font-semibold mb-4">新着ブログ・お知らせ</h2>
         <Swiper
           modules={[Autoplay, Navigation]}
@@ -233,7 +233,7 @@ export default function HomePage() {
       </section>
 
       {/* おすすめのジャンルセクション（バイク） */}
-      <section className="py-6 px-4 animate__animated animate__fadeIn">
+      <section className="py-6 px-4">
         <h2 className="text-lg font-semibold mb-4">今借りたい！おすすめのジャンル</h2>
         <Swiper spaceBetween={12} slidesPerView={4}>
           {genreItems.map((item, index) => (
