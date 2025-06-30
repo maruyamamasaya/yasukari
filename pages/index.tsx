@@ -201,7 +201,6 @@ export default function HomePage() {
                 </ul>
               )}
             </div>
-        </div>
 
             {/* ナビゲーションボタン */}
             <nav className="flex items-center gap-6 text-sm font-medium">
