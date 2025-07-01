@@ -11,6 +11,7 @@ interface Message {
   from: "bot" | "user";
   text: string;
   time: string;
+  feedback?: boolean;
 }
 
 interface Category {
@@ -21,7 +22,13 @@ interface Category {
 
 const categories: Category[] = (faqData as any).categories;
 
-export default function ChatBot({ className = "" }: { className?: string }) {
+export default function ChatBot({
+  className = "",
+  onClose,
+}: {
+  className?: string;
+  onClose?: () => void;
+}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<"survey" | "free">("survey");
   const [selectedCategory, setSelectedCategory] =
@@ -30,6 +37,8 @@ export default function ChatBot({ className = "" }: { className?: string }) {
   const [height, setHeight] = useState(448);
   const startYRef = useRef(0);
   const startHeightRef = useRef(0);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [loopCount, setLoopCount] = useState(0);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -54,6 +63,15 @@ export default function ChatBot({ className = "" }: { className?: string }) {
   function handleQuestion(faq: { q: string; a: string }) {
     addMessage("user", faq.q);
     addMessage("bot", faq.a);
+    const d = new Date();
+    const time = `${String(d.getHours()).padStart(2, "0")}:${String(
+      d.getMinutes()
+    ).padStart(2, "0")}`;
+    setMessages((prev) => [
+      ...prev,
+      { from: "bot", text: "解決しましたか？", time, feedback: true },
+    ]);
+    setShowFeedback(true);
   }
 
   function handleFreeStart() {
@@ -74,6 +92,22 @@ export default function ChatBot({ className = "" }: { className?: string }) {
     input.value = "";
     // ここでは OpenAI 連携の代わりにプレースホルダー応答を返す
     addMessage("bot", "ただいま確認中です。後ほどご回答いたします。");
+  }
+
+  function handleYes() {
+    onClose?.();
+    setShowFeedback(false);
+  }
+
+  function handleNo() {
+    const newCount = loopCount + 1;
+    setLoopCount(newCount);
+    setShowFeedback(false);
+    setSelectedCategory(null);
+    setStep("survey");
+    if (newCount >= 4) {
+      handleFreeStart();
+    }
   }
 
   function handleBack() {
@@ -150,6 +184,17 @@ export default function ChatBot({ className = "" }: { className?: string }) {
         </button>
       </div>
 
+      {showFeedback && (
+        <div className="flex justify-center gap-4 my-2">
+          <button className="btn-primary px-4" onClick={handleYes}>
+            はい👍
+          </button>
+          <button className="btn-secondary px-4" onClick={handleNo}>
+            いいえ
+          </button>
+        </div>
+      )}
+
       {step === "survey" && !selectedCategory && (
         <div className="space-y-2">
           <p className="text-sm">カテゴリを選択してください。</p>
@@ -182,12 +227,14 @@ export default function ChatBot({ className = "" }: { className?: string }) {
               {faq.q}
             </button>
           ))}
-          <button
-            className="w-full text-left p-2 border rounded bg-gray-200 hover:bg-gray-300"
-            onClick={handleFreeStart}
-          >
-            その他の質問を入力する
-          </button>
+          {loopCount >= 2 && (
+            <button
+              className="w-full text-left p-2 border rounded bg-gray-200 hover:bg-gray-300"
+              onClick={handleFreeStart}
+            >
+              その他の質問を入力する
+            </button>
+          )}
         </div>
       )}
 
