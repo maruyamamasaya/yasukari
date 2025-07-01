@@ -228,7 +228,9 @@ export default function HomePage() {
               <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
               <NavItem icon={<FaMotorcycle />} label="ジャンル" />
               <NavItem icon={<FaShoppingCart />} label="カート" />
-              <NavItem label="ヘルプ" />
+              <Link href="/help">
+                <NavItem label="ヘルプ" />
+              </Link>
             </nav>
           </div>
         </div>
