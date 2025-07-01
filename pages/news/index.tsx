@@ -2,6 +2,7 @@ import Head from 'next/head'
 
 export default function NewsPage() {
   const posts = [
+    { title: '定休日変更のお知らせ', date: '2023-11-23', excerpt: '定休日が月曜日のみから月・木曜日へ変更となります。' },
     { title: '新サービス開始のお知らせ', date: '2025-07-01', excerpt: 'バイクレンタルの新プランをスタートしました。' },
     { title: '夏季休業について', date: '2025-07-15', excerpt: 'お盆期間中の営業スケジュールを掲載しています。' },
     { title: '店舗リニューアル', date: '2025-06-20', excerpt: '内装を一新し、より快適にご利用いただけるようになりました。' },
