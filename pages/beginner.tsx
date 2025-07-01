@@ -1,9 +1,10 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { FaArrowDown } from 'react-icons/fa';
 
 export default function BeginnerGuidePage() {
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6 text-sm leading-relaxed">
+    <div className="max-w-[1440px] mx-auto p-6 space-y-6 text-sm leading-relaxed">
       <Head>
         <title>はじめてガイド - yasukari</title>
       </Head>
@@ -11,26 +12,12 @@ export default function BeginnerGuidePage() {
       <img
         src="https://yasukari.com/static/images/guide/barner.jpg"
         alt="はじめてガイドバナー"
-        className="w-full h-48 object-cover mb-6"
+        className="w-full h-[300px] object-cover mb-6"
       />
-
-      <nav className="text-xs text-center text-gray-500 space-x-2">
-        <span>ホーム</span>
-        <span>&gt;</span>
-        <span>ご利用案内</span>
-        <span>&gt;</span>
-        <span>ご予約</span>
-        <span>&gt;</span>
-        <span>ご来店</span>
-        <span>&gt;</span>
-        <span>ご利用</span>
-        <span>&gt;</span>
-        <span>ご返却</span>
-      </nav>
 
       <h1 className="text-2xl font-bold mb-6 text-center">はじめてガイド</h1>
 
-      <section className="space-y-2">
+      <section className="border rounded p-4 space-y-2">
         <h2 className="text-lg font-semibold">01. ご予約について</h2>
         <p>各車両ページより、スケジュールを確認しご予約ください。※18歳未満のお客様はご利用出来ません。</p>
         <ul className="list-disc list-inside space-y-1">
@@ -46,8 +33,9 @@ export default function BeginnerGuidePage() {
           </li>
         </ul>
       </section>
+      <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
-      <section className="space-y-2">
+      <section className="border rounded p-4 space-y-2">
         <h2 className="text-lg font-semibold">02. ご来店</h2>
         <p>ご来店時は下記をお持ちください。オプションでヘルメットをお申込みでないお客様はヘルメットをお持ちください。</p>
         <ul className="list-disc list-inside space-y-1">
@@ -57,8 +45,9 @@ export default function BeginnerGuidePage() {
         <p>ご予約日の10時から18時30分の間にお越しください。(手続きに時間がかかる為)</p>
         <p>ヤスカリはリバイクルK-JETが運営しております。ご来店の際はリバイクルK-JETのスタッフまでお声かけ下さい。</p>
       </section>
+      <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
-      <section className="space-y-2">
+      <section className="border rounded p-4 space-y-2">
         <h2 className="text-lg font-semibold">03. ご利用</h2>
         <ul className="list-disc list-inside space-y-1">
           <li>契約者様以外の貸し出し、返却はお受けできませんので必ずご本人が時間内にご来店ください。</li>
@@ -103,8 +92,9 @@ export default function BeginnerGuidePage() {
         </table>
         <p className="mt-2">走行中の不具合については営業時間内に契約店舗へご連絡ください。営業時間外に走行不可能になった場合は、ロードサービスをご利用ください。</p>
       </section>
+      <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
-      <section className="space-y-2">
+      <section className="border rounded p-4 space-y-2">
         <h2 className="text-lg font-semibold">04. ご返却</h2>
         <p>ご返却日の10時から18時30分の間にお越しください。(手続きに時間がかかる為)</p>
         <p>返却時にガソリンが満タンでない場合は、当社規定の費用をいただきます。</p>
