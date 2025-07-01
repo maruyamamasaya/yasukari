@@ -99,8 +99,6 @@ export default function Header() {
               <Link href="/beginner">
                 <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
               </Link>
-              <NavItem icon={<FaMotorcycle />} label="ジャンル" />
-              <NavItem icon={<FaShoppingCart />} label="カート" />
               <Link href="/help">
                 <NavItem label="ヘルプ" />
               </Link>
@@ -129,12 +127,6 @@ export default function Header() {
                 <Link href="/beginner">
                   <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
                 </Link>
-              </li>
-              <li>
-                <NavItem icon={<FaMotorcycle />} label="ジャンル" />
-              </li>
-              <li>
-                <NavItem icon={<FaShoppingCart />} label="カート" />
               </li>
               <li>
                 <Link href="/help">
