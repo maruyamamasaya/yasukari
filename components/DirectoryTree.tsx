@@ -1,6 +1,26 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 
+const DESCRIPTIONS: Record<string, string> = {
+  'README.md': 'プロジェクト概要',
+  components: '再利用コンポーネント',
+  data: 'サンプルデータ',
+  'deploy.sh': 'デプロイスクリプト',
+  lib: 'ユーティリティ',
+  manual_for_system: '運用マニュアル',
+  'next-env.d.ts': 'Next.js型定義',
+  'next.config.js': 'Next.js設定',
+  'package-lock.json': '依存固定',
+  'package.json': 'npm設定',
+  pages: 'ページ群',
+  styles: 'スタイル',
+  'tsconfig.json': 'TypeScript設定',
+};
+
+function getDesc(name: string) {
+  return DESCRIPTIONS[name] ?? '';
+}
+
 export type DirNode = {
   name: string;
   path: string;
@@ -17,6 +37,7 @@ function Node({ node }: { node: DirNode }) {
         <button
           onClick={() => setOpen(!open)}
           className="text-left hover:underline flex items-center gap-1"
+          title={getDesc(node.name)}
         >
           <span>{open ? '▼' : '▶'}</span>
           {node.name}
@@ -34,7 +55,11 @@ function Node({ node }: { node: DirNode }) {
 
   return (
     <li className="mt-1">
-      <Link href={`/source/${node.path}`} className="hover:underline text-teal-700">
+      <Link
+        href={`/source/${node.path}`}
+        className="hover:underline text-teal-700"
+        title={getDesc(node.name)}
+      >
         {node.name}
       </Link>
     </li>
