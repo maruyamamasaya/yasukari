@@ -130,6 +130,20 @@ a:hover {
 .animate-fade {
   animation: fade-up 0.3s ease forwards;
 }
+
+/* FAQ accordion */
+.faq-answer {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+}
+
+.faq-answer.open {
+  max-height: 500px;
+  opacity: 1;
+  padding-top: 0.5rem;
+}
 /* Markdown article styles */
 .markdown-body {
   font-size: 1rem;
