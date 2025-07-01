@@ -44,6 +44,16 @@ export default function StoresPage() {
             </tr>
           </tbody>
         </table>
+        <div className="w-full h-64 mt-4">
+          <iframe
+            src="https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E8%B6%B3%E7%AB%8B%E5%8C%BA%E5%B0%8F%E5%8F%B02-9-7&output=embed"
+            width="100%"
+            height="100%"
+            loading="lazy"
+            style={{ border: 0 }}
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
       </section>
 
       <section className="space-y-2">
@@ -77,6 +87,16 @@ export default function StoresPage() {
             </tr>
           </tbody>
         </table>
+        <div className="w-full h-64 mt-4">
+          <iframe
+            src="https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E5%8F%B0%E6%9D%B1%E5%8C%BA%E4%B8%8B%E8%B0%B73%E3%83%BC16%E3%83%BC14&output=embed"
+            width="100%"
+            height="100%"
+            loading="lazy"
+            style={{ border: 0 }}
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
       </section>
 
       <p className="mt-6 text-center text-gray-500">Copyright レンタルバイク『ヤスカリ』.</p>
