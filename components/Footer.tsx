@@ -77,7 +77,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/guide" className="hover:underline">
+                <Link href="/beginner" className="hover:underline">
                   はじめての方へ（ガイド）
                 </Link>
               </li>
