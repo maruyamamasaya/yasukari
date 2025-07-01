@@ -12,6 +12,7 @@ export type BikeItem = {
   modelCode: string;
   img: string;
   badge?: string;
+  price24h?: string;
 };
 
 type Props = {
@@ -54,6 +55,11 @@ export default function BikeModelCarousel({ items, title = "人気の型番" }: 
                   )}
                 </div>
                 <div className="text-sm mt-2 truncate">{item.modelName}</div>
+                {item.price24h && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    24時間 {item.price24h}
+                  </div>
+                )}
               </div>
             </Link>
           </SwiperSlide>
