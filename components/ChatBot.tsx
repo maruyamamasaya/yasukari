@@ -80,7 +80,7 @@ export default function ChatBot({ className = "" }: { className?: string }) {
 
   return (
     <div
-      className={`w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-2xl shadow-lg bg-white overflow-y-auto ${className}`}
+      className={`w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-2xl shadow-lg bg-white resize-y max-h-[150vh] overflow-hidden ${className}`}
     >
       <div className="relative flex-1 overflow-y-auto space-y-2 mb-2 pr-4" ref={scrollRef}>
         {messages.map((m, idx) => (
