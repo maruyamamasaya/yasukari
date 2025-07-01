@@ -216,7 +216,7 @@ export default function HomePage() {
       <section className="py-8 bg-gray-50">
         <div className="max-w-5xl mx-auto grid gap-6 md:grid-cols-3 text-center px-4">
           <FeatureItem icon={<FaClock size={28} />} title="24時間予約" text="スマホからいつでも申し込み" />
-          <FeatureItem icon={<FaTruck size={28} />} title="配送対応" text="ご自宅やホテルへお届け" />
+          <FeatureItem icon={<FaTruck size={28} />} title="格安レンタル" text="オンラインで簡単手続き" />
           <FeatureItem icon={<FaStar size={28} />} title="整備済み車両" text="プロメカニックによる点検済み" />
         </div>
       </section>
