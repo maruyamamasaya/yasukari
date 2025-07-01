@@ -73,9 +73,14 @@ export default function ChatBot({ className = "" }: { className?: string }) {
     addMessage("bot", "ただいま確認中です。後ほどご回答いたします。");
   }
 
+  function handleBack() {
+    setSelectedCategory(null);
+    setStep("survey");
+  }
+
   return (
     <div
-      className={`w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-2xl shadow-lg bg-white ${className}`}
+      className={`w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-2xl shadow-lg bg-white overflow-y-auto ${className}`}
     >
       <div className="relative flex-1 overflow-y-auto space-y-2 mb-2 pr-4" ref={scrollRef}>
         {messages.map((m, idx) => (
@@ -136,6 +141,12 @@ export default function ChatBot({ className = "" }: { className?: string }) {
 
       {step === "survey" && selectedCategory && (
         <div className="space-y-2">
+          <button
+            onClick={handleBack}
+            className="text-sm text-red-700 hover:underline"
+          >
+            &larr; カテゴリ選択に戻る
+          </button>
           {selectedCategory.faqs.map((faq, idx) => (
             <button
               key={idx}
@@ -155,17 +166,25 @@ export default function ChatBot({ className = "" }: { className?: string }) {
       )}
 
       {step === "free" && (
-        <form onSubmit={handleFreeSubmit} className="mt-2 flex gap-2">
-          <input
-            type="text"
-            name="free"
-            className="flex-1 border rounded-full p-2 px-3"
-            placeholder="質問を入力してください"
-          />
-          <button type="submit" className="btn-primary rounded-full px-4">
-            送信
+        <div className="space-y-2">
+          <button
+            onClick={handleBack}
+            className="text-sm text-red-700 hover:underline"
+          >
+            &larr; カテゴリ選択に戻る
           </button>
-        </form>
+          <form onSubmit={handleFreeSubmit} className="flex gap-2">
+            <input
+              type="text"
+              name="free"
+              className="flex-1 border rounded-full p-2 px-3"
+              placeholder="質問を入力してください"
+            />
+            <button type="submit" className="btn-primary rounded-full px-4">
+              送信
+            </button>
+          </form>
+        </div>
       )}
     </div>
   );

@@ -14,7 +14,7 @@ export default function ChatBotWidget() {
           >
             ×
           </button>
-          <ChatBot className="w-80 sm:w-96 h-96" />
+            <ChatBot className="w-80 sm:w-96 h-[28rem]" />
         </div>
       )}
       <button
