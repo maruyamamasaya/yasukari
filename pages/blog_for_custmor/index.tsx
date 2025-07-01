@@ -8,6 +8,7 @@ type PostMeta = {
   title: string
   date: string
   excerpt: string
+  tags?: string
 }
 
 export async function getStaticProps() {
@@ -33,7 +34,8 @@ export async function getStaticProps() {
     const dateMatch = meta.date || slug.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || ''
     const excerptLine = lines.slice(idx).find((l) => l.trim() && !l.startsWith('#')) || ''
     const excerpt = excerptLine.replace(/\*/g, '').slice(0, 80)
-    return { slug, title, date: dateMatch, excerpt }
+    const tags = meta.tags
+    return { slug, title, date: dateMatch, excerpt, tags }
   })
 
   posts.sort((a, b) => b.date.localeCompare(a.date))
@@ -57,6 +59,11 @@ export default function BlogIndex({ posts }: { posts: PostMeta[] }) {
           >
             <h2 className="font-semibold">{post.title}</h2>
             {post.date && <p className="text-gray-500 text-xs mb-1">{post.date}</p>}
+            {post.tags && (
+              <p className="text-blue-600 text-xs mb-1">
+                {post.tags.split(',').map((t) => `#${t.trim()}`).join(' ')}
+              </p>
+            )}
             {post.excerpt && <p>{post.excerpt}</p>}
           </Link>
         ))}

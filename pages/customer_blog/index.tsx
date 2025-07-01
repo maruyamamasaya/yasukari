@@ -1,12 +1,49 @@
+import fs from 'fs'
+import path from 'path'
 import Head from 'next/head'
+import Link from 'next/link'
 
-export default function CustomerBlogPage() {
-  const posts = [
-    { title: 'おすすめルート紹介', date: '2025-07-05', excerpt: '常連さんが選ぶツーリングコースを写真付きでご紹介。' },
-    { title: '初めてのレンタル体験記', date: '2025-06-28', excerpt: '初心者のお客様によるバイクレンタルレポートです。' },
-    { title: 'スタッフとの交流イベント', date: '2025-06-10', excerpt: '店舗主催イベントの様子をレポートします。' },
-  ]
+interface PostMeta {
+  slug: string
+  title: string
+  date: string
+  excerpt: string
+  tags?: string
+}
 
+export async function getStaticProps() {
+  const dir = path.join(process.cwd(), 'blog_for_custmor')
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'))
+  const posts: PostMeta[] = files.map((file) => {
+    const slug = file.replace(/\.md$/, '')
+    const md = fs.readFileSync(path.join(dir, file), 'utf8')
+    const lines = md.split(/\r?\n/)
+    let idx = 0
+    const meta: Record<string, string> = {}
+    if (lines[idx] === '---') {
+      idx++
+      while (idx < lines.length && lines[idx] !== '---') {
+        const [k, ...v] = lines[idx].split(':')
+        if (k) meta[k.trim()] = v.join(':').trim().replace(/^"|"$/g, '')
+        idx++
+      }
+      idx++
+    }
+    const heading = lines.find((l) => l.startsWith('# '))
+    const title = meta.title || (heading ? heading.replace(/^#\s*/, '') : slug)
+    const dateMatch = meta.date || slug.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || ''
+    const excerptLine = lines.slice(idx).find((l) => l.trim() && !l.startsWith('#')) || ''
+    const excerpt = excerptLine.replace(/\*/g, '').slice(0, 80)
+    const tags = meta.tags
+    return { slug, title, date: dateMatch, excerpt, tags }
+  })
+
+  posts.sort((a, b) => b.date.localeCompare(a.date))
+
+  return { props: { posts } }
+}
+
+export default function CustomerBlogPage({ posts }: { posts: PostMeta[] }) {
   return (
     <div className="max-w-3xl mx-auto p-6 text-sm leading-relaxed">
       <Head>
@@ -14,12 +51,21 @@ export default function CustomerBlogPage() {
       </Head>
       <h1 className="text-xl font-bold mb-4 text-center">店舗ブログ</h1>
       <div className="space-y-4">
-        {posts.map((post, idx) => (
-          <div key={idx} className="p-4 bg-white rounded shadow">
+        {posts.map((post) => (
+          <Link
+            key={post.slug}
+            href={`/blog_for_custmor/${post.slug}`}
+            className="block p-4 bg-white rounded shadow hover:bg-gray-50"
+          >
             <h2 className="font-semibold">{post.title}</h2>
-            <p className="text-gray-500 text-xs mb-1">{post.date}</p>
-            <p>{post.excerpt}</p>
-          </div>
+            {post.date && <p className="text-gray-500 text-xs mb-1">{post.date}</p>}
+            {post.tags && (
+              <p className="text-blue-600 text-xs mb-1">
+                {post.tags.split(',').map((t) => `#${t.trim()}`).join(' ')}
+              </p>
+            )}
+            {post.excerpt && <p>{post.excerpt}</p>}
+          </Link>
         ))}
       </div>
     </div>
