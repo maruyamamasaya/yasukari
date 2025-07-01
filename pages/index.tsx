@@ -311,6 +311,11 @@ export default function HomePage({ blogSlides }: Props) {
       <HowToUse />
 
       <section className="py-8 px-4">
+        <div className="text-center mb-1">
+          <span className="text-red-600 font-bold text-sm tracking-wide">
+            FAQ
+          </span>
+        </div>
         <h2 className="text-lg font-semibold mb-4 text-center">よくある質問</h2>
         <FaqAccordion faqs={faqs} />
         <div className="mt-6 flex flex-col sm:flex-row justify-center gap-2">
