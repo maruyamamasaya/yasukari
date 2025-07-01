@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import faqData from "../data/faq.json";
+import {
+  FaUser,
+  FaRobot,
+  FaArrowDown,
+  FaArrowUp,
+} from "react-icons/fa";
 
 interface Message {
   from: "bot" | "user";
   text: string;
+  time: string;
 }
 
 interface Category {
@@ -19,9 +26,21 @@ export default function ChatBot({ className = "" }: { className?: string }) {
   const [step, setStep] = useState<"survey" | "free">("survey");
   const [selectedCategory, setSelectedCategory] =
     useState<Category | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
+  }, [messages]);
 
   function addMessage(from: "bot" | "user", text: string) {
-    setMessages((prev) => [...prev, { from, text }]);
+    const d = new Date();
+    const time = `${String(d.getHours()).padStart(2, "0")}:${String(
+      d.getMinutes()
+    ).padStart(2, "0")}`;
+    setMessages((prev) => [...prev, { from, text, time }]);
   }
 
   function handleCategory(cat: Category) {
@@ -55,24 +74,49 @@ export default function ChatBot({ className = "" }: { className?: string }) {
   }
 
   return (
-    <div className={`w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-lg shadow-lg bg-white ${className}`}>
-      <div className="flex-1 overflow-y-auto space-y-2 mb-2 pr-1">
+    <div
+      className={`w-72 sm:w-96 h-96 flex flex-col p-4 border rounded-2xl shadow-lg bg-white ${className}`}
+    >
+      <div className="relative flex-1 overflow-y-auto space-y-2 mb-2 pr-4" ref={scrollRef}>
         {messages.map((m, idx) => (
           <div
             key={idx}
-            className={m.from === "bot" ? "text-left" : "text-right"}
+            className={`flex items-end gap-2 ${m.from === "bot" ? "" : "flex-row-reverse"}`}
           >
+            {m.from === "bot" ? (
+              <FaRobot className="text-red-600 w-5 h-5" />
+            ) : (
+              <FaUser className="text-red-600 w-5 h-5" />
+            )}
             <div
-              className={
-                m.from === "bot"
-                  ? "inline-block bg-gray-100 p-2 rounded"
-                  : "inline-block bg-red-500 text-white p-2 rounded"
-              }
+              className={`max-w-[70%] p-2 rounded-2xl animate-fade ${
+                m.from === "bot" ? "bg-gray-100" : "bg-red-500 text-white"
+              }`}
             >
-              {m.text}
+              <p>{m.text}</p>
+              <span className="block text-[10px] text-right mt-1 opacity-70">
+                {m.time}
+              </span>
             </div>
           </div>
         ))}
+        <button
+          onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+          className="absolute top-1 right-1 bg-white border rounded-full p-1 shadow"
+        >
+          <FaArrowUp className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() =>
+            scrollRef.current?.scrollTo({
+              top: scrollRef.current.scrollHeight,
+              behavior: "smooth",
+            })
+          }
+          className="absolute bottom-1 right-1 bg-white border rounded-full p-1 shadow"
+        >
+          <FaArrowDown className="w-4 h-4" />
+        </button>
       </div>
 
       {step === "survey" && !selectedCategory && (
