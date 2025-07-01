@@ -30,11 +30,11 @@ export default function ManualPost({ html, tree, posts }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-col md:flex-row gap-6">
       <article
-        className="prose flex-1"
+        className="prose w-full md:w-[70%]"
         style={{ marginLeft: "1rem" }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
-      <div className="w-64 space-y-4">
+      <div className="w-full md:w-[30%] space-y-4">
         <CalendarWidget posts={posts} />
         <DirectoryTree tree={tree} />
       </div>
