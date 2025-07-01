@@ -27,18 +27,9 @@ export default function HowToUse() {
               src="https://fastly.rentio.jp/packs/common/footer_howto_img_step1-0dcf870f8f81ea55e7e7.png"
             />
           </div>
-          <div className="mt-3 md:mt-5">
-            <img
-              className="w-auto h-5 mx-auto"
-              height={18}
-              alt="1:ネット・アプリで注文"
-              loading="lazy"
-              decoding="async"
-              src="https://fastly.rentio.jp/packs/common/footer_howto_subtitle_step1-dac27cc2731c87c46e9c.png"
-            />
-          </div>
+          <p className="font-bold mt-3 md:mt-5">1. ご予約</p>
           <p className="text-start mt-2 md:mt-3 text-sm">
-            プランや受取日を選択したら注文完了！オンラインで手続きできます。
+            車両ページでスケジュールを確認しクレジットカードで予約。変更やキャンセルはお問い合わせから連絡してください。
           </p>
         </div>
         <FaCaretRight className="hidden md:block text-gray-400 text-2xl" />
@@ -53,18 +44,9 @@ export default function HowToUse() {
               src="https://fastly.rentio.jp/packs/common/footer_howto_img_step2-6e9dd48f4776e72ff26d.png"
             />
           </div>
-          <div className="mt-3 md:mt-5">
-            <img
-              className="w-auto h-5 mx-auto"
-              height={18}
-              alt="2:ご利用開始"
-              loading="lazy"
-              decoding="async"
-              src="https://fastly.rentio.jp/packs/common/footer_howto_subtitle_step2-f19e309951a1207ec802.png"
-            />
-          </div>
+          <p className="font-bold mt-3 md:mt-5">2. ご来店</p>
           <p className="text-start mt-2 md:mt-3 text-sm">
-            万が一の故障・破損の際も「トラブルあんしん宣言」でサポートします。
+            10:00〜18:30の間に免許証とヘルメットを持参し、リバイクルK-JETスタッフにお声かけください。
           </p>
         </div>
         <FaCaretRight className="hidden md:block text-gray-400 text-2xl" />
@@ -79,18 +61,9 @@ export default function HowToUse() {
               src="https://fastly.rentio.jp/packs/common/footer_howto_img_step3-77e52caf06b1fa9b2bbb.png"
             />
           </div>
-          <div className="mt-3 md:mt-5">
-            <img
-              className="w-auto h-5 mx-auto"
-              height={18}
-              alt="3:返送してレンタル終了"
-              loading="lazy"
-              decoding="async"
-              src="https://fastly.rentio.jp/packs/common/footer_howto_subtitle_step3-b7ff0c0e2b0006c68e9f.png"
-            />
-          </div>
+          <p className="font-bold mt-3 md:mt-5">3. ご利用・返却</p>
           <p className="text-start mt-2 md:mt-3 text-sm">
-            返送するだけで自動的にレンタル終了までの手続きが進みます。
+            契約者本人のみが乗車・返却可能です。返却は10:00〜18:30の間にガソリン満タンでお願いします。
           </p>
         </div>
       </div>
