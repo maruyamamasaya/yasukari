@@ -47,7 +47,7 @@ export default function GuidePage() {
           <li>予約可能時間：ご利用予定日90日前から前営業日17時まで</li>
           <li>お支払い方法：クレジットカードのみ</li>
           <li>
-            予約内容の変更は<Link href="/contact" className="text-teal-600 underline ml-1">お問い合わせ</Link>からご連絡の上、再度ご予約をお願いします。
+            予約内容の変更は<Link href="/contact" className="text-red-600 underline ml-1">お問い合わせ</Link>からご連絡の上、再度ご予約をお願いします。
           </li>
           <li>キャンセル料：4日前まで無料、3日前〜当日はレンタル料金の50％</li>
         </ul>
@@ -137,7 +137,7 @@ export default function GuidePage() {
       </section>
 
       <section className="text-center text-sm">
-        <Link href="/contact" className="text-teal-600 underline">
+        <Link href="/contact" className="text-red-600 underline">
           お問い合わせはこちら
         </Link>
       </section>

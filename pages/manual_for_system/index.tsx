@@ -75,7 +75,7 @@ export default function ManualIndex({ posts, tree }: Props) {
                 className={
                   i + 1 === page
                     ? 'font-bold underline'
-                    : 'text-teal-700 hover:underline'
+                    : 'text-red-700 hover:underline'
                 }
               >
                 {i + 1}

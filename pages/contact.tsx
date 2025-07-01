@@ -16,7 +16,7 @@ export default function ContactPage() {
       </ul>
       <p className="mt-6">
         よくある質問は
-        <Link href="/guide" className="text-teal-600 underline ml-1">
+        <Link href="/guide" className="text-red-600 underline ml-1">
           ご利用案内
         </Link>
         でもご確認いただけます。

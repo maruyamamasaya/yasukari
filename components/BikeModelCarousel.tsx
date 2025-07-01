@@ -46,7 +46,7 @@ export default function BikeModelCarousel({ items, title = "人気の型番" }: 
                     className="object-cover w-[220px] h-[220px] mx-auto"
                   />
                   {item.badge && (
-                    <div className="absolute top-1 left-1 bg-teal-500 text-white text-xs px-1 py-0.5 rounded">
+                    <div className="absolute top-1 left-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">
                       {item.badge}
                     </div>
                   )}
