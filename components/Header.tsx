@@ -28,8 +28,12 @@ export default function Header() {
       <header className="bg-white shadow-md border-b-2 border-teal-600">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
           {/* ロゴ */}
-          <Link href="/" className="text-2xl font-extrabold text-teal-600 tracking-wide">
-            yasukari
+          <Link href="/" className="flex items-center">
+            <img
+              src="https://yasukari.com/static/images/logo/250x50.png"
+              alt="yasukari logo"
+              className="h-8 w-auto"
+            />
           </Link>
           <div className="flex items-center gap-6">
             {/* 検索 */}
