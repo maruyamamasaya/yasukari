@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 
-interface ClientEntry {
-  0: string;
-  1: {
+type ClientEntry = [
+  string,
+  {
     count: number;
     first: number;
     blockedUntil?: number;
     failCount: number;
     failFirst: number;
-  };
-}
+  }
+];
 
 export default function MonitorPage() {
   const [data, setData] = useState<ClientEntry[]>([]);
