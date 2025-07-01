@@ -1,0 +1,58 @@
+import { GetStaticProps, GetStaticPaths } from "next";
+import Head from "next/head";
+import { useEffect } from "react";
+import { getBikeModels, BikeModel } from "../../lib/bikes";
+import RecentlyViewed from "../../components/RecentlyViewed";
+
+interface Props {
+  bike: BikeModel;
+}
+
+export default function ProductDetailPage({ bike }: Props) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("recentBikes");
+      const list: BikeModel[] = stored ? JSON.parse(stored) : [];
+      const existingIndex = list.findIndex((b) => b.modelCode === bike.modelCode);
+      if (existingIndex !== -1) list.splice(existingIndex, 1);
+      list.unshift(bike);
+      if (list.length > 4) list.length = 4;
+      localStorage.setItem("recentBikes", JSON.stringify(list));
+    } catch {
+      // ignore write errors
+    }
+  }, [bike]);
+
+  return (
+    <> 
+      <Head>
+        <title>{bike.modelName} - yasukari</title>
+      </Head>
+      <main className="p-6">
+        <h1 className="text-lg font-semibold mb-4">{bike.modelName}</h1>
+        <img
+          src={bike.img}
+          alt={bike.modelName}
+          className="w-full max-w-md object-cover mx-auto mb-4"
+        />
+        {bike.description && <p>{bike.description}</p>}
+        <RecentlyViewed />
+      </main>
+    </>
+  );
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const bikes = await getBikeModels();
+  return {
+    paths: bikes.map((b) => ({ params: { modelCode: b.modelCode } })),
+    fallback: false,
+  };
+};
+
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const bikes = await getBikeModels();
+  const bike = bikes.find((b) => b.modelCode === params?.modelCode) as BikeModel;
+  return { props: { bike } };
+};
