@@ -76,8 +76,10 @@ a:hover {
 /* Swiper navigation arrows */
 .swiper-button-next,
 .swiper-button-prev {
-  color: #fff;
+  color: #f00;
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  top: calc(100% + 1rem);
+  margin-top: 0;
 }
 
 /* Swiper pagination bullets */
