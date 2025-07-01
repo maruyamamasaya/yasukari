@@ -9,6 +9,10 @@ export interface ClientInfo {
 
 const clients = new Map<string, ClientInfo>();
 
+export function getClients(): [string, ClientInfo][] {
+  return Array.from(clients.entries());
+}
+
 function getInfo(ip: string): ClientInfo {
   const now = Date.now();
   let info = clients.get(ip);
@@ -34,7 +38,7 @@ export function checkAccess(ip: string): boolean {
     info.count += 1;
   }
 
-  if (info.count > 15) {
+  if (info.count > 100) {
     info.blockedUntil = now + 60_000;
     info.count = 0;
     return true;
