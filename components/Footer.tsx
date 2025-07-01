@@ -97,6 +97,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+
                 <Link href="/insurance" className="hover:underline">
                   車両保険の内容について
                 </Link>
