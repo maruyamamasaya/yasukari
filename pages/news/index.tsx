@@ -2,6 +2,12 @@ import Head from 'next/head'
 
 export default function NewsPage() {
   const posts = [
+    {
+      title: 'サイトリニューアルのお知らせ',
+      date: '2025-08-01',
+      excerpt:
+        '8月1日に公式サイトをリニューアルしました。旧サイトから順次こちらへ移行してまいります。',
+    },
     { title: '新サービス開始のお知らせ', date: '2025-07-01', excerpt: 'バイクレンタルの新プランをスタートしました。' },
     { title: '夏季休業について', date: '2025-07-15', excerpt: 'お盆期間中の営業スケジュールを掲載しています。' },
     { title: '店舗リニューアル', date: '2025-06-20', excerpt: '内装を一新し、より快適にご利用いただけるようになりました。' },
