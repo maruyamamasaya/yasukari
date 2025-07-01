@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle, FaClock, FaTruck, FaStar } from "react-icons/fa";
+import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle, FaClipboardList, FaClock, FaTruck, FaStar } from "react-icons/fa";
 import { IoMdSearch } from "react-icons/io";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
@@ -207,6 +207,9 @@ export default function HomePage() {
             <nav className="flex items-center gap-6 text-sm font-medium">
               <Link href="/login">
                 <NavItem icon={<FaUser />} label="ログイン" />
+              </Link>
+              <Link href="/pricing">
+                <NavItem icon={<FaClipboardList />} label="車種・料金" />
               </Link>
               <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
               <NavItem icon={<FaMotorcycle />} label="ジャンル" />
