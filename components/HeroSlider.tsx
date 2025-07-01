@@ -23,9 +23,16 @@ export default function HeroSlider({ slides }: { slides: { img: string }[] }) {
       </Swiper>
       <div className="absolute inset-0 bg-black/40" />
       <div className="relative z-10 text-center px-4 text-white">
-        <h1 className="text-3xl md:text-5xl font-bold mb-4">Ride the Future</h1>
-        <p className="mb-6 max-w-xl mx-auto">最新モデルからクラシックまで、多彩なバイクを簡単レンタル。</p>
-        <Link href="/products" className="btn-primary inline-block">バイクを探す</Link>
+        <h1 className="text-3xl md:text-5xl font-bold mb-2">Ride the Future</h1>
+        <h2 className="text-lg md:text-2xl font-semibold mb-4">
+          激安・便利なレンタルバイクのヤスカリ
+        </h2>
+        <p className="mb-6 max-w-xl mx-auto">
+          最新モデルからクラシックまで、多彩なバイクを簡単レンタル。
+        </p>
+        <Link href="/products" className="btn-primary inline-block">
+          バイクを探す
+        </Link>
       </div>
     </section>
   );

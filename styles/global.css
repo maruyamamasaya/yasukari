@@ -80,6 +80,19 @@ a:hover {
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
+/* Swiper pagination bullets */
+.swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  margin: 0 4px !important;
+  background: rgba(255, 255, 255, 0.7);
+  opacity: 1;
+}
+
+.swiper-pagination-bullet-active {
+  background: var(--primary-color);
+}
+
 /* Mobile bottom navigation */
 .mobile-nav {
   position: fixed;
