@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle, FaClipboardList } from 'react-icons/fa';
+import {
+  FaUser,
+  FaQuestionCircle,
+  FaShoppingCart,
+  FaMotorcycle,
+  FaClipboardList,
+  FaBars,
+} from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
 
 export default function Header() {
@@ -15,6 +22,7 @@ export default function Header() {
 
   const [query, setQuery] = useState('');
   const [showSuggest, setShowSuggest] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const filteredSuggest = suggestItems.filter((s) =>
     s.toLowerCase().includes(query.toLowerCase())
   );
@@ -25,8 +33,8 @@ export default function Header() {
       <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm">
         🎉 今週限定：初回レンタル30%OFF + 新着モデル入荷！
       </div>
-      <header className="bg-white shadow-md border-b-2 border-red-600">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+      <header className="bg-white shadow-md border-b-2 border-red-600 relative">
+        <div className="mx-auto flex items-center justify-between px-4 py-3 w-full max-w-screen-xl">
           {/* ロゴ */}
           <Link href="/" className="flex items-center">
             <img
@@ -36,12 +44,18 @@ export default function Header() {
             />
           </Link>
           <div className="flex items-center gap-6">
+            <button
+              className="sm:hidden text-gray-700"
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              <FaBars size={20} />
+            </button>
             {/* 検索 */}
             <div className="relative">
               <input
                 type="text"
                 placeholder="バイク名・キーワード"
-                className="border rounded-full px-4 py-2 pl-10 w-64"
+                className="border rounded-full px-4 py-2 pl-10 w-40 sm:w-64"
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
@@ -52,7 +66,7 @@ export default function Header() {
               />
               <IoMdSearch className="absolute left-3 top-2.5 text-gray-500 text-lg" />
               {showSuggest && (
-                <ul className="absolute left-0 mt-1 w-64 bg-white border rounded shadow z-10">
+                <ul className="absolute left-0 mt-1 w-40 sm:w-64 bg-white border rounded shadow z-10">
                   {filteredSuggest.map((s) => (
                     <li key={s}>
                       <button
@@ -72,7 +86,7 @@ export default function Header() {
             </div>
 
             {/* ナビゲーションボタン */}
-            <nav className="flex items-center gap-6 text-sm font-medium">
+            <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
               <Link href="/">
                 <NavItem label="ホーム" />
               </Link>
@@ -91,6 +105,41 @@ export default function Header() {
             </nav>
           </div>
         </div>
+        {menuOpen && (
+          <nav className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md">
+            <ul className="flex flex-col p-4 gap-4 text-sm font-medium">
+              <li>
+                <Link href="/">
+                  <NavItem label="ホーム" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/login">
+                  <NavItem icon={<FaUser />} label="ログイン" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing">
+                  <NavItem icon={<FaClipboardList />} label="車種・料金" />
+                </Link>
+              </li>
+              <li>
+                <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
+              </li>
+              <li>
+                <NavItem icon={<FaMotorcycle />} label="ジャンル" />
+              </li>
+              <li>
+                <NavItem icon={<FaShoppingCart />} label="カート" />
+              </li>
+              <li>
+                <Link href="/help">
+                  <NavItem label="ヘルプ" />
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        )}
       </header>
     </>
   );
