@@ -365,7 +365,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     const heading = lines.find((l) => l.startsWith("# "));
     const title = meta.title || (heading ? heading.replace(/^#\s*/, "") : slug);
     const date = meta.date || slug.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || "";
-    return { slug, title, date };
+    const eyecatch = meta.eyecatch;
+    return { slug, title, date, eyecatch };
   });
 
   posts.sort((a, b) => b.date.localeCompare(a.date));
@@ -383,10 +384,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=60",
   ];
 
-  const blogSlides: BlogSlide[] = posts.slice(0,10).map((p, idx) => ({
+  const blogSlides: BlogSlide[] = posts.slice(0, 10).map((p, idx) => ({
     title: p.title,
     href: `/blog_for_custmor/${p.slug}`,
-    img: images[idx % images.length],
+    img: p.eyecatch || images[idx % images.length],
   }));
 
   return { props: { blogSlides } };
