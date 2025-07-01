@@ -29,7 +29,7 @@ export default function Header() {
   );
 
   return (
-    <>
+    <div className="sticky top-0 z-50">
       {/* トップバー */}
       <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm">
         🎉 今週限定：初回レンタル30%OFF + 新着モデル入荷！
@@ -184,7 +184,7 @@ export default function Header() {
           </nav>
         )}
       </header>
-    </>
+    </div>
   );
 }
 
