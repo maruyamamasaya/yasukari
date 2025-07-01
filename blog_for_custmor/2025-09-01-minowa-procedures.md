@@ -8,15 +8,15 @@ eyecatch: https://yasukari.com/storage/posts/crdv6gb1qb7e1e9ro9rg.jpg
 # ヤスカリ三ノ輪店 お貸出しの手順・ご返却の手順
 
 ## レンタル時の手順
-1. マイページにアクセスし、記載された番号を端末に入力して緑の鍵ボタンを押し入店します。  
-   ![画像1](https://rebikele.com/wp-content/uploads/2024/09/IMG_0012-300x225.png)  
-   ![画像2](https://rebikele.com/wp-content/uploads/2024/09/IMG_0011-300x225.png)
-2. ヘルメットやグローブのレンタルオプションをご利用の方は棚から受け取ります。  
-   ![画像3](https://rebikele.com/wp-content/uploads/2024/09/IMG_0024-375x500.png)
-3. マイページに表示されているレーン番号へ移動し、対応するキーフックから鍵を取ります。  
-   ![画像4](https://rebikele.com/wp-content/uploads/2024/09/IMG_0037-640x480.png)
-4. 車両を出口付近まで移動させ、再度番号を入力してドアを開けます。  
-   ![画像](https://rebikele.com/wp-content/uploads/2024/09/IMG_0018-640x480.jpg)
+1. マイページにアクセスし、記載された番号を端末に入力して緑の鍵ボタンを押し入店します。
+    ![画像1](https://rebikele.com/wp-content/uploads/2024/09/IMG_0012-300x225.png)
+    ![画像2](https://rebikele.com/wp-content/uploads/2024/09/IMG_0011-300x225.png)
+2. ヘルメットやグローブのレンタルオプションをご利用の方は棚から受け取ります。
+    ![画像3](https://rebikele.com/wp-content/uploads/2024/09/IMG_0024-375x500.png)
+3. マイページに表示されているレーン番号へ移動し、対応するキーフックから鍵を取ります。
+    ![画像4](https://rebikele.com/wp-content/uploads/2024/09/IMG_0037-640x480.png)
+4. 車両を出口付近まで移動させ、再度番号を入力してドアを開けます。
+    ![画像](https://rebikele.com/wp-content/uploads/2024/09/IMG_0018-640x480.jpg)
 5. 車両を店外に出せば手続き完了です。
 
 ### 貸出中の注意点
