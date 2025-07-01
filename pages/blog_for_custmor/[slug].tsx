@@ -87,6 +87,9 @@ export default function BlogPost({ html, meta, posts }: Props) {
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <Head>
         <title>{meta.title ? `${meta.title} - yasukari` : 'ブログ'}</title>
+        {meta.eyecatch && (
+          <meta property="og:image" content={meta.eyecatch} />
+        )}
       </Head>
       <article className="markdown-body w-[70%]">
         {meta.title && (
@@ -104,11 +107,18 @@ export default function BlogPost({ html, meta, posts }: Props) {
             )}
           </header>
         )}
+        {meta.eyecatch && (
+          <img
+            src={meta.eyecatch}
+            alt={meta.title || ''}
+            className="w-full h-60 object-cover rounded mb-4"
+          />
+        )}
         <div dangerouslySetInnerHTML={{ __html: html }} />
       </article>
       <div className="w-[25%] space-y-4">
         <CalendarWidget posts={posts} />
-        <PostSearch posts={posts} />
+        <PostSearch posts={posts} basePath="/blog_for_custmor" />
       </div>
     </div>
   )

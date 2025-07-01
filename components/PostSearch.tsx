@@ -7,7 +7,12 @@ type SearchPost = {
   excerpt?: string;
 };
 
-export default function PostSearch({ posts }: { posts: SearchPost[] }) {
+interface Props {
+  posts: SearchPost[];
+  basePath?: string;
+}
+
+export default function PostSearch({ posts, basePath = '/manual_for_system' }: Props) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchPost[] | null>(null);
 
@@ -50,7 +55,7 @@ export default function PostSearch({ posts }: { posts: SearchPost[] }) {
               {results.map((p) => (
                 <li key={p.slug} className="mt-1">
                   <Link
-                    href={`/manual_for_system/${p.slug}`}
+                    href={`${basePath}/${p.slug}`}
                     className="hover:underline text-red-700"
                   >
                     {p.title}
