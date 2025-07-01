@@ -327,3 +327,29 @@ a:hover {
   padding: 0;
   color: inherit;
 }
+
+/* Fade edges for bike model carousel */
+.bike-model-carousel {
+  position: relative;
+}
+
+.bike-model-carousel::before,
+.bike-model-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.bike-model-carousel::before {
+  left: 0;
+  background: linear-gradient(to right, var(--secondary-color), transparent);
+}
+
+.bike-model-carousel::after {
+  right: 0;
+  background: linear-gradient(to left, var(--secondary-color), transparent);
+}
