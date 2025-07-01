@@ -82,6 +82,11 @@ a:hover {
   margin-top: 0;
 }
 
+/* Position pagination just below the slider */
+.swiper-pagination {
+  bottom: -1rem;
+}
+
 /* Swiper pagination bullets */
 .swiper-pagination-bullet {
   width: 10px;
