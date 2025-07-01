@@ -12,6 +12,7 @@ type PostMeta = {
   date: string
   excerpt: string
   tags?: string
+  eyecatch?: string
 }
 
 export const getStaticPaths: GetStaticPaths = () => {
@@ -64,7 +65,8 @@ export const getStaticProps: GetStaticProps = ({ params }) => {
     const excerptLine = lines.slice(idx).find((l) => l.trim() && !l.startsWith('#')) || ''
     const excerpt = excerptLine.replace(/\*/g, '').slice(0, 80)
     const tags = meta.tags
-    return { slug, title, date: dateMatch, excerpt, tags }
+    const eyecatch = meta.eyecatch
+    return { slug, title, date: dateMatch, excerpt, tags, eyecatch }
   })
 
   posts.sort((a, b) => b.date.localeCompare(a.date))
@@ -105,6 +107,13 @@ export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) 
               href={`/blog_for_custmor/${post.slug}`}
               className="block p-4 bg-white rounded shadow hover:bg-gray-50"
             >
+              {post.eyecatch && (
+                <img
+                  src={post.eyecatch}
+                  alt={post.title}
+                  className="w-full h-40 object-cover rounded mb-2"
+                />
+              )}
               <h2 className="font-semibold">{post.title}</h2>
               {post.date && (
                 <p className="text-gray-500 text-xs mb-1">{post.date}</p>
@@ -127,7 +136,7 @@ export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) 
       </div>
       <div className="w-[25%] space-y-4">
         <CalendarWidget posts={calendarPosts} />
-        <PostSearch posts={posts} />
+        <PostSearch posts={posts} basePath="/blog_for_custmor" />
       </div>
     </div>
   )

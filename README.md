@@ -143,7 +143,8 @@ yasukari公式ホームページリニューアル
 - `manual_for_system/2025-07-03-development-summary.md`
   2025年7月3日の開発状況をまとめた記事です。
 - `blog_for_custmor/`
-  店舗ブログ記事をMarkdownで管理するディレクトリです。
+  店舗ブログ記事をMarkdownで管理するディレクトリです。各記事のフロントマターでは
+  `title`, `date`, `tags` に加え `eyecatch`(アイキャッチ画像URL) を設定できます。
 - `next.config.js`
   Next.jsの動作設定を記述するファイル。現状はreactStrictModeをfalseにした最小構成のみですが、今後画像ドメインの許可や環境変数の定義など、ビルドやランタイムの挙動を調整する際に利用します。
 - `next-env.d.ts`  
