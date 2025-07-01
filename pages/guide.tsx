@@ -31,6 +31,12 @@ export default function GuidePage() {
         <title>ご利用案内 - yasukari</title>
       </Head>
 
+      <img
+        src="https://yasukari.com/static/images/guide/barner.jpg"
+        alt="ご利用案内バナー"
+        className="w-full h-48 object-cover mb-6"
+      />
+
       <h1 className="text-2xl font-bold mb-6 text-center">ご利用案内</h1>
 
       {/* ご予約 */}
