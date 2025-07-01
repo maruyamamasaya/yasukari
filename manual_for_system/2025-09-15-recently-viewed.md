@@ -10,5 +10,6 @@ date: "2025-09-15"
 - `components/RecentlyViewed.tsx` で履歴を読み込みカード形式で描画
 - `/products/[modelCode].tsx` で閲覧時に履歴へ追加
 - `/products/index.tsx` でも履歴セクションを表示
+- `pages/index.tsx` でもトップページ下部に履歴を表示
 
 サーバーを介さない簡易実装のため、同じ端末・ブラウザ内でのみ履歴が共有されます。

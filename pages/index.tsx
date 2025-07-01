@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import HeroSlider from "../components/HeroSlider";
+import RecentlyViewed from "../components/RecentlyViewed";
 
 type GenreItem = {
   title: string;
@@ -256,6 +257,7 @@ export default function HomePage() {
       </section>
 
       <BikeModelCarousel items={bikeModels} />
+      <RecentlyViewed />
     </>
   );
 }
