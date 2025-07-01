@@ -14,28 +14,29 @@ export default function FaqAccordion({ faqs }: { faqs: FAQItem[] }) {
   };
 
   return (
-    <dl className="space-y-2">
+    <div className="border-t border-b border-gray-300 divide-y">
       {faqs.map((faq, idx) => (
-        <div key={idx} className="border rounded-lg bg-white shadow-sm overflow-hidden">
-          <dt>
+        <dl key={idx} className="py-2 sm:py-3">
+          <dt className="mt-0">
             <button
               type="button"
               onClick={() => toggle(idx)}
-              className="flex items-center justify-between w-full px-4 py-3 font-semibold text-left"
+              className="collapsed flex items-baseline gap-2 w-full font-bold text-left"
             >
-              <span>{faq.q}</span>
+              <span className="text-primary">Q</span>
+              <span className="flex-1">{faq.q}</span>
               <FaChevronDown
                 className={`transition-transform ${openIndex === idx ? 'rotate-180' : ''}`}
               />
             </button>
           </dt>
           <dd
-            className={`faq-answer px-4 pb-4 text-sm text-gray-700 ${openIndex === idx ? 'open' : ''}`}
+            className={`faq-answer my-0 ps-6 text-sm text-gray-700 ${openIndex === idx ? 'open' : ''}`}
           >
-            {faq.a}
+            <p>{faq.a}</p>
           </dd>
-        </div>
+        </dl>
       ))}
-    </dl>
+    </div>
   );
 }
