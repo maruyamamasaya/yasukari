@@ -27,6 +27,7 @@ function parseMarkdown(md: string): { html: string; meta: Record<string, string>
   let inList = false;
 
   for (const line of lines) {
+    const trimmed = line.trim();
     if (inCode) {
       if (line.startsWith('```')) {
         html += '</code></pre>\n';
@@ -37,14 +38,14 @@ function parseMarkdown(md: string): { html: string; meta: Record<string, string>
       continue;
     }
 
-    if (line.startsWith('```')) {
+    if (trimmed.startsWith('```')) {
       const lang = line.slice(3).trim();
       html += `<pre class="code-block"><code class="language-${lang}">`;
       inCode = true;
       continue;
     }
 
-    if (/^- /.test(line)) {
+    if (/^- /.test(trimmed)) {
       if (!inList) {
         html += '<ul>\n';
         inList = true;
@@ -58,16 +59,22 @@ function parseMarkdown(md: string): { html: string; meta: Record<string, string>
       inList = false;
     }
 
-    if (line.startsWith('### ')) {
-      html += `<h3>${line.slice(4)}</h3>\n`;
-    } else if (line.startsWith('## ')) {
-      html += `<h2>${line.slice(3)}</h2>\n`;
-    } else if (line.startsWith('# ')) {
-      html += `<h1>${line.slice(2)}</h1>\n`;
-    } else if (line.trim() === '') {
+    if (/^!\[.*\]\(.*\)$/.test(trimmed)) {
+      const altMatch = trimmed.match(/!\[(.*?)\]/);
+      const srcMatch = trimmed.match(/\((.*?)\)/);
+      const alt = altMatch ? escapeHtml(altMatch[1]) : '';
+      const src = srcMatch ? srcMatch[1] : '';
+      html += `<img src="${src}" alt="${alt}" />\n`;
+    } else if (trimmed.startsWith('### ')) {
+      html += `<h3>${trimmed.slice(4)}</h3>\n`;
+    } else if (trimmed.startsWith('## ')) {
+      html += `<h2>${trimmed.slice(3)}</h2>\n`;
+    } else if (trimmed.startsWith('# ')) {
+      html += `<h1>${trimmed.slice(2)}</h1>\n`;
+    } else if (trimmed === '') {
       html += '';
     } else {
-      html += `<p>${line}</p>\n`;
+      html += `<p>${trimmed}</p>\n`;
     }
   }
 
