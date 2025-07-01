@@ -91,6 +91,11 @@ export default function Footer() {
                   メンテナンス体制について
                 </Link>
               </li>
+              <li>
+                <Link href="/stores" className="hover:underline">
+                  店舗一覧
+                </Link>
+              </li>
             </ul>
             <h4 className="font-bold mb-2">SNS・動画</h4>
             <ul className="space-y-2">
