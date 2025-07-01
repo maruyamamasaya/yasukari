@@ -31,7 +31,7 @@ export default function WaitPage() {
       <div>
         <h1 className="text-xl font-bold mb-4">アクセス制限中です</h1>
         <p className="mb-4">短時間に多数のアクセスが検出されたため、一時的に閲覧を制限しています。1分ほど待ってから再度お試しください。</p>
-        <p>お問い合わせ: <a href="mailto:info@rebikele.com" className="text-red-600 underline">info@rebikele.com</a></p>
+        <p>お問い合わせ: <a href="mailto:info@yasukari.com" className="text-red-600 underline">info@yasukari.com</a></p>
       </div>
       {positions.map((p, idx) => (
         <button

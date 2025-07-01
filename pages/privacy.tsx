@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
           <p>
             個人情報の取扱いに関するお問い合わせは下記までご連絡ください。
             <br />株式会社ケイジェット 金森 真佐樹
-            <br />メール: info[at]rebikele.com
+            <br />メール: info[at]yasukari.com
             <br />電話: 03-5856-8075
           </p>
           <h2 className="font-semibold">組織・体制</h2>
