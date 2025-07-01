@@ -8,6 +8,12 @@ export default function BeginnerGuidePage() {
         <title>はじめてガイド - yasukari</title>
       </Head>
 
+      <img
+        src="https://yasukari.com/static/images/guide/barner.jpg"
+        alt="はじめてガイドバナー"
+        className="w-full h-48 object-cover mb-6"
+      />
+
       <nav className="text-xs text-center text-gray-500 space-x-2">
         <span>ホーム</span>
         <span>&gt;</span>
