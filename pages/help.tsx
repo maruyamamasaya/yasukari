@@ -14,6 +14,10 @@ export default function HelpPage() {
       q: '走行距離の上限はありますか？',
       a: '車種クラスごとの目安距離を設定しています。詳しくは表をご確認ください。',
     },
+    {
+      q: 'レンタル料金は変わりましたか？',
+      a: '安全で快適なサービス維持のため料金を改定しました。新料金表は https://yasukari.com/storage/informations/cuhbm1j1qb717lh4v090.png でご確認いただけます。',
+    },
   ];
 
   return (
