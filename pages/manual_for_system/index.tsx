@@ -84,7 +84,7 @@ export default function ManualIndex({ posts, tree }: Props) {
           </nav>
         )}
       </div>
-      <div className="w-[30%] space-y-4">
+      <div className="w-[25%] space-y-4">
         <CalendarWidget posts={posts} />
         <DirectoryTree tree={tree} />
       </div>
