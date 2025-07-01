@@ -286,6 +286,14 @@ export default function HomePage() {
       <section className="py-8 px-4">
         <h2 className="text-lg font-semibold mb-4 text-center">よくある質問</h2>
         <FaqAccordion faqs={faqs} />
+        <div className="mt-6 flex flex-col sm:flex-row justify-center gap-2">
+          <Link href="/beginner" className="btn-primary text-center w-full sm:w-auto">
+            はじめてガイドで利用の流れを詳しく知る
+          </Link>
+          <Link href="/help" className="btn-primary text-center w-full sm:w-auto">
+            その他のよくあるご質問をもっと見る
+          </Link>
+        </div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
