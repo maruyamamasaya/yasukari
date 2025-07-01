@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { FaClock, FaTruck, FaStar } from "react-icons/fa";
+import { FaClock, FaTruck, FaStar, FaHashtag } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
@@ -74,6 +74,16 @@ export default function HomePage() {
       img: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=60",
       href: "#",
     },
+  ];
+
+  const hotKeywords = [
+    { label: "夏のツーリング", href: "/t/scene/summer?click_from=top_keywords" },
+    { label: "初心者おすすめ", href: "/t/tag/beginner?click_from=top_keywords" },
+    {
+      label: "キャンプツーリング",
+      href: "/blog/camp-touring?click_from=top_keywords",
+    },
+    { label: "ヘルメット", href: "/search?q=ヘルメット&click_from=top_keywords" },
   ];
 
   const genreItems: GenreItem[] = [
@@ -162,6 +172,23 @@ export default function HomePage() {
 
       {/* ヒーローセクション */}
       <HeroSlider slides={heroSlides} />
+
+      {/* 注目キーワード */}
+      <section className="py-4 px-4">
+        <h2 className="text-sm font-semibold mb-2">注目キーワード</h2>
+        <div className="flex flex-wrap gap-2">
+          {hotKeywords.map((k, idx) => (
+            <Link
+              key={idx}
+              href={k.href}
+              className="inline-flex items-center gap-1 rounded-full shadow-sm border border-gray-200 bg-white text-black text-[13px] font-bold px-2 py-1.5"
+            >
+              <FaHashtag className="text-primary text-[16px]" />
+              {k.label}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* 特徴紹介 */}
       <section className="py-8 bg-gray-50">
