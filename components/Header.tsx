@@ -23,6 +23,7 @@ export default function Header() {
   const [query, setQuery] = useState('');
   const [showSuggest, setShowSuggest] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const filteredSuggest = suggestItems.filter((s) =>
     s.toLowerCase().includes(query.toLowerCase())
   );
@@ -43,7 +44,13 @@ export default function Header() {
               className="h-8 w-auto"
             />
           </Link>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <button
+              className="sm:hidden text-gray-700"
+              onClick={() => setMobileSearchOpen((o) => !o)}
+            >
+              <IoMdSearch size={20} />
+            </button>
             <button
               className="sm:hidden text-gray-700"
               onClick={() => setMenuOpen((o) => !o)}
@@ -51,7 +58,7 @@ export default function Header() {
               <FaBars size={20} />
             </button>
             {/* 検索 */}
-            <div className="relative">
+            <div className="relative hidden sm:block">
               <input
                 type="text"
                 placeholder="バイク名・キーワード"
@@ -105,6 +112,46 @@ export default function Header() {
             </nav>
           </div>
         </div>
+        {mobileSearchOpen && (
+          <div className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md p-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="バイク名・キーワード"
+                className="border rounded-full px-4 py-2 pl-10 w-full"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setShowSuggest(true);
+                }}
+                onFocus={() => setShowSuggest(true)}
+                onBlur={() => {
+                  setTimeout(() => setShowSuggest(false), 100);
+                }}
+              />
+              <IoMdSearch className="absolute left-3 top-2.5 text-gray-500 text-lg" />
+              {showSuggest && (
+                <ul className="absolute left-0 mt-1 w-full bg-white border rounded shadow z-10">
+                  {filteredSuggest.map((s) => (
+                    <li key={s}>
+                      <button
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setQuery(s);
+                          setShowSuggest(false);
+                          setMobileSearchOpen(false);
+                        }}
+                      >
+                        {s}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
         {menuOpen && (
           <nav className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md">
             <ul className="flex flex-col p-4 gap-4 text-sm font-medium">
