@@ -31,8 +31,9 @@ export function checkAccess(ip: string): boolean {
     return true;
   }
 
-  if (now - info.first > 5000) {
-    info.first = now;
+  const bucketStart = now - (now % 5000);
+  if (bucketStart !== info.first) {
+    info.first = bucketStart;
     info.count = 1;
   } else {
     info.count += 1;
