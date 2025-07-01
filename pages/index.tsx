@@ -1,15 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { FaUser, FaQuestionCircle, FaShoppingCart, FaMotorcycle, FaClipboardList, FaClock, FaTruck, FaStar } from "react-icons/fa";
-import { IoMdSearch } from "react-icons/io";
+import { FaClock, FaTruck, FaStar } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
-import Footer from "../components/Footer";
-import ChatBotWidget from "../components/ChatBotWidget";
 import HeroSlider from "../components/HeroSlider";
 
 type GenreItem = {
@@ -154,20 +151,6 @@ export default function HomePage() {
     },
   ];
 
-  const suggestItems = [
-    "ホンダ CB400",
-    "ヤマハ MT-25",
-    "カワサキ Ninja",
-    "スズキ GSX-S125",
-    "人気モデルランキング",
-    "ブログ:メンテナンス入門",
-  ];
-
-  const [query, setQuery] = useState("");
-  const [showSuggest, setShowSuggest] = useState(false);
-  const filteredSuggest = suggestItems.filter((s) =>
-    s.toLowerCase().includes(query.toLowerCase())
-  );
 
   return (
     <>
@@ -175,71 +158,6 @@ export default function HomePage() {
         <title>yasukari - バイクレンタルサイト</title>
       </Head>
 
-      {/* トップバー（今週限定サービスなど） */}
-      <div className="bg-gradient-to-r from-teal-600 to-teal-500 text-white text-center py-2 text-sm animate__animated animate__pulse">
-        🎉 今週限定：初回レンタル30%OFF + 新着モデル入荷！
-      </div>
-
-      {/* ヘッダー */}
-      <header className="bg-white shadow-md border-b-2 border-teal-600 animate__animated animate__fadeInDown">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
-          {/* ロゴ */}
-          <Link href="/" className="text-2xl font-extrabold text-teal-600 tracking-wide">yasukari</Link>
-
-          <div className="flex items-center gap-6">
-            {/* 検索 */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="バイク名・キーワード"
-                className="border rounded-full px-4 py-2 pl-10 w-64"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setShowSuggest(true);
-                }}
-                onFocus={() => setShowSuggest(true)}
-                onBlur={() => setTimeout(() => setShowSuggest(false), 100)}
-              />
-              <IoMdSearch className="absolute left-3 top-2.5 text-gray-500 text-lg" />
-              {showSuggest && (
-                <ul className="absolute left-0 mt-1 w-64 bg-white border rounded shadow z-10">
-                  {filteredSuggest.map((s) => (
-                    <li key={s}>
-                      <button
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          setQuery(s);
-                          setShowSuggest(false);
-                        }}
-                      >
-                        {s}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* ナビゲーションボタン */}
-            <nav className="flex items-center gap-6 text-sm font-medium">
-              <Link href="/login">
-                <NavItem icon={<FaUser />} label="ログイン" />
-              </Link>
-              <Link href="/pricing">
-                <NavItem icon={<FaClipboardList />} label="車種・料金" />
-              </Link>
-              <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
-              <NavItem icon={<FaMotorcycle />} label="ジャンル" />
-              <NavItem icon={<FaShoppingCart />} label="カート" />
-              <Link href="/help">
-                <NavItem label="ヘルプ" />
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
 
       {/* ヒーローセクション */}
       <HeroSlider slides={heroSlides} />
@@ -311,8 +229,7 @@ export default function HomePage() {
       </section>
 
       <BikeModelCarousel items={bikeModels} />
-      <Footer />
-      <ChatBotWidget />
+      
     </>
   );
 }
