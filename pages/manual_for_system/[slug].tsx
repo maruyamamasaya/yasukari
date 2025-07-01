@@ -5,35 +5,96 @@ import CalendarWidget, { CalendarPost } from '../../components/CalendarWidget';
 import DirectoryTree, { DirNode } from '../../components/DirectoryTree';
 import { getDirTree } from '../../lib/getDirTree';
 
-function renderMarkdown(md: string): string {
-  const lines = md.split(/\r?\n/);
-  return lines
-    .map((line) => {
-      if (line.startsWith('### ')) {
-        return `<h3>${line.slice(4)}</h3>`;
-      } else if (line.startsWith('## ')) {
-        return `<h2>${line.slice(3)}</h2>`;
-      } else if (line.startsWith('# ')) {
-        return `<h1>${line.slice(2)}</h1>`;
-      } else if (line.trim() === '') {
-        return '';
+function parseMarkdown(md: string): { html: string; meta: Record<string, string> } {
+  const meta: Record<string, string> = {};
+  let content = md;
+  const fm = md.match(/^---\n([\s\S]*?)\n---\n?/);
+  if (fm) {
+    content = md.slice(fm[0].length);
+    fm[1].split(/\r?\n/).forEach((line) => {
+      const [k, ...v] = line.split(':');
+      if (k) meta[k.trim()] = v.join(':').trim().replace(/^"|"$/g, '');
+    });
+  }
+
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const lines = content.split(/\r?\n/);
+  let html = '';
+  let inCode = false;
+  let inList = false;
+
+  for (const line of lines) {
+    if (inCode) {
+      if (line.startsWith('```')) {
+        html += '</code></pre>\n';
+        inCode = false;
       } else {
-        return `<p>${line}</p>`;
+        html += escapeHtml(line) + '\n';
       }
-    })
-    .join('\n');
+      continue;
+    }
+
+    if (line.startsWith('```')) {
+      const lang = line.slice(3).trim();
+      html += `<pre class="code-block"><code class="language-${lang}">`;
+      inCode = true;
+      continue;
+    }
+
+    if (/^- /.test(line)) {
+      if (!inList) {
+        html += '<ul>\n';
+        inList = true;
+      }
+      html += `<li>${line.slice(2)}</li>\n`;
+      continue;
+    }
+
+    if (inList) {
+      html += '</ul>\n';
+      inList = false;
+    }
+
+    if (line.startsWith('### ')) {
+      html += `<h3>${line.slice(4)}</h3>\n`;
+    } else if (line.startsWith('## ')) {
+      html += `<h2>${line.slice(3)}</h2>\n`;
+    } else if (line.startsWith('# ')) {
+      html += `<h1>${line.slice(2)}</h1>\n`;
+    } else if (line.trim() === '') {
+      html += '';
+    } else {
+      html += `<p>${line}</p>\n`;
+    }
+  }
+
+  if (inList) html += '</ul>\n';
+  if (inCode) html += '</code></pre>\n';
+
+  return { html, meta };
 }
 
-type Props = { html: string; tree: DirNode[]; posts: CalendarPost[] };
+type Props = {
+  html: string;
+  meta: Record<string, string>;
+  tree: DirNode[];
+  posts: CalendarPost[];
+};
 
-export default function ManualPost({ html, tree, posts }: Props) {
+export default function ManualPost({ html, meta, tree, posts }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
-      <article
-        className="markdown-body w-[70%]"
-        style={{ marginLeft: "1rem" }}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <article className="markdown-body w-[70%]" style={{ marginLeft: '1rem' }}>
+        {meta.title && (
+          <header className="post-header">
+            <h1 className="post-title">{meta.title}</h1>
+            {meta.date && <p className="post-date">{meta.date}</p>}
+          </header>
+        )}
+        <div dangerouslySetInnerHTML={{ __html: html }} />
+      </article>
       <div className="w-[25%] space-y-4">
         <CalendarWidget posts={posts} />
         <DirectoryTree tree={tree} />
@@ -54,7 +115,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const dir = path.join(process.cwd(), 'manual_for_system');
   const filePath = path.join(dir, `${slug}.md`);
   const md = fs.readFileSync(filePath, 'utf8');
-  const html = renderMarkdown(md);
+  const { html, meta } = parseMarkdown(md);
   const tree: DirNode[] = getDirTree(process.cwd(), 2);
 
   const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'));
@@ -68,5 +129,5 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     return { slug: s, title, date };
   });
 
-  return { props: { html, tree, posts } };
+  return { props: { html, meta, tree, posts } };
 };
