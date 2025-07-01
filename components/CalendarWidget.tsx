@@ -68,13 +68,13 @@ export default function CalendarWidget({ posts = [] }: { posts?: CalendarPost[] 
   if (selected) {
     return (
       <div className="border rounded p-2 bg-white shadow text-sm animate-fade">
-        <button onClick={() => setSelected(null)} className="text-teal-700 hover:underline mb-2">
+        <button onClick={() => setSelected(null)} className="text-red-700 hover:underline mb-2">
           &larr; カレンダーへ戻る
         </button>
         <ul className="ml-2 list-disc">
           {selected.map((p) => (
             <li key={p.slug} className="mt-1">
-              <Link href={`/manual_for_system/${p.slug}`} className="hover:underline text-teal-700">
+              <Link href={`/manual_for_system/${p.slug}`} className="hover:underline text-red-700">
                 {p.title}
               </Link>
             </li>
@@ -87,9 +87,9 @@ export default function CalendarWidget({ posts = [] }: { posts?: CalendarPost[] 
   return (
     <div className="border rounded p-2 bg-white shadow text-sm animate-fade">
       <div className="flex justify-between items-center mb-2">
-        <button onClick={prevMonth} className="px-2 hover:text-teal-700">&lt;</button>
+        <button onClick={prevMonth} className="px-2 hover:text-red-700">&lt;</button>
         <span className="font-bold">{year}年{month + 1}月</span>
-        <button onClick={nextMonth} className="px-2 hover:text-teal-700">&gt;</button>
+        <button onClick={nextMonth} className="px-2 hover:text-red-700">&gt;</button>
       </div>
       <table className="w-full text-xs border-collapse">
         <thead>
@@ -112,7 +112,7 @@ export default function CalendarWidget({ posts = [] }: { posts?: CalendarPost[] 
                     key={j}
                     className={
                       'border h-8 w-8 text-center cursor-pointer transition ' +
-                      (hasPost ? 'bg-teal-50 hover:bg-teal-100' : 'text-gray-400 cursor-default')
+                      (hasPost ? 'bg-pink-50 hover:bg-pink-100' : 'text-gray-400 cursor-default')
                     }
                     onClick={() => handleDayClick(d)}
                   >

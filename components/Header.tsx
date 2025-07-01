@@ -22,10 +22,10 @@ export default function Header() {
   return (
     <>
       {/* トップバー */}
-      <div className="bg-gradient-to-r from-teal-600 to-teal-500 text-white text-center py-2 text-sm">
+      <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm">
         🎉 今週限定：初回レンタル30%OFF + 新着モデル入荷！
       </div>
-      <header className="bg-white shadow-md border-b-2 border-teal-600">
+      <header className="bg-white shadow-md border-b-2 border-red-600">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
           {/* ロゴ */}
           <Link href="/" className="flex items-center">
@@ -98,7 +98,7 @@ export default function Header() {
 
 function NavItem({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (
-    <button className="flex items-center gap-1 text-gray-700 hover:text-teal-600 transition-colors">
+    <button className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors">
       {icon && <span>{icon}</span>}
       <span>{label}</span>
     </button>

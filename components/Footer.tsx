@@ -21,10 +21,10 @@ export default function Footer() {
               1日からレンタルでき、月額プランや法人向けサービスも充実しています。
             </p>
             <div className="space-y-1">
-              <Link href="/" className="text-teal-600 hover:underline block">
+              <Link href="/" className="text-red-600 hover:underline block">
                 ホーム
               </Link>
-              <Link href="/contact" className="text-teal-600 hover:underline block">
+              <Link href="/contact" className="text-red-600 hover:underline block">
                 お問い合わせはこちら
               </Link>
             </div>

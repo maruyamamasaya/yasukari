@@ -66,7 +66,7 @@ export default function ChatBot({ className = "" }: { className?: string }) {
               className={
                 m.from === "bot"
                   ? "inline-block bg-gray-100 p-2 rounded"
-                  : "inline-block bg-teal-500 text-white p-2 rounded"
+                  : "inline-block bg-red-500 text-white p-2 rounded"
               }
             >
               {m.text}
