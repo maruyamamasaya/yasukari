@@ -124,7 +124,7 @@ export default function ChatBot({
   }
 
   function handleResizing(e: MouseEvent) {
-    const newHeight = startHeightRef.current + (e.clientY - startYRef.current);
+    const newHeight = startHeightRef.current - (e.clientY - startYRef.current);
     setHeight(Math.max(200, Math.min(newHeight, window.innerHeight * 1.5)));
   }
 
