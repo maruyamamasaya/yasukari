@@ -50,8 +50,8 @@ export default function ManualIndex({ posts, tree }: Props) {
   const pagePosts = posts.slice(start, start + perPage);
 
   return (
-    <div className="max-w-6xl mx-auto p-4 flex flex-col md:flex-row gap-6">
-      <div className="w-full md:w-[70%]">
+    <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
+      <div className="w-[70%]">
         <h1 className="text-2xl font-bold mb-6">サイト更新ブログ</h1>
         <div className="space-y-4">
           {pagePosts.map((post) => (
@@ -84,7 +84,7 @@ export default function ManualIndex({ posts, tree }: Props) {
           </nav>
         )}
       </div>
-      <div className="w-full md:w-[30%] space-y-4">
+      <div className="w-[30%] space-y-4">
         <CalendarWidget posts={posts} />
         <DirectoryTree tree={tree} />
       </div>
