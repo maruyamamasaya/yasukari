@@ -26,6 +26,9 @@ yasukari公式ホームページリニューアル
 - 簡易的なログイン機能を追加
 - `/login` ページと `/api/login` API でユーザー認証を実装
 
+### v1.5
+- 新着情報ページ `/news` と 店舗ブログ `/customer_blog` を追加
+
 
 ## manual_for_system
 サイトの更新情報や運用マニュアルをMarkdown形式で記録するディレクトリです。`/manual_for_system` 配下の `.md` ファイルはサイト上でも閲覧できます。
