@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -10,6 +10,7 @@ import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
 import FaqAccordion, { FAQItem } from "../components/FaqAccordion";
+import faqData from "../data/faq.json";
 import HowToUse from "../components/HowToUse";
 
 type GenreItem = {
@@ -26,24 +27,16 @@ export default function HomePage() {
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
   ];
 
-  const faqs: FAQItem[] = [
-    {
-      q: '予約はいつまで可能ですか？',
-      a: 'ご利用予定日の前営業日17時までご予約いただけます。',
-    },
-    {
-      q: '定休日はいつですか？',
-      a: '2023年11月23日より月曜と木曜が定休日となります。定休日は貸出・返却・延長など全ての業務を行っておりません。',
-    },
-    {
-      q: 'ヘルメットをレンタルできますか？',
-      a: 'オプションとしてヘルメットレンタルをご用意しています。お申込みがない場合はご持参ください。',
-    },
-    {
-      q: '走行距離の上限はありますか？',
-      a: '車種クラスごとの目安距離を設定しています。詳しくは表をご確認ください。',
-    },
-  ];
+  const faqs: FAQItem[] = useMemo(() => {
+    const all: FAQItem[] = (faqData as any).categories.flatMap(
+      (c: any) => c.faqs
+    );
+    for (let i = all.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [all[i], all[j]] = [all[j], all[i]];
+    }
+    return all.slice(0, 10);
+  }, []);
 
 
   const genreItems: GenreItem[] = [
