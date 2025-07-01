@@ -11,6 +11,7 @@ import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
 import FaqAccordion, { FAQItem } from "../components/FaqAccordion";
+import HowToUse from "../components/HowToUse";
 
 type GenreItem = {
   title: string;
@@ -282,6 +283,7 @@ export default function HomePage() {
 
       <BikeModelCarousel items={bikeModels} />
       <RecentlyViewed />
+      <HowToUse />
 
       <section className="py-8 px-4">
         <h2 className="text-lg font-semibold mb-4 text-center">よくある質問</h2>
