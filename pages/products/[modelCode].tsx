@@ -17,7 +17,7 @@ export default function ProductDetailPage({ bike }: Props) {
       const existingIndex = list.findIndex((b) => b.modelCode === bike.modelCode);
       if (existingIndex !== -1) list.splice(existingIndex, 1);
       list.unshift(bike);
-      if (list.length > 4) list.length = 4;
+      if (list.length > 6) list.length = 6;
       localStorage.setItem("recentBikes", JSON.stringify(list));
     } catch {
       // ignore write errors
