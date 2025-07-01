@@ -2,6 +2,8 @@ import fs from 'fs'
 import path from 'path'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
+import CalendarWidget, { CalendarPost } from '../../components/CalendarWidget'
+import PostSearch from '../../components/PostSearch'
 
 function parseMarkdown(md: string): { html: string; meta: Record<string, string> } {
   const meta: Record<string, string> = {}
@@ -77,15 +79,16 @@ function parseMarkdown(md: string): { html: string; meta: Record<string, string>
 interface Props {
   html: string
   meta: Record<string, string>
+  posts: CalendarPost[]
 }
 
-export default function BlogPost({ html, meta }: Props) {
+export default function BlogPost({ html, meta, posts }: Props) {
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <Head>
         <title>{meta.title ? `${meta.title} - yasukari` : 'ブログ'}</title>
       </Head>
-      <article className="markdown-body">
+      <article className="markdown-body w-[70%]">
         {meta.title && (
           <header className="post-header">
             <h1 className="post-title">{meta.title}</h1>
@@ -93,7 +96,9 @@ export default function BlogPost({ html, meta }: Props) {
             {meta.tags && (
               <p className="post-tags space-x-2 mt-1">
                 {meta.tags.split(',').map((tag) => (
-                  <span key={tag.trim()} className="text-blue-600 text-xs">#{tag.trim()}</span>
+                  <span key={tag.trim()} className="text-blue-600 text-xs">
+                    #{tag.trim()}
+                  </span>
                 ))}
               </p>
             )}
@@ -101,6 +106,10 @@ export default function BlogPost({ html, meta }: Props) {
         )}
         <div dangerouslySetInnerHTML={{ __html: html }} />
       </article>
+      <div className="w-[25%] space-y-4">
+        <CalendarWidget posts={posts} />
+        <PostSearch posts={posts} />
+      </div>
     </div>
   )
 }
@@ -118,5 +127,17 @@ export const getStaticProps: GetStaticProps = ({ params }) => {
   const filePath = path.join(dir, `${slug}.md`)
   const md = fs.readFileSync(filePath, 'utf8')
   const { html, meta } = parseMarkdown(md)
-  return { props: { html, meta } }
+
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'))
+  const posts: CalendarPost[] = files.map((file) => {
+    const s = file.replace(/\.md$/, '')
+    const lines = fs.readFileSync(path.join(dir, file), 'utf8').split(/\r?\n/)
+    const heading = lines.find((l) => l.startsWith('# '))
+    const title = heading ? heading.replace(/^#\s*/, '') : s
+    const dateMatch = s.match(/^\d{4}-\d{2}-\d{2}/)
+    const date = dateMatch ? dateMatch[0] : ''
+    return { slug: s, title, date }
+  })
+
+  return { props: { html, meta, posts } }
 }
