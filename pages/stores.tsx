@@ -8,7 +8,7 @@ export default function StoresPage() {
       </Head>
       <h1 className="text-xl font-bold mb-4 text-center">店舗一覧</h1>
 
-      <section className="mb-8 space-y-2">
+      <section id="adachi" className="mb-8 space-y-2">
         <h2 className="text-lg font-semibold">足立小台本店</h2>
         <p>足立区にある格安バイク屋です。</p>
         <ul className="list-disc list-inside space-y-1">
@@ -56,7 +56,7 @@ export default function StoresPage() {
         </div>
       </section>
 
-      <section className="space-y-2">
+      <section id="minowa" className="space-y-2">
         <h2 className="text-lg font-semibold">三ノ輪店</h2>
         <p>東京都台東区の国道4号線沿いにあるレンタルバイク店です。</p>
         <ul className="list-disc list-inside space-y-1">
