@@ -7,7 +7,6 @@ import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
-import Footer from "../components/Footer";
 import HeroSlider from "../components/HeroSlider";
 
 type GenreItem = {
@@ -257,7 +256,6 @@ export default function HomePage() {
       </section>
 
       <BikeModelCarousel items={bikeModels} />
-      <Footer />
     </>
   );
 }
