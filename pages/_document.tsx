@@ -14,10 +14,7 @@ export default function Document() {
           rel="stylesheet"
         />
         {/* Tailwind CSS CDN for utility classes */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.4/dist/tailwind.min.css"
-        />
+        <script src="https://cdn.tailwindcss.com"></script>
         {/* Swiper styles for carousels */}
         <link
           rel="stylesheet"
