@@ -27,14 +27,14 @@ export function checkAccess(ip: string): boolean {
     return true;
   }
 
-  if (now - info.first > 10000) {
+  if (now - info.first > 5000) {
     info.first = now;
     info.count = 1;
   } else {
     info.count += 1;
   }
 
-  if (info.count > 10) {
+  if (info.count > 15) {
     info.blockedUntil = now + 60_000;
     info.count = 0;
     return true;
