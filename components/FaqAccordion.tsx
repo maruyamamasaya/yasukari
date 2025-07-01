@@ -14,14 +14,14 @@ export default function FaqAccordion({ faqs }: { faqs: FAQItem[] }) {
   };
 
   return (
-    <div className="border-t border-b border-gray-300 divide-y">
+    <div className="faq-accordion">
       {faqs.map((faq, idx) => (
         <dl key={idx} className="py-2 sm:py-3">
           <dt className="mt-0">
             <button
               type="button"
               onClick={() => toggle(idx)}
-              className="collapsed flex items-baseline gap-2 w-full font-bold text-left"
+              className={`flex items-baseline gap-2 w-full text-left ${openIndex === idx ? '' : 'collapsed'}`}
             >
               <span className="text-primary">Q</span>
               <span className="flex-1">{faq.q}</span>
@@ -31,7 +31,7 @@ export default function FaqAccordion({ faqs }: { faqs: FAQItem[] }) {
             </button>
           </dt>
           <dd
-            className={`faq-answer my-0 ps-6 text-sm text-gray-700 ${openIndex === idx ? 'open' : ''}`}
+            className={`faq-answer my-0 ${openIndex === idx ? 'open' : ''}`}
           >
             <p>{faq.a}</p>
           </dd>
