@@ -38,7 +38,7 @@ export default function HowToUse() {
             />
           </div>
           <p className="text-start mt-2 md:mt-3 text-sm">
-            プランやお届け日を選択したら注文完了！ご自宅に商品が届きます。
+            プランや受取日を選択したら注文完了！オンラインで手続きできます。
           </p>
         </div>
         <FaCaretRight className="hidden md:block text-gray-400 text-2xl" />
