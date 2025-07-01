@@ -25,13 +25,18 @@ function getInfo(ip: string): ClientInfo {
 
 export function checkAccess(ip: string): boolean {
   const now = Date.now();
-  const info = getInfo(ip);
+  let info = getInfo(ip);
+
+  if (info.blockedUntil && now >= info.blockedUntil) {
+    clearBlock(ip);
+    info = getInfo(ip);
+  }
 
   if (info.blockedUntil && now < info.blockedUntil) {
     return true;
   }
 
-  const bucketStart = now - (now % 5000);
+  const bucketStart = now - (now % 10000);
   if (bucketStart !== info.first) {
     info.first = bucketStart;
     info.count = 1;
@@ -39,7 +44,7 @@ export function checkAccess(ip: string): boolean {
     info.count += 1;
   }
 
-  if (info.count > 100) {
+  if (info.count > 50) {
     info.blockedUntil = now + 60_000;
     info.count = 0;
     return true;
@@ -50,7 +55,12 @@ export function checkAccess(ip: string): boolean {
 
 export function recordLoginResult(ip: string, success: boolean): boolean {
   const now = Date.now();
-  const info = getInfo(ip);
+  let info = getInfo(ip);
+
+  if (info.blockedUntil && now >= info.blockedUntil) {
+    clearBlock(ip);
+    info = getInfo(ip);
+  }
 
   if (info.blockedUntil && now < info.blockedUntil) {
     return true;
@@ -65,7 +75,7 @@ export function recordLoginResult(ip: string, success: boolean): boolean {
     } else {
       info.failCount += 1;
     }
-    if (info.failCount >= 10) {
+    if (info.failCount >= 5) {
       info.blockedUntil = now + 60_000;
       info.failCount = 0;
       return true;
