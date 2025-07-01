@@ -30,7 +30,7 @@ export default function ManualPost({ html, tree, posts }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <article
-        className="prose w-[70%]"
+        className="markdown-body w-[70%]"
         style={{ marginLeft: "1rem" }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
