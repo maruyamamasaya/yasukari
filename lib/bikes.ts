@@ -96,5 +96,17 @@ export async function getBikeModels(): Promise<BikeModel[]> {
       modelCode: "sr400",
       img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=60",
     },
+    {
+      modelName: "\u30C8\u30A5\u30C7\u30A4-2",
+      modelCode: "today2",
+      img: "https://images.unsplash.com/photo-1529429612084-bd3517b6be0e?auto=format&fit=crop&w=400&q=60",
+      description: "\u6392\u6C17\u91CF\uff1a49cm3 \u30B7\u30FC\u30C8\u9AD8\uff1a695mm",
+    },
+    {
+      modelName: "\u30BF\u30AF\u30C8\u3000\u30D9\u30FC\u30B7\u30C3\u30AF",
+      modelCode: "tact-basic",
+      img: "https://images.unsplash.com/photo-1618322076062-3d90e649b6ce?auto=format&fit=crop&w=400&q=60",
+      description: "\u6392\u6C17\u91CF\uff1a49cm3 \u30B7\u30FC\u30C8\u9AD8\uff1a720mm",
+    },
   ];
 }
