@@ -35,7 +35,7 @@ export default function GuidePage() {
       <img
         src="https://yasukari.com/static/images/guide/barner.jpg"
         alt="ご利用案内バナー"
-        className="w-full h-[300px] object-cover mb-6"
+        className="w-1/2 h-auto mb-6"
       />
 
       <h1 className="text-2xl font-bold mb-6 text-center">ご利用案内</h1>
