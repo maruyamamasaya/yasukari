@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 
 export default function NewsPage() {
   const posts = [
@@ -7,6 +8,7 @@ export default function NewsPage() {
       date: '2025-08-01',
       excerpt:
         '8月1日に公式サイトをリニューアルしました。旧サイトから順次こちらへ移行してまいります。',
+      href: '/news/site-renewal',
     },
     {
       title: 'お盆休業および繁忙期料金のお知らせ',
@@ -38,13 +40,28 @@ export default function NewsPage() {
       </Head>
       <h1 className="text-xl font-bold mb-4 text-center">新着情報</h1>
       <div className="space-y-4">
-        {posts.map((post, idx) => (
-          <div key={idx} className="p-4 bg-white rounded shadow">
-            <h2 className="font-semibold">{post.title}</h2>
-            <p className="text-gray-500 text-xs mb-1">{post.date}</p>
-            <p>{post.excerpt}</p>
-          </div>
-        ))}
+        {posts.map((post, idx) => {
+          const content = (
+            <>
+              <h2 className="font-semibold">{post.title}</h2>
+              <p className="text-gray-500 text-xs mb-1">{post.date}</p>
+              <p>{post.excerpt}</p>
+            </>
+          )
+          return post.href ? (
+            <Link
+              key={idx}
+              href={post.href}
+              className="block p-4 bg-white rounded shadow hover:bg-gray-50"
+            >
+              {content}
+            </Link>
+          ) : (
+            <div key={idx} className="p-4 bg-white rounded shadow">
+              {content}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
