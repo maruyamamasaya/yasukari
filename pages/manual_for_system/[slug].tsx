@@ -34,7 +34,7 @@ export default function ManualPost({ html, tree, posts }: Props) {
         style={{ marginLeft: "1rem" }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
-      <div className="w-[30%] space-y-4">
+      <div className="w-[25%] space-y-4">
         <CalendarWidget posts={posts} />
         <DirectoryTree tree={tree} />
       </div>
