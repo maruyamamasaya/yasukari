@@ -90,6 +90,13 @@ export default function BlogPost({ html, meta }: Props) {
           <header className="post-header">
             <h1 className="post-title">{meta.title}</h1>
             {meta.date && <p className="post-date">{meta.date}</p>}
+            {meta.tags && (
+              <p className="post-tags space-x-2 mt-1">
+                {meta.tags.split(',').map((tag) => (
+                  <span key={tag.trim()} className="text-blue-600 text-xs">#{tag.trim()}</span>
+                ))}
+              </p>
+            )}
           </header>
         )}
         <div dangerouslySetInnerHTML={{ __html: html }} />
