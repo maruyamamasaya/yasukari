@@ -210,7 +210,7 @@ export default function HomePage({ blogSlides }: Props) {
           {blogSlides.map((card, index) => (
             <SwiperSlide key={index}>
               <Link href={card.href}>
-                <div className="blog-slide cursor-pointer shadow-md">
+                <div className="blog-slide cursor-pointer shadow-md hover-glow">
                   <img
                     src={card.img}
                     alt={card.title}
