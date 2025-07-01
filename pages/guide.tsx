@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { FaArrowDown } from 'react-icons/fa';
 
 export default function GuidePage() {
   const faqs = [
@@ -26,7 +27,7 @@ export default function GuidePage() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-8 text-sm leading-relaxed">
+    <div className="max-w-[1440px] mx-auto p-6 space-y-8 text-sm leading-relaxed">
       <Head>
         <title>ご利用案内 - yasukari</title>
       </Head>
@@ -34,13 +35,13 @@ export default function GuidePage() {
       <img
         src="https://yasukari.com/static/images/guide/barner.jpg"
         alt="ご利用案内バナー"
-        className="w-full h-48 object-cover mb-6"
+        className="w-full h-[300px] object-cover mb-6"
       />
 
       <h1 className="text-2xl font-bold mb-6 text-center">ご利用案内</h1>
 
       {/* ご予約 */}
-      <section className="space-y-2">
+      <section className="border rounded p-4 space-y-2">
         <h2 className="text-lg font-semibold">01. ご予約について</h2>
         <p>各車両ページよりスケジュールを確認しご予約ください。18歳未満のお客様はご利用いただけません。</p>
         <ul className="list-disc list-inside space-y-1">
@@ -52,9 +53,10 @@ export default function GuidePage() {
           <li>キャンセル料：4日前まで無料、3日前〜当日はレンタル料金の50％</li>
         </ul>
       </section>
+      <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
       {/* ご来店 */}
-      <section className="space-y-2">
+      <section className="border rounded p-4 space-y-2">
         <h2 className="text-lg font-semibold mt-6">02. ご来店</h2>
         <p>ご来店時は下記をお持ちください。ヘルメットをオプション申込されていない場合はご持参ください。</p>
         <ul className="list-disc list-inside space-y-1">
@@ -64,9 +66,10 @@ export default function GuidePage() {
         <p>ご予約日の10時から18時30分の間にお越しください。（手続きに時間がかかるため）</p>
         <p>ヤスカリはリバイクルK-JETが運営しております。ご来店の際はスタッフまでお声かけください。</p>
       </section>
+      <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
       {/* ご利用 */}
-      <section className="space-y-2">
+      <section className="border rounded p-4 space-y-2">
         <h2 className="text-lg font-semibold mt-6">03. ご利用</h2>
         <ul className="list-disc list-inside space-y-1">
           <li>契約者様以外への貸し出し・返却はできません。</li>
@@ -111,9 +114,10 @@ export default function GuidePage() {
         </table>
         <p className="mt-2">走行中に不具合が生じた場合は営業時間内に契約店舗へご連絡ください。営業時間外に走行不能となった場合はロードサービスをご利用ください。</p>
       </section>
+      <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
       {/* ご返却 */}
-      <section className="space-y-2">
+      <section className="border rounded p-4 space-y-2">
         <h2 className="text-lg font-semibold mt-6">04. ご返却</h2>
         <p>ご返却日の10時から18時30分の間にお越しください。（手続きに時間がかかるため）</p>
         <p>返却時にガソリンが満タンでない場合は当社規定の費用を頂戴します。</p>
