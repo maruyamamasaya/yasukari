@@ -74,3 +74,7 @@ export function isBlocked(ip: string): boolean {
   const info = clients.get(ip);
   return info ? info.blockedUntil !== undefined && Date.now() < info.blockedUntil : false;
 }
+
+export function clearBlock(ip: string): void {
+  clients.delete(ip);
+}
