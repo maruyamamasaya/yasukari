@@ -3,10 +3,16 @@ import Head from 'next/head'
 export default function NewsPage() {
   const posts = [
     {
+      title: 'サイトリニューアルのお知らせ',
+      date: '2025-08-01',
+      excerpt:
+        '8月1日に公式サイトをリニューアルしました。旧サイトから順次こちらへ移行してまいります。',
+    },
+    {
       title: 'お盆休業および繁忙期料金のお知らせ',
       date: '2025-07-20',
       excerpt:
-        '8/11\uFF08月\uFF09\uFF5E8/15\uFF08金\uFF09は休業、8/6\uFF08水\uFF09\uFF5E8/15\uFF08金\uFF09は1日550円の繁忙期料金を頂戴します。',
+        '8/11（月）〜8/15（金）は休業、8/6（水）〜8/15（金）は1日550円の繁忙期料金を頂戴します。',
     },
     {
       title: '新サービス開始のお知らせ',
