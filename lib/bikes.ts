@@ -4,6 +4,7 @@ export interface BikeModel {
   img: string;
   badge?: string;
   description?: string;
+  price24h?: string;
 }
 
 /**
@@ -13,6 +14,36 @@ export interface BikeModel {
 export async function getBikeModels(): Promise<BikeModel[]> {
   // Sample data for development
   return [
+    {
+      modelName: "\u30C9\u30E9\u30C3\u30B0\u30B9\u30BF\u30FC250",
+      modelCode: "dragstar250",
+      img: "https://yasukari.com/storage/models/DXD10WTKLvRB45VWYVtm.jpg",
+      price24h: "7,980\u5186",
+    },
+    {
+      modelName: "\u30AF\u30ED\u30B9\u30AB\u30D6110",
+      modelCode: "crosscub110",
+      img: "https://yasukari.com/storage/models/yIj7Bnk5KSgr05pITe8y.jpg",
+      price24h: "6,980\u5186",
+    },
+    {
+      modelName: "CB400SFV\u30DC\u30EB\u30C9\u30FC\u30EB",
+      modelCode: "cb400sfv",
+      img: "https://yasukari.com/storage/models/nXUvT7KLr38W99F5xmqy.jpg",
+      price24h: "11,980\u5186",
+    },
+    {
+      modelName: "CB1300SF\u30DC\u30EB\u30C9\u30FC\u30EB",
+      modelCode: "cb1300sf",
+      img: "https://yasukari.com/storage/models/nP97p32L9F4o2mL4TtX6.jpg",
+      price24h: "14,980\u5186",
+    },
+    {
+      modelName: "CBR400R",
+      modelCode: "cbr400r",
+      img: "https://yasukari.com/storage/models/c9kas47ob2ulkaeppka0.jpg",
+      price24h: "11,980\u5186",
+    },
     {
       modelName: "CT125 \u30CF\u30F3\u30BF\u30FC\u30AB\u30D6",
       modelCode: "ct125",
