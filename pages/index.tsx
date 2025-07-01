@@ -9,7 +9,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import Footer from "../components/Footer";
-import ChatBotWidget from "../components/ChatBotWidget";
 import HeroSlider from "../components/HeroSlider";
 
 type GenreItem = {
@@ -312,7 +311,6 @@ export default function HomePage() {
 
       <BikeModelCarousel items={bikeModels} />
       <Footer />
-      <ChatBotWidget />
     </>
   );
 }

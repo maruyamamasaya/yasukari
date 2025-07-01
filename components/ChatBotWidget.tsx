@@ -19,9 +19,9 @@ export default function ChatBotWidget() {
       )}
       <button
         onClick={() => setOpen(!open)}
-        className="bg-teal-600 text-white p-3 rounded-full shadow-lg"
+        className="bg-teal-600 text-white p-4 rounded-full shadow-lg"
       >
-        <FaComments className="w-5 h-5" />
+        <FaComments className="w-8 h-8" />
       </button>
     </div>
   );
