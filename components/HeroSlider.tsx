@@ -1,18 +1,18 @@
 import React from "react";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
+import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 export default function HeroSlider({ slides }: { slides: { img: string }[] }) {
   return (
     <section className="relative flex items-center justify-center" style={{ height: 560 }}>
       <Swiper
-        modules={[Autoplay, Pagination]}
+        modules={[Autoplay, Navigation]}
+        navigation
         autoplay={{ delay: 4000 }}
         loop
-        pagination={{ clickable: true }}
         className="absolute inset-0"
       >
         {slides.map((s, idx) => (
