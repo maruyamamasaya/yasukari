@@ -22,14 +22,15 @@ type Props = {
 
 export default function BikeModelCarousel({ items, title = "人気の型番" }: Props) {
   return (
-    <section className="py-6 px-4 bike-model-carousel">
+    <section className="py-6 px-4">
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
-      <Swiper
-        modules={[Autoplay, Navigation, EffectCoverflow, Pagination]}
-        spaceBetween={12}
-        slidesPerView={3.2}
-        centeredSlides
-        loop
+      <div className="bike-model-carousel">
+        <Swiper
+          modules={[Autoplay, Navigation, EffectCoverflow, Pagination]}
+          spaceBetween={12}
+          slidesPerView={3.2}
+          centeredSlides
+          loop
         navigation
         pagination={{ clickable: true }}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
@@ -64,7 +65,8 @@ export default function BikeModelCarousel({ items, title = "人気の型番" }: 
             </Link>
           </SwiperSlide>
         ))}
-      </Swiper>
+        </Swiper>
+      </div>
     </section>
   );
 }
