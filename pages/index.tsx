@@ -201,7 +201,7 @@ export default function HomePage({ blogSlides }: Props) {
         <Swiper
           modules={[Autoplay, Navigation, Pagination]}
           spaceBetween={12}
-          slidesPerView={3}
+          slidesPerView={5}
           navigation
           pagination={{ clickable: true }}
           autoplay={{ delay: 3000 }}
@@ -210,13 +210,13 @@ export default function HomePage({ blogSlides }: Props) {
           {blogSlides.map((card, index) => (
             <SwiperSlide key={index}>
               <Link href={card.href}>
-                <div className="relative rounded-lg overflow-hidden shadow-md cursor-pointer">
+                <div className="blog-slide cursor-pointer shadow-md">
                   <img
                     src={card.img}
                     alt={card.title}
                     className="square-img"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm p-2 text-center">
+                  <div className="blog-slide-title">
                     {card.title}
                   </div>
                 </div>
@@ -383,7 +383,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=60",
   ];
 
-  const blogSlides: BlogSlide[] = posts.map((p, idx) => ({
+  const blogSlides: BlogSlide[] = posts.slice(0,10).map((p, idx) => ({
     title: p.title,
     href: `/blog_for_custmor/${p.slug}`,
     img: images[idx % images.length],

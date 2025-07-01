@@ -81,6 +81,31 @@ a:hover {
   aspect-ratio: 1 / 1;
   object-fit: cover;
 }
+
+.blog-slide {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.blog-slide img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+.blog-slide-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+}
 /* Swiper basic styles */
 .swiper {
   width: 100%;
