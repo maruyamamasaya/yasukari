@@ -3,6 +3,7 @@ import path from 'path';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import CalendarWidget from '../../components/CalendarWidget';
+import PostSearch from '../../components/PostSearch';
 import DirectoryTree, { DirNode } from '../../components/DirectoryTree';
 import { getDirTree } from '../../lib/getDirTree';
 
@@ -98,6 +99,7 @@ export default function ManualIndex({ posts, tree }: Props) {
       </div>
       <div className="w-[25%] space-y-4">
         <CalendarWidget posts={posts} />
+        <PostSearch posts={posts} />
         <DirectoryTree tree={tree} />
       </div>
     </div>

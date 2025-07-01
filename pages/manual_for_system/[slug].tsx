@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import CalendarWidget, { CalendarPost } from '../../components/CalendarWidget';
+import PostSearch from '../../components/PostSearch';
 import DirectoryTree, { DirNode } from '../../components/DirectoryTree';
 import { getDirTree } from '../../lib/getDirTree';
 
@@ -97,6 +98,7 @@ export default function ManualPost({ html, meta, tree, posts }: Props) {
       </article>
       <div className="w-[25%] space-y-4">
         <CalendarWidget posts={posts} />
+        <PostSearch posts={posts} />
         <DirectoryTree tree={tree} />
       </div>
     </div>
