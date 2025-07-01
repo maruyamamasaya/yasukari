@@ -10,6 +10,7 @@ import "swiper/css/navigation";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import Footer from "../components/Footer";
 import ChatBotWidget from "../components/ChatBotWidget";
+import HeroSlider from "../components/HeroSlider";
 
 type GenreItem = {
   title: string;
@@ -20,6 +21,10 @@ type GenreItem = {
 };
 
 export default function HomePage() {
+  const heroSlides = [
+    { img: "https://yasukari.com/static/images/home/slide.jpg" },
+    { img: "https://yasukari.com/static/images/home/slide2.jpg" },
+  ];
   const blogSlides = [
     {
       title: "最新モデル入荷！",
@@ -221,23 +226,7 @@ export default function HomePage() {
       </header>
 
       {/* ヒーローセクション */}
-      <section
-        className="relative h-[60vh] flex items-center justify-center text-white bg-cover bg-center"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504203700661-56077a803b6c?auto=format&fit=crop&w=1200&q=80')" }}
-      >
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative z-10 text-center px-4">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">
-            Ride the Future
-          </h1>
-          <p className="mb-6 max-w-xl mx-auto">
-            最新モデルからクラシックまで、多彩なバイクを簡単レンタル。
-          </p>
-          <Link href="/products" className="btn-primary inline-block">
-            バイクを探す
-          </Link>
-        </div>
-      </section>
+      <HeroSlider slides={heroSlides} />
 
       {/* 特徴紹介 */}
       <section className="py-8 bg-gray-50">
