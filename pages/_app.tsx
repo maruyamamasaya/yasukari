@@ -5,13 +5,16 @@ import ChatBotWidget from '../components/ChatBotWidget';
 import MobileNav from '../components/MobileNav';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Layout from '../components/Layout';
 
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Header />
-      <Component {...pageProps} />
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
       <Footer />
       <ChatBotWidget />
       <MobileNav />
