@@ -1,9 +1,8 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { FaClock, FaTruck, FaStar, FaHashtag } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -45,68 +44,7 @@ export default function HomePage() {
       a: '車種クラスごとの目安距離を設定しています。詳しくは表をご確認ください。',
     },
   ];
-  const blogSlides = [
-    {
-      title: "最新モデル入荷！",
-      img: "https://images.unsplash.com/photo-1586216586175-8aa98895d72b?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "レンタルガイド",
-      img: "https://images.unsplash.com/photo-1558981403-c5f9891deab2?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "ユーザーインタビュー",
-      img: "https://images.unsplash.com/photo-1600788907411-28fe8e361f25?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "キャンペーン情報",
-      img: "https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "整備のこだわり",
-      img: "https://images.unsplash.com/photo-1558980664-10abf19c5c99?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "ツーリング特集",
-      img: "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd9d?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "最新アクセサリ",
-      img: "https://images.unsplash.com/photo-1596991367806-58714a22747c?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "スタッフブログ",
-      img: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "バイクの保管方法",
-      img: "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "イベントレポート",
-      img: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-  ];
 
-  const hotKeywords = [
-    { label: "夏のツーリング", href: "/t/scene/summer?click_from=top_keywords" },
-    { label: "初心者おすすめ", href: "/t/tag/beginner?click_from=top_keywords" },
-    {
-      label: "キャンプツーリング",
-      href: "/blog/camp-touring?click_from=top_keywords",
-    },
-    { label: "ヘルメット", href: "/search?q=ヘルメット&click_from=top_keywords" },
-  ];
 
   const genreItems: GenreItem[] = [
     {
@@ -213,89 +151,15 @@ export default function HomePage() {
       {/* ヒーローセクション */}
       <HeroSlider slides={heroSlides} />
 
-      {/* 店舗を選ぶセクション */}
-      <section className="py-8 px-4">
-        <h2 className="text-lg font-semibold mb-4 text-center">どちらの店舗で借りますか？</h2>
-        <div className="max-w-4xl mx-auto grid gap-4 md:grid-cols-2">
-          <div className="border rounded p-4 shadow-sm">
-            <h3 className="font-bold mb-1 text-center">足立小台本店</h3>
-            <p className="text-sm">足立区にある格安バイク屋です。</p>
-            <Link href="/stores#adachi" className="text-red-600 underline text-sm block mt-2 text-center">
-              詳細を見る
-            </Link>
-          </div>
-          <div className="border rounded p-4 shadow-sm">
-            <h3 className="font-bold mb-1 text-center">三ノ輪店</h3>
-            <p className="text-sm">東京都台東区の国道4号線沿いにあるレンタルバイク店です。</p>
-            <Link href="/stores#minowa" className="text-red-600 underline text-sm block mt-2 text-center">
-              詳細を見る
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 注目キーワード */}
-      <section className="py-4 px-4">
-        <h2 className="text-sm font-semibold mb-2">注目キーワード</h2>
-        <div className="flex flex-wrap gap-2">
-          {hotKeywords.map((k, idx) => (
-            <Link
-              key={idx}
-              href={k.href}
-              className="inline-flex items-center gap-1 rounded-full shadow-sm border border-gray-200 bg-white text-black text-[13px] font-bold px-2 py-1.5"
-            >
-              <FaHashtag className="text-primary text-[16px]" />
-              {k.label}
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 特徴紹介 */}
-      <section className="py-8 bg-gray-50">
-        <div className="max-w-5xl mx-auto grid gap-6 md:grid-cols-3 text-center px-4">
-          <FeatureItem icon={<FaClock size={28} />} title="24時間予約" text="スマホからいつでも申し込み" />
-          <FeatureItem icon={<FaTruck size={28} />} title="格安レンタル" text="オンラインで簡単手続き" />
-          <FeatureItem icon={<FaStar size={28} />} title="整備済み車両" text="プロメカニックによる点検済み" />
-        </div>
-      </section>
-
-      {/* カルーセル（新着ブログカード） */}
-      <section className="py-6 px-4">
-        <h2 className="text-lg font-semibold mb-4">新着ブログ・お知らせ</h2>
-        <Swiper
-          modules={[Autoplay, Navigation, Pagination]}
-          spaceBetween={12}
-          slidesPerView={3}
-          navigation
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 3000 }}
-          loop
-        >
-          {blogSlides.map((card, index) => (
-            <SwiperSlide key={index}>
-              <Link href={card.href}>
-                <div className="relative rounded-lg overflow-hidden shadow-md cursor-pointer">
-                  <img
-                    src={card.img}
-                    alt={card.title}
-                    className="w-full h-56 object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm p-2 text-center">
-                    {card.title}
-                  </div>
-                </div>
-              </Link>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </section>
-
+      {/* 最近チェックした商品 */}
       <RecentlyViewed />
+
+      {/* 人気の型番 */}
+      <BikeModelCarousel items={bikeModels} />
 
       {/* おすすめのジャンルセクション（バイク） */}
       <section className="py-6 px-4">
-        <h2 className="text-lg font-semibold mb-4">今借りたい！おすすめのジャンル</h2>
+        <h2 className="text-lg font-semibold mb-4">すぐに借りれる！おすすめのジャンル</h2>
         <Swiper modules={[Pagination]} spaceBetween={12} slidesPerView={4} pagination={{ clickable: true }}>
           {genreItems.map((item, index) => (
             <SwiperSlide key={index}>
@@ -320,8 +184,38 @@ export default function HomePage() {
         </Swiper>
       </section>
 
-      <BikeModelCarousel items={bikeModels} />
-      <RecentlyViewed />
+      {/* レンタル店舗 */}
+      <section className="py-8 px-4">
+        <h2 className="text-lg font-semibold mb-2 text-center">レンタル店舗（２店舗表示）</h2>
+        <h3 className="text-md font-semibold mb-4 text-center">どちらの店舗で借りますか？</h3>
+        <div className="max-w-4xl mx-auto grid gap-4 md:grid-cols-2">
+          <div className="border rounded p-4 shadow-sm">
+            <h3 className="font-bold mb-1 text-center">足立小台本店</h3>
+            <img
+              src="https://lh3.googleusercontent.com/gps-cs-s/AC9h4nqVQEu7iamQVzNqnomQOvgsiEUR7DIW3ZdaAHEnxWggYWnC73HV5doQ1TwHaab2CW_mPNIfW1bbR8gKFCRrVYybhzd5kZ7iuU0cOLGuamr8lRc_onfgLsFbYbPWL0AaoCn9v30=s680-w680-h510-rw"
+              alt="足立小台本店"
+              className="w-full h-40 object-cover mb-2 rounded"
+            />
+            <p className="text-sm">足立区にある格安バイク屋です。</p>
+            <Link href="/stores#adachi" className="text-red-600 underline text-sm block mt-2 text-center">
+              詳細を見る
+            </Link>
+          </div>
+          <div className="border rounded p-4 shadow-sm">
+            <h3 className="font-bold mb-1 text-center">三ノ輪店</h3>
+            <img
+              src="https://lh3.googleusercontent.com/p/AF1QipO9gfqTiOGXc1xWxE90p1a7asvUFDH4smOC7R48=s680-w680-h510-rw"
+              alt="三ノ輪店"
+              className="w-full h-40 object-cover mb-2 rounded"
+            />
+            <p className="text-sm">東京都台東区の国道4号線沿いにあるレンタルバイク店です。</p>
+            <Link href="/stores#minowa" className="text-red-600 underline text-sm block mt-2 text-center">
+              詳細を見る
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <HowToUse />
 
       <section className="py-8 px-4">
@@ -354,30 +248,4 @@ export default function HomePage() {
   );
 }
 
-function NavItem({ icon, label }: { icon?: React.ReactNode; label: string }) {
-  return (
-    <button className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors">
-      {icon && <span>{icon}</span>}
-      <span>{label}</span>
-    </button>
-  );
-}
-
-function FeatureItem({
-  icon,
-  title,
-  text,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="bg-white rounded shadow-sm p-4">
-      <div className="text-primary mb-2">{icon}</div>
-      <h3 className="font-semibold mb-1">{title}</h3>
-      <p className="text-sm text-gray-600">{text}</p>
-    </div>
-  );
-}
 
