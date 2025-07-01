@@ -213,6 +213,27 @@ export default function HomePage() {
       {/* ヒーローセクション */}
       <HeroSlider slides={heroSlides} />
 
+      {/* 店舗を選ぶセクション */}
+      <section className="py-8 px-4">
+        <h2 className="text-lg font-semibold mb-4 text-center">どちらの店舗で借りますか？</h2>
+        <div className="max-w-4xl mx-auto grid gap-4 md:grid-cols-2">
+          <div className="border rounded p-4 shadow-sm">
+            <h3 className="font-bold mb-1 text-center">足立小台本店</h3>
+            <p className="text-sm">足立区にある格安バイク屋です。</p>
+            <Link href="/stores#adachi" className="text-red-600 underline text-sm block mt-2 text-center">
+              詳細を見る
+            </Link>
+          </div>
+          <div className="border rounded p-4 shadow-sm">
+            <h3 className="font-bold mb-1 text-center">三ノ輪店</h3>
+            <p className="text-sm">東京都台東区の国道4号線沿いにあるレンタルバイク店です。</p>
+            <Link href="/stores#minowa" className="text-red-600 underline text-sm block mt-2 text-center">
+              詳細を見る
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 注目キーワード */}
       <section className="py-4 px-4">
         <h2 className="text-sm font-semibold mb-2">注目キーワード</h2>
