@@ -22,7 +22,7 @@ type Props = {
 
 export default function BikeModelCarousel({ items, title = "人気の型番" }: Props) {
   return (
-    <section className="py-6 px-4">
+    <section className="py-6 px-4 bike-model-carousel">
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
       <Swiper
         modules={[Autoplay, Navigation, EffectCoverflow, Pagination]}
