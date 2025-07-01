@@ -27,7 +27,7 @@ export default function CompanyPage() {
           </tr>
           <tr>
             <th className="text-left w-40 p-2 border">メール</th>
-            <td className="p-2 border">info@rebikele.com</td>
+            <td className="p-2 border">info@yasukari.com</td>
           </tr>
           <tr>
             <th className="text-left w-40 p-2 border">事業内容</th>
