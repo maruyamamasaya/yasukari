@@ -207,3 +207,34 @@ a:hover {
   background-color: #f3f3f3;
   text-align: left;
 }
+
+/* Blog post header */
+.post-header {
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.post-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.post-date {
+  color: #888;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Dark style code block */
+.markdown-body pre.code-block {
+  background-color: #1e1e1e;
+  color: #dcdcdc;
+  font-family: Menlo, Monaco, 'Courier New', monospace;
+}
+.markdown-body pre.code-block code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}

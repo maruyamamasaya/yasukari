@@ -20,13 +20,25 @@ export async function getStaticProps() {
     const slug = file.replace(/\.md$/, '');
     const md = fs.readFileSync(path.join(dir, file), 'utf8');
     const lines = md.split(/\r?\n/);
+    let idx = 0;
+    const meta: Record<string, string> = {};
+    if (lines[idx] === '---') {
+      idx++;
+      while (idx < lines.length && lines[idx] !== '---') {
+        const [k, ...v] = lines[idx].split(':');
+        if (k) meta[k.trim()] = v.join(':').trim().replace(/^"|"$/g, '');
+        idx++;
+      }
+      idx++;
+    }
     const heading = lines.find((l) => l.startsWith('# '));
-    const title = heading ? heading.replace(/^#\s*/, '') : slug;
-    const dateMatch = slug.match(/^\d{4}-\d{2}-\d{2}/);
-    const date = dateMatch ? dateMatch[0] : '';
-    const excerptLine = lines.find((l) => l.trim() && !l.startsWith('#')) || '';
+    const title = meta.title || (heading ? heading.replace(/^#\s*/, '') : slug);
+    const dateMatch = meta.date || slug.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || '';
+    const excerptLine = lines
+      .slice(idx)
+      .find((l) => l.trim() && !l.startsWith('#')) || '';
     const excerpt = excerptLine.replace(/\*/g, '').slice(0, 80);
-    return { slug, title, date, excerpt };
+    return { slug, title, date: dateMatch, excerpt };
   });
 
   posts.sort((a, b) => b.date.localeCompare(a.date));
