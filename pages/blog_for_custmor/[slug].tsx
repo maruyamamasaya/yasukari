@@ -111,7 +111,7 @@ export default function BlogPost({ html, meta, posts }: Props) {
           <img
             src={meta.eyecatch}
             alt={meta.title || ''}
-            className="w-full h-60 object-cover rounded mb-4"
+            className="square-img rounded mb-4"
           />
         )}
         <div dangerouslySetInnerHTML={{ __html: html }} />

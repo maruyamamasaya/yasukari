@@ -111,7 +111,7 @@ export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) 
                 <img
                   src={post.eyecatch}
                   alt={post.title}
-                  className="w-full h-40 object-cover rounded mb-2"
+                  className="square-img rounded mb-2"
                 />
               )}
               <h2 className="font-semibold">{post.title}</h2>
