@@ -1,8 +1,9 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation } from "swiper/modules";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 export default function HeroSlider({ slides }: { slides: { img: string }[] }) {
   return (
@@ -11,8 +12,9 @@ export default function HeroSlider({ slides }: { slides: { img: string }[] }) {
       style={{ width: 960, maxWidth: "100%", height: 560 }}
     >
       <Swiper
-        modules={[Autoplay, Navigation]}
+        modules={[Autoplay, Navigation, Pagination]}
         navigation
+        pagination={{ clickable: true }}
         autoplay={{ delay: 4000 }}
         loop
         className="absolute inset-0"

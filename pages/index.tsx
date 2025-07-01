@@ -3,9 +3,10 @@ import Head from "next/head";
 import Link from "next/link";
 import { FaClock, FaTruck, FaStar, FaHashtag } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation } from "swiper/modules";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
@@ -203,10 +204,11 @@ export default function HomePage() {
       <section className="py-6 px-4">
         <h2 className="text-lg font-semibold mb-4">新着ブログ・お知らせ</h2>
         <Swiper
-          modules={[Autoplay, Navigation]}
+          modules={[Autoplay, Navigation, Pagination]}
           spaceBetween={12}
           slidesPerView={3}
           navigation
+          pagination={{ clickable: true }}
           autoplay={{ delay: 3000 }}
           loop
         >
@@ -232,7 +234,7 @@ export default function HomePage() {
       {/* おすすめのジャンルセクション（バイク） */}
       <section className="py-6 px-4">
         <h2 className="text-lg font-semibold mb-4">今借りたい！おすすめのジャンル</h2>
-        <Swiper spaceBetween={12} slidesPerView={4}>
+        <Swiper modules={[Pagination]} spaceBetween={12} slidesPerView={4} pagination={{ clickable: true }}>
           {genreItems.map((item, index) => (
             <SwiperSlide key={index}>
               <Link href={item.href}>

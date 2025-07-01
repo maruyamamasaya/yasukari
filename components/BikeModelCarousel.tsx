@@ -1,10 +1,11 @@
 import React from "react";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation, EffectCoverflow } from "swiper/modules";
+import { Autoplay, Navigation, EffectCoverflow, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/effect-coverflow";
+import "swiper/css/pagination";
 
 export type BikeItem = {
   modelName: string;
@@ -23,12 +24,13 @@ export default function BikeModelCarousel({ items, title = "人気の型番" }: 
     <section className="py-6 px-4">
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
       <Swiper
-        modules={[Autoplay, Navigation, EffectCoverflow]}
+        modules={[Autoplay, Navigation, EffectCoverflow, Pagination]}
         spaceBetween={12}
         slidesPerView={3.2}
         centeredSlides
         loop
         navigation
+        pagination={{ clickable: true }}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
         effect="coverflow"
         coverflowEffect={{ rotate: 0, stretch: 10, depth: 100, modifier: 1, slideShadows: false }}
