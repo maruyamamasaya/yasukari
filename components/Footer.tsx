@@ -96,6 +96,11 @@ export default function Footer() {
                   店舗一覧
                 </Link>
               </li>
+              <li>
+                <Link href="/insurance" className="hover:underline">
+                  車両保険の内容について
+                </Link>
+              </li>
             </ul>
             <h4 className="font-bold mb-2">SNS・動画</h4>
             <ul className="space-y-2">
