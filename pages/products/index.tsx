@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { GetStaticProps } from "next";
 import { getBikeModels, BikeModel } from "../../lib/bikes";
+import RecentlyViewed from "../../components/RecentlyViewed";
 
 interface Props {
   bikes: BikeModel[];
@@ -29,6 +30,7 @@ export default function AllProductsPage({ bikes }: Props) {
             </Link>
           ))}
         </div>
+        <RecentlyViewed />
       </main>
     </>
   );
