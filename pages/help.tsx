@@ -1,7 +1,8 @@
 import Head from 'next/head';
+import FaqAccordion, { FAQItem } from '../components/FaqAccordion';
 
 export default function HelpPage() {
-  const faqs = [
+  const faqs: FAQItem[] = [
     {
       q: '予約はいつまで可能ですか？',
       a: 'ご利用予定日の前営業日17時までご予約いただけます。',
@@ -55,14 +56,21 @@ export default function HelpPage() {
 
       <section>
         <h2 className="text-lg font-semibold mb-4 text-center">よくある質問</h2>
-        <ul className="space-y-4">
-          {faqs.map((f, idx) => (
-            <li key={idx} className="border rounded p-4">
-              <p className="font-semibold">Q. {f.q}</p>
-              <p className="mt-2">A. {f.a}</p>
-            </li>
-          ))}
-        </ul>
+        <FaqAccordion faqs={faqs} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.q,
+                acceptedAnswer: { '@type': 'Answer', text: f.a },
+              })),
+            }),
+          }}
+        />
       </section>
     </div>
   );
