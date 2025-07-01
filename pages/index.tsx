@@ -10,6 +10,7 @@ import "swiper/css/pagination";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
 import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
+import FaqAccordion, { FAQItem } from "../components/FaqAccordion";
 
 type GenreItem = {
   title: string;
@@ -23,6 +24,25 @@ export default function HomePage() {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
+  ];
+
+  const faqs: FAQItem[] = [
+    {
+      q: '予約はいつまで可能ですか？',
+      a: 'ご利用予定日の前営業日17時までご予約いただけます。',
+    },
+    {
+      q: '定休日はいつですか？',
+      a: '2023年11月23日より月曜と木曜が定休日となります。定休日は貸出・返却・延長など全ての業務を行っておりません。',
+    },
+    {
+      q: 'ヘルメットをレンタルできますか？',
+      a: 'オプションとしてヘルメットレンタルをご用意しています。お申込みがない場合はご持参ください。',
+    },
+    {
+      q: '走行距離の上限はありますか？',
+      a: '車種クラスごとの目安距離を設定しています。詳しくは表をご確認ください。',
+    },
   ];
   const blogSlides = [
     {
@@ -261,6 +281,26 @@ export default function HomePage() {
       </section>
 
       <BikeModelCarousel items={bikeModels} />
+      <RecentlyViewed />
+
+      <section className="py-8 px-4">
+        <h2 className="text-lg font-semibold mb-4 text-center">よくある質問</h2>
+        <FaqAccordion faqs={faqs} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.q,
+                acceptedAnswer: { '@type': 'Answer', text: f.a },
+              })),
+            }),
+          }}
+        />
+      </section>
     </>
   );
 }
