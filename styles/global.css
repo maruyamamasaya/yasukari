@@ -3,6 +3,17 @@
   --primary-color-light: #f43f5e;
   --secondary-color: #fdf2f2;
   --font-family-base: "Inter", "Noto Sans JP", Arial, Helvetica, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "\30e1\30a4\30ea\30aa", Meiryo, sans-serif;
+  /* Bootstrap inspired variables for FAQ styling */
+  --bs-border-color: #dee2e6;
+  --bs-border-width: 1px;
+  --bs-border-radius: 0.25rem;
+  --bs-body-font-family: Arial, Helvetica, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "\30e1\30a4\30ea\30aa", Meiryo, sans-serif;
+  --bs-body-font-size: 1rem;
+  --bs-body-font-weight: 400;
+  --bs-body-line-height: 1.5;
+  --bs-body-color: #000;
+  --bs-light: rgba(30, 50, 70, 0.05);
+  --bs-primary: rgb(0, 155, 209);
 }
 
 body {
@@ -137,11 +148,39 @@ a:hover {
 }
 
 /* FAQ accordion */
+.faq-accordion {
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-white, #fff);
+}
+
+.faq-accordion dl + dl {
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.faq-accordion button {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: var(--bs-body-font-family);
+  font-size: var(--bs-body-font-size);
+  font-weight: var(--bs-body-font-weight);
+  line-height: var(--bs-body-line-height);
+  background-color: var(--bs-light);
+  color: var(--bs-body-color);
+}
+
+.faq-accordion button.collapsed {
+  background-color: var(--bs-white, #fff);
+}
+
 .faq-answer {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  padding: 0 1rem;
 }
 
 .faq-answer.open {
