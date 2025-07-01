@@ -29,7 +29,7 @@ export default function RecentlyViewed() {
               <img
                 src={b.img}
                 alt={b.modelName}
-                className="w-full h-28 object-cover rounded mb-1"
+                className="w-full aspect-square object-cover rounded mb-1"
               />
               <div className="text-sm truncate">{b.modelName}</div>
             </div>
