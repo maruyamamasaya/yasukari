@@ -123,8 +123,26 @@ yasukari公式ホームページリニューアル
   サイトの更新履歴を記録したMarkdownファイル。2025年6月30日時点の開発状況として、Next.js初期構築やトップページのカルーセル実装などを説明しています。Markdown形式のため履歴の閲覧や管理が容易で、プロジェクト初期の方針を振り返る資料としても役立ちます。今後の開発予定を追記していくことで進捗を追うドキュメントとしても利用され、履歴の共有でチーム全体の認識を統一します。
 - `manual_for_system/2025-06-30-chatbot-design.md`
   チャットボット機能の設計メモをまとめたMarkdown。FAQカテゴリのボタン表示から自由入力へ遷移する流れやOpenAI API連携予定などを記述しています。試験実装時の注意点やデータファイルの配置場所も記録し、ブログ記事として公開することで社内外への進捗共有を兼ねます。開発意図を簡潔にメモして方針のブレを防ぐ役割を担い、今後のチャット機能拡張時に参照する基礎資料として残しています。
+- `manual_for_system/2025-06-30-development-summary.md`
+  開発状況のまとめを記したMarkdownファイルです。
+- `manual_for_system/2025-06-30-search-suggest.md`
+  サイト内検索のサジェスト機能検討メモです。
 - `manual_for_system/2025-07-01-site-renewal.md`
   サイトリニューアルのお知らせを掲載したMarkdownファイル。2025年7月1日に更新し、旧サイトから順次移行する旨を告知しています。
+- `manual_for_system/2025-07-01-css-style-guide.md`
+  CSSスタイルガイドをまとめたドキュメントです。
+- `manual_for_system/2025-07-01-ddos-protection.md`
+  DDoS対策の方針を記したメモです。
+- `manual_for_system/2025-07-01-development-summary.md`
+  2025年7月1日時点の開発サマリをまとめています。
+- `manual_for_system/2025-07-01-recently-viewed.md`
+  最近チェックした商品機能についての設計ノートです。
+- `manual_for_system/2025-07-02-development-summary.md`
+  2025年7月2日の開発状況をまとめた記事です。
+- `manual_for_system/2025-07-03-development-summary.md`
+  2025年7月3日の開発状況をまとめた記事です。
+- `blog_for_custmor/`
+  店舗ブログ記事をMarkdownで管理するディレクトリです。
 - `next.config.js`
   Next.jsの動作設定を記述するファイル。現状はreactStrictModeをfalseにした最小構成のみですが、今後画像ドメインの許可や環境変数の定義など、ビルドやランタイムの挙動を調整する際に利用します。
 - `next-env.d.ts`  
