@@ -95,7 +95,7 @@ export default function BlogIndex({
             <Link
               key={post.slug}
               href={`/blog_for_custmor/${post.slug}`}
-              className="block p-4 bg-white rounded shadow hover:bg-gray-50"
+              className="block p-4 bg-white rounded shadow hover:bg-gray-50 hover-glow"
             >
               {post.eyecatch && (
                 <img

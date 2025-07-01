@@ -52,12 +52,12 @@ export default function NewsPage() {
             <Link
               key={idx}
               href={post.href}
-              className="block p-4 bg-white rounded shadow hover:bg-gray-50"
+              className="block p-4 bg-white rounded shadow hover:bg-gray-50 hover-glow"
             >
               {content}
             </Link>
           ) : (
-            <div key={idx} className="p-4 bg-white rounded shadow">
+            <div key={idx} className="p-4 bg-white rounded shadow hover-glow">
               {content}
             </div>
           )
