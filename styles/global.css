@@ -270,6 +270,13 @@ a:hover {
   margin-bottom: 1.25rem;
 }
 
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
 .markdown-body ul,
 .markdown-body ol {
   margin-bottom: 1.25rem;
