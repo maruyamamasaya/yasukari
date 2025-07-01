@@ -231,6 +231,8 @@ export default function HomePage() {
         </Swiper>
       </section>
 
+      <RecentlyViewed />
+
       {/* おすすめのジャンルセクション（バイク） */}
       <section className="py-6 px-4">
         <h2 className="text-lg font-semibold mb-4">今借りたい！おすすめのジャンル</h2>
@@ -259,7 +261,6 @@ export default function HomePage() {
       </section>
 
       <BikeModelCarousel items={bikeModels} />
-      <RecentlyViewed />
     </>
   );
 }
