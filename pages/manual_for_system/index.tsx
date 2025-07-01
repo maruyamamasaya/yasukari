@@ -64,7 +64,7 @@ export default function ManualIndex({ posts, tree }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <div className="w-[70%]">
-        <h1 className="text-2xl font-bold mb-6">サイト更新ブログ</h1>
+        <h1 className="text-2xl font-bold mb-6">システムエンジニア・管理者専用サイト更新ブログ</h1>
         <div className="space-y-4">
           {pagePosts.map((post) => (
             <Link
