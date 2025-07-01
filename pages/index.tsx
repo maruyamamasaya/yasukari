@@ -3,6 +3,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import fs from "fs";
+import path from "path";
+import { GetStaticProps } from "next";
 import { FaClock, FaTruck, FaStar, FaHashtag } from "react-icons/fa";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -22,7 +25,16 @@ type GenreItem = {
   badge?: string;
 };
 
-export default function HomePage() {
+type BlogSlide = {
+  title: string;
+  href: string;
+  img: string;
+};
+interface Props {
+  blogSlides: BlogSlide[];
+}
+
+export default function HomePage({ blogSlides }: Props) {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
@@ -39,58 +51,6 @@ export default function HomePage() {
     return all.slice(0, 10);
   }, []);
 
-  const blogSlides = [
-    {
-      title: "最新モデル入荷！",
-      img: "https://images.unsplash.com/photo-1586216586175-8aa98895d72b?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "レンタルガイド",
-      img: "https://images.unsplash.com/photo-1558981403-c5f9891deab2?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "ユーザーインタビュー",
-      img: "https://images.unsplash.com/photo-1600788907411-28fe8e361f25?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "キャンペーン情報",
-      img: "https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "整備のこだわり",
-      img: "https://images.unsplash.com/photo-1558980664-10abf19c5c99?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "ツーリング特集",
-      img: "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd9d?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "最新アクセサリ",
-      img: "https://images.unsplash.com/photo-1596991367806-58714a22747c?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "スタッフブログ",
-      img: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "バイクの保管方法",
-      img: "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-    {
-      title: "イベントレポート",
-      img: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=60",
-      href: "#",
-    },
-  ];
 
   const hotKeywords = [
     { label: "夏のツーリング", href: "/t/scene/summer?click_from=top_keywords" },
@@ -254,7 +214,7 @@ export default function HomePage() {
                   <img
                     src={card.img}
                     alt={card.title}
-                    className="w-full h-56 object-cover"
+                    className="square-img"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm p-2 text-center">
                     {card.title}
@@ -383,5 +343,53 @@ function FeatureItem({
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const dir = path.join(process.cwd(), "blog_for_custmor");
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
+  const posts = files.map((file) => {
+    const slug = file.replace(/\.md$/, "");
+    const md = fs.readFileSync(path.join(dir, file), "utf8");
+    const lines = md.split(/\r?\n/);
+    let idx = 0;
+    const meta: Record<string, string> = {};
+    if (lines[idx] === "---") {
+      idx++;
+      while (idx < lines.length && lines[idx] !== "---") {
+        const [k, ...v] = lines[idx].split(":");
+        if (k) meta[k.trim()] = v.join(":").trim().replace(/^"|"$/g, "");
+        idx++;
+      }
+      idx++;
+    }
+    const heading = lines.find((l) => l.startsWith("# "));
+    const title = meta.title || (heading ? heading.replace(/^#\s*/, "") : slug);
+    const date = meta.date || slug.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || "";
+    return { slug, title, date };
+  });
+
+  posts.sort((a, b) => b.date.localeCompare(a.date));
+
+  const images = [
+    "https://images.unsplash.com/photo-1586216586175-8aa98895d72b?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1558981403-c5f9891deab2?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1600788907411-28fe8e361f25?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1558980664-10abf19c5c99?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd9d?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1596991367806-58714a22747c?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=400&q=60",
+    "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=60",
+  ];
+
+  const blogSlides: BlogSlide[] = posts.map((p, idx) => ({
+    title: p.title,
+    href: `/blog_for_custmor/${p.slug}`,
+    img: images[idx % images.length],
+  }));
+
+  return { props: { blogSlides } };
+};
 
 

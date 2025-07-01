@@ -75,6 +75,12 @@ a:hover {
   width: 100%;
   display: block;
 }
+
+.square-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
 /* Swiper basic styles */
 .swiper {
   width: 100%;
