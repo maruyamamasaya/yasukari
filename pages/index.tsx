@@ -235,13 +235,27 @@ export default function HomePage({ blogSlides }: Props) {
       {/* おすすめのジャンルセクション（バイク） */}
       <section className="py-6 px-4">
         <h2 className="text-lg font-semibold mb-4">すぐに借りれる！おすすめのジャンル</h2>
-        <Swiper modules={[Pagination]} spaceBetween={12} slidesPerView={4} pagination={{ clickable: true }}>
+        <Swiper
+          modules={[Autoplay, Navigation, Pagination]}
+          spaceBetween={12}
+          slidesPerView={4}
+          navigation
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 2500, disableOnInteraction: false }}
+          loop
+        >
           {genreItems.map((item, index) => (
             <SwiperSlide key={index}>
               <Link href={item.href}>
                 <div className="text-center shadow-sm rounded bg-white p-2 hover:bg-gray-50 transition">
                   <div className="relative w-fit mx-auto">
-                    <img src={item.img} alt={item.title} width={70} height={73} className="object-cover" />
+                    <img
+                      src={item.img}
+                      alt={item.title}
+                      width={70}
+                      height={70}
+                      className="object-cover w-[70px] h-[70px]"
+                    />
                     {item.badge && (
                       <div className="absolute top-1 left-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">
                         {item.badge}
