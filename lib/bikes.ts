@@ -108,5 +108,35 @@ export async function getBikeModels(): Promise<BikeModel[]> {
       img: "https://yasukari.com/storage/models/cai2v0vob2uptbmdc4n0.jpg",
       description: "\u6392\u6C17\u91CF\uff1a49cm3 \u30B7\u30FC\u30C8\u9AD8\uff1a720mm",
     },
+    {
+      modelName: "リトルカブ -E",
+      modelCode: "littlecub-e",
+      img: "https://yasukari.com/storage/models/cuo67fb1qb717lh4v1tg.JPG",
+      description: "排気量：49cm3 シート高：705mm",
+    },
+    {
+      modelName: "エイプ",
+      modelCode: "ape",
+      img: "https://yasukari.com/storage/models/cuo4qlr1qb717lh4v1q0.JPG",
+      description: "排気量：49cm3 シート高：715mm",
+    },
+    {
+      modelName: "C50",
+      modelCode: "c50",
+      img: "https://yasukari.com/storage/models/cunc5sb1qb717lh4v1ag.JPG",
+      description: "排気量：48cm3 シート高：735mm",
+    },
+    {
+      modelName: "PCX",
+      modelCode: "pcx",
+      img: "https://yasukari.com/storage/models/7sglRumMZg96OY4jtMvr.jpg",
+      description: "排気量：125cm3 シート高：764mm",
+    },
+    {
+      modelName: "トリシティ",
+      modelCode: "tricity",
+      img: "https://yasukari.com/storage/models/Xkaefo1byEdK32othKb7.jpg",
+      description: "排気量：124cm3 シート高：765mm",
+    },
   ];
 }
