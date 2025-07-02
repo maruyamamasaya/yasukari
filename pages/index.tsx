@@ -270,7 +270,7 @@ export default function HomePage({ blogSlides }: Props) {
           {genreItems.map((item, index) => (
             <SwiperSlide key={index}>
               <Link href={item.href}>
-                <div className="text-center shadow-sm rounded bg-white p-2 hover:bg-gray-50 transition w-[160px] min-h-[200px] mx-auto">
+                <div className="text-center shadow-sm rounded bg-white p-2 hover:bg-gray-50 transition w-[160px] h-[220px] mx-auto flex flex-col justify-between">
                   <div className="relative mx-auto w-[150px] h-[150px] flex items-center justify-center">
                     {item.img ? (
                       <img
