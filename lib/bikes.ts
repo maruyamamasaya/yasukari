@@ -21,10 +21,11 @@ export async function getBikeModels(): Promise<BikeModel[]> {
       price24h: "7,980\u5186",
     },
     {
-      modelName: "\u30AF\u30ED\u30B9\u30AB\u30D6110",
+      modelName: "クロスカブ110",
       modelCode: "crosscub110",
       img: "https://yasukari.com/storage/models/yIj7Bnk5KSgr05pITe8y.jpg",
-      price24h: "6,980\u5186",
+      price24h: "6,980円",
+      description: "排気量：109cm3 シート高：784mm",
     },
     {
       modelName: "CB400SFV\u30DC\u30EB\u30C9\u30FC\u30EB",
@@ -45,16 +46,17 @@ export async function getBikeModels(): Promise<BikeModel[]> {
       price24h: "11,980\u5186",
     },
     {
-      modelName: "CT125 \u30CF\u30F3\u30BF\u30FC\u30AB\u30D6",
+      modelName: "CT125ハンターカブ",
       modelCode: "ct125",
-      img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=400&q=60",
-      badge: "\u4EBA\u6C17",
+      img: "https://yasukari.com/storage/models/cescbjb1qb75lhmssvi0.jpg",
+      description: "排気量：124cm3 シート高：800mm",
+      badge: "人気",
     },
     {
-      modelName: "Rebel 250",
-      modelCode: "rebel250",
-      img: "https://images.unsplash.com/photo-1527059815533-5e3217fe272b?auto=format&fit=crop&w=400&q=60",
-      badge: "\u65B0\u7740",
+      modelName: "グロム125",
+      modelCode: "grom125",
+      img: "https://yasukari.com/storage/models/PeJtT9J2MZ5zDdtlf12T.jpg",
+      description: "排気量：123cm3 シート高：761mm",
     },
     {
       modelName: "Monkey 125",
@@ -75,21 +77,6 @@ export async function getBikeModels(): Promise<BikeModel[]> {
       modelName: "Ninja 400",
       modelCode: "ninja400",
       img: "https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=400&q=60",
-    },
-    {
-      modelName: "MT-25",
-      modelCode: "mt25",
-      img: "https://images.unsplash.com/photo-1558980664-10abf19c5c99?auto=format&fit=crop&w=400&q=60",
-    },
-    {
-      modelName: "GSX-S125",
-      modelCode: "gsxs125",
-      img: "https://images.unsplash.com/photo-1521033630360-8da27f438aab?auto=format&fit=crop&w=400&q=60",
-    },
-    {
-      modelName: "Super Cub 110",
-      modelCode: "supercub110",
-      img: "https://images.unsplash.com/photo-1541290166853-cc98c362c88a?auto=format&fit=crop&w=400&q=60",
     },
     {
       modelName: "SR400",
