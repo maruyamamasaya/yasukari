@@ -173,7 +173,7 @@ export default function Header() {
         )}
         <nav
           ref={menuRef}
-          className={`sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md transform transition-all duration-300 origin-top ${menuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 pointer-events-none'}`}
+          className={`sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md mobile-menu ${menuOpen ? 'open' : ''}`}
         >
             <ul className="flex flex-col p-4 gap-4 text-sm font-medium">
               <li>
