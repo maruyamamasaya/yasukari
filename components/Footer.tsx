@@ -132,7 +132,7 @@ export default function Footer() {
         {/* ロゴとコピーライト */}
         <div className="border-t border-gray-300 mt-8 pt-6 text-center">
           <img
-            src="/logo-rebikele.svg"
+            src="https://yasukari.com/static/images/logo/250x50.png"
             alt="yasukari ロゴ"
             width={120}
             className="mx-auto mb-2"
