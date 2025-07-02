@@ -285,7 +285,7 @@ export default function HomePage({ blogSlides }: Props) {
                       <span className="text-gray-400 text-6xl">{item.icon}</span>
                     )}
                     {item.badge && (
-                      <div className="absolute top-1 left-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">
+                      <div className="absolute top-1 left-1 bg-red-500 text-white text-xs flex items-center justify-center w-6 h-6 rounded">
                         {item.badge}
                       </div>
                     )}
