@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import { Autoplay, Navigation, Pagination, Grid } from "swiper/modules";
 import fs from "fs";
 import path from "path";
 import { GetStaticProps } from "next";
@@ -217,11 +217,14 @@ export default function HomePage({ blogSlides }: Props) {
         <Swiper
           modules={[Autoplay, Navigation, Pagination]}
           spaceBetween={12}
-          slidesPerView={3}
           navigation
           pagination={{ clickable: true }}
           autoplay={{ delay: 3000 }}
           loop
+          breakpoints={{
+            0: { slidesPerView: 1 },
+            640: { slidesPerView: 3 },
+          }}
         >
           {blogSlides.map((card, index) => (
             <SwiperSlide key={index}>
@@ -252,13 +255,16 @@ export default function HomePage({ blogSlides }: Props) {
       <section className="py-6 px-4">
         <h2 className="text-lg font-semibold mb-4">すぐに借りれる！おすすめのジャンル</h2>
         <Swiper
-          modules={[Autoplay, Navigation, Pagination]}
+          modules={[Autoplay, Navigation, Pagination, Grid]}
           spaceBetween={12}
-          slidesPerView={4}
           navigation
           pagination={{ clickable: true }}
           autoplay={{ delay: 2500, disableOnInteraction: false }}
           loop
+          breakpoints={{
+            0: { slidesPerView: 2, grid: { rows: 2 } },
+            640: { slidesPerView: 4, grid: { rows: 1 } },
+          }}
         >
           {genreItems.map((item, index) => (
             <SwiperSlide key={index}>

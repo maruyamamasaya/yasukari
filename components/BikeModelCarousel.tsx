@@ -28,15 +28,18 @@ export default function BikeModelCarousel({ items, title = "人気の型番" }: 
         <Swiper
           modules={[Autoplay, Navigation, EffectCoverflow, Pagination]}
           spaceBetween={12}
-          slidesPerView={3.2}
           centeredSlides
           loop
-        navigation
-        pagination={{ clickable: true }}
-        autoplay={{ delay: 2500, disableOnInteraction: false }}
-        effect="coverflow"
-        coverflowEffect={{ rotate: 0, stretch: 10, depth: 100, modifier: 1, slideShadows: false }}
-      >
+          navigation
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 2500, disableOnInteraction: false }}
+          effect="coverflow"
+          coverflowEffect={{ rotate: 0, stretch: 10, depth: 100, modifier: 1, slideShadows: false }}
+          breakpoints={{
+            0: { slidesPerView: 1.2 },
+            640: { slidesPerView: 3.2 },
+          }}
+        >
         {items.map((item) => (
           <SwiperSlide key={item.modelCode}>
             <Link href={`/products/${item.modelCode}?click_from=top_modelcarousel`}>
