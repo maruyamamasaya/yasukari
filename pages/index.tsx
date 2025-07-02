@@ -201,7 +201,7 @@ export default function HomePage({ blogSlides }: Props) {
         <Swiper
           modules={[Autoplay, Navigation, Pagination]}
           spaceBetween={12}
-          slidesPerView={5}
+          slidesPerView={3}
           navigation
           pagination={{ clickable: true }}
           autoplay={{ delay: 3000 }}
