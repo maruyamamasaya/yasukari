@@ -82,20 +82,7 @@ a:hover {
   aspect-ratio: 1 / 1;
 }
 
-.square-img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-}
 
-@media (max-width: 640px) {
-  .square-img {
-    aspect-ratio: 1 / 1;
-  }
-  .blog-slide img {
-    aspect-ratio: 1 / 1;
-  }
-}
 
 .blog-slide {
   position: relative;
@@ -110,12 +97,7 @@ a:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.blog-slide img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  display: block;
-}
+
 
 .blog-slide-title {
   position: absolute;
@@ -181,54 +163,6 @@ a:hover {
   background: var(--primary-color);
 }
 
-
-/* Mobile bottom navigation */
-.mobile-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  background: #fff;
-  border-top: 1px solid #e5e5e5;
-  padding: 0.25rem 0.5rem;
-  z-index: 40;
-}
-.mobile-nav a {
-  color: #555;
-  text-align: center;
-  font-size: 0.75rem;
-}
-.mobile-nav a:hover {
-  color: var(--primary-color);
-}
-
-/* Mobile menu animation */
-.mobile-menu {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease, opacity 0.2s ease;
-}
-.mobile-menu.open {
-  max-height: 400px;
-  opacity: 1;
-}
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade {
-  animation: fade-up 0.3s ease forwards;
-}
 
 /* FAQ accordion */
 .faq-accordion {
@@ -476,25 +410,7 @@ a:hover {
   background: linear-gradient(to left, var(--secondary-color), transparent);
 }
 
-/* Ensure genre carousel slides keep natural width */
-.genre-carousel .swiper-slide {
-  width: 150px;
-}
-
-@media (max-width: 640px) {
-  .genre-carousel .swiper-slide {
-    width: 45%;
-  }
-}
-
 /* HowToUse section */
-.howto-step { width: 220px; text-align: center; }
-
-@media (max-width: 640px) {
-  .howto-step {
-    width: 260px;
-  }
-}
 .howto-img { width: 100%; height: 150px; object-fit: contain; }
 .howto-title { font-size: 1rem; font-weight: bold; margin-top: 0.75rem; }
 .howto-desc { font-size: 0.875rem; margin-top: 0.5rem; text-align: start; }
