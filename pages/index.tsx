@@ -380,7 +380,7 @@ function FeatureItem({
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const dir = path.join(process.cwd(), "rental_bike");
+  const dir = path.join(process.cwd(), "blog_for_custmor");
   const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
   const posts = files.map((file) => {
     const slug = file.replace(/\.md$/, "");
@@ -421,7 +421,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
   const blogSlides: BlogSlide[] = posts.slice(0, 10).map((p, idx) => ({
     title: p.title,
-    href: `/rental_bike/${p.slug}`,
+    href: `/blog_for_custmor/${p.slug}`,
     img: p.eyecatch || images[idx % images.length],
   }));
 
