@@ -13,8 +13,9 @@ export default function FaqCategoryAccordion({
 }: {
   categories: FaqCategory[];
 }) {
+  // start with all categories collapsed
   const [openIndexes, setOpenIndexes] = useState<boolean[]>(
-    categories.map(() => true)
+    categories.map(() => false)
   );
 
   const toggle = (idx: number) => {
