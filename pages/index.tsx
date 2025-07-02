@@ -264,7 +264,7 @@ export default function HomePage({ blogSlides }: Props) {
           autoplay={{ delay: 2500, disableOnInteraction: false }}
           loop
           breakpoints={{
-            0: { slidesPerView: 2, grid: { rows: 2 } },
+            0: { slidesPerView: 2, grid: { rows: 2, fill: "row" } },
             640: { slidesPerView: 4, grid: { rows: 1 } },
           }}
         >
