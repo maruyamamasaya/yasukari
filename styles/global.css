@@ -237,6 +237,25 @@ a:hover {
   opacity: 1;
   padding-top: 0.5rem;
 }
+
+.faq-category-accordion button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--bs-light);
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  font-weight: 600;
+}
+
+.faq-category-accordion button.collapsed {
+  background-color: var(--bs-white, #fff);
+}
+
+.faq-category-accordion > div > div {
+  margin-top: 0.5rem;
+}
 /* Markdown article styles */
 .markdown-body {
   font-size: 1rem;
