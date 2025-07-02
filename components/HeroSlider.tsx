@@ -8,7 +8,7 @@ import "swiper/css/pagination";
 export default function HeroSlider({ slides }: { slides: { img: string }[] }) {
   return (
     <section
-      className="relative flex items-center justify-center mx-auto mb-8"
+      className="relative flex items-center justify-center mx-auto mb-12"
       style={{ width: 960, maxWidth: "100%", height: 560 }}
     >
       <Swiper

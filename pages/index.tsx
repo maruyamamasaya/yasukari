@@ -178,7 +178,7 @@ export default function HomePage({ blogSlides }: Props) {
 
 
       {/* 注目キーワード */}
-      <section className="py-4 px-4">
+      <section className="py-6 px-4">
         <h2 className="text-sm font-semibold mb-2">注目キーワード</h2>
         <div className="flex flex-wrap gap-2">
           {hotKeywords.slice(0, 7).map((k, idx) => (
@@ -203,7 +203,7 @@ export default function HomePage({ blogSlides }: Props) {
       </section>
 
       {/* 特徴紹介 */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-10 bg-gray-50">
         <div className="max-w-5xl mx-auto grid gap-6 md:grid-cols-3 text-center px-4">
           <FeatureItem icon={<FaClock size={28} />} title="24時間予約" text="スマホからいつでも申し込み" />
           <FeatureItem icon={<FaTruck size={28} />} title="格安レンタル" text="オンラインで簡単手続き" />
@@ -212,7 +212,7 @@ export default function HomePage({ blogSlides }: Props) {
       </section>
 
       {/* カルーセル（新着ブログカード） */}
-      <section className="py-6 px-4">
+      <section className="py-8 px-4 mb-8">
         <h2 className="text-lg font-semibold mb-4">新着ブログ・お知らせ</h2>
         <Swiper
           modules={[Autoplay, Navigation, Pagination]}
@@ -252,7 +252,7 @@ export default function HomePage({ blogSlides }: Props) {
       <BikeModelCarousel items={bikeModels} />
 
       {/* おすすめのジャンルセクション（バイク） */}
-      <section className="py-6 px-4">
+      <section className="py-8 px-4 mb-8">
         <h2 className="text-lg font-semibold mb-4">すぐに借りれる！おすすめのジャンル</h2>
         <div className="genre-carousel">
         <Swiper
@@ -302,7 +302,7 @@ export default function HomePage({ blogSlides }: Props) {
       </section>
 
       {/* 店舗を選ぶセクション */}
-      <section className="py-8 px-4">
+      <section className="py-10 px-4">
         <h2 className="text-lg font-semibold mb-4 text-center">どちらの店舗で借りますか？</h2>
         <div className="max-w-4xl mx-auto grid gap-4 md:grid-cols-2">
           <div className="border rounded overflow-hidden shadow-sm">
@@ -338,7 +338,7 @@ export default function HomePage({ blogSlides }: Props) {
 
       <HowToUse />
 
-      <section className="py-8 px-4">
+      <section className="py-12 px-4">
         <div className="text-center mb-1">
           <span className="text-red-600 font-bold text-sm tracking-wide">
             FAQ

@@ -41,7 +41,7 @@ export default function HowToUse() {
   ];
 
   return (
-    <section className="py-5 md:py-7">
+    <section className="py-8 md:py-10">
       <div className="text-center mb-1">
         <span className="text-red-600 font-bold text-sm tracking-wide">
           How to use
