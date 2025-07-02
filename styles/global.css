@@ -165,7 +165,7 @@ a:hover {
 
 /* Position pagination just below the slider */
 .swiper-pagination {
-  bottom: -1.5rem;
+  bottom: -20pt;
 }
 
 /* Swiper pagination bullets */
