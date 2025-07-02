@@ -467,3 +467,9 @@ a:hover {
 .genre-carousel .swiper-slide {
   width: 160px;
 }
+
+@media (max-width: 640px) {
+  .genre-carousel .swiper-slide {
+    width: 45%;
+  }
+}
