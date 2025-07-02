@@ -39,6 +39,8 @@
   opacity: 0;
   overflow: hidden;
   transition: max-height 0.2s ease, opacity 0.2s ease;
+  /* Ensure the dropdown appears above other elements on mobile */
+  z-index: 50;
 }
 .mobile-menu.open {
   max-height: 400px;
