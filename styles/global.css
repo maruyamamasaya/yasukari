@@ -181,6 +181,13 @@ a:hover {
   background: var(--primary-color);
 }
 
+/* Swiper pagination fraction */
+.swiper-pagination-fraction {
+  font-size: 0.75rem;
+  bottom: -20pt;
+  color: var(--primary-color);
+}
+
 /* Mobile bottom navigation */
 .mobile-nav {
   position: fixed;

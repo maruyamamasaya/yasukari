@@ -260,7 +260,7 @@ export default function HomePage({ blogSlides }: Props) {
           modules={[Autoplay, Navigation, Pagination, Grid]}
           spaceBetween={12}
           navigation
-          pagination={{ clickable: true }}
+          pagination={{ type: "fraction" }}
           autoplay={{ delay: 2500, disableOnInteraction: false }}
           loop
           breakpoints={{
