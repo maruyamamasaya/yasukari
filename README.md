@@ -164,6 +164,8 @@ docs/               プロジェクトドキュメント
   2025年7月2日の開発状況をまとめた記事です。
 - `manual_for_system/2025-07-03-development-summary.md`
   2025年7月3日の開発状況をまとめた記事です。
+- `manual_for_system/2025-07-04-api-document.md`
+  サイト更新ブログ用 API の概要をまとめたドキュメントです。
 - `blog_for_custmor/`
   店舗ブログ記事をMarkdownで管理するディレクトリです。各記事のフロントマターでは
   `title`, `date`, `tags` に加え `eyecatch`(アイキャッチ画像URL) を設定できます。
