@@ -47,7 +47,8 @@ export default function HowToUse() {
           How to use
         </span>
       </div>
-      <p className="text-center font-bold text-lg mt-2 text-red-600">
+      {/* 利用方法の見出しは周りのテキストと同じ色にする */}
+      <p className="text-center font-bold text-lg mt-2">
         yasukariの利用方法
       </p>
       <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-2 mt-4">
