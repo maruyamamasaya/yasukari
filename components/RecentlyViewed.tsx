@@ -22,8 +22,8 @@ export default function RecentlyViewed() {
   return (
     <section className="my-6 px-4">
       <h2 className="text-lg font-semibold mb-2">最近チェックした商品</h2>
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
-        {bikes.map((b) => (
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+        {bikes.slice(0, 5).map((b) => (
           <Link key={b.modelCode} href={`/products/${b.modelCode}`}>
             <div className="bg-white rounded shadow-sm p-2 hover:bg-gray-50 transition text-center">
               <img
