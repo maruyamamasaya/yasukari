@@ -58,7 +58,7 @@ export default function HowToUse() {
               <FaCaretRight className="hidden md:block text-gray-400 text-2xl" />
             )}
             <div className="howto-step">
-              <div className="mx-auto">
+              <div className="mx-auto w-full">
                 <img
                   className="howto-img"
                   alt={step.alt}
