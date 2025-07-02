@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
   FaUser,
@@ -22,6 +22,25 @@ export default function Header() {
   const [showSuggest, setShowSuggest] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const menuRef = useRef<HTMLElement | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [menuOpen]);
   const filteredSuggest = suggestItems.filter((s) =>
     s.toLowerCase().includes(query.toLowerCase())
   );
@@ -52,6 +71,7 @@ export default function Header() {
             <button
               className="sm:hidden text-gray-700"
               onClick={() => setMenuOpen((o) => !o)}
+              ref={menuButtonRef}
             >
               <FaBars size={20} />
             </button>
@@ -151,7 +171,10 @@ export default function Header() {
           </div>
         )}
         {menuOpen && (
-          <nav className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md">
+          <nav
+            ref={menuRef}
+            className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md"
+          >
             <ul className="flex flex-col p-4 gap-4 text-sm font-medium">
               <li>
                 <Link href="/">
