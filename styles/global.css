@@ -76,6 +76,12 @@ a:hover {
   display: block;
 }
 
+/* Utility class to enforce a square aspect ratio */
+.aspect-square {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
 .square-img {
   width: 100%;
   aspect-ratio: 4 / 3;
