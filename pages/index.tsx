@@ -254,6 +254,7 @@ export default function HomePage({ blogSlides }: Props) {
       {/* おすすめのジャンルセクション（バイク） */}
       <section className="py-6 px-4">
         <h2 className="text-lg font-semibold mb-4">すぐに借りれる！おすすめのジャンル</h2>
+        <div className="genre-carousel">
         <Swiper
           modules={[Autoplay, Navigation, Pagination, Grid]}
           spaceBetween={12}
@@ -274,9 +275,9 @@ export default function HomePage({ blogSlides }: Props) {
                     <img
                       src={item.img}
                       alt={item.title}
-                      width={100}
-                      height={100}
-                      className="object-cover w-[100px] h-[100px]"
+                      width={150}
+                      height={150}
+                      className="object-cover w-[150px] h-[150px]"
                     />
                     {item.badge && (
                       <div className="absolute top-1 left-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">
@@ -293,6 +294,7 @@ export default function HomePage({ blogSlides }: Props) {
             </SwiperSlide>
           ))}
         </Swiper>
+        </div>
       </section>
 
       {/* 店舗を選ぶセクション */}
