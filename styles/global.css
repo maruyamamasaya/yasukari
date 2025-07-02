@@ -208,6 +208,9 @@ a:hover {
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
   background-color: var(--bs-white, #fff);
+  width: 95%;
+  margin: 0 auto;
+  font-size: 0.875rem;
 }
 
 .faq-accordion dl + dl {
@@ -243,6 +246,11 @@ a:hover {
   max-height: 500px;
   opacity: 1;
   padding-top: 0.5rem;
+}
+
+.faq-category-accordion {
+  width: 95%;
+  margin: 0 auto;
 }
 
 .faq-category-accordion button {
