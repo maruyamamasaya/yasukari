@@ -43,7 +43,7 @@ export default function BikeModelCarousel({ items, title = "人気の型番" }: 
         {items.map((item) => (
           <SwiperSlide key={item.modelCode}>
             <Link href={`/products/${item.modelCode}?click_from=top_modelcarousel`}>
-              <div className="card text-center shadow-md hover:shadow-lg transition transform hover:-translate-y-1 p-2">
+              <div className="card text-center shadow-md hover:shadow-lg transition transform hover:-translate-y-1 p-2 w-[220px] h-[280px] mx-auto flex flex-col justify-between">
                 <div className="relative">
                   <img
                     src={item.img}
