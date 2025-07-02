@@ -1,0 +1,59 @@
+@media (max-width: 640px) {
+  .square-img {
+    aspect-ratio: 1 / 1;
+  }
+  .blog-slide img {
+    aspect-ratio: 1 / 1;
+  }
+  .genre-carousel .swiper-slide {
+    width: 45%;
+  }
+  .howto-step {
+    width: 260px;
+  }
+}
+
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  padding: 0.25rem 0.5rem;
+  z-index: 40;
+}
+.mobile-nav a {
+  color: #555;
+  text-align: center;
+  font-size: 0.75rem;
+}
+.mobile-nav a:hover {
+  color: var(--primary-color);
+}
+
+.mobile-menu {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease, opacity 0.2s ease;
+}
+.mobile-menu.open {
+  max-height: 400px;
+  opacity: 1;
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade {
+  animation: fade-up 0.3s ease forwards;
+}
