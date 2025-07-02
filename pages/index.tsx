@@ -148,12 +148,12 @@ export default function HomePage({ blogSlides }: Props) {
     {
       modelName: "\u30C8\u30A5\u30C7\u30A4-2",
       modelCode: "today2",
-      img: "https://images.unsplash.com/photo-1529429612084-bd3517b6be0e?auto=format&fit=crop&w=400&q=60",
+      img: "https://yasukari.com/storage/models/chzPCoSkTibLXYsrMN93.jpg",
     },
     {
       modelName: "\u30BF\u30AF\u30C8\u3000\u30D9\u30FC\u30B7\u30C3\u30AF",
       modelCode: "tact-basic",
-      img: "https://images.unsplash.com/photo-1618322076062-3d90e649b6ce?auto=format&fit=crop&w=400&q=60",
+      img: "https://yasukari.com/storage/models/cai2v0vob2uptbmdc4n0.jpg",
     },
   ];
 
