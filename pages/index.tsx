@@ -253,7 +253,7 @@ export default function HomePage({ blogSlides }: Props) {
       <BikeModelCarousel items={bikeModels} />
 
       {/* おすすめのジャンルセクション（バイク） */}
-      <section className="py-8 px-4 mb-8">
+      <section className="py-8 lg:py-6 px-4 mb-8 lg:mb-6">
         <h2 className="text-lg font-semibold mb-4">すぐに借りれる！おすすめのジャンル</h2>
         <div className="genre-carousel">
         <Swiper
@@ -303,7 +303,7 @@ export default function HomePage({ blogSlides }: Props) {
       </section>
 
       {/* 店舗を選ぶセクション */}
-      <section className="py-10 px-4">
+      <section className="py-10 lg:py-8 px-4">
         <h2 className="text-lg font-semibold mb-4 text-center">どちらの店舗で借りますか？</h2>
         <div className="max-w-4xl mx-auto grid gap-4 md:grid-cols-2">
           <div className="border rounded overflow-hidden shadow-sm">
