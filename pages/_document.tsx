@@ -13,8 +13,11 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
           rel="stylesheet"
         />
-        {/* Tailwind CSS CDN for utility classes */}
-        <script src="https://cdn.tailwindcss.com"></script>
+        {/* Tailwind CSS */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+        />
         {/* Swiper styles for carousels */}
         <link
           rel="stylesheet"
