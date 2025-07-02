@@ -171,10 +171,11 @@ export default function Header() {
             </div>
           </div>
         )}
-        <nav
-          ref={menuRef}
-          className={`sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md mobile-menu ${menuOpen ? 'open' : ''}`}
-        >
+        {menuOpen && (
+          <nav
+            ref={menuRef}
+            className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md mobile-menu open"
+          >
             <ul className="flex flex-col p-4 gap-4 text-sm font-medium">
               <li>
                 <Link href="/">
@@ -202,7 +203,8 @@ export default function Header() {
                 </Link>
               </li>
             </ul>
-        </nav>
+          </nav>
+        )}
       </header>
     </div>
   );
