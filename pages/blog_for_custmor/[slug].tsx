@@ -20,6 +20,9 @@ function parseMarkdown(md: string): { html: string; meta: Record<string, string>
   const escapeHtml = (s: string) =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
+  const formatInline = (s: string) =>
+    s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+
   const lines = content.split(/\r?\n/)
   let html = ''
   let inCode = false
@@ -49,7 +52,7 @@ function parseMarkdown(md: string): { html: string; meta: Record<string, string>
         html += '<ul>\n'
         inList = true
       }
-      html += `<li>${line.slice(2)}</li>\n`
+      html += `<li>${formatInline(line.slice(2))}</li>\n`
       continue
     }
 
@@ -65,15 +68,15 @@ function parseMarkdown(md: string): { html: string; meta: Record<string, string>
       const src = srcMatch ? srcMatch[1] : ''
       html += `<img src="${src}" alt="${alt}" />\n`
     } else if (trimmed.startsWith('### ')) {
-      html += `<h3>${trimmed.slice(4)}</h3>\n`
+      html += `<h3>${formatInline(trimmed.slice(4))}</h3>\n`
     } else if (trimmed.startsWith('## ')) {
-      html += `<h2>${trimmed.slice(3)}</h2>\n`
+      html += `<h2>${formatInline(trimmed.slice(3))}</h2>\n`
     } else if (trimmed.startsWith('# ')) {
-      html += `<h1>${trimmed.slice(2)}</h1>\n`
+      html += `<h1>${formatInline(trimmed.slice(2))}</h1>\n`
     } else if (trimmed === '') {
       html += ''
     } else {
-      html += `<p>${trimmed}</p>\n`
+      html += `<p>${formatInline(trimmed)}</p>\n`
     }
   }
 
