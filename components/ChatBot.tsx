@@ -25,9 +25,11 @@ const categories: Category[] = (faqData as any).categories;
 export default function ChatBot({
   className = "",
   onClose,
+  fullScreen = false,
 }: {
   className?: string;
   onClose?: () => void;
+  fullScreen?: boolean;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [step, setStep] = useState<"survey" | "free">("survey");
@@ -135,13 +137,15 @@ export default function ChatBot({
 
   return (
     <div
-      className={`relative w-72 sm:w-96 flex flex-col p-4 border rounded-2xl shadow-lg bg-white max-h-[150vh] overflow-hidden ${className}`}
-      style={{ height }}
+      className={`relative ${fullScreen ? 'w-full' : 'w-72 sm:w-96'} flex flex-col p-4 border rounded-2xl shadow-lg bg-white max-h-[150vh] overflow-hidden ${className}`}
+      style={fullScreen ? { height: '100vh' } : { height }}
     >
-      <div
-        onMouseDown={handleResizeStart}
-        className="absolute top-0 left-0 w-3 h-3 bg-gray-300 cursor-nwse-resize z-10 rounded-br"
-      />
+      {!fullScreen && (
+        <div
+          onMouseDown={handleResizeStart}
+          className="absolute top-0 left-0 w-3 h-3 bg-gray-300 cursor-nwse-resize z-10 rounded-br"
+        />
+      )}
       <div className="relative flex-1 overflow-y-auto space-y-2 mb-2 pr-4" ref={scrollRef}>
         {messages.map((m, idx) => (
           <div
