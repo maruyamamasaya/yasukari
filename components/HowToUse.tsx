@@ -57,19 +57,18 @@ export default function HowToUse() {
             {idx > 0 && (
               <FaCaretRight className="hidden md:block text-gray-400 text-2xl" />
             )}
-            <div className="text-center max-w-xs">
+            <div className="howto-step">
               <div className="mx-auto">
                 <img
-                  className="w-full h-auto"
-                  height={220}
+                  className="howto-img"
                   alt={step.alt}
                   loading="lazy"
                   decoding="async"
                   src={step.img}
                 />
               </div>
-              <p className="font-bold mt-3 md:mt-5">{step.title}</p>
-              <p className="text-start mt-2 md:mt-3 text-sm">{step.desc}</p>
+              <p className="howto-title md:mt-5">{step.title}</p>
+              <p className="howto-desc md:mt-3">{step.desc}</p>
             </div>
           </React.Fragment>
         ))}
