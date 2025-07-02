@@ -6,7 +6,7 @@ import { Autoplay, Navigation, Pagination, Grid } from "swiper/modules";
 import fs from "fs";
 import path from "path";
 import { GetStaticProps } from "next";
-import { FaClock, FaTruck, FaStar, FaHashtag } from "react-icons/fa";
+import { FaClock, FaTruck, FaStar, FaHashtag, FaMotorcycle } from "react-icons/fa";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -20,9 +20,10 @@ import HowToUse from "../components/HowToUse";
 type GenreItem = {
   title: string;
   keywords?: string;
-  img: string;
+  img?: string;
   href: string;
   badge?: string;
+  icon?: React.ReactNode;
 };
 
 type BlogSlide = {
@@ -116,9 +117,8 @@ export default function HomePage({ blogSlides }: Props) {
     },
     {
       title: "全ての機種を見る",
-      img: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=120&q=60",
       href: "/products",
-      badge: null,
+      icon: <FaMotorcycle size={64} />,
     },
   ];
 
@@ -270,15 +270,19 @@ export default function HomePage({ blogSlides }: Props) {
           {genreItems.map((item, index) => (
             <SwiperSlide key={index}>
               <Link href={item.href}>
-                <div className="text-center shadow-sm rounded bg-white p-2 hover:bg-gray-50 transition">
-                  <div className="relative w-fit mx-auto">
-                    <img
-                      src={item.img}
-                      alt={item.title}
-                      width={150}
-                      height={150}
-                      className="object-cover w-[150px] h-[150px]"
-                    />
+                <div className="text-center shadow-sm rounded bg-white p-2 hover:bg-gray-50 transition w-[160px] min-h-[200px] mx-auto">
+                  <div className="relative mx-auto w-[150px] h-[150px] flex items-center justify-center">
+                    {item.img ? (
+                      <img
+                        src={item.img}
+                        alt={item.title}
+                        width={150}
+                        height={150}
+                        className="object-cover w-[150px] h-[150px]"
+                      />
+                    ) : (
+                      <span className="text-gray-400 text-6xl">{item.icon}</span>
+                    )}
                     {item.badge && (
                       <div className="absolute top-1 left-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">
                         {item.badge}
