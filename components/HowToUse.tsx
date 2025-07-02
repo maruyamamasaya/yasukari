@@ -41,17 +41,17 @@ export default function HowToUse() {
   ];
 
   return (
-    <section className="py-8 md:py-10">
-      <div className="text-center mb-1">
+    <section className="py-6 md:py-8">
+      <div className="text-center mb-0">
         <span className="text-red-600 font-bold text-sm tracking-wide">
           How to use
         </span>
       </div>
       {/* 利用方法の見出しは周りのテキストと同じ色にする */}
-      <p className="text-center font-bold text-lg mt-2">
+      <p className="text-center font-bold text-lg mt-1">
         yasukariの利用方法
       </p>
-      <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-2 mt-4">
+      <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-2 mt-3">
         {steps.map((step, idx) => (
           <React.Fragment key={idx}>
             {idx > 0 && (
