@@ -82,6 +82,15 @@ a:hover {
   object-fit: cover;
 }
 
+@media (max-width: 640px) {
+  .square-img {
+    aspect-ratio: 1 / 1;
+  }
+  .blog-slide img {
+    aspect-ratio: 1 / 1;
+  }
+}
+
 .blog-slide {
   position: relative;
   overflow: hidden;
