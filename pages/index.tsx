@@ -118,7 +118,8 @@ export default function HomePage({ blogSlides }: Props) {
     {
       title: "全ての機種を見る",
       href: "/products",
-      icon: <FaMotorcycle size={64} />,
+      icon: <FaMotorcycle className="w-[150px] h-[150px]" />,
+      keywords: "\u00A0",
     },
   ];
 
