@@ -11,32 +11,28 @@ type Step = {
 export default function HowToUse() {
   const steps: Step[] = [
     {
-      img:
-        "https://images.unsplash.com/photo-1542038784456-1ea8b03dc497?auto=format&fit=crop&w=400&q=60",
+      img: "/image/howto01_touka.png",
       alt: "店舗選択イラスト",
       title: "1. 店舗を選ぶ",
       desc:
         "足立小台本店（足立区の格安バイク屋）と三ノ輪店（東京都台東区の国道4号線沿いのレンタルバイク店）のどちらから借りるか選択します。",
     },
     {
-      img:
-        "https://fastly.rentio.jp/packs/common/footer_howto_img_step1-0dcf870f8f81ea55e7e7.png",
+      img: "/image/howto02_touka.png",
       alt: "予約イラスト",
       title: "2. ご予約",
       desc:
         "車両ページでスケジュールを確認しクレジットカードで予約。変更やキャンセルはお問い合わせから連絡してください。",
     },
     {
-      img:
-        "https://fastly.rentio.jp/packs/common/footer_howto_img_step2-6e9dd48f4776e72ff26d.png",
+      img: "/image/howto03_touka.png",
       alt: "来店イラスト",
       title: "3. ご来店",
       desc:
         "10:00〜18:30の間に免許証とヘルメットを持参し、リバイクルK-JETスタッフにお声かけください。",
     },
     {
-      img:
-        "https://fastly.rentio.jp/packs/common/footer_howto_img_step3-77e52caf06b1fa9b2bbb.png",
+      img: "/image/howto04_touka.png",
       alt: "返却イラスト",
       title: "4. ご利用・返却",
       desc:
