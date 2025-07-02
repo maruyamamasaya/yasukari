@@ -10,12 +10,6 @@ export default function ChatBotWidget() {
         <div>
           {/* Mobile full-screen overlay */}
           <div className="fixed inset-0 bg-white z-50 flex flex-col sm:hidden">
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center"
-            >
-              ×
-            </button>
             <ChatBot className="flex-1" fullScreen onClose={() => setOpen(false)} />
           </div>
           {/* Desktop popup */}
