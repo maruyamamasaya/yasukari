@@ -1,12 +1,27 @@
 import { GetStaticProps, GetStaticPaths } from "next";
 import Head from "next/head";
 import { useEffect } from "react";
-import { getBikeModels, BikeModel } from "../../lib/bikes";
+import { getBikeModels, BikeModel, BikeSpec } from "../../lib/bikes";
 import RecentlyViewed from "../../components/RecentlyViewed";
 
 interface Props {
   bike: BikeModel;
 }
+
+const specLabels: Record<keyof BikeSpec, string> = {
+  license: "必要免許",
+  capacity: "乗車定員",
+  length: "全長",
+  width: "全幅",
+  height: "全高",
+  seatHeight: "シート高",
+  weight: "車両重量",
+  tank: "タンク容量",
+  fuel: "使用燃料",
+  output: "最高出力",
+  displacement: "排気量",
+  torque: "最大トルク",
+};
 
 export default function ProductDetailPage({ bike }: Props) {
   useEffect(() => {
@@ -37,6 +52,20 @@ export default function ProductDetailPage({ bike }: Props) {
           className="w-full max-w-md object-cover mx-auto mb-4"
         />
         {bike.description && <p>{bike.description}</p>}
+        {bike.spec && (
+          <table className="mt-4 text-sm border-collapse">
+            <tbody>
+              {Object.entries(bike.spec).map(([key, value]) => (
+                <tr key={key}>
+                  <th className="pr-4 text-gray-500 text-left">
+                    {specLabels[key as keyof BikeSpec]}
+                  </th>
+                  <td>{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
         <RecentlyViewed />
       </main>
     </>
