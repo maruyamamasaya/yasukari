@@ -21,7 +21,7 @@ export default function RecentlyViewed() {
 
   return (
     <section className="my-6 px-4">
-      <h2 className="text-lg font-semibold mb-2">最近チェックした商品</h2>
+      <h2 className="text-lg font-bold mb-2">最近チェックした商品</h2>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
         {bikes.slice(0, 4).map((b) => (
           <Link key={b.modelCode} href={`/products/${b.modelCode}`}
@@ -32,7 +32,7 @@ export default function RecentlyViewed() {
                 alt={b.modelName}
                 className="object-cover w-full h-full"
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 px-1 truncate text-center">
+              <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-bold py-1 px-1 truncate text-center">
                 {b.modelName}
               </div>
             </div>
