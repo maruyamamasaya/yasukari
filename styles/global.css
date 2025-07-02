@@ -208,6 +208,8 @@ a:hover {
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
   background-color: var(--bs-white, #fff);
+  width: 95%;
+  margin: 0 auto;
 }
 
 .faq-accordion dl + dl {
@@ -220,7 +222,7 @@ a:hover {
   width: 100%;
   padding: 0.75rem 1rem;
   font-family: var(--bs-body-font-family);
-  font-size: var(--bs-body-font-size);
+  font-size: 0.9rem;
   font-weight: var(--bs-body-font-weight);
   line-height: var(--bs-body-line-height);
   background-color: var(--bs-light);
@@ -237,6 +239,7 @@ a:hover {
   overflow: hidden;
   transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
   padding: 0 1rem;
+  font-size: 0.9rem;
 }
 
 .faq-answer.open {
