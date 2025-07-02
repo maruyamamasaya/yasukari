@@ -114,7 +114,7 @@ export default function BlogPost({ html, meta, posts }: Props) {
                   return (
                     <Link
                       key={t}
-                      href={`/blog_for_custmor/tag/${encodeURIComponent(t)}`}
+                      href={`/rental_bike/tag/${encodeURIComponent(t)}`}
                       className="text-blue-600 text-xs hover:underline"
                     >
                       #{t}
@@ -136,14 +136,14 @@ export default function BlogPost({ html, meta, posts }: Props) {
       </article>
       <div className="w-[25%] space-y-4">
         <CalendarWidget posts={posts} />
-        <PostSearch posts={posts} basePath="/blog_for_custmor" />
+        <PostSearch posts={posts} basePath="/rental_bike" />
       </div>
     </div>
   )
 }
 
 export const getStaticPaths: GetStaticPaths = () => {
-  const dir = path.join(process.cwd(), 'blog_for_custmor')
+  const dir = path.join(process.cwd(), 'rental_bike')
   const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'))
   const paths = files.map((file) => ({ params: { slug: file.replace(/\.md$/, '') } }))
   return { paths, fallback: false }
@@ -151,7 +151,7 @@ export const getStaticPaths: GetStaticPaths = () => {
 
 export const getStaticProps: GetStaticProps = ({ params }) => {
   const slug = params!.slug as string
-  const dir = path.join(process.cwd(), 'blog_for_custmor')
+  const dir = path.join(process.cwd(), 'rental_bike')
   const filePath = path.join(dir, `${slug}.md`)
   const md = fs.readFileSync(filePath, 'utf8')
   const { html, meta } = parseMarkdown(md)
