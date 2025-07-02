@@ -7,6 +7,7 @@ import {
   FaMotorcycle,
   FaClipboardList,
   FaBars,
+  FaTimes,
 } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
 
@@ -69,11 +70,11 @@ export default function Header() {
               <IoMdSearch size={20} />
             </button>
             <button
-              className="sm:hidden text-gray-700"
+              className="sm:hidden text-gray-700 transition-transform duration-300"
               onClick={() => setMenuOpen((o) => !o)}
               ref={menuButtonRef}
             >
-              <FaBars size={20} />
+              {menuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
             </button>
             {/* 検索 */}
             <div className="relative hidden sm:block">
@@ -170,11 +171,10 @@ export default function Header() {
             </div>
           </div>
         )}
-        {menuOpen && (
-          <nav
-            ref={menuRef}
-            className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md"
-          >
+        <nav
+          ref={menuRef}
+          className={`sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md transform transition-all duration-300 origin-top ${menuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 pointer-events-none'}`}
+        >
             <ul className="flex flex-col p-4 gap-4 text-sm font-medium">
               <li>
                 <Link href="/">
@@ -202,8 +202,7 @@ export default function Header() {
                 </Link>
               </li>
             </ul>
-          </nav>
-        )}
+        </nav>
       </header>
     </div>
   );
