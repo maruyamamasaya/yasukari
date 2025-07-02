@@ -146,7 +146,6 @@ a:hover {
   height: 100%;
 }
 .swiper-slide {
-  width: auto;
   box-sizing: border-box;
 }
 /* Swiper navigation arrows */
@@ -424,4 +423,9 @@ a:hover {
 .bike-model-carousel::after {
   right: 0;
   background: linear-gradient(to left, var(--secondary-color), transparent);
+}
+
+/* Ensure bike model carousel slides keep natural width */
+.bike-model-carousel .swiper-slide {
+  width: auto;
 }
