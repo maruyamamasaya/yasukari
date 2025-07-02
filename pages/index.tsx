@@ -406,23 +406,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
   posts.sort((a, b) => b.date.localeCompare(a.date));
 
-  const images = [
-    "https://images.unsplash.com/photo-1586216586175-8aa98895d72b?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1558981403-c5f9891deab2?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1600788907411-28fe8e361f25?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1558980664-10abf19c5c99?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd9d?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1596991367806-58714a22747c?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=400&q=60",
-    "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=60",
-  ];
-
-  const blogSlides: BlogSlide[] = posts.slice(0, 10).map((p, idx) => ({
+  const blogSlides: BlogSlide[] = posts.slice(0, 10).map((p) => ({
     title: p.title,
     href: `/blog_for_custmor/${p.slug}`,
-    img: p.eyecatch || images[idx % images.length],
+    img: p.eyecatch || "",
   }));
 
   return { props: { blogSlides } };
