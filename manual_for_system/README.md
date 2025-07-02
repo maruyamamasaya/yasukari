@@ -130,6 +130,8 @@ yasukari公式ホームページリニューアル
   2025年7月3日の開発状況をまとめた記事です。
 - `manual_for_system/2025-07-04-api-document.md`
   サイト更新ブログ用 API の概要をまとめたドキュメントです。
+- `manual_for_system/2025-09-02-css-style-guide.md`
+  CSSスタイルガイド更新版を要点だけまとめたドキュメントです。
 - `blog_for_custmor/`
   店舗ブログ記事をMarkdownで管理するディレクトリです。
 - `next.config.js`
