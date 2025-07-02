@@ -22,6 +22,7 @@ export interface BikeModel {
   badge?: string;
   description?: string;
   price24h?: string;
+  tags?: string[];
   spec?: BikeSpec;
   stores?: string[];
 }
