@@ -74,43 +74,50 @@
       "modelName": "トゥデイ-2",
       "modelCode": "today2",
       "img": "https://yasukari.com/storage/models/chzPCoSkTibLXYsrMN93.jpg",
-      "description": "排気量：49cm3 シート高：695mm"
+      "description": "排気量：49cm3 シート高：695mm",
+      "tags": ["50cc", "原付スクーター"]
     },
     {
       "modelName": "タクト　ベーシック",
       "modelCode": "tact-basic",
       "img": "https://yasukari.com/storage/models/cai2v0vob2uptbmdc4n0.jpg",
-      "description": "排気量：49cm3 シート高：720mm"
+      "description": "排気量：49cm3 シート高：720mm",
+      "tags": ["50cc", "原付スクーター"]
     },
     {
       "modelName": "リトルカブ -E",
       "modelCode": "littlecub-e",
       "img": "https://yasukari.com/storage/models/cuo67fb1qb717lh4v1tg.JPG",
-      "description": "排気量：49cm3 シート高：705mm"
+      "description": "排気量：49cm3 シート高：705mm",
+      "tags": ["50cc", "原付ミッション"]
     },
     {
       "modelName": "エイプ",
       "modelCode": "ape",
       "img": "https://yasukari.com/storage/models/cuo4qlr1qb717lh4v1q0.JPG",
-      "description": "排気量：49cm3 シート高：715mm"
+      "description": "排気量：49cm3 シート高：715mm",
+      "tags": ["50cc", "原付ミッション"]
     },
     {
       "modelName": "C50",
       "modelCode": "c50",
       "img": "https://yasukari.com/storage/models/cunc5sb1qb717lh4v1ag.JPG",
-      "description": "排気量：48cm3 シート高：735mm"
+      "description": "排気量：48cm3 シート高：735mm",
+      "tags": ["50cc", "原付ミッション"]
     },
     {
       "modelName": "PCX",
       "modelCode": "pcx",
       "img": "https://yasukari.com/storage/models/7sglRumMZg96OY4jtMvr.jpg",
-      "description": "排気量：125cm3 シート高：764mm"
+      "description": "排気量：125cm3 シート高：764mm",
+      "tags": ["原付二種スクーター"]
     },
     {
       "modelName": "トリシティ",
       "modelCode": "tricity",
       "img": "https://yasukari.com/storage/models/Xkaefo1byEdK32othKb7.jpg",
-      "description": "排気量：124cm3 シート高：765mm"
+      "description": "排気量：124cm3 シート高：765mm",
+      "tags": ["原付二種スクーター"]
     },
     {
       "modelName": "CBR250RR-2",
