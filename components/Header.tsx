@@ -13,9 +13,7 @@ import { IoMdSearch } from 'react-icons/io';
 export default function Header() {
   const suggestItems = [
     'ホンダ CB400',
-    'ヤマハ MT-25',
     'カワサキ Ninja',
-    'スズキ GSX-S125',
     '人気モデルランキング',
     'ブログ:メンテナンス入門',
   ];
