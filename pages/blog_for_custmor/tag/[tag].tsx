@@ -36,7 +36,7 @@ export const getStaticPaths: GetStaticPaths = () => {
     }
   })
   const paths = Array.from(tags).map((t) => ({
-    params: { tag: encodeURIComponent(t) },
+    params: { tag: t },
   }))
   return { paths, fallback: false }
 }
