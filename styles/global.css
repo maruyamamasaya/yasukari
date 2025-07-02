@@ -208,7 +208,7 @@ a:hover {
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
   background-color: var(--bs-white, #fff);
-  width: 95%;
+  width: 90%;
   margin: 0 auto;
   font-size: 0.875rem;
 }
@@ -221,7 +221,7 @@ a:hover {
   display: flex;
   align-items: baseline;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   font-family: var(--bs-body-font-family);
   font-size: 0.9rem;
   font-weight: var(--bs-body-font-weight);
@@ -250,7 +250,7 @@ a:hover {
 }
 
 .faq-category-accordion {
-  width: 95%;
+  width: 90%;
   margin: 0 auto;
 }
 
@@ -258,7 +258,7 @@ a:hover {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   background-color: var(--bs-light);
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
