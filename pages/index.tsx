@@ -75,43 +75,43 @@ export default function HomePage({ blogSlides }: Props) {
     {
       title: "原付スクーター",
       keywords: "50cc",
-      img: "https://images.unsplash.com/photo-1518600324302-04d4683cf19d?auto=format&fit=crop&w=120&q=60",
+      img: "/image/category/原付スクーター.png",
       href: "/t/genre/scooter-50cc?click_from=top_genres",
     },
     {
       title: "ジャイロキャノビー原付",
-      img: "https://images.unsplash.com/photo-1596991367806-58714a22747c?auto=format&fit=crop&w=120&q=60",
+      img: "/image/category/ジャイロキャノビー原付.png",
       href: "/t/genre/gyrocanopy-moped?click_from=top_genres",
     },
     {
       title: "ジャイロキャノビーミニカー",
-      img: "https://images.unsplash.com/photo-1600788907411-28fe8e361f25?auto=format&fit=crop&w=120&q=60",
+      img: "/image/category/ジャイロキャノビーミニカー.png",
       href: "/t/genre/gyrocanopy-minicar?click_from=top_genres",
     },
     {
       title: "原付二種スクーター",
       keywords: "〜125cc",
-      img: "https://images.unsplash.com/photo-1521033630360-8da27f438aab?auto=format&fit=crop&w=120&q=60",
+      img: "/image/category/原付二種スクーター.png",
       href: "/t/genre/scooter-125cc?click_from=top_genres",
     },
     {
       title: "原付ミッション",
-      img: "https://images.unsplash.com/photo-1558980664-10abf19c5c99?auto=format&fit=crop&w=120&q=60",
+      img: "/image/category/原付ミッション.png",
       href: "/t/genre/moped-manual?click_from=top_genres",
     },
     {
       title: "126〜250cc",
-      img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=120&q=60",
+      img: "/image/category/126〜250cc.png",
       href: "/t/genre/cc126-250?click_from=top_genres",
     },
     {
       title: "251〜400cc",
-      img: "https://images.unsplash.com/photo-1527059815533-5e3217fe272b?auto=format&fit=crop&w=120&q=60",
+      img: "/image/category/251〜400cc.png",
       href: "/t/genre/cc251-400?click_from=top_genres",
     },
     {
       title: "400cc超",
-      img: "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=120&q=60",
+      img: "/image/category/400cc超.png",
       href: "/t/genre/cc400-plus?click_from=top_genres",
     },
     {
