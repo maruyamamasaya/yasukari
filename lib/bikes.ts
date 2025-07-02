@@ -19,6 +19,7 @@ export async function getBikeModels(): Promise<BikeModel[]> {
       modelCode: "dragstar250",
       img: "https://yasukari.com/storage/models/DXD10WTKLvRB45VWYVtm.jpg",
       price24h: "7,980\u5186",
+      description: "排気量：248cm3 シート高：670mm",
     },
     {
       modelName: "クロスカブ110",
@@ -124,6 +125,54 @@ export async function getBikeModels(): Promise<BikeModel[]> {
       modelCode: "tricity",
       img: "https://yasukari.com/storage/models/Xkaefo1byEdK32othKb7.jpg",
       description: "排気量：124cm3 シート高：765mm",
+    },
+    {
+      modelName: "CBR250RR-2",
+      modelCode: "cbr250rr-2",
+      img: "https://yasukari.com/storage/models/cokam5b1qb78vevuid50.jpg",
+      description: "排気量：249cm3 シート高：790mm",
+    },
+    {
+      modelName: "セロー250",
+      modelCode: "serow250",
+      img: "https://yasukari.com/storage/models/cm3oeaj1qb7c2oe4l44g.jpeg",
+      description: "排気量：249cm3 シート高：830mm",
+    },
+    {
+      modelName: "ホーネット250",
+      modelCode: "hornet250",
+      img: "https://yasukari.com/storage/models/25J2UmoEMCojHwAOwJSQ.jpg",
+      description: "排気量：249cm3 シート高：745mm",
+    },
+    {
+      modelName: "NINJA250",
+      modelCode: "ninja250",
+      img: "https://yasukari.com/storage/models/MojJKSlEe0eTy2kzhKjo.jpg",
+      description: "排気量：248cm3 シート高：795mm",
+    },
+    {
+      modelName: "VTR250-2",
+      modelCode: "vtr250-2",
+      img: "https://yasukari.com/storage/models/Wjwj9L0qfPg9UAtX8h6s.jpg",
+      description: "排気量：249cm3 シート高：740mm",
+    },
+    {
+      modelName: "CBR250R-3",
+      modelCode: "cbr250r-3",
+      img: "https://yasukari.com/storage/models/dTFlfNWxafzrAQWajos2.jpg",
+      description: "排気量：249cm3 シート高：780mm",
+    },
+    {
+      modelName: "YZF-R25",
+      modelCode: "yzf-r25",
+      img: "https://yasukari.com/storage/models/dolPvZyZJSkXr5zsitzP.jpg",
+      description: "排気量：249cm3 シート高：780mm",
+    },
+    {
+      modelName: "フォルツァSI",
+      modelCode: "forza-si",
+      img: "https://yasukari.com/storage/models/zBcR087BXz6WCUm6hrKY.jpg",
+      description: "排気量：248cm3 シート高：715mm",
     },
   ];
 }
