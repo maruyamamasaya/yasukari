@@ -1,8 +1,16 @@
 import React, { useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Swiper, SwiperSlide } from "swiper/react";
+import dynamic from "next/dynamic";
 import { Autoplay, Navigation, Pagination, Grid } from "swiper/modules";
+
+const Swiper = dynamic(() => import("swiper/react").then((m) => m.Swiper), {
+  ssr: false,
+});
+const SwiperSlide = dynamic(
+  () => import("swiper/react").then((m) => m.SwiperSlide),
+  { ssr: false }
+);
 import fs from "fs";
 import path from "path";
 import { GetStaticProps } from "next";
