@@ -429,3 +429,35 @@ a:hover {
 .bike-model-carousel .swiper-slide {
   width: auto;
 }
+
+/* Fade edges for genre carousel */
+.genre-carousel {
+  position: relative;
+  overflow: hidden;
+}
+
+.genre-carousel::before,
+.genre-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.genre-carousel::before {
+  left: 0;
+  background: linear-gradient(to right, var(--secondary-color), transparent);
+}
+
+.genre-carousel::after {
+  right: 0;
+  background: linear-gradient(to left, var(--secondary-color), transparent);
+}
+
+/* Ensure genre carousel slides keep natural width */
+.genre-carousel .swiper-slide {
+  width: auto;
+}
