@@ -60,6 +60,14 @@ export default function HomePage({ blogSlides }: Props) {
       href: "/blog/camp-touring?click_from=top_keywords",
     },
     { label: "ヘルメット", href: "/search?q=ヘルメット&click_from=top_keywords" },
+    { label: "原付スクーター", href: "/blog_for_custmor/tag/%E5%8E%9F%E4%BB%98%E3%82%B9%E3%82%AF%E3%83%BC%E3%82%BF%E3%83%BC?click_from=top_keywords" },
+    { label: "ジャイロキャノビー原付", href: "/blog_for_custmor/tag/%E3%82%B8%E3%83%A3%E3%82%A4%E3%83%AD%E3%82%AD%E3%83%A3%E3%83%8E%E3%83%93%E3%83%BC%E5%8E%9F%E4%BB%98?click_from=top_keywords" },
+    { label: "ジャイロキャノビーミニカー", href: "/blog_for_custmor/tag/%E3%82%B8%E3%83%A3%E3%82%A4%E3%83%AD%E3%82%AD%E3%83%A3%E3%83%8E%E3%83%93%E3%83%BC%E3%83%9F%E3%83%8B%E3%82%AB%E3%83%BC?click_from=top_keywords" },
+    { label: "原付二種スクーター", href: "/blog_for_custmor/tag/%E5%8E%9F%E4%BB%98%E4%BA%8C%E7%A8%AE%E3%82%B9%E3%82%AF%E3%83%BC%E3%82%BF%E3%83%BC?click_from=top_keywords" },
+    { label: "原付ミッション", href: "/blog_for_custmor/tag/%E5%8E%9F%E4%BB%98%E3%83%9F%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3?click_from=top_keywords" },
+    { label: "126〜250cc", href: "/blog_for_custmor/tag/126%E3%80%9C250cc?click_from=top_keywords" },
+    { label: "251〜400cc", href: "/blog_for_custmor/tag/251%E3%80%9C400cc?click_from=top_keywords" },
+    { label: "400cc超", href: "/blog_for_custmor/tag/400cc%E8%B6%85?click_from=top_keywords" },
   ];
 
 
@@ -173,7 +181,7 @@ export default function HomePage({ blogSlides }: Props) {
       <section className="py-4 px-4">
         <h2 className="text-sm font-semibold mb-2">注目キーワード</h2>
         <div className="flex flex-wrap gap-2">
-          {hotKeywords.map((k, idx) => (
+          {hotKeywords.slice(0, 7).map((k, idx) => (
             <Link
               key={idx}
               href={k.href}
@@ -183,6 +191,14 @@ export default function HomePage({ blogSlides }: Props) {
               {k.label}
             </Link>
           ))}
+          {hotKeywords.length > 7 && (
+            <Link
+              href="/blog_for_custmor"
+              className="inline-flex items-center gap-1 rounded-full shadow-sm border border-gray-200 bg-white text-black text-[13px] font-bold px-2 py-1.5"
+            >
+              もっと見る
+            </Link>
+          )}
         </div>
       </section>
 
