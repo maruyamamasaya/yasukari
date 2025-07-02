@@ -256,15 +256,15 @@ export default function HomePage({ blogSlides }: Props) {
         <h2 className="text-lg font-semibold mb-4">すぐに借りれる！おすすめのジャンル</h2>
         <div className="genre-carousel">
         <Swiper
-          modules={[Autoplay, Navigation, Pagination]}
+          modules={[Autoplay, Navigation, Pagination, Grid]}
           spaceBetween={12}
           navigation
           pagination={{ clickable: true }}
           autoplay={{ delay: 2500, disableOnInteraction: false }}
           loop
           breakpoints={{
-            0: { slidesPerView: 2 },
-            640: { slidesPerView: 4 },
+            0: { slidesPerView: 2, grid: { rows: 2 } },
+            640: { slidesPerView: 4, grid: { rows: 1 } },
           }}
         >
           {genreItems.map((item, index) => (
