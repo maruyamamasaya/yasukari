@@ -61,6 +61,22 @@ yasukari公式ホームページリニューアル
 ## manual_for_system
 サイトの更新情報や運用マニュアルをMarkdown形式で記録するディレクトリです。`/manual_for_system` 配下の `.md` ファイルはサイト上でも閲覧できます。
 
+
+## ディレクトリ構成
+本リポジトリの主なディレクトリは以下の通りです。
+
+```
+components/         React コンポーネント群
+pages/              画面を構成する Next.js ページ
+manual_for_system/  運用マニュアル・更新ブログ
+blog_for_custmor/   店舗向けブログ記事
+lib/                便利関数やユーティリティ
+styles/             グローバル CSS
+data/               静的データファイル
+docs/               プロジェクトドキュメント
+```
+
+より詳しい説明は [docs/OVERVIEW.md](docs/OVERVIEW.md) を参照してください。
 ## 各ファイルの役割
 
 - `components/BikeModelCarousel.tsx`  
