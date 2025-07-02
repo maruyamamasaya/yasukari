@@ -247,6 +247,7 @@ a:hover {
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
   font-weight: 600;
+  font-size: var(--bs-body-font-size);
 }
 
 .faq-category-accordion button.collapsed {
@@ -255,6 +256,7 @@ a:hover {
 
 .faq-category-accordion > div > div {
   margin-top: 0.5rem;
+  margin-left: 1rem;
 }
 /* Markdown article styles */
 .markdown-body {
