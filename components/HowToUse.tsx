@@ -42,17 +42,14 @@ export default function HowToUse() {
 
   return (
     <section className="py-5 md:py-7">
-      <div className="text-center">
-        <img
-          className="w-auto h-3 mx-auto"
-          height={12}
-          alt="How to use"
-          loading="lazy"
-          decoding="async"
-          src="https://fastly.rentio.jp/packs/common/footer_howto_title-5606d66ca8ed4c4fe108.png"
-        />
+      <div className="text-center mb-1">
+        <span className="text-red-600 font-bold text-sm tracking-wide">
+          How to use
+        </span>
       </div>
-      <p className="text-center font-bold text-lg mt-2">yasukariの利用方法</p>
+      <p className="text-center font-bold text-lg mt-2 text-red-600">
+        yasukariの利用方法
+      </p>
       <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-2 mt-4">
         {steps.map((step, idx) => (
           <React.Fragment key={idx}>

@@ -1,9 +1,10 @@
 import fs from 'fs'
 import path from 'path'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
-import CalendarWidget, { CalendarPost } from '../../components/CalendarWidget'
-import PostSearch from '../../components/PostSearch'
+import CalendarWidget, { CalendarPost } from '../../../components/CalendarWidget'
+import PostSearch from '../../../components/PostSearch'
 
 type PostMeta = {
   slug: string
@@ -14,8 +15,34 @@ type PostMeta = {
   eyecatch?: string
 }
 
-export async function getStaticProps() {
-  const dir = path.join(process.cwd(), 'blog_for_custmor')
+export const getStaticPaths: GetStaticPaths = () => {
+  const dir = path.join(process.cwd(), 'rental_bike')
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'))
+  const tags = new Set<string>()
+  files.forEach((file) => {
+    const lines = fs.readFileSync(path.join(dir, file), 'utf8').split(/\r?\n/)
+    let idx = 0
+    if (lines[idx] === '---') {
+      idx++
+      while (idx < lines.length && lines[idx] !== '---') {
+        const [k, ...v] = lines[idx].split(':')
+        if (k.trim() === 'tags') {
+          v.join(':')
+            .split(',')
+            .forEach((t) => tags.add(t.trim()))
+        }
+        idx++
+      }
+    }
+  })
+  const paths = Array.from(tags).map((t) => ({
+    params: { tag: encodeURIComponent(t) },
+  }))
+  return { paths, fallback: false }
+}
+
+export const getStaticProps: GetStaticProps = ({ params }) => {
+  const dir = path.join(process.cwd(), 'rental_bike')
   const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'))
   const posts: PostMeta[] = files.map((file) => {
     const slug = file.replace(/\.md$/, '')
@@ -50,52 +77,35 @@ export async function getStaticProps() {
     date: p.date,
   }))
 
-  const tags = Array.from(
-    new Set(
-      posts.flatMap((p) =>
-        p.tags ? p.tags.split(',').map((t) => t.trim()) : []
-      )
-    )
+  const tag = decodeURIComponent(params!.tag as string)
+  const tagPosts = posts.filter((p) =>
+    p.tags?.split(',').map((t) => t.trim()).includes(tag)
   )
 
-  return { props: { posts, calendarPosts, tags } }
+  return { props: { tag, tagPosts, calendarPosts, posts } }
 }
 
-export default function BlogIndex({
-  posts,
-  calendarPosts,
-  tags,
-}: {
-  posts: PostMeta[]
+interface Props {
+  tag: string
+  tagPosts: PostMeta[]
   calendarPosts: CalendarPost[]
-  tags: string[]
-}) {
+  posts: PostMeta[]
+}
+
+export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <Head>
-        <title>新着ブログ・お知らせ - yasukari</title>
+        <title>#{tag} の記事 - yasukari</title>
       </Head>
       <div className="w-[70%]">
-        <h1 className="text-xl font-bold mb-4">新着ブログ・お知らせ</h1>
-        {tags.length > 0 && (
-          <div className="mb-4 text-sm space-x-2">
-            {tags.map((t) => (
-              <Link
-                key={t}
-                href={`/blog_for_custmor/tag/${encodeURIComponent(t)}`}
-                className="text-blue-600 hover:underline"
-              >
-                #{t}
-              </Link>
-            ))}
-          </div>
-        )}
+        <h1 className="text-xl font-bold mb-4">タグ: #{tag}</h1>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
+          {tagPosts.map((post) => (
             <Link
               key={post.slug}
-              href={`/blog_for_custmor/${post.slug}`}
-              className="block p-4 bg-white rounded shadow hover:bg-gray-50 hover-glow"
+              href={`/rental_bike/${post.slug}`}
+              className="block p-4 bg-white rounded shadow hover:bg-gray-50"
             >
               {post.eyecatch && (
                 <img
@@ -119,11 +129,14 @@ export default function BlogIndex({
               {post.excerpt && <p>{post.excerpt}</p>}
             </Link>
           ))}
+          {tagPosts.length === 0 && (
+            <p className="text-gray-500">該当する記事がありません。</p>
+          )}
         </div>
       </div>
       <div className="w-[25%] space-y-4">
         <CalendarWidget posts={calendarPosts} />
-        <PostSearch posts={posts} basePath="/blog_for_custmor" />
+        <PostSearch posts={posts} basePath="/rental_bike" />
       </div>
     </div>
   )

@@ -223,7 +223,7 @@ a:hover {
   width: 100%;
   padding: 0.75rem 1rem;
   font-family: var(--bs-body-font-family);
-  font-size: var(--bs-body-font-size);
+  font-size: 0.9rem;
   font-weight: var(--bs-body-font-weight);
   line-height: var(--bs-body-line-height);
   background-color: var(--bs-light);
@@ -240,6 +240,7 @@ a:hover {
   overflow: hidden;
   transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
   padding: 0 1rem;
+  font-size: 0.9rem;
 }
 
 .faq-answer.open {

@@ -15,7 +15,7 @@ type PostMeta = {
 }
 
 export async function getStaticProps() {
-  const dir = path.join(process.cwd(), 'blog_for_custmor')
+  const dir = path.join(process.cwd(), 'rental_bike')
   const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'))
   const posts: PostMeta[] = files.map((file) => {
     const slug = file.replace(/\.md$/, '')
@@ -82,7 +82,7 @@ export default function BlogIndex({
             {tags.map((t) => (
               <Link
                 key={t}
-                href={`/blog_for_custmor/tag/${encodeURIComponent(t)}`}
+                href={`/rental_bike/tag/${encodeURIComponent(t)}`}
                 className="text-blue-600 hover:underline"
               >
                 #{t}
@@ -94,7 +94,7 @@ export default function BlogIndex({
           {posts.map((post) => (
             <Link
               key={post.slug}
-              href={`/blog_for_custmor/${post.slug}`}
+              href={`/rental_bike/${post.slug}`}
               className="block p-4 bg-white rounded shadow hover:bg-gray-50 hover-glow"
             >
               {post.eyecatch && (
@@ -123,7 +123,7 @@ export default function BlogIndex({
       </div>
       <div className="w-[25%] space-y-4">
         <CalendarWidget posts={calendarPosts} />
-        <PostSearch posts={posts} basePath="/blog_for_custmor" />
+        <PostSearch posts={posts} basePath="/rental_bike" />
       </div>
     </div>
   )

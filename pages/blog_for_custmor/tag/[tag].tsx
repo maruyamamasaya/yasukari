@@ -100,7 +100,7 @@ export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) 
       </Head>
       <div className="w-[70%]">
         <h1 className="text-xl font-bold mb-4">タグ: #{tag}</h1>
-        <div className="space-y-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {tagPosts.map((post) => (
             <Link
               key={post.slug}
