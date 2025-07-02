@@ -1,15 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, EffectCoverflow, Pagination } from "swiper/modules";
-
-const Swiper = dynamic(() => import("swiper/react").then((mod) => mod.Swiper), {
-  ssr: false,
-});
-const SwiperSlide = dynamic(
-  () => import("swiper/react").then((mod) => mod.SwiperSlide),
-  { ssr: false }
-);
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/effect-coverflow";
