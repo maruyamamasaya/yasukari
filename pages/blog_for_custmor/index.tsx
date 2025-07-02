@@ -101,7 +101,7 @@ export default function BlogIndex({
                 <img
                   src={post.eyecatch}
                   alt={post.title}
-                  className="square-img rounded mb-2"
+                  className="w-full rounded mb-2"
                 />
               )}
               <h2 className="font-semibold">{post.title}</h2>
