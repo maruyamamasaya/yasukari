@@ -77,6 +77,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/blog_for_custmor" className="hover:underline">
+                  新着ブログ・お知らせ
+                </Link>
+              </li>
+              <li>
                 <Link href="/beginner" className="hover:underline">
                   はじめての方へ（ガイド）
                 </Link>
