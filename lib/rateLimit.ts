@@ -36,7 +36,8 @@ export function checkAccess(ip: string): boolean {
     return true;
   }
 
-  const bucketStart = now - (now % 10000);
+  // Count requests in a 5 second window
+  const bucketStart = now - (now % 5000);
   if (bucketStart !== info.first) {
     info.first = bucketStart;
     info.count = 1;
@@ -69,7 +70,7 @@ export function recordLoginResult(ip: string, success: boolean): boolean {
   if (success) {
     info.failCount = 0;
   } else {
-    if (now - info.failFirst > 10000) {
+    if (now - info.failFirst > 5000) {
       info.failFirst = now;
       info.failCount = 1;
     } else {
