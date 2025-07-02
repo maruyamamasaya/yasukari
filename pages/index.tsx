@@ -290,10 +290,12 @@ export default function HomePage({ blogSlides }: Props) {
                       </div>
                     )}
                   </div>
-                  <div className="text-sm mt-1 truncate">{item.title}</div>
-                  {item.keywords && (
-                    <div className="text-xs text-gray-500 truncate">{item.keywords}</div>
-                  )}
+                  <div className="mt-1 truncate">
+                    <span className="text-sm">{item.title}</span>
+                    {item.keywords && (
+                      <span className="text-xs text-gray-500 ml-1">{item.keywords}</span>
+                    )}
+                  </div>
                 </div>
               </Link>
             </SwiperSlide>
