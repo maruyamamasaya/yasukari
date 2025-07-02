@@ -465,7 +465,7 @@ a:hover {
 
 /* Ensure genre carousel slides keep natural width */
 .genre-carousel .swiper-slide {
-  width: 160px;
+  width: 150px;
 }
 
 @media (max-width: 640px) {
