@@ -5,6 +5,8 @@ import {
   FaRobot,
   FaArrowDown,
   FaArrowUp,
+  FaArrowLeft,
+  FaTimes,
 } from "react-icons/fa";
 
 interface Message {
@@ -117,6 +119,14 @@ export default function ChatBot({
     setStep("survey");
   }
 
+  function handleBackButton() {
+    if (selectedCategory || step === "free") {
+      handleBack();
+    } else {
+      onClose?.();
+    }
+  }
+
   function handleResizeStart(e: React.MouseEvent) {
     startYRef.current = e.clientY;
     startHeightRef.current = height;
@@ -137,16 +147,26 @@ export default function ChatBot({
 
   return (
     <div
-      className={`relative ${fullScreen ? 'w-full' : 'w-72 sm:w-96'} flex flex-col p-4 border rounded-2xl shadow-lg bg-white max-h-[150vh] overflow-hidden ${className}`}
+      className={`relative ${fullScreen ? 'w-full' : 'w-72 sm:w-96'} flex flex-col ${fullScreen ? 'pt-10 p-3' : 'p-3 sm:p-4'} border rounded-2xl shadow-lg bg-white max-h-[150vh] overflow-hidden ${className}`}
       style={fullScreen ? { height: '100vh' } : { height }}
     >
+      {fullScreen && (
+        <div className="absolute top-2 left-2 flex items-center gap-2 z-20">
+          <button onClick={handleBackButton} className="bg-white rounded-full p-1 shadow">
+            <FaArrowLeft className="w-5 h-5" />
+          </button>
+          <button onClick={onClose} className="bg-white rounded-full p-1 shadow">
+            <FaTimes className="w-5 h-5" />
+          </button>
+        </div>
+      )}
       {!fullScreen && (
         <div
           onMouseDown={handleResizeStart}
           className="absolute top-0 left-0 w-3 h-3 bg-gray-300 cursor-nwse-resize z-10 rounded-br"
         />
       )}
-      <div className="relative flex-1 overflow-y-auto space-y-2 mb-2 pr-4" ref={scrollRef}>
+      <div className="relative flex-1 overflow-y-auto space-y-1 mb-1 pr-3 sm:space-y-2 sm:mb-2 sm:pr-4" ref={scrollRef}>
         {messages.map((m, idx) => (
           <div
             key={idx}
@@ -158,12 +178,12 @@ export default function ChatBot({
               <FaUser className="text-red-600 w-5 h-5" />
             )}
             <div
-              className={`max-w-[70%] p-2 rounded-2xl animate-fade ${
+              className={`max-w-[70%] p-1 sm:p-2 rounded-2xl animate-fade ${
                 m.from === "bot" ? "bg-gray-100" : "bg-red-500 text-white"
               }`}
             >
-              <p>{m.text}</p>
-              <span className="block text-[10px] text-right mt-1 opacity-70">
+              <p className="text-xs sm:text-sm">{m.text}</p>
+              <span className="block text-[9px] sm:text-[10px] text-right mt-1 opacity-70">
                 {m.time}
               </span>
             </div>
@@ -201,11 +221,11 @@ export default function ChatBot({
 
       {step === "survey" && !selectedCategory && (
         <div className="space-y-2">
-          <p className="text-sm">カテゴリを選択してください。</p>
+          <p className="text-xs sm:text-sm">カテゴリを選択してください。</p>
           {categories.map((cat) => (
             <button
               key={cat.id}
-              className="w-full text-left p-2 border rounded hover:bg-gray-50"
+              className="w-full text-left p-1 sm:p-2 border rounded hover:bg-gray-50"
               onClick={() => handleCategory(cat)}
             >
               {cat.title}
@@ -225,7 +245,7 @@ export default function ChatBot({
           {selectedCategory.faqs.map((faq, idx) => (
             <button
               key={idx}
-              className="w-full text-left p-2 border rounded hover:bg-gray-50"
+              className="w-full text-left p-1 sm:p-2 border rounded hover:bg-gray-50"
               onClick={() => handleQuestion(faq)}
             >
               {faq.q}
@@ -233,7 +253,7 @@ export default function ChatBot({
           ))}
           {loopCount >= 2 && (
             <button
-              className="w-full text-left p-2 border rounded bg-gray-200 hover:bg-gray-300"
+              className="w-full text-left p-1 sm:p-2 border rounded bg-gray-200 hover:bg-gray-300"
               onClick={handleFreeStart}
             >
               その他の質問を入力する
@@ -254,7 +274,7 @@ export default function ChatBot({
             <input
               type="text"
               name="free"
-              className="flex-1 border rounded-full p-2 px-3"
+              className="flex-1 border rounded-full p-1 px-2 sm:p-2 sm:px-3"
               placeholder="質問を入力してください"
             />
             <button type="submit" className="btn-primary rounded-full px-4">
