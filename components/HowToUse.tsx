@@ -18,21 +18,21 @@ export default function HowToUse() {
         "足立小台本店（足立区の格安バイク屋）と三ノ輪店（東京都台東区の国道4号線沿いのレンタルバイク店）のどちらから借りるか選択します。",
     },
     {
-      img: "/image/howto02_touka.png",
+      img: "/image/howto02.png",
       alt: "予約イラスト",
       title: "2. ご予約",
       desc:
         "車両ページでスケジュールを確認しクレジットカードで予約。変更やキャンセルはお問い合わせから連絡してください。",
     },
     {
-      img: "/image/howto03_touka.png",
+      img: "/image/howto03.png",
       alt: "来店イラスト",
       title: "3. ご来店",
       desc:
         "10:00〜18:30の間に免許証とヘルメットを持参し、リバイクルK-JETスタッフにお声かけください。",
     },
     {
-      img: "/image/howto04_touka.png",
+      img: "/image/howto04.png",
       alt: "返却イラスト",
       title: "4. ご利用・返却",
       desc:
