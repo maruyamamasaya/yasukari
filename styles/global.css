@@ -213,6 +213,8 @@ a:hover {
 .faq-category-accordion {
   width: 95%;
   margin: 0 auto;
+  position: relative;
+  z-index: 60;
 }
 
 .faq-category-accordion button {
