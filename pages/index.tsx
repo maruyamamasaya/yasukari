@@ -11,11 +11,13 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
+import BikeLineup from "../components/BikeLineup";
 import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
 import FaqAccordion, { FAQItem } from "../components/FaqAccordion";
 import faqData from "../data/faq.json";
 import HowToUse from "../components/HowToUse";
+import { getBikeModels, BikeModel } from "../lib/bikes";
 
 type GenreItem = {
   title: string;
@@ -33,9 +35,10 @@ type BlogSlide = {
 };
 interface Props {
   blogSlides: BlogSlide[];
+  bikeModelsAll: BikeModel[];
 }
 
-export default function HomePage({ blogSlides }: Props) {
+export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
@@ -176,6 +179,9 @@ export default function HomePage({ blogSlides }: Props) {
 
       {/* ヒーローセクション */}
       <HeroSlider slides={heroSlides} />
+
+      {/* バイクラインアップ */}
+      <BikeLineup bikes={bikeModelsAll} />
 
 
       {/* 注目キーワード */}
@@ -426,8 +432,9 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     href: `/blog_for_custmor/${p.slug}`,
     img: p.eyecatch || "",
   }));
+  const bikeModelsAll = await getBikeModels();
 
-  return { props: { blogSlides } };
+  return { props: { blogSlides, bikeModelsAll } };
 };
 
 
