@@ -415,3 +415,101 @@ a:hover {
 .howto-title { font-size: 1rem; font-weight: bold; margin-top: 0.75rem; }
 .howto-desc { font-size: 0.875rem; margin-top: 0.5rem; text-align: start; }
 
+
+/* Bike lineup styles */
+.bike-lineup {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 5vw;
+}
+.bike-lineup-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.bike-lineup-subtitle {
+  display: block;
+  font-size: 0.75rem;
+  color: #555;
+}
+.bike-lineup-radio-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.bike-lineup-radio {
+  font-size: 0.75rem;
+}
+.bike-lineup-radio input {
+  display: none;
+}
+.bike-lineup-radio-text {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #f3f3f3;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  line-height: 1.2;
+}
+.bike-lineup-radio input:checked + .bike-lineup-radio-text {
+  background: var(--primary-color);
+  color: #fff;
+}
+.bike-lineup-scroll {
+  overflow-x: auto;
+}
+.bike-lineup-list {
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+}
+.bike-lineup-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 160px;
+  background: #fff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: fadeInUp 0.4s ease both;
+}
+.bike-lineup-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.bike-lineup-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+.bike-lineup-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.bike-lineup-info {
+  padding: 0.25rem;
+  text-align: center;
+}
+.bike-lineup-name {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+.bike-lineup-link {
+  display: block;
+  text-align: right;
+  font-size: 0.875rem;
+  color: var(--primary-color);
+  margin-top: 0.5rem;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
