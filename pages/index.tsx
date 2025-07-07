@@ -180,10 +180,6 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
       {/* ヒーローセクション */}
       <HeroSlider slides={heroSlides} />
 
-      {/* バイクラインアップ */}
-      <BikeLineup bikes={bikeModelsAll} />
-
-
       {/* 注目キーワード */}
       <section className="py-6 px-4">
         <h2 className="text-sm font-semibold mb-2">注目キーワード</h2>
@@ -254,6 +250,9 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
 
       {/* 最近チェックした商品 */}
       <RecentlyViewed />
+
+      {/* バイクラインアップ */}
+      <BikeLineup bikes={bikeModelsAll} />
 
       {/* 人気の型番 */}
       <BikeModelCarousel items={bikeModels} />
