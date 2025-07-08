@@ -255,11 +255,20 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
       <BikeLineup bikes={bikeModelsAll} />
 
       {/* 人気の型番 */}
-      <BikeModelCarousel items={bikeModels} />
+      <BikeModelCarousel
+        items={bikeModels}
+        title="POPULAR MODELS"
+        subtitle="人気の型番"
+      />
 
       {/* おすすめのジャンルセクション（バイク） */}
       <section className="bike-lineup py-8 lg:py-6 my-5">
-        <h2 className="bike-lineup-title">すぐに借りれる！おすすめのジャンル</h2>
+        <h2 className="bike-lineup-title">
+          RECOMMENDED GENRES
+          <span className="bike-lineup-subtitle">
+            すぐに借りれる！おすすめのジャンル
+          </span>
+        </h2>
         <div className="genre-carousel">
         <Swiper
           modules={[Autoplay, Navigation, Pagination, Grid]}
