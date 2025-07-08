@@ -1,11 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation, EffectCoverflow, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/effect-coverflow";
-import "swiper/css/pagination";
 
 export type BikeItem = {
   modelName: string;
@@ -36,29 +30,12 @@ export default function BikeModelCarousel({
     <section className="bike-lineup py-8 lg:py-6 my-5">
       <h2 className="bike-lineup-title">
         {title}
-        {subtitle && (
-          <span className="bike-lineup-subtitle">{subtitle}</span>
-        )}
+        {subtitle && <span className="bike-lineup-subtitle">{subtitle}</span>}
       </h2>
-      <div className="bike-model-carousel">
-        <Swiper
-          modules={[Autoplay, Navigation, EffectCoverflow, Pagination]}
-          spaceBetween={12}
-          centeredSlides
-          loop
-          navigation
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 2500, disableOnInteraction: false }}
-          effect="coverflow"
-          coverflowEffect={{ rotate: 0, stretch: 10, depth: 100, modifier: 1, slideShadows: false }}
-          breakpoints={{
-            0: { slidesPerView: 1.2 },
-            640: { slidesPerView: 7 },
-          }}
-        >
-        {items.map((item) => (
-          <SwiperSlide key={item.modelCode}>
-            <div className="bike-lineup-card">
+      <div className="bike-lineup-scroll">
+        <div className="bike-lineup-list">
+          {items.map((item) => (
+            <div key={item.modelCode} className="bike-lineup-card">
               <Link href={`/products/${item.modelCode}?click_from=top_modelcarousel`}>
                 <img src={item.img} alt={item.modelName} className="bike-lineup-image" />
                 {item.badge && <div className="bike-lineup-badge">{item.badge}</div>}
@@ -70,9 +47,8 @@ export default function BikeModelCarousel({
                 </div>
               </Link>
             </div>
-          </SwiperSlide>
-        ))}
-        </Swiper>
+          ))}
+        </div>
       </div>
     </section>
   );
