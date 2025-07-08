@@ -258,8 +258,8 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
       <BikeModelCarousel items={bikeModels} />
 
       {/* おすすめのジャンルセクション（バイク） */}
-      <section className="py-8 lg:py-6 px-4 mb-8 lg:mb-6">
-        <h2 className="text-lg font-semibold mb-4">すぐに借りれる！おすすめのジャンル</h2>
+      <section className="bike-lineup py-8 lg:py-6 mb-8 lg:mb-6">
+        <h2 className="bike-lineup-title">すぐに借りれる！おすすめのジャンル</h2>
         <div className="genre-carousel">
         <Swiper
           modules={[Autoplay, Navigation, Pagination, Grid]}
@@ -275,34 +275,30 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
         >
           {genreItems.map((item, index) => (
             <SwiperSlide key={index}>
-              <Link href={item.href}>
-                <div className="text-center shadow-sm rounded bg-white p-1 hover:bg-gray-50 transition w-[150px] h-[190px] mx-auto flex flex-col justify-between">
-                  <div className="relative mx-auto w-full aspect-square flex items-center justify-center">
+              <div className="bike-lineup-card">
+                <Link href={item.href}>
+                  <div className="relative">
                     {item.img ? (
                       <img
                         src={item.img}
                         alt={item.title}
-                        width={150}
-                        height={150}
-                        className="object-cover w-full h-full"
+                        className="bike-lineup-image"
                       />
                     ) : (
-                      <span className="text-gray-400 text-6xl">{item.icon}</span>
+                      <span className="text-gray-400 text-6xl flex items-center justify-center w-full h-full">{item.icon}</span>
                     )}
                     {item.badge && (
-                      <div className="absolute top-1 left-1 bg-red-500 text-white text-xs flex items-center justify-center w-6 h-6 rounded">
-                        {item.badge}
-                      </div>
+                      <div className="bike-lineup-badge">{item.badge}</div>
                     )}
                   </div>
-                  <div className="mt-1 truncate">
-                    <span className="text-sm">{item.title}</span>
+                  <div className="bike-lineup-info">
+                    <h3 className="bike-lineup-name truncate">{item.title}</h3>
                     {item.keywords && (
                       <span className="text-xs text-gray-500 ml-1">{item.keywords}</span>
                     )}
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>

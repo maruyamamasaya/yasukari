@@ -420,11 +420,13 @@ a:hover {
 .bike-lineup {
   margin: 0 auto;
   padding: 0 1rem;
+  font-family: var(--font-family-base);
 }
 .bike-lineup-title {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
+  font-family: var(--font-family-base);
 }
 .bike-lineup-subtitle {
   display: block;
@@ -500,6 +502,7 @@ a:hover {
 .bike-lineup-name {
   font-size: 0.75rem;
   line-height: 1.2;
+  font-family: var(--font-family-base);
 }
 .bike-lineup-link {
   display: block;

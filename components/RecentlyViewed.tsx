@@ -20,31 +20,28 @@ export default function RecentlyViewed() {
   if (bikes.length === 0) return null;
 
   return (
-    <section className="my-6 px-4">
-      <h2 className="text-lg font-bold mb-2">最近チェックした商品</h2>
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
-        {bikes.slice(0, 4).map((b) => (
-          <Link key={b.modelCode} href={`/products/${b.modelCode}`}
-            className="block">
-            <div className="relative overflow-hidden rounded shadow-sm hover:bg-gray-50 transition aspect-square">
-              <img
-                src={b.img}
-                alt={b.modelName}
-                className="object-cover w-full h-full"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-bold py-1 px-1 truncate text-center">
-                {b.modelName}
-              </div>
+    <section className="bike-lineup my-6">
+      <h2 className="bike-lineup-title">最近チェックした商品</h2>
+      <div className="bike-lineup-scroll">
+        <div className="bike-lineup-list">
+          {bikes.slice(0, 4).map((b) => (
+            <div key={b.modelCode} className="bike-lineup-card">
+              <Link href={`/products/${b.modelCode}`}>
+                <img src={b.img} alt={b.modelName} className="bike-lineup-image" />
+                <div className="bike-lineup-info">
+                  <h3 className="bike-lineup-name truncate" dangerouslySetInnerHTML={{ __html: b.modelName.replace(/\\n/g, '<br>') }} />
+                </div>
+              </Link>
             </div>
-          </Link>
-        ))}
-        {bikes.length > 4 && (
-          <Link href="/products" className="block">
-            <div className="flex items-center justify-center rounded shadow-sm hover:bg-gray-50 transition aspect-square bg-white text-sm font-semibold text-red-600">
-              もっと見る
+          ))}
+          {bikes.length > 4 && (
+            <div className="bike-lineup-card">
+              <Link href="/products" className="flex items-center justify-center w-full h-full text-sm font-semibold text-red-600">
+                もっと見る
+              </Link>
             </div>
-          </Link>
-        )}
+          )}
+        </div>
       </div>
     </section>
   );
