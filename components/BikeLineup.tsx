@@ -30,7 +30,7 @@ export default function BikeLineup({ bikes }: { bikes: BikeModel[] }) {
   const [filter, setFilter] = useState<number>(2);
   const filtered = bikes.filter((b) => getCategory(parseDisplacement(b)) === filter);
   return (
-    <section className="bike-lineup">
+    <section className="bike-lineup my-5">
       <h2 className="bike-lineup-title">
         BIKE LINE UP
         <span className="bike-lineup-subtitle">バイクラインアップ</span>

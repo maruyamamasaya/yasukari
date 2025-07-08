@@ -258,7 +258,7 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
       <BikeModelCarousel items={bikeModels} />
 
       {/* おすすめのジャンルセクション（バイク） */}
-      <section className="bike-lineup py-8 lg:py-6 mb-8 lg:mb-6">
+      <section className="bike-lineup py-8 lg:py-6 my-5">
         <h2 className="bike-lineup-title">すぐに借りれる！おすすめのジャンル</h2>
         <div className="genre-carousel">
         <Swiper
@@ -270,7 +270,7 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
           loop
           breakpoints={{
             0: { slidesPerView: 2, grid: { rows: 2, fill: "row" } },
-            640: { slidesPerView: 4, grid: { rows: 1 } },
+            640: { slidesPerView: 7, grid: { rows: 1 } },
           }}
         >
           {genreItems.map((item, index) => (

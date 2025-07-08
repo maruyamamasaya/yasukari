@@ -22,7 +22,7 @@ type Props = {
 
 export default function BikeModelCarousel({ items, title = "人気の型番" }: Props) {
   return (
-    <section className="bike-lineup py-8 lg:py-6 mb-8 lg:mb-6">
+    <section className="bike-lineup py-8 lg:py-6 my-5">
       <h2 className="bike-lineup-title">{title}</h2>
       <div className="bike-model-carousel">
         <Swiper
@@ -37,7 +37,7 @@ export default function BikeModelCarousel({ items, title = "人気の型番" }: 
           coverflowEffect={{ rotate: 0, stretch: 10, depth: 100, modifier: 1, slideShadows: false }}
           breakpoints={{
             0: { slidesPerView: 1.2 },
-            640: { slidesPerView: 3.2 },
+            640: { slidesPerView: 7 },
           }}
         >
         {items.map((item) => (
