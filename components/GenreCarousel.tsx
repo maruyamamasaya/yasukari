@@ -28,7 +28,7 @@ export default function GenreCarousel({
   subtitle = "すぐに借りれる！おすすめのジャンル",
 }: Props) {
   return (
-    <section className="bike-lineup py-8 lg:py-6 my-5">
+    <section className="bike-lineup my-5">
       <h2 className="bike-lineup-title">
         {title}
         {subtitle && <span className="bike-lineup-subtitle">{subtitle}</span>}
