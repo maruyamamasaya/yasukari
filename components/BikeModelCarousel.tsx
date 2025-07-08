@@ -17,13 +17,29 @@ export type BikeItem = {
 
 type Props = {
   items: BikeItem[];
+  /**
+   * メイン見出し(英語)。デフォルトは "POPULAR MODELS"
+   */
   title?: string;
+  /**
+   * 日本語のサブタイトル
+   */
+  subtitle?: string;
 };
 
-export default function BikeModelCarousel({ items, title = "人気の型番" }: Props) {
+export default function BikeModelCarousel({
+  items,
+  title = "POPULAR MODELS",
+  subtitle = "人気の型番",
+}: Props) {
   return (
     <section className="bike-lineup py-8 lg:py-6 my-5">
-      <h2 className="bike-lineup-title">{title}</h2>
+      <h2 className="bike-lineup-title">
+        {title}
+        {subtitle && (
+          <span className="bike-lineup-subtitle">{subtitle}</span>
+        )}
+      </h2>
       <div className="bike-model-carousel">
         <Swiper
           modules={[Autoplay, Navigation, EffectCoverflow, Pagination]}
