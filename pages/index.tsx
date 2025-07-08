@@ -2,7 +2,12 @@ import React, { useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation, Pagination, Grid } from "swiper/modules";
+import {
+  Autoplay,
+  Navigation,
+  Pagination,
+  EffectCoverflow,
+} from "swiper/modules";
 import fs from "fs";
 import path from "path";
 import { GetStaticProps } from "next";
@@ -269,17 +274,20 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
             すぐに借りれる！おすすめのジャンル
           </span>
         </h2>
-        <div className="genre-carousel">
+        <div className="bike-model-carousel">
         <Swiper
-          modules={[Autoplay, Navigation, Pagination, Grid]}
+          modules={[Autoplay, Navigation, Pagination, EffectCoverflow]}
           spaceBetween={12}
+          centeredSlides
           navigation
           pagination={{ clickable: true }}
           autoplay={{ delay: 2500, disableOnInteraction: false }}
           loop
+          effect="coverflow"
+          coverflowEffect={{ rotate: 0, stretch: 10, depth: 100, modifier: 1, slideShadows: false }}
           breakpoints={{
-            0: { slidesPerView: 2, grid: { rows: 2, fill: "row" } },
-            640: { slidesPerView: 7, grid: { rows: 1 } },
+            0: { slidesPerView: 1.2 },
+            640: { slidesPerView: 7 },
           }}
         >
           {genreItems.map((item, index) => (
