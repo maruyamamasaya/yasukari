@@ -1,0 +1,150 @@
+import React from "react";
+import Link from "next/link";
+import {
+  FaFacebookF,
+  FaXTwitter,
+  FaInstagram,
+  FaYoutube,
+  FaLine,
+} from "react-icons/fa6";
+
+export default function FooterEn() {
+  return (
+    <footer className="bg-gray-100 border-t border-gray-200 text-sm text-gray-700">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          {/* Brand intro & contact */}
+          <div>
+            <h4 className="font-bold mb-2">yasukari</h4>
+            <p className="mb-3">
+              We specialize in motorcycle rentals and subscriptions. From mopeds to large and EV bikes, we offer a wide lineup.
+              Rentals are available from one day, with monthly plans and corporate services.
+            </p>
+            <div className="space-y-1">
+              <Link href="/" className="text-red-600 hover:underline block">
+                Home
+              </Link>
+              <Link href="/contact" className="text-red-600 hover:underline block">
+                Contact us
+              </Link>
+            </div>
+          </div>
+
+          {/* Site policy */}
+          <div>
+            <h4 className="font-bold mb-2">Site policy</h4>
+            <ul className="space-y-1">
+              <li>
+                <Link href="/tokusyouhou" className="hover:underline">
+                  Act on Specified Commercial Transactions
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:underline">
+                  Terms of use
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:underline">
+                  Privacy policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/external" className="hover:underline">
+                  External data transmission
+                </Link>
+              </li>
+              <li>
+                <Link href="/company" className="hover:underline">
+                  Company information
+                </Link>
+              </li>
+              <li>
+                <Link href="/support-policy" className="hover:underline">
+                  Contact & support policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Service info + SNS */}
+          <div>
+            <h4 className="font-bold mb-2">Services</h4>
+            <ul className="space-y-1 mb-4">
+              <li>
+                <Link href="/popular" className="hover:underline">
+                  Popular categories: mopeds, 250cc, large bikes, EV bikes
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog_for_custmor" className="hover:underline">
+                  Blog & News
+                </Link>
+              </li>
+              <li>
+                <Link href="/beginner" className="hover:underline">
+                  Beginner's guide
+                </Link>
+              </li>
+              <li>
+                <Link href="/help" className="hover:underline">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/shipping" className="hover:underline">
+                  Shipping & returns
+                </Link>
+              </li>
+              <li>
+                <Link href="/maintenance" className="hover:underline">
+                  Maintenance
+                </Link>
+              </li>
+              <li>
+                <Link href="/stores" className="hover:underline">
+                  Store list
+                </Link>
+              </li>
+              <li>
+
+                <Link href="/insurance" className="hover:underline">
+                  Vehicle insurance
+                </Link>
+              </li>
+            </ul>
+            <h4 className="font-bold mb-2">SNS & Videos</h4>
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2">
+                <FaFacebookF /> <a href="#" className="hover:underline">Facebook</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <FaXTwitter /> <a href="#" className="hover:underline">X (Twitter)</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <FaInstagram /> <a href="#" className="hover:underline">Instagram</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <FaYoutube /> <a href="#" className="hover:underline">YouTube</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <FaLine /> <a href="#" className="hover:underline">LINE Official</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Logo & copyright */}
+        <div className="border-t border-gray-300 mt-8 pt-6 text-center">
+          <img
+            src="https://yasukari.com/static/images/logo/250x50.png"
+            alt="yasukari logo"
+            width={120}
+            className="mx-auto mb-2"
+          />
+          <p className="text-gray-400">© 2025 yasukari Inc.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
