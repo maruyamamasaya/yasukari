@@ -1,0 +1,178 @@
+{
+  "categories": [
+    {
+      "id": "eligibility",
+      "title": "Eligibility",
+      "faqs": [
+        {
+          "q": "Can minors use the service?",
+          "a": "You must be at least 18 years old to use the service. Even if you hold a motorcycle license, you cannot rent under 18."
+        },
+        {
+          "q": "Can beginners rent?",
+          "a": "Yes, beginners are welcome. Our insurance options ensure peace of mind."
+        }
+      ]
+    },
+    {
+      "id": "business_hours",
+      "title": "Business Hours",
+      "faqs": [
+        {
+          "q": "Can I rent at any time?",
+          "a": "We are closed on Mondays and Thursdays. Rentals and returns are unavailable on those days."
+        },
+        {
+          "q": "When are your holidays?",
+          "a": "Starting Nov 23, 2023 we are closed on Mondays and Thursdays. Rentals, returns and extensions are unavailable on closed days."
+        },
+        {
+          "q": "Do you have Obon holidays or peak season fees?",
+          "a": "We are closed Aug 11-15, 2025. From Aug 6-15 a busy-season surcharge of ¥550 per day applies."
+        },
+        {
+          "q": "Can I return the bike outside business hours?",
+          "a": "Returns outside business hours (10:00-19:00) are not possible. Please return later; late returns will incur a fee."
+        },
+        {
+          "q": "About returning after hours",
+          "a": "Returns after hours are not allowed. Security is active so please return on another day. Late returns incur a fee."
+        }
+      ]
+    },
+    {
+      "id": "options",
+      "title": "Equipment & Options",
+      "faqs": [
+        {
+          "q": "Do you rent helmets and gloves?",
+          "a": "Yes, you can choose them as options after selecting your bike."
+        },
+        {
+          "q": "Can I rent a helmet?",
+          "a": "Helmet rental is available as an option. If not selected, please bring your own."
+        },
+        {
+          "q": "Do you lend ETC cards?",
+          "a": "We do not lend ETC cards. Some bikes may not have ETC equipment."
+        }
+      ]
+    },
+    {
+      "id": "store_usage",
+      "title": "Store & Usage",
+      "faqs": [
+        {
+          "q": "How do I use the Minowa store?",
+          "a": "At the Minowa store, press the intercom on the right side of the Route 4 entrance and our staff will assist you."
+        },
+        {
+          "q": "Can I return the bike to a different store?",
+          "a": "Please return the bike to the store you rented from."
+        },
+        {
+          "q": "Is parking available if I come by car, bike or bicycle?",
+          "a": "We do not keep customers' vehicles."
+        },
+        {
+          "q": "Can you store my car, bike or bicycle while I rent?",
+          "a": "We cannot store any personal vehicles."
+        }
+      ]
+    },
+    {
+      "id": "trouble",
+      "title": "Breakdown & Troubles",
+      "faqs": [
+        {
+          "q": "What if the bike breaks down during use?",
+          "a": "If within 180km of the rental store, free 24-hour roadside service is available. During business hours contact the store; otherwise use the service directly."
+        }
+      ]
+    },
+    {
+      "id": "reservation",
+      "title": "Reservations & Cancellations",
+      "faqs": [
+        {
+          "q": "Until when can I make a reservation?",
+          "a": "Reservations are accepted until 5pm on the business day before your rental."
+        },
+        {
+          "q": "How do I cancel?",
+          "a": "Email info@yasukari.com by 5pm with your name, bike and reservation number."
+        },
+        {
+          "q": "When do cancellation fees apply?",
+          "a": "A fee of 50% of the base rate applies from 3 business days before your rental."
+        },
+        {
+          "q": "How do I change my reservation date?",
+          "a": "Please cancel and rebook. See \"01. About Reservations\" for details."
+        },
+        {
+          "q": "How do I extend my rental?",
+          "a": "Email info@yasukari.com by 5pm with subject \"Extension\" including reservation number, name, bike and rental date. Extensions may not always be possible."
+        }
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "Contact",
+      "faqs": [
+        {
+          "q": "Can I make reservations or inquiries by phone?",
+          "a": "We do not handle inquiries by phone. Please use our website."
+        },
+        {
+          "q": "When are email inquiries answered?",
+          "a": "Emails are answered 10:00-17:00 on business days. Messages after hours or on closed days will be handled the next business day."
+        }
+      ]
+    },
+    {
+      "id": "insurance_pricing",
+      "title": "Pricing & Insurance",
+      "faqs": [
+        {
+          "q": "What does the insurance cover?",
+          "a": "It includes personal, property and vehicle coverage. See the terms of use for details."
+        },
+        {
+          "q": "How can I get a copy of the voluntary insurance certificate?",
+          "a": "Email info@yasukari.com with subject \"Insurance Certificate\" including your reservation number, name, bike and rental date."
+        },
+        {
+          "q": "Have rental rates changed?",
+          "a": "Rates have been revised due to rising maintenance and parts costs. See https://yasukari.com/storage/informations/cuhbm1j1qb717lh4v090.png for the new prices."
+        }
+      ]
+    },
+    {
+      "id": "general",
+      "title": "General Questions",
+      "faqs": [
+        {
+          "q": "Do I need anything besides my license?",
+          "a": "You may be asked for proof of current address such as a utility bill."
+        },
+        {
+          "q": "How do I pay?",
+          "a": "Payment is in advance by credit card, e-money or other specified method."
+        },
+        {
+          "q": "Do I have to return the bike with a full tank?",
+          "a": "Yes, please return the bike with a full tank. Otherwise we will charge for fuel."
+        },
+        {
+          "q": "Can I use the bike for long distances?",
+          "a": "Yes. Distance limits and extra fees vary by bike and plan, so check in advance."
+        },
+        {
+          "q": "Is there a mileage limit?",
+          "a": "Each bike class has a guideline distance. See the chart for details."
+        }
+      ]
+    }
+  ]
+}
