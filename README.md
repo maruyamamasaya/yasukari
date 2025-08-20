@@ -211,4 +211,7 @@ docs/               プロジェクトドキュメント
    ```
    ブラウザで `http://localhost:3000` を開くとアプリを確認できます。
 
+## テストとLint
+`npm test -- --passWithNoTests` と `npm run lint` を実行してコード品質を確認します。
+
 AWS などでの本番運用時は Cognito を用いたユーザー認証にも対応可能です。
