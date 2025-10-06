@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import SectionHeading from "./SectionHeading";
 
 export type GenreItem = {
   title: string;
@@ -12,13 +13,7 @@ export type GenreItem = {
 
 interface Props {
   items: GenreItem[];
-  /**
-   * メイン見出し(英語)。デフォルトは "RECOMMENDED GENRES"
-   */
   title?: string;
-  /**
-   * 日本語のサブタイトル
-   */
   subtitle?: string;
 }
 
@@ -28,36 +23,58 @@ export default function GenreCarousel({
   subtitle = "すぐに借りれる！おすすめのジャンル",
 }: Props) {
   return (
-    <section className="bike-lineup my-5">
-      <h2 className="bike-lineup-title">
-        {title}
-        {subtitle && <span className="bike-lineup-subtitle">{subtitle}</span>}
-      </h2>
-      <div className="bike-lineup-scroll">
-        <div className="bike-lineup-list">
-          {items.map((item, index) => (
-            <div key={index} className="bike-lineup-card">
-              <Link href={item.href}>
-                <div className="relative">
-                  {item.img ? (
-                    <img src={item.img} alt={item.title} className="bike-lineup-image" />
-                  ) : (
-                    <span className="text-gray-400 text-6xl flex items-center justify-center w-full h-full">
-                      {item.icon}
-                    </span>
-                  )}
-                  {item.badge && <div className="bike-lineup-badge">{item.badge}</div>}
-                </div>
-                <div className="bike-lineup-info">
-                  <h3 className="bike-lineup-name truncate">{item.title}</h3>
-                  {item.keywords && (
-                    <span className="text-xs text-gray-500 ml-1">{item.keywords}</span>
-                  )}
-                </div>
-              </Link>
+    <section className="section-surface section-padding">
+      <SectionHeading
+        eyebrow={title}
+        title="利用シーンから探す"
+        description={`${
+          subtitle ?? "おすすめのジャンル"
+        }。イメージしやすいカテゴリから最適な一台をセレクトしましょう。`}
+      />
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {items.slice(0, 9).map((item, index) => (
+          <Link
+            key={index}
+            href={item.href}
+            className="group flex flex-col overflow-hidden rounded-2xl border border-white/60 bg-white/80 p-6 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_54px_-30px_rgba(220,38,38,0.45)]"
+          >
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16 overflow-hidden rounded-xl bg-red-100/70">
+                {item.img ? (
+                  <img
+                    src={item.img}
+                    alt={item.title}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-3xl text-red-500">
+                    {item.icon}
+                  </span>
+                )}
+                {item.badge ? (
+                  <span className="absolute -right-2 -top-2 inline-flex rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow">
+                    {item.badge}
+                  </span>
+                ) : null}
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-base font-semibold text-slate-800">{item.title}</h3>
+                {item.keywords ? (
+                  <span className="text-xs font-medium uppercase tracking-wide text-red-500">
+                    {item.keywords}
+                  </span>
+                ) : null}
+              </div>
             </div>
-          ))}
-        </div>
+            <p className="mt-4 text-sm text-slate-500">
+              受け取りやすさ、積載量、快適性などの観点から、スタッフが人気の理由を解説。シーンに合う選択肢を見つけましょう。
+            </p>
+            <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-red-500">
+              詳細を見る
+              <span aria-hidden>→</span>
+            </span>
+          </Link>
+        ))}
       </div>
     </section>
   );

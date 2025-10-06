@@ -1,5 +1,6 @@
-import React from 'react';
-import { FaCaretRight } from 'react-icons/fa';
+import React from "react";
+import { FaCaretRight } from "react-icons/fa";
+import SectionHeading from "./SectionHeading";
 
 type Step = {
   img: string;
@@ -41,34 +42,30 @@ export default function HowToUse() {
   ];
 
   return (
-    <section className="py-6 md:py-8">
-      <div className="text-center mb-0">
-        <span className="text-red-600 font-bold text-sm tracking-wide">
-          How to use
-        </span>
-      </div>
-      {/* 利用方法の見出しは周りのテキストと同じ色にする */}
-      <p className="text-center font-bold text-lg mt-1">
-        yasukariの利用方法
-      </p>
-      <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-2 mt-3">
+    <section className="section-surface section-padding">
+      <SectionHeading
+        eyebrow="How to use"
+        title="yasukariの利用方法"
+        description="初めてでも迷わずにステップを完了できるよう、予約から返却までの流れをシンプルにまとめました。"
+      />
+      <div className="flex flex-col items-stretch justify-center gap-6 md:flex-row md:items-start md:gap-4">
         {steps.map((step, idx) => (
           <React.Fragment key={idx}>
             {idx > 0 && (
-              <FaCaretRight className="hidden md:block text-gray-400 text-2xl" />
+              <FaCaretRight className="hidden text-2xl text-red-300 md:block" />
             )}
-            <div className="howto-step">
-              <div className="mx-auto w-full">
+            <div className="flex flex-1 flex-col items-center gap-4 rounded-2xl border border-white/60 bg-white/80 p-6 text-center shadow-[0_20px_42px_-28px_rgba(15,23,42,0.45)]">
+              <div className="mx-auto w-44 overflow-hidden rounded-xl bg-white">
                 <img
-                  className="howto-img"
+                  className="h-full w-full object-contain"
                   alt={step.alt}
                   loading="lazy"
                   decoding="async"
                   src={step.img}
                 />
               </div>
-              <p className="howto-title md:mt-5">{step.title}</p>
-              <p className="howto-desc md:mt-3">{step.desc}</p>
+              <p className="text-base font-semibold text-slate-800">{step.title}</p>
+              <p className="text-sm leading-relaxed text-slate-600">{step.desc}</p>
             </div>
           </React.Fragment>
         ))}
