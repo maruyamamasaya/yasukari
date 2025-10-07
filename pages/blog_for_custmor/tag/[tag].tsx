@@ -3,7 +3,6 @@ import path from 'path'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
-import CalendarWidget, { CalendarPost } from '../../../components/CalendarWidget'
 import PostSearch from '../../../components/PostSearch'
 
 type PostMeta = {
@@ -71,28 +70,21 @@ export const getStaticProps: GetStaticProps = ({ params }) => {
 
   posts.sort((a, b) => b.date.localeCompare(a.date))
 
-  const calendarPosts: CalendarPost[] = posts.map((p) => ({
-    slug: p.slug,
-    title: p.title,
-    date: p.date,
-  }))
-
   const tag = decodeURIComponent(params!.tag as string)
   const tagPosts = posts.filter((p) =>
     p.tags?.split(',').map((t) => t.trim()).includes(tag)
   )
 
-  return { props: { tag, tagPosts, calendarPosts, posts } }
+  return { props: { tag, tagPosts, posts } }
 }
 
 interface Props {
   tag: string
   tagPosts: PostMeta[]
-  calendarPosts: CalendarPost[]
   posts: PostMeta[]
 }
 
-export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) {
+export default function TagPage({ tag, tagPosts, posts }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <Head>
@@ -135,7 +127,6 @@ export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) 
         </div>
       </div>
       <div className="w-[25%] space-y-4">
-        <CalendarWidget posts={calendarPosts} />
         <PostSearch posts={posts} basePath="/blog_for_custmor" />
       </div>
     </div>
