@@ -3,7 +3,6 @@ import path from 'path'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
-import CalendarWidget, { CalendarPost } from '../../components/CalendarWidget'
 import PostSearch from '../../components/PostSearch'
 
 function parseMarkdown(md: string): { html: string; meta: Record<string, string> } {
@@ -87,10 +86,16 @@ function parseMarkdown(md: string): { html: string; meta: Record<string, string>
   return { html, meta }
 }
 
+type SearchPost = {
+  slug: string
+  title: string
+  excerpt?: string
+}
+
 interface Props {
   html: string
   meta: Record<string, string>
-  posts: CalendarPost[]
+  posts: SearchPost[]
 }
 
 export default function BlogPost({ html, meta, posts }: Props) {
@@ -135,7 +140,6 @@ export default function BlogPost({ html, meta, posts }: Props) {
         <div dangerouslySetInnerHTML={{ __html: html }} />
       </article>
       <div className="w-[25%] space-y-4">
-        <CalendarWidget posts={posts} />
         <PostSearch posts={posts} basePath="/blog_for_custmor" />
       </div>
     </div>
@@ -157,14 +161,29 @@ export const getStaticProps: GetStaticProps = ({ params }) => {
   const { html, meta } = parseMarkdown(md)
 
   const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'))
-  const posts: CalendarPost[] = files.map((file) => {
-    const s = file.replace(/\.md$/, '')
-    const lines = fs.readFileSync(path.join(dir, file), 'utf8').split(/\r?\n/)
+  const posts: SearchPost[] = files.map((file) => {
+    const slug = file.replace(/\.md$/, '')
+    const md = fs.readFileSync(path.join(dir, file), 'utf8')
+    const lines = md.split(/\r?\n/)
+    let idx = 0
+    const meta: Record<string, string> = {}
+    if (lines[idx] === '---') {
+      idx++
+      while (idx < lines.length && lines[idx] !== '---') {
+        const [k, ...v] = lines[idx].split(':')
+        if (k) meta[k.trim()] = v.join(':').trim().replace(/^"|"$/g, '')
+        idx++
+      }
+      idx++
+    }
     const heading = lines.find((l) => l.startsWith('# '))
-    const title = heading ? heading.replace(/^#\s*/, '') : s
-    const dateMatch = s.match(/^\d{4}-\d{2}-\d{2}/)
-    const date = dateMatch ? dateMatch[0] : ''
-    return { slug: s, title, date }
+    const title = meta.title || (heading ? heading.replace(/^#\s*/, '') : slug)
+    const excerptLine = lines
+      .slice(idx)
+      .find((l) => l.trim() && !l.startsWith('#'))
+      ?.replace(/\*/g, '')
+    const excerpt = excerptLine ? excerptLine.slice(0, 80) : undefined
+    return { slug, title, excerpt }
   })
 
   return { props: { html, meta, posts } }

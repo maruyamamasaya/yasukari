@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import Head from 'next/head'
 import Link from 'next/link'
-import CalendarWidget, { CalendarPost } from '../../components/CalendarWidget'
 import PostSearch from '../../components/PostSearch'
 
 type PostMeta = {
@@ -44,12 +43,6 @@ export async function getStaticProps() {
 
   posts.sort((a, b) => b.date.localeCompare(a.date))
 
-  const calendarPosts: CalendarPost[] = posts.map((p) => ({
-    slug: p.slug,
-    title: p.title,
-    date: p.date,
-  }))
-
   const tags = Array.from(
     new Set(
       posts.flatMap((p) =>
@@ -58,16 +51,14 @@ export async function getStaticProps() {
     )
   )
 
-  return { props: { posts, calendarPosts, tags } }
+  return { props: { posts, tags } }
 }
 
 export default function BlogIndex({
   posts,
-  calendarPosts,
   tags,
 }: {
   posts: PostMeta[]
-  calendarPosts: CalendarPost[]
   tags: string[]
 }) {
   return (
@@ -122,7 +113,6 @@ export default function BlogIndex({
         </div>
       </div>
       <div className="w-[25%] space-y-4">
-        <CalendarWidget posts={calendarPosts} />
         <PostSearch posts={posts} basePath="/blog_for_custmor" />
       </div>
     </div>
