@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { createLightMember } from '../../lib/mockUserDb';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -7,10 +8,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const { username, password } = req.body || {};
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Missing fields' });
-  }
 
-  // Demo only: pretend we created the user
-  return res.status(200).json({ message: 'User registered' });
+  try {
+    const member = createLightMember(username ?? '', password ?? '');
+    res.setHeader('Set-Cookie', `auth=${member.id}; Path=/; HttpOnly; Max-Age=${60 * 60 * 24}; SameSite=Lax`);
+
+    return res.status(201).json({
+      message: 'ライト会員として登録しました',
+      member: {
+        id: member.id,
+        username: member.username,
+        plan: member.plan,
+        createdAt: member.createdAt,
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '登録に失敗しました';
+    return res.status(400).json({ message });
+  }
 }
