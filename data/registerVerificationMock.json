@@ -1,0 +1,5 @@
+{
+  "email": "preview-user@example.com",
+  "code": "A1B2C3",
+  "note": "フロントエンドの表示確認用ダミーデータです。入力しても認証は行われません。"
+}
