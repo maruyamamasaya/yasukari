@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
@@ -93,6 +94,17 @@ export default function SignupPage() {
                   />
                 </label>
                 <p className="text-xs text-gray-500">登録後はライトプランのマイページ「MYP-DASH」がすぐにご利用いただけます。</p>
+                <p className="text-xs text-gray-500">
+                  新規登録すると、
+                  <Link href="/terms" className="text-blue-600 underline underline-offset-2">
+                    利用規約
+                  </Link>
+                  及び
+                  <Link href="/privacy" className="text-blue-600 underline underline-offset-2">
+                    プライバシーポリシー
+                  </Link>
+                  に同意したとみなされます。
+                </p>
                 <button
                   type="submit"
                   className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
