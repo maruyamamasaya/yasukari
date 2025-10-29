@@ -26,60 +26,88 @@ export default function LoginPage() {
     }
   };
 
-    return (
-      <>
-        <Head>
-          <title>ログイン</title>
-        </Head>
-        <main className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-          <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
-            <h1 className="text-xl font-bold mb-4 text-center">ログイン</h1>
-            <div className="bg-blue-50 border border-blue-100 text-sm text-blue-900 rounded p-3 mb-4">
-              <p className="font-semibold">デモアカウント情報</p>
-              <ul className="mt-1 space-y-1">
-                <li>
-                  <span className="font-semibold">ID:</span> adminuser
-                </li>
-                <li>
-                  <span className="font-semibold">パスワード:</span> adminuser
-                </li>
-              </ul>
+  return (
+    <>
+      <Head>
+        <title>ログイン</title>
+      </Head>
+      <main className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-50 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-5xl mx-auto grid gap-12 md:grid-cols-[minmax(0,1fr),420px] items-center">
+          <section className="hidden md:block space-y-6 text-slate-700">
+            <h1 className="text-3xl font-bold text-slate-900">ようこそ、レンタル管理プラットフォームへ</h1>
+            <p className="text-lg leading-relaxed">
+              シンプルなログインで、レンタル状況の確認や契約情報の管理を素早く行えます。
+              セキュアで快適な管理体験を提供します。
+            </p>
+            <ul className="space-y-3 text-base">
+              <li className="flex items-start gap-3">
+                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
+                <span>リアルタイムで状況を把握できるダッシュボード</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
+                <span>チーム全員が使いやすいシンプルなインターフェース</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
+                <span>安心のセキュリティ対策で重要な情報を保護</span>
+              </li>
+            </ul>
+          </section>
+          <div className="bg-white shadow-xl rounded-2xl p-8 sm:p-10 w-full">
+            <div className="mb-8 text-center space-y-2">
+              <h2 className="text-2xl font-bold text-slate-900">ログイン</h2>
+              <p className="text-sm text-slate-500">ご登録のメールアドレスとパスワードを入力してください</p>
             </div>
-            <div className="space-y-2">
-              <button type="button" className="btn-primary w-full">Google でログイン</button>
-              <button type="button" className="btn-primary w-full">Apple でログイン</button>
+            <div className="space-y-3">
+              <button type="button" className="btn-primary w-full py-3 text-base">Google でログイン</button>
+              <button type="button" className="btn-primary w-full py-3 text-base">Apple でログイン</button>
             </div>
-            <hr className="my-4" />
-            <form onSubmit={handleSubmit}>
-              {error && <p className="text-red-500 mb-2">{error}</p>}
-              <div className="mb-4">
-                <label className="block mb-1">メールアドレス</label>
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-3 text-slate-400">または</span>
+              </div>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">メールアドレス</label>
                 <input
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full border px-3 py-2 rounded"
+                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  placeholder="example@company.jp"
                   required
                 />
               </div>
-              <div className="mb-4">
-                <label className="block mb-1">パスワード</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">パスワード</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border px-3 py-2 rounded"
+                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  placeholder="パスワードを入力"
                   required
                 />
               </div>
-              <button type="submit" className="btn-primary w-full">
+              <button type="submit" className="btn-primary w-full py-3 text-base font-semibold">
                 メールアドレスでログイン
               </button>
             </form>
-            <p className="text-sm text-center mt-4">
-              <Link href="/signup">新規登録はこちら</Link>
+            <p className="mt-8 text-center text-sm text-slate-500">
+              アカウントをお持ちでない方は{' '}
+              <Link href="/signup" className="font-semibold text-blue-600 hover:underline">
+                新規登録
+              </Link>
+              へ
             </p>
           </div>
-        </main>
-      </>
-    );
+        </div>
+      </main>
+    </>
+  );
 }
