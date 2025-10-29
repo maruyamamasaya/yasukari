@@ -57,7 +57,7 @@ export default function LoginPage() {
           <div className="bg-white shadow-xl rounded-2xl p-8 sm:p-10 w-full">
             <div className="mb-8 text-center space-y-2">
               <h2 className="text-2xl font-bold text-slate-900">ログイン</h2>
-              <p className="text-sm text-slate-500">ご登録のメールアドレスとパスワードを入力してください</p>
+              <p className="text-sm text-slate-500">ご登録のメールアドレスとパスワードを入力してください（メールアドレスのみで登録された場合はパスワード入力は不要です）</p>
             </div>
             <div className="space-y-3">
               <button type="button" className="btn-primary w-full py-3 text-base">Google でログイン</button>
@@ -90,8 +90,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-lg border border-slate-200 px-4 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="パスワードを入力"
-                  required
+                  placeholder="パスワードを入力（メール登録のみの場合は空欄でOK）"
                 />
               </div>
               <button type="submit" className="btn-primary w-full py-3 text-base font-semibold">

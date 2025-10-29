@@ -7,10 +7,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  const { username, password } = req.body || {};
+  const { username, password, email } = req.body || {};
 
   try {
-    const member = createLightMember(username ?? '', password ?? '');
+    const member = createLightMember({
+      username: username ?? undefined,
+      password: password ?? undefined,
+      email: email ?? undefined,
+    });
     res.setHeader('Set-Cookie', `auth=${member.id}; Path=/; HttpOnly; Max-Age=${60 * 60 * 24}; SameSite=Lax`);
 
     return res.status(201).json({
@@ -18,6 +22,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       member: {
         id: member.id,
         username: member.username,
+        email: member.email,
         plan: member.plan,
         createdAt: member.createdAt,
       },

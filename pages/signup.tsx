@@ -1,99 +1,189 @@
 import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Link from 'next/link';
 
-type SignupState = 'idle' | 'loading' | 'success';
+import type { FormEvent } from 'react';
+
+type FormStatus = 'idle' | 'loading' | 'success' | 'error';
+
+type ApiResponse = {
+  message?: string;
+};
 
 export default function SignupPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [state, setState] = useState<SignupState>('idle');
-  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<FormStatus>('idle');
+  const [feedback, setFeedback] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setState('loading');
-    const res = await fetch('/api/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (res.ok) {
-      setState('success');
-      setTimeout(() => {
-        router.push('/mypage');
-      }, 800);
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!email.trim()) {
+      setFeedback('メールアドレスを入力してください');
+      setStatus('error');
       return;
     }
 
-    const data = await res.json().catch(() => ({}));
-    setError(data.message || '会員登録に失敗しました');
-    setState('idle');
+    setStatus('loading');
+    setFeedback('');
+
+    try {
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data: ApiResponse = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setStatus('error');
+        setFeedback(data.message ?? '会員登録に失敗しました。時間をおいて再度お試しください。');
+        return;
+      }
+
+      setStatus('success');
+      setFeedback(
+        data.message ??
+          '入力いただいたメールアドレス宛に登録のご案内をお送りしました。メールをご確認ください。',
+      );
+      setEmail('');
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+      setFeedback('通信エラーが発生しました。ネットワーク環境をご確認のうえ、再度お試しください。');
+    }
   };
 
   return (
     <>
       <Head>
-        <title>ライト会員登録 | yasukari</title>
+        <title>新規会員登録 | 激安・便利なレンタルバイクのヤスカリ。</title>
         <meta
           name="description"
-          content="ライトプランの会員登録ページ。最短1分で無料アカウントを作成し、ダッシュボードで予約状況を確認できます。"
+          content="中古バイク専門店が運営するレンタルバイク屋です。メールアドレスを入力して簡単に会員登録が行えます。"
         />
       </Head>
-      <main className="bg-gradient-to-b from-blue-50 via-white to-white min-h-screen">
-        <section className="bg-blue-600 text-white">
-          <div className="mx-auto max-w-5xl px-6 py-16">
-            <p className="text-sm uppercase tracking-[0.25em] text-blue-200">Light Membership</p>
-            <h1 className="mt-4 text-3xl font-semibold md:text-4xl">ライト会員登録</h1>
-            <p className="mt-6 max-w-2xl text-lg text-blue-100">
-              予約管理や利用履歴の確認ができる「ライトプラン」のダッシュボードをご利用いただけます。登録後は自動的にログインされ、すぐに
-              マイページを確認できます。
-            </p>
-          </div>
-        </section>
 
-        <section className="relative z-10 mx-auto -mt-16 max-w-5xl px-6 pb-24">
-          <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
-            <div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-xl shadow-blue-100/40">
-              <h2 className="text-xl font-semibold text-gray-900">アカウント情報</h2>
-              <p className="mt-2 text-sm text-gray-500">必要事項を入力してライト会員アカウントを作成してください。</p>
-              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-                {error && (
-                  <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">{error}</div>
-                )}
-                {state === 'success' && (
-                  <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-                    登録が完了しました。マイページへ移動します。
+      <div className="min-h-screen bg-white text-gray-900">
+        <header className="border-b border-gray-100 bg-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
+            <Link href="/" className="flex items-center gap-3">
+              <img
+                src="/static/images/logo/250x50.png"
+                alt="ヤスカリ"
+                width={200}
+                height={40}
+                className="hidden md:block"
+              />
+              <div className="flex items-center gap-2 md:hidden">
+                <img src="/static/images/logo/300x300.jpg" alt="ヤスカリ" width={44} height={44} className="rounded-full" />
+                <span className="text-sm font-semibold text-gray-800">レンタルバイクのヤスカリ</span>
+              </div>
+            </Link>
+            <div className="hidden md:flex flex-col text-right text-sm">
+              <div className="flex items-center justify-end gap-2 text-red-600">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="18" height="18" fill="currentColor">
+                  <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path>
+                  <path
+                    fillRule="evenodd"
+                    d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"
+                  ></path>
+                </svg>
+                <Link href="/signup" className="font-semibold text-red-600">
+                  会員登録
+                </Link>
+              </div>
+              <span className="mt-1 text-gray-600">激安・便利なレンタルバイクのヤスカリ</span>
+            </div>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-full border border-red-600 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-600 hover:text-white md:hidden"
+            >
+              ログイン
+            </Link>
+          </div>
+          <div className="hidden bg-red-700 text-white md:block">
+            <div className="mx-auto flex max-w-6xl items-center justify-between px-8 text-sm">
+              {[
+                { href: '/guide', label: 'ご利用案内' },
+                { href: '/stores', label: '店舗' },
+                { href: '/products', label: '車種・料金' },
+                { href: '/insurance', label: '保険と補償' },
+                { href: '/faq', label: 'よくあるご質問' },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex-1 border-b-2 border-transparent py-3 text-center font-medium transition hover:bg-red-600"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
+          <nav aria-label="breadcrumb" className="mb-6">
+            <ol className="flex items-center space-x-2 text-sm text-gray-500">
+              <li>
+                <Link href="/" className="text-blue-600 hover:underline">
+                  ホーム
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="text-gray-600">会員登録</li>
+            </ol>
+          </nav>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">
+              <p className="text-sm text-gray-600">アカウントをお持ちの方はこちら</p>
+              <Link
+                href="/login"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-emerald-500 py-3 text-lg font-semibold text-white transition hover:bg-emerald-600"
+              >
+                ログイン
+              </Link>
+            </div>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-gray-900">新規会員登録</h2>
+              <p className="mt-2 text-sm text-gray-600">メールアドレスを入力して簡単に登録できます。</p>
+              <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
+                {feedback && (
+                  <div
+                    className={
+                      status === 'success'
+                        ? 'rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700'
+                        : 'rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600'
+                    }
+                  >
+                    {feedback}
                   </div>
                 )}
-                <label className="block">
-                  <span className="text-sm font-medium text-gray-700">ユーザー名</span>
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                    メールアドレス
+                  </label>
                   <input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                    placeholder="例: rider_yasu"
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                     required
-                    autoComplete="username"
+                    maxLength={50}
+                    placeholder="メールアドレスを入力してください"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
                   />
-                </label>
-                <label className="block">
-                  <span className="text-sm font-medium text-gray-700">パスワード</span>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                    placeholder="6文字以上の半角英数字"
-                    required
-                    autoComplete="new-password"
-                  />
-                </label>
-                <p className="text-xs text-gray-500">登録後はライトプランのマイページ「MYP-DASH」がすぐにご利用いただけます。</p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={status === 'loading'}
+                  className="inline-flex w-full items-center justify-center rounded-full bg-red-600 py-3 text-lg font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-400"
+                >
+                  {status === 'loading' ? '登録処理中...' : '新規会員登録'}
+                </button>
                 <p className="text-xs text-gray-500">
                   新規登録すると、
                   <Link href="/terms" className="text-blue-600 underline underline-offset-2">
@@ -105,53 +195,32 @@ export default function SignupPage() {
                   </Link>
                   に同意したとみなされます。
                 </p>
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
-                  disabled={state === 'loading'}
-                >
-                  {state === 'loading' ? '登録処理中...' : 'ライト会員として登録する'}
-                </button>
               </form>
             </div>
-
-            <aside className="space-y-6 lg:sticky lg:top-24">
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/80 p-6">
-                <h3 className="text-lg font-semibold text-blue-900">ライトプランの特長</h3>
-                <ul className="mt-4 space-y-3 text-sm text-blue-900/80">
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-blue-500" />
-                    予約状況や過去の利用履歴を1画面で確認
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-blue-500" />
-                    メンテナンス予定やお知らせを自動で受信
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-blue-500" />
-                    スマートフォン最適化されたダッシュボード
-                  </li>
-                </ul>
-              </div>
-
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900">登録の流れ</h3>
-                <ol className="mt-4 space-y-4 text-sm text-gray-600">
-                  <li>
-                    <span className="font-semibold text-blue-600">1.</span> ユーザー名とパスワードを入力
-                  </li>
-                  <li>
-                    <span className="font-semibold text-blue-600">2.</span> ライト会員として登録
-                  </li>
-                  <li>
-                    <span className="font-semibold text-blue-600">3.</span> 自動ログインでマイページ「MYP-DASH」へ
-                  </li>
-                </ol>
-              </div>
-            </aside>
           </div>
-        </section>
-      </main>
+        </main>
+
+        <footer className="border-t border-gray-100 bg-white py-6 text-sm text-gray-500">
+          <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 text-center md:flex-row md:flex-wrap md:justify-center md:gap-4">
+            <Link href="/faq" className="hover:text-red-600">
+              よくあるご質問
+            </Link>
+            <Link href="/privacy" className="hover:text-red-600">
+              プライバシーポリシー
+            </Link>
+            <Link href="/tokusyouhou" className="hover:text-red-600">
+              特定商取引法に基づく表示
+            </Link>
+            <Link href="/terms" className="hover:text-red-600">
+              利用規約・注意事項
+            </Link>
+            <Link href="/contact" className="hover:text-red-600">
+              お問い合わせ
+            </Link>
+          </div>
+          <p className="mt-4 text-center text-xs text-gray-400">Copyright レンタルバイク『ヤスカリ』.</p>
+        </footer>
+      </div>
     </>
   );
 }
