@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -9,7 +10,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     const res = await fetch('/api/login', {
@@ -18,7 +19,7 @@ export default function LoginPage() {
       body: JSON.stringify({ username, password }),
     });
     if (res.ok) {
-      router.push('/');
+      router.push('/mypage');
     } else {
       const data = await res.json();
       setError(data.message || 'Login failed');
@@ -33,6 +34,17 @@ export default function LoginPage() {
         <main className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
           <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
             <h1 className="text-xl font-bold mb-4 text-center">ログイン</h1>
+            <div className="bg-blue-50 border border-blue-100 text-sm text-blue-900 rounded p-3 mb-4">
+              <p className="font-semibold">デモアカウント情報</p>
+              <ul className="mt-1 space-y-1">
+                <li>
+                  <span className="font-semibold">ID:</span> adminuser
+                </li>
+                <li>
+                  <span className="font-semibold">パスワード:</span> adminuser
+                </li>
+              </ul>
+            </div>
             <div className="space-y-2">
               <button type="button" className="btn-primary w-full">Google でログイン</button>
               <button type="button" className="btn-primary w-full">Apple でログイン</button>
