@@ -10,7 +10,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const ip = req.socket.remoteAddress || '';
   const { username, password } = req.body || {};
 
-  const success = username === 'admin' && password === 'password';
+  const success = username === 'adminuser' && password === 'adminuser';
   const blocked = recordLoginResult(ip, success);
   if (blocked) {
     return res.status(429).json({ message: 'Too many attempts. Please wait.' });
