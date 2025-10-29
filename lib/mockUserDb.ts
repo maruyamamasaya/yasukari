@@ -96,6 +96,13 @@ export function createLightMember(params: CreateLightMemberParams): LightMember 
   return member;
 }
 
+export function hasLightMemberByEmail(email: string): boolean {
+  if (!email) {
+    return false;
+  }
+  return membersByEmail.has(email.trim().toLowerCase());
+}
+
 export function verifyLightMember(identifier: string, password: string): LightMember | null {
   const sanitizedIdentifier = identifier.trim();
   if (!sanitizedIdentifier) {

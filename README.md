@@ -67,6 +67,11 @@ yasukari公式ホームページリニューアル
 - `/signup` をライト会員専用の登録導線として再設計し、MYP-DASH への自動ログインを実装
 - ライト会員情報を保持するモックDB `lib/mockUserDb.ts` を追加し、ログインAPIと連携
 - 登録時の入力バリデーションとフィードバックUIを整備
+
+### v0.61
+- 認証コード入力ページ `/register/auth` を追加し、本登録の2段階認証フローを導入
+- サインアップAPIで認証コードを発行しAWS SESによるメール送信（ローカルはモック送信）に対応
+- 認証コード検証API `/api/register/verify` を実装し、成功時にライト会員を作成するよう変更
 ## 主要ディレクトリ
 - `components/` - React コンポーネント群
 - `pages/` - Next.js ページ
@@ -106,6 +111,21 @@ docs/               プロジェクトドキュメント
 ```
 
 より詳しい説明は [docs/OVERVIEW.md](docs/OVERVIEW.md) を参照してください。
+
+## 認証コード設計メモ
+
+AWS上での本番運用を想定し、メールリンクとワンタイム認証コードを組み合わせた2段階登録を設計しています。
+
+- **コード生成**: `lib/verificationCodeService.ts` で英数字6桁のコードを生成します。暗号学的に安全な `crypto.randomBytes` を利用し、24時間の有効期限と5回までの入力制限を設定しています。入力上限に達した場合はコードを失効させ、再度メールアドレスから発行し直す運用とします。
+- **データストア**: 本番環境では DynamoDB テーブル `registration_verification_codes` を用意し、`PK = email`, `code`, `expiresAt`, `attempts` を保持します。TTL機能を有効化して24時間経過後に自動削除します。開発環境ではメモリ上のMapで代替しています。
+- **メール送信**: `lib/verificationEmail.ts` がAWS SESへ送信処理を委譲します。`AWS_REGION` と `AWS_SES_SOURCE_EMAIL` を設定するとSESクライアントが作成され、本番用のHTML/テキストテンプレートで送信します。環境変数が未設定の場合はモック送信としてログ出力に切り替わります。
+- **エンドポイント構成**:
+  - `POST /api/signup` はメールアドレスを受け取り、重複登録を判定した上でコードを発行・送信し、`/register/auth?email=...` へ誘導するリンクを生成します。
+  - `POST /api/register/verify` はメールアドレスとコードを検証し、成功時に `lib/mockUserDb.ts` を通じてライト会員を作成し、セッションクッキーを付与します。
+- **再送運用**: 認証コードメールが届かない場合は `/signup` で再入力して再発行します。既存コードは上書きされ、最新のコードのみが有効になります。
+- **監査と可観測性**: SESの送信結果はCloudWatch Logsへ出力し、DynamoDBテーブルには`attempts`フィールドで入力回数を保持します。異常な連続失敗はEventBridgeで通知する想定です。
+
+これらの設計により、AWSを活用したセキュアな仮登録→本登録フローを維持しつつ、ローカル開発ではモック機構で簡易検証が可能です。
 ## 各ファイルの役割
 
 - `components/BikeModelCarousel.tsx`  

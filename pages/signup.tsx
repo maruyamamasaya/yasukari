@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 import type { FormEvent } from 'react';
 
@@ -11,6 +12,7 @@ type ApiResponse = {
 };
 
 export default function SignupPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<FormStatus>('idle');
   const [feedback, setFeedback] = useState('');
@@ -44,9 +46,11 @@ export default function SignupPage() {
       setStatus('success');
       setFeedback(
         data.message ??
-          '入力いただいたメールアドレス宛に登録のご案内をお送りしました。メールをご確認ください。',
+          '入力いただいたメールアドレス宛に認証コードを送信しました。届いたメールから本登録を進めてください。',
       );
+      const redirectEmail = email.trim().toLowerCase();
       setEmail('');
+      void router.push(`/register/auth?email=${encodeURIComponent(redirectEmail)}`);
     } catch (error) {
       console.error(error);
       setStatus('error');
