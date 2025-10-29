@@ -169,13 +169,13 @@ docs/               プロジェクトドキュメント
 ## ライト会員登録のモックDB設計
 
 - データ構造
-  - `LightMember` 型で `id`, `username`, `passwordHash`, `createdAt`, `plan` を保持します。
+  - `LightMember` 型で `id`, `username?`, `email?`, `passwordHash?`, `createdAt`, `plan` を保持します。メールアドレスのみの登録と従来のユーザー名・パスワード登録の両方に対応できるようにしています。
   - `plan` はライト会員を示す固定値 `"ライトプラン"` を採用しています。
 - 保存方式
-  - `Map<string, LightMember>` を利用したインメモリ管理。Next.js のAPIルート内で共有され、簡易なテストやデモ用途を想定しています。
+  - 会員情報はIDをキーにした `Map<string, LightMember>` と、ユーザー名・メールアドレス用のインデックスMapでインメモリ管理します。Next.js のAPIルート内で共有され、簡易なテストやデモ用途を想定しています。
   - 起動直後に `adminuser` / `adminuser` のデフォルトアカウントを自動生成し、既存のログイン動作を維持します。
 - 提供機能
-  - `createLightMember` がバリデーション付きで新規会員を登録し、`verifyLightMember` がログイン照合を行います。
+  - `createLightMember` がバリデーション付きで新規会員を登録し（メールアドレスのみの登録も可）、`verifyLightMember` がログイン照合を行います。
   - `/api/signup` は登録成功時に `auth` クッキーを返して自動ログインを成立させ、ユーザーは即座に MYP-DASH ( `/mypage` ) へ遷移します。
 - `lib/rateLimit.ts`
   APIやミドルウェアで使用する簡易メモリベースのレートリミッターを実装しています。
