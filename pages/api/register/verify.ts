@@ -22,31 +22,36 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const result = verifyVerificationCode(sanitizedEmail, sanitizedCode);
 
-  if (!result.success) {
-    switch (result.reason) {
-      case 'expired':
-        return res
-          .status(400)
-          .json({ message: '認証コードの有効期限が切れています。お手数ですが、もう一度メールアドレスを入力してください。' });
-      case 'too_many_attempts':
-        return res.status(400).json({ message: '認証コードの入力上限に達しました。最初からやり直してください。' });
-      case 'mismatch':
-        return res.status(400).json({ message: '認証コードが正しくありません。入力内容をご確認ください。' });
-      default:
-        return res.status(404).json({ message: '認証コードが見つかりませんでした。もう一度メールアドレスを入力してください。' });
-    }
+  if (result.success) {
+    const member = createLightMember({ email: sanitizedEmail });
+    res.setHeader('Set-Cookie', `auth=${member.id}; Path=/; HttpOnly; Max-Age=${60 * 60 * 24}; SameSite=Lax`);
+
+    return res.status(200).json({
+      message: '本登録が完了しました。マイページからご利用を開始できます。',
+      member: {
+        id: member.id,
+        email: member.email,
+        plan: member.plan,
+        createdAt: member.createdAt,
+      },
+    });
   }
 
-  const member = createLightMember({ email: sanitizedEmail });
-  res.setHeader('Set-Cookie', `auth=${member.id}; Path=/; HttpOnly; Max-Age=${60 * 60 * 24}; SameSite=Lax`);
-
-  return res.status(200).json({
-    message: '本登録が完了しました。マイページからご利用を開始できます。',
-    member: {
-      id: member.id,
-      email: member.email,
-      plan: member.plan,
-      createdAt: member.createdAt,
-    },
-  });
+  switch (result.reason) {
+    case 'expired':
+      return res
+        .status(400)
+        .json({ message: '認証コードの有効期限が切れています。お手数ですが、もう一度メールアドレスを入力してください。' });
+    case 'too_many_attempts':
+      return res.status(400).json({ message: '認証コードの入力上限に達しました。最初からやり直してください。' });
+    case 'mismatch': {
+      const attemptsRemaining = result.attemptsRemaining;
+      const message = attemptsRemaining
+        ? `認証コードが正しくありません。入力内容をご確認ください。（あと${attemptsRemaining}回再試行できます）`
+        : '認証コードが正しくありません。入力内容をご確認ください。';
+      return res.status(400).json({ message });
+    }
+    default:
+      return res.status(404).json({ message: '認証コードが見つかりませんでした。もう一度メールアドレスを入力してください。' });
+  }
 }
