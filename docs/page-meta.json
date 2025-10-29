@@ -1,0 +1,354 @@
+[
+  {
+    "file": "404.tsx",
+    "route": "/404",
+    "title": "ページが見つかりません - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "beginner.tsx",
+    "route": "/beginner",
+    "title": "はじめてガイド - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "blog_for_custmor/[slug].tsx",
+    "route": "/blog_for_custmor/[slug]",
+    "title": null,
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "blog_for_custmor/index.tsx",
+    "route": "/blog_for_custmor",
+    "title": "新着ブログ・お知らせ - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "blog_for_custmor/tag/[tag].tsx",
+    "route": "/blog_for_custmor/tag/[tag]",
+    "title": null,
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "chat.tsx",
+    "route": "/chat",
+    "title": "チャットサポート | yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "company.tsx",
+    "route": "/company",
+    "title": "運営会社情報 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "contact.tsx",
+    "route": "/contact",
+    "title": "お問い合わせ - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "customer_blog/index.tsx",
+    "route": "/customer_blog",
+    "title": "店舗ブログ - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "en/index.tsx",
+    "route": "/en",
+    "title": "yasukari - Motorcycle Rentals",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "external.tsx",
+    "route": "/external",
+    "title": "情報の外部送信について - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "guide.tsx",
+    "route": "/guide",
+    "title": "ご利用案内 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "help.tsx",
+    "route": "/help",
+    "title": "ヘルプ - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "index.tsx",
+    "route": "/",
+    "title": "yasukari - バイクレンタルサイト",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "insurance.tsx",
+    "route": "/insurance",
+    "title": "車両保険の内容について - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "login.tsx",
+    "route": "/login",
+    "title": "ログイン",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": true
+  },
+  {
+    "file": "manual_for_system/[slug].tsx",
+    "route": "/manual_for_system/[slug]",
+    "title": null,
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "manual_for_system/index.tsx",
+    "route": "/manual_for_system",
+    "title": null,
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "monitor.tsx",
+    "route": "/monitor",
+    "title": "Rate Limit Monitor",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "mypage/index.tsx",
+    "route": "/mypage",
+    "title": "マイページ",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "news/index.tsx",
+    "route": "/news",
+    "title": "新着情報 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "news/site-renewal.tsx",
+    "route": "/news/site-renewal",
+    "title": "サイトリニューアルのお知らせ - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "pricing.tsx",
+    "route": "/pricing",
+    "title": "車種・料金 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "privacy.tsx",
+    "route": "/privacy",
+    "title": "プライバシーポリシー - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "products/[modelCode].tsx",
+    "route": "/products/[modelCode]",
+    "title": null,
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "products/index.tsx",
+    "route": "/products",
+    "title": "全ての機種一覧 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "rental-status/index.tsx",
+    "route": "/rental-status",
+    "title": "レンタル状況",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "rental_bike/[slug].tsx",
+    "route": "/rental_bike/[slug]",
+    "title": null,
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "rental_bike/index.tsx",
+    "route": "/rental_bike",
+    "title": "新着ブログ・お知らせ - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "rental_bike/tag/[tag].tsx",
+    "route": "/rental_bike/tag/[tag]",
+    "title": null,
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "signup.tsx",
+    "route": "/signup",
+    "title": "新規会員登録 | 激安・便利なレンタルバイクのヤスカリ。",
+    "description": "中古バイク専門店が運営するレンタルバイク屋です。メールアドレスを入力して簡単に会員登録が行えます。",
+    "hasBreadcrumb": true,
+    "hasForm": true
+  },
+  {
+    "file": "source/[...path].tsx",
+    "route": "/source/[...path]",
+    "title": null,
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "stores.tsx",
+    "route": "/stores",
+    "title": "店舗一覧 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "t/genre/cc126-250.tsx",
+    "route": "/t/genre/cc126-250",
+    "title": "126〜250cc - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "t/genre/cc251-400.tsx",
+    "route": "/t/genre/cc251-400",
+    "title": "251〜400cc - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "t/genre/cc400-plus.tsx",
+    "route": "/t/genre/cc400-plus",
+    "title": "400cc超 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "t/genre/gyrocanopy-minicar.tsx",
+    "route": "/t/genre/gyrocanopy-minicar",
+    "title": "ジャイロキャノビーミニカー - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "t/genre/gyrocanopy-moped.tsx",
+    "route": "/t/genre/gyrocanopy-moped",
+    "title": "ジャイロキャノビー原付 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "t/genre/moped-manual.tsx",
+    "route": "/t/genre/moped-manual",
+    "title": "原付ミッション - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "t/genre/scooter-125cc.tsx",
+    "route": "/t/genre/scooter-125cc",
+    "title": "原付二種スクーター - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "t/genre/scooter-50cc.tsx",
+    "route": "/t/genre/scooter-50cc",
+    "title": "原付スクーター - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "terms.tsx",
+    "route": "/terms",
+    "title": "利用規約・注意事項",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "tokusyouhou.tsx",
+    "route": "/tokusyouhou",
+    "title": "特定商取引法に基づく表記 - yasukari",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  },
+  {
+    "file": "wait.tsx",
+    "route": "/wait",
+    "title": "しばらくお待ちください",
+    "description": null,
+    "hasBreadcrumb": false,
+    "hasForm": false
+  }
+]
