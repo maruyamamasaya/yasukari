@@ -1,9 +1,18 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
+import verificationPreview from '../../data/registerVerificationMock.json';
+
+type VerificationPreviewSample = {
+  email: string;
+  code: string;
+  note?: string;
+};
+
+const verificationPreviewSample = verificationPreview as VerificationPreviewSample;
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -49,6 +58,21 @@ const RegisterAuthPage: NextPage = () => {
     }
   }, [email]);
 
+  const previewEmailLower = verificationPreviewSample.email.toLowerCase();
+  const previewCodeLower = verificationPreviewSample.code.toLowerCase();
+  const isUsingPreviewEmail = normalizedEmail.toLowerCase() === previewEmailLower;
+
+  const handleApplyPreview = useCallback(() => {
+    setCode(verificationPreviewSample.code);
+    setStatus('idle');
+    setFeedback('');
+    void router.replace(
+      { pathname: router.pathname, query: { email: verificationPreviewSample.email } },
+      undefined,
+      { shallow: true },
+    );
+  }, [router]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -58,9 +82,21 @@ const RegisterAuthPage: NextPage = () => {
       return;
     }
 
-    if (!code.trim()) {
+    const trimmedCode = code.trim();
+
+    if (!trimmedCode) {
       setStatus('error');
       setFeedback('認証コードを入力してください。');
+      return;
+    }
+
+    const normalizedEmailLower = normalizedEmail.toLowerCase();
+    const trimmedCodeLower = trimmedCode.toLowerCase();
+
+    if (normalizedEmailLower === previewEmailLower && trimmedCodeLower === previewCodeLower) {
+      setStatus('success');
+      setFeedback('テスト表示用ダミーデータで認証を完了しました。');
+      setCode('');
       return;
     }
 
@@ -71,7 +107,7 @@ const RegisterAuthPage: NextPage = () => {
       const res = await fetch('/api/register/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizedEmail, code }),
+        body: JSON.stringify({ email: normalizedEmail, code: trimmedCode }),
       });
 
       const data: ApiResponse = await res.json().catch(() => ({}));
@@ -106,14 +142,20 @@ const RegisterAuthPage: NextPage = () => {
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
             <Link href="/" className="flex items-center gap-3">
               <img
-                src="/static/images/logo/250x50.png"
+                src="https://yasukari.com/static/images/logo/250x50.png"
                 alt="ヤスカリ"
                 width={200}
                 height={40}
                 className="hidden md:block"
               />
               <div className="flex items-center gap-2 md:hidden">
-                <img src="/static/images/logo/300x300.jpg" alt="ヤスカリ" width={44} height={44} className="rounded-full" />
+                <img
+                  src="https://yasukari.com/static/images/logo/300x300.jpg"
+                  alt="ヤスカリ"
+                  width={44}
+                  height={44}
+                  className="rounded-full"
+                />
                 <span className="text-sm font-semibold text-gray-800">レンタルバイクのヤスカリ</span>
               </div>
             </Link>
@@ -148,6 +190,40 @@ const RegisterAuthPage: NextPage = () => {
             <p className="mt-3 text-sm leading-relaxed text-gray-600">
               メールアドレスに本登録用の認証コードをお送りしました。メール本文に記載された6桁のコードを入力し、登録を完了してください。
             </p>
+            <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">テスト表示用ダミーデータ</p>
+              <dl className="mt-3 space-y-2 text-gray-700">
+                <div>
+                  <dt className="text-xs text-gray-500">メールアドレス</dt>
+                  <dd className="font-mono text-sm text-gray-900">{verificationPreviewSample.email}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-gray-500">マスク表示例</dt>
+                  <dd className="font-mono text-sm text-gray-900">{maskEmail(verificationPreviewSample.email)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-gray-500">認証コード</dt>
+                  <dd className="font-mono text-base text-gray-900 tracking-[0.3em]">{verificationPreviewSample.code}</dd>
+                </div>
+              </dl>
+              {verificationPreviewSample.note ? (
+                <p className="mt-3 text-xs leading-relaxed text-gray-600">{verificationPreviewSample.note}</p>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleApplyPreview}
+                className="mt-4 inline-flex items-center justify-center rounded-full border border-blue-500 px-4 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-500 hover:text-white"
+              >
+                テストデータをフォームに反映する
+              </button>
+              <p className="mt-2 text-[11px] leading-relaxed text-gray-500">
+                ボタンを押すと URL が <code className="rounded bg-gray-100 px-1 py-0.5">?email=preview-user%40example.com</code> に更新され、
+                認証コード欄にサンプル値が入力されます。
+              </p>
+              {isUsingPreviewEmail ? (
+                <p className="mt-2 text-[11px] font-semibold text-blue-600">テストデータがフォームに適用されています。</p>
+              ) : null}
+            </div>
             {normalizedEmail ? (
               <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 p-4">
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500">メールアドレス</p>
