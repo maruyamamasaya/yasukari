@@ -103,6 +103,19 @@ export function hasLightMemberByEmail(email: string): boolean {
   return membersByEmail.has(email.trim().toLowerCase());
 }
 
+export function findLightMemberByEmail(email: string): LightMember | null {
+  if (!email) {
+    return null;
+  }
+  const normalizedEmail = email.trim().toLowerCase();
+  const memberId = membersByEmail.get(normalizedEmail);
+  if (!memberId) {
+    return null;
+  }
+  const member = members.get(memberId);
+  return member ? { ...member } : null;
+}
+
 export function verifyLightMember(identifier: string, password: string): LightMember | null {
   const sanitizedIdentifier = identifier.trim();
   if (!sanitizedIdentifier) {

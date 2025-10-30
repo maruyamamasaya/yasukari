@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -16,8 +16,17 @@ const verificationPreviewSample = verificationPreview as VerificationPreviewSamp
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
+type LightMember = {
+  id: string;
+  email?: string;
+  username?: string;
+  plan: string;
+  createdAt: string;
+};
+
 type ApiResponse = {
   message?: string;
+  member?: LightMember;
 };
 
 const maskEmail = (email: string): string => {
@@ -32,11 +41,16 @@ const maskEmail = (email: string): string => {
   return `${head}***@${domain}`;
 };
 
+const TEST_EMAIL = 'test@test.com';
+const TEST_VERIFICATION_CODE = '0000';
+const TEST_REDIRECT_PATH = '/register/test';
+
 const RegisterAuthPage: NextPage = () => {
   const router = useRouter();
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<FormStatus>('idle');
   const [feedback, setFeedback] = useState('');
+  const autoSubmitAttemptedRef = useRef(false);
 
   const email = useMemo(() => {
     const queryEmail = router.query.email;
@@ -58,75 +72,108 @@ const RegisterAuthPage: NextPage = () => {
     }
   }, [email]);
 
-  const previewEmailLower = verificationPreviewSample.email.toLowerCase();
-  const previewCodeLower = verificationPreviewSample.code.toLowerCase();
-  const isUsingPreviewEmail = normalizedEmail.toLowerCase() === previewEmailLower;
+  useEffect(() => {
+    autoSubmitAttemptedRef.current = false;
+  }, [normalizedEmail]);
 
-  const handleApplyPreview = useCallback(() => {
-    setCode(verificationPreviewSample.code);
-    setStatus('idle');
-    setFeedback('');
-    void router.replace(
-      { pathname: router.pathname, query: { email: verificationPreviewSample.email } },
-      undefined,
-      { shallow: true },
-    );
-  }, [router]);
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!normalizedEmail) {
-      setStatus('error');
-      setFeedback('メールアドレス情報が見つかりません。最初から手続きをやり直してください。');
-      return;
+  useEffect(() => {
+    if (normalizedEmail === TEST_EMAIL && code !== TEST_VERIFICATION_CODE) {
+      setCode(TEST_VERIFICATION_CODE);
     }
+  }, [code, normalizedEmail]);
 
-    const trimmedCode = code.trim();
-
-    if (!trimmedCode) {
-      setStatus('error');
-      setFeedback('認証コードを入力してください。');
-      return;
-    }
-
-    const normalizedEmailLower = normalizedEmail.toLowerCase();
-    const trimmedCodeLower = trimmedCode.toLowerCase();
-
-    if (normalizedEmailLower === previewEmailLower && trimmedCodeLower === previewCodeLower) {
-      setStatus('success');
-      setFeedback('テスト表示用ダミーデータで認証を完了しました。');
-      setCode('');
-      return;
-    }
-
-    setStatus('loading');
-    setFeedback('');
-
-    try {
-      const res = await fetch('/api/register/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizedEmail, code: trimmedCode }),
-      });
-
-      const data: ApiResponse = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
+  const submitVerification = useCallback(
+    async (inputCode: string) => {
+      if (!normalizedEmail) {
         setStatus('error');
-        setFeedback(data.message ?? '認証に失敗しました。時間を置いて再度お試しください。');
+        setFeedback('メールアドレス情報が見つかりません。最初から手続きをやり直してください。');
+        autoSubmitAttemptedRef.current = false;
         return;
       }
 
-      setStatus('success');
-      setFeedback(data.message ?? '本登録が完了しました。');
-      setCode('');
-    } catch (error) {
-      console.error(error);
-      setStatus('error');
-      setFeedback('通信エラーが発生しました。ネットワーク環境をご確認のうえ、再度お試しください。');
+      const trimmedCode = inputCode.trim();
+
+      if (!trimmedCode) {
+        setStatus('error');
+        setFeedback('認証コードを入力してください。');
+        autoSubmitAttemptedRef.current = false;
+        return;
+      }
+
+      setStatus('loading');
+      setFeedback('');
+
+      try {
+        const res = await fetch('/api/register/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: normalizedEmail, code: trimmedCode }),
+        });
+
+        const data: ApiResponse = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          setStatus('error');
+          setFeedback(data.message ?? '認証に失敗しました。時間を置いて再度お試しください。');
+          autoSubmitAttemptedRef.current = false;
+          return;
+        }
+
+        setStatus('success');
+        setFeedback(data.message ?? '本登録が完了しました。');
+        if (normalizedEmail !== TEST_EMAIL) {
+          setCode('');
+        }
+
+        if (normalizedEmail === TEST_EMAIL) {
+          const query = new URLSearchParams();
+          if (data.member?.username) {
+            query.set('name', data.member.username);
+          }
+          const emailForRedirect = data.member?.email ?? normalizedEmail;
+          if (emailForRedirect) {
+            query.set('email', emailForRedirect);
+          }
+          void router.push(`${TEST_REDIRECT_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus('error');
+        setFeedback('通信エラーが発生しました。ネットワーク環境をご確認のうえ、再度お試しください。');
+        autoSubmitAttemptedRef.current = false;
+      }
+    },
+    [normalizedEmail, router],
+  );
+
+  useEffect(() => {
+    if (
+      normalizedEmail === TEST_EMAIL &&
+      code === TEST_VERIFICATION_CODE &&
+      !autoSubmitAttemptedRef.current &&
+      status === 'idle'
+    ) {
+      autoSubmitAttemptedRef.current = true;
+      void submitVerification(TEST_VERIFICATION_CODE);
     }
+  }, [code, normalizedEmail, status, submitVerification]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void submitVerification(code);
   };
+
+  useEffect(() => {
+    if (status === 'success' && normalizedEmail !== TEST_EMAIL) {
+      autoSubmitAttemptedRef.current = false;
+    }
+  }, [normalizedEmail, status]);
+
+  useEffect(() => {
+    if (status === 'error' && normalizedEmail === TEST_EMAIL) {
+      autoSubmitAttemptedRef.current = false;
+    }
+  }, [normalizedEmail, status]);
 
   return (
     <>
@@ -188,7 +235,7 @@ const RegisterAuthPage: NextPage = () => {
           <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-10">
             <h1 className="text-2xl font-semibold text-gray-900">認証コードを入力してください</h1>
             <p className="mt-3 text-sm leading-relaxed text-gray-600">
-              メールアドレスに本登録用の認証コードをお送りしました。メール本文に記載された6桁のコードを入力し、登録を完了してください。
+              メールアドレスに本登録用の認証コードをお送りしました。メール本文に記載されたコードを入力し、登録を完了してください。
             </p>
             <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
               <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">テスト表示用ダミーデータ</p>
@@ -235,6 +282,11 @@ const RegisterAuthPage: NextPage = () => {
                   </Link>
                   してください。
                 </p>
+                {normalizedEmail === TEST_EMAIL && (
+                  <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+                    テスト用のメールアドレスが検出されたため、自動で認証コードを入力し次のステップへ進みます。
+                  </p>
+                )}
               </div>
             ) : (
               <div className="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700">
@@ -272,8 +324,10 @@ const RegisterAuthPage: NextPage = () => {
                 onChange={(event) => setCode(event.target.value)}
                 className="w-full rounded-xl border border-gray-200 px-4 py-3 text-lg tracking-[0.3em] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
                 disabled={status === 'loading'}
+                minLength={4}
+                maxLength={6}
               />
-              <p className="text-xs text-gray-500">半角英数字6桁で入力してください。</p>
+              <p className="text-xs text-gray-500">半角英数字4〜6桁で入力してください。</p>
               <button
                 type="submit"
                 className="w-full rounded-full bg-red-600 py-3 text-lg font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"

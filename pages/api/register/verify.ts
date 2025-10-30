@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createLightMember, hasLightMemberByEmail } from '../../../lib/mockUserDb';
+import { createLightMember, findLightMemberByEmail, hasLightMemberByEmail } from '../../../lib/mockUserDb';
 import { verifyVerificationCode } from '../../../lib/verificationCodeService';
+
+const TEST_EMAIL = 'test@test.com';
+const TEST_VERIFICATION_CODE = '0000';
+const TEST_USERNAME = 'テスト';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -14,6 +18,28 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if (!sanitizedEmail || !sanitizedCode) {
     return res.status(400).json({ message: 'メールアドレスと認証コードを入力してください。' });
+  }
+
+  if (sanitizedEmail === TEST_EMAIL) {
+    if (sanitizedCode !== TEST_VERIFICATION_CODE) {
+      return res.status(400).json({ message: 'テストアカウントの認証コードが正しくありません。' });
+    }
+
+    const existingMember = findLightMemberByEmail(sanitizedEmail);
+    const member = existingMember ?? createLightMember({ email: sanitizedEmail, username: TEST_USERNAME });
+
+    res.setHeader('Set-Cookie', `auth=${member.id}; Path=/; HttpOnly; Max-Age=${60 * 60 * 24}; SameSite=Lax`);
+
+    return res.status(200).json({
+      message: 'テストアカウントでの認証に成功しました。',
+      member: {
+        id: member.id,
+        email: member.email,
+        username: member.username,
+        plan: member.plan,
+        createdAt: member.createdAt,
+      },
+    });
   }
 
   if (hasLightMemberByEmail(sanitizedEmail)) {
@@ -51,6 +77,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     member: {
       id: member.id,
       email: member.email,
+      username: member.username,
       plan: member.plan,
       createdAt: member.createdAt,
     },
