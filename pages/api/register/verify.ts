@@ -49,6 +49,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const result = verifyVerificationCode(sanitizedEmail, sanitizedCode);
 
   if (!result.success) {
+    if (!('reason' in result)) {
+      return res.status(500).json({ message: '認証処理中にエラーが発生しました。' });
+    }
+
     switch (result.reason) {
       case 'expired':
         return res
@@ -59,7 +63,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       case 'mismatch':
         return res.status(400).json({ message: '認証コードが正しくありません。入力内容をご確認ください。' });
       default:
-        return res.status(404).json({ message: '認証コードが見つかりませんでした。もう一度メールアドレスを入力してください。' });
+        return res
+          .status(404)
+          .json({ message: '認証コードが見つかりませんでした。もう一度メールアドレスを入力してください。' });
     }
   }
 
