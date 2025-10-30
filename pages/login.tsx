@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 
+import AuthHeader from '../components/auth/AuthHeader';
+
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -31,82 +33,136 @@ export default function LoginPage() {
       <Head>
         <title>ログイン</title>
       </Head>
-      <main className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-50 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-5xl mx-auto grid gap-12 md:grid-cols-[minmax(0,1fr),420px] items-center">
-          <section className="hidden md:block space-y-6 text-slate-700">
-            <h1 className="text-3xl font-bold text-slate-900">ようこそ、レンタル管理プラットフォームへ</h1>
-            <p className="text-lg leading-relaxed">
-              シンプルなログインで、レンタル状況の確認や契約情報の管理を素早く行えます。
-              セキュアで快適な管理体験を提供します。
-            </p>
-            <ul className="space-y-3 text-base">
-              <li className="flex items-start gap-3">
-                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
-                <span>リアルタイムで状況を把握できるダッシュボード</span>
+      <div className="min-h-screen bg-white text-gray-900">
+        <AuthHeader
+          highlightHref="/signup"
+          highlightLabel="会員登録"
+          mobileCtaHref="/signup"
+          mobileCtaLabel="会員登録"
+        />
+        <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
+          <nav aria-label="breadcrumb" className="mb-6">
+            <ol className="flex items-center space-x-2 text-sm text-gray-500">
+              <li>
+                <Link href="/" className="text-blue-600 hover:underline">
+                  ホーム
+                </Link>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
-                <span>チーム全員が使いやすいシンプルなインターフェース</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
-                <span>安心のセキュリティ対策で重要な情報を保護</span>
-              </li>
-            </ul>
-          </section>
-          <div className="bg-white shadow-xl rounded-2xl p-8 sm:p-10 w-full">
-            <div className="mb-8 text-center space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">ログイン</h2>
-              <p className="text-sm text-slate-500">ご登録のメールアドレスとパスワードを入力してください（メールアドレスのみで登録された場合はパスワード入力は不要です）</p>
+              <li aria-hidden="true">/</li>
+              <li className="text-gray-600">ログイン</li>
+            </ol>
+          </nav>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <h1 className="text-2xl font-bold text-gray-900">マイページでレンタルをスムーズに管理</h1>
+              <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                ご契約状況の確認や延長手続き、支払い情報の更新まで、マイページからまとめて行えます。
+                会員ならではの限定キャンペーンもこちらでお知らせしています。
+              </p>
+              <ul className="mt-4 space-y-3 text-sm text-gray-700">
+                {[{
+                  text: '最新のレンタル状況と履歴をいつでもチェック'
+                }, {
+                  text: 'オンラインで延長・オプション追加が完結'
+                }, {
+                  text: '会員限定クーポンや新着車両をいち早くご案内'
+                }].map((item) => (
+                  <li key={item.text} className="flex items-start gap-3">
+                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-red-500" aria-hidden="true" />
+                    <span>{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+                <p className="font-semibold">はじめての方へ</p>
+                <p className="mt-1 leading-relaxed">
+                  メールアドレスだけで仮登録が行えます。まだ会員でない方は
+                  <Link href="/signup" className="ml-1 font-semibold text-red-700 underline underline-offset-4">
+                    新規登録ページ
+                  </Link>
+                  をご確認ください。
+                </p>
+              </div>
+            </section>
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="mb-6 space-y-2 text-center">
+                <h2 className="text-xl font-semibold text-gray-900">ログイン</h2>
+                <p className="text-xs text-gray-500">
+                  ご登録のメールアドレスとパスワードを入力してください。メールアドレスのみで登録された場合はパスワード入力は不要です。
+                </p>
+              </div>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                >
+                  Google でログイン
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                >
+                  Apple でログイン
+                </button>
+              </div>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <span className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-3 text-gray-400">または</span>
+                </div>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {error && (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+                )}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700" htmlFor="email">
+                    メールアドレス
+                  </label>
+                  <input
+                    id="email"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                    placeholder="example@company.jp"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700" htmlFor="password">
+                    パスワード
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                    placeholder="パスワードを入力（メール登録のみの場合は空欄でOK）"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+                >
+                  メールアドレスでログイン
+                </button>
+              </form>
+              <p className="mt-6 text-center text-xs text-gray-500">
+                アカウントをお持ちでない方は
+                <Link href="/signup" className="ml-1 font-semibold text-red-600 underline underline-offset-2">
+                  新規登録
+                </Link>
+                へ
+              </p>
             </div>
-            <div className="space-y-3">
-              <button type="button" className="btn-primary w-full py-3 text-base">Google でログイン</button>
-              <button type="button" className="btn-primary w-full py-3 text-base">Apple でログイン</button>
-            </div>
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                <span className="w-full border-t border-slate-200" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-3 text-slate-400">または</span>
-              </div>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">メールアドレス</label>
-                <input
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="example@company.jp"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">パスワード</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="パスワードを入力（メール登録のみの場合は空欄でOK）"
-                />
-              </div>
-              <button type="submit" className="btn-primary w-full py-3 text-base font-semibold">
-                メールアドレスでログイン
-              </button>
-            </form>
-            <p className="mt-8 text-center text-sm text-slate-500">
-              アカウントをお持ちでない方は{' '}
-              <Link href="/signup" className="font-semibold text-blue-600 hover:underline">
-                新規登録
-              </Link>
-              へ
-            </p>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </>
   );
 }

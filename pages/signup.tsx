@@ -3,6 +3,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
+import AuthHeader from '../components/auth/AuthHeader';
+
 import type { FormEvent } from 'react';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -69,63 +71,12 @@ export default function SignupPage() {
       </Head>
 
       <div className="min-h-screen bg-white text-gray-900">
-        <header className="border-b border-gray-100 bg-white">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-            <Link href="/" className="flex items-center gap-3">
-              <img
-                src="/static/images/logo/250x50.png"
-                alt="ヤスカリ"
-                width={200}
-                height={40}
-                className="hidden md:block"
-              />
-              <div className="flex items-center gap-2 md:hidden">
-                <img src="/static/images/logo/300x300.jpg" alt="ヤスカリ" width={44} height={44} className="rounded-full" />
-                <span className="text-sm font-semibold text-gray-800">レンタルバイクのヤスカリ</span>
-              </div>
-            </Link>
-            <div className="hidden md:flex flex-col text-right text-sm">
-              <div className="flex items-center justify-end gap-2 text-red-600">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="18" height="18" fill="currentColor">
-                  <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path>
-                  <path
-                    fillRule="evenodd"
-                    d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"
-                  ></path>
-                </svg>
-                <Link href="/signup" className="font-semibold text-red-600">
-                  会員登録
-                </Link>
-              </div>
-              <span className="mt-1 text-gray-600">激安・便利なレンタルバイクのヤスカリ</span>
-            </div>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 rounded-full border border-red-600 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-600 hover:text-white md:hidden"
-            >
-              ログイン
-            </Link>
-          </div>
-          <div className="hidden bg-red-700 text-white md:block">
-            <div className="mx-auto flex max-w-6xl items-center justify-between px-8 text-sm">
-              {[
-                { href: '/guide', label: 'ご利用案内' },
-                { href: '/stores', label: '店舗' },
-                { href: '/products', label: '車種・料金' },
-                { href: '/insurance', label: '保険と補償' },
-                { href: '/faq', label: 'よくあるご質問' },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex-1 border-b-2 border-transparent py-3 text-center font-medium transition hover:bg-red-600"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </header>
+        <AuthHeader
+          highlightHref="/signup"
+          highlightLabel="会員登録"
+          mobileCtaHref="/login"
+          mobileCtaLabel="ログイン"
+        />
 
         <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
           <nav aria-label="breadcrumb" className="mb-6">
