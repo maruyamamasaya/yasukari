@@ -32,28 +32,7 @@ export default function LoginPage() {
         <title>ログイン</title>
       </Head>
       <main className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-50 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-5xl mx-auto grid gap-12 md:grid-cols-[minmax(0,1fr),420px] items-center">
-          <section className="hidden md:block space-y-6 text-slate-700">
-            <h1 className="text-3xl font-bold text-slate-900">ようこそ、レンタル管理プラットフォームへ</h1>
-            <p className="text-lg leading-relaxed">
-              シンプルなログインで、レンタル状況の確認や契約情報の管理を素早く行えます。
-              セキュアで快適な管理体験を提供します。
-            </p>
-            <ul className="space-y-3 text-base">
-              <li className="flex items-start gap-3">
-                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
-                <span>リアルタイムで状況を把握できるダッシュボード</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
-                <span>チーム全員が使いやすいシンプルなインターフェース</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
-                <span>安心のセキュリティ対策で重要な情報を保護</span>
-              </li>
-            </ul>
-          </section>
+        <div className="w-full max-w-xl mx-auto">
           <div className="bg-white shadow-xl rounded-2xl p-8 sm:p-10 w-full">
             <div className="mb-8 text-center space-y-2">
               <h2 className="text-2xl font-bold text-slate-900">ログイン</h2>
