@@ -1,19 +1,9 @@
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useCallback, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
-import verificationPreview from '../../data/registerVerificationMock.json';
-
-type VerificationPreviewSample = {
-  email: string;
-  code: string;
-  note?: string;
-};
-
-const verificationPreviewSample = verificationPreview as VerificationPreviewSample;
-
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
 type LightMember = {
@@ -41,17 +31,13 @@ const maskEmail = (email: string): string => {
   return `${head}***@${domain}`;
 };
 
-const PREVIEW_EMAIL = verificationPreviewSample.email ?? '';
-const PREVIEW_VERIFICATION_CODE = verificationPreviewSample.code ?? '';
-const PREVIEW_REDIRECT_PATH = '/register/test';
+const REGISTER_COMPLETION_PATH = '/register/test';
 
 const RegisterAuthPage: NextPage = () => {
   const router = useRouter();
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<FormStatus>('idle');
   const [feedback, setFeedback] = useState('');
-  const autoSubmitAttemptedRef = useRef(false);
-
   const email = useMemo(() => {
     const queryEmail = router.query.email;
     if (Array.isArray(queryEmail)) {
@@ -72,39 +58,11 @@ const RegisterAuthPage: NextPage = () => {
     }
   }, [email]);
 
-  const isUsingPreviewEmail = useMemo(() => normalizedEmail === PREVIEW_EMAIL, [normalizedEmail]);
-
-  const handleApplyPreview = useCallback(() => {
-    const previewEmail = verificationPreviewSample.email;
-    if (!previewEmail) {
-      return;
-    }
-
-    const nextUrl = `${router.pathname}?email=${encodeURIComponent(previewEmail)}`;
-    void router.replace(nextUrl, undefined, { shallow: true });
-
-    setCode(PREVIEW_VERIFICATION_CODE);
-    setStatus('idle');
-    setFeedback('');
-    autoSubmitAttemptedRef.current = false;
-  }, [router]);
-
-  useEffect(() => {
-    autoSubmitAttemptedRef.current = false;
-  }, [normalizedEmail]);
-
-  useEffect(() => {
-    if (normalizedEmail === PREVIEW_EMAIL && PREVIEW_VERIFICATION_CODE && code !== PREVIEW_VERIFICATION_CODE) {
-      setCode(PREVIEW_VERIFICATION_CODE);
-    }
-  }, [code, normalizedEmail]);
-
   const submitVerification = useCallback(
     async (inputCode: string) => {
       if (!normalizedEmail) {
         setStatus('error');
         setFeedback('メールアドレス情報が見つかりません。最初から手続きをやり直してください。');
-        autoSubmitAttemptedRef.current = false;
         return;
       }
 
@@ -113,18 +71,6 @@ const RegisterAuthPage: NextPage = () => {
       if (!trimmedCode) {
         setStatus('error');
         setFeedback('認証コードを入力してください。');
-        autoSubmitAttemptedRef.current = false;
-        return;
-      }
-
-      if (normalizedEmail === PREVIEW_EMAIL && trimmedCode === PREVIEW_VERIFICATION_CODE) {
-        setStatus('success');
-        setFeedback('テスト用アカウントの認証が完了しました。次のフォームで会員情報を入力してください。');
-        const query = new URLSearchParams();
-        if (normalizedEmail) {
-          query.set('email', normalizedEmail);
-        }
-        void router.push(`${PREVIEW_REDIRECT_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
         return;
       }
 
@@ -143,7 +89,6 @@ const RegisterAuthPage: NextPage = () => {
         if (!res.ok) {
           setStatus('error');
           setFeedback(data.message ?? '認証に失敗しました。時間を置いて再度お試しください。');
-          autoSubmitAttemptedRef.current = false;
           return;
         }
 
@@ -159,46 +104,20 @@ const RegisterAuthPage: NextPage = () => {
         if (emailForRedirect) {
           query.set('email', emailForRedirect);
         }
-        void router.push(`${PREVIEW_REDIRECT_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
+        void router.push(`${REGISTER_COMPLETION_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
       } catch (error) {
         console.error(error);
         setStatus('error');
         setFeedback('通信エラーが発生しました。ネットワーク環境をご確認のうえ、再度お試しください。');
-        autoSubmitAttemptedRef.current = false;
       }
     },
     [normalizedEmail, router],
   );
 
-  useEffect(() => {
-    if (
-      normalizedEmail === PREVIEW_EMAIL &&
-      PREVIEW_VERIFICATION_CODE &&
-      code === PREVIEW_VERIFICATION_CODE &&
-      !autoSubmitAttemptedRef.current &&
-      status === 'idle'
-    ) {
-      autoSubmitAttemptedRef.current = true;
-      void submitVerification(PREVIEW_VERIFICATION_CODE);
-    }
-  }, [code, normalizedEmail, status, submitVerification]);
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     void submitVerification(code);
   };
-
-  useEffect(() => {
-    if (status === 'success' && normalizedEmail !== PREVIEW_EMAIL) {
-      autoSubmitAttemptedRef.current = false;
-    }
-  }, [normalizedEmail, status]);
-
-  useEffect(() => {
-    if (status === 'error' && normalizedEmail === PREVIEW_EMAIL) {
-      autoSubmitAttemptedRef.current = false;
-    }
-  }, [normalizedEmail, status]);
 
   return (
     <>
@@ -263,38 +182,11 @@ const RegisterAuthPage: NextPage = () => {
               メールアドレスに本登録用の認証コードをお送りしました。メール本文に記載されたコードを入力し、登録を完了してください。
             </p>
             <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">テスト表示用ダミーデータ</p>
-              <dl className="mt-3 space-y-2 text-gray-700">
-                <div>
-                  <dt className="text-xs text-gray-500">メールアドレス</dt>
-                  <dd className="font-mono text-sm text-gray-900">{verificationPreviewSample.email}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-gray-500">マスク表示例</dt>
-                  <dd className="font-mono text-sm text-gray-900">{maskEmail(verificationPreviewSample.email)}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-gray-500">認証コード</dt>
-                  <dd className="font-mono text-base text-gray-900 tracking-[0.3em]">{verificationPreviewSample.code}</dd>
-                </div>
-              </dl>
-              {verificationPreviewSample.note ? (
-                <p className="mt-3 text-xs leading-relaxed text-gray-600">{verificationPreviewSample.note}</p>
-              ) : null}
-              <button
-                type="button"
-                onClick={handleApplyPreview}
-                className="mt-4 inline-flex items-center justify-center rounded-full border border-blue-500 px-4 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-500 hover:text-white"
-              >
-                テストデータをフォームに反映する
-              </button>
-              <p className="mt-2 text-[11px] leading-relaxed text-gray-500">
-                ボタンを押すと URL が <code className="rounded bg-gray-100 px-1 py-0.5">?email=preview-user%40example.com</code> に更新され、
-                認証コード欄にサンプル値が入力されます。
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">ご確認ください</p>
+              <p className="mt-3 leading-relaxed text-gray-700">
+                メール本文に記載された認証コードを入力して本登録を完了してください。メールが届かない場合は迷惑メールフォルダもご確認のうえ、
+                再送を希望される場合は最初から手続きをやり直してください。
               </p>
-              {isUsingPreviewEmail ? (
-                <p className="mt-2 text-[11px] font-semibold text-blue-600">テストデータがフォームに適用されています。</p>
-              ) : null}
             </div>
             {normalizedEmail ? (
               <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 p-4">
@@ -307,11 +199,6 @@ const RegisterAuthPage: NextPage = () => {
                   </Link>
                   してください。
                 </p>
-                {normalizedEmail === PREVIEW_EMAIL && (
-                  <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-                    テスト用のメールアドレスが検出されたため、自動で認証コードを入力し次のステップへ進みます。
-                  </p>
-                )}
               </div>
             ) : (
               <div className="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700">
