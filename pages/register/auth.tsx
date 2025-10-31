@@ -41,9 +41,9 @@ const maskEmail = (email: string): string => {
   return `${head}***@${domain}`;
 };
 
-const TEST_EMAIL = 'test@test.com';
-const TEST_VERIFICATION_CODE = '0000';
-const TEST_REDIRECT_PATH = '/register/test';
+const PREVIEW_EMAIL = verificationPreviewSample.email ?? '';
+const PREVIEW_VERIFICATION_CODE = verificationPreviewSample.code ?? '';
+const PREVIEW_REDIRECT_PATH = '/register/test';
 
 const RegisterAuthPage: NextPage = () => {
   const router = useRouter();
@@ -72,10 +72,7 @@ const RegisterAuthPage: NextPage = () => {
     }
   }, [email]);
 
-  const isUsingPreviewEmail = useMemo(
-    () => normalizedEmail === verificationPreviewSample.email,
-    [normalizedEmail],
-  );
+  const isUsingPreviewEmail = useMemo(() => normalizedEmail === PREVIEW_EMAIL, [normalizedEmail]);
 
   const handleApplyPreview = useCallback(() => {
     const previewEmail = verificationPreviewSample.email;
@@ -86,7 +83,7 @@ const RegisterAuthPage: NextPage = () => {
     const nextUrl = `${router.pathname}?email=${encodeURIComponent(previewEmail)}`;
     void router.replace(nextUrl, undefined, { shallow: true });
 
-    setCode(verificationPreviewSample.code ?? '');
+    setCode(PREVIEW_VERIFICATION_CODE);
     setStatus('idle');
     setFeedback('');
     autoSubmitAttemptedRef.current = false;
@@ -97,8 +94,8 @@ const RegisterAuthPage: NextPage = () => {
   }, [normalizedEmail]);
 
   useEffect(() => {
-    if (normalizedEmail === TEST_EMAIL && code !== TEST_VERIFICATION_CODE) {
-      setCode(TEST_VERIFICATION_CODE);
+    if (normalizedEmail === PREVIEW_EMAIL && PREVIEW_VERIFICATION_CODE && code !== PREVIEW_VERIFICATION_CODE) {
+      setCode(PREVIEW_VERIFICATION_CODE);
     }
   }, [code, normalizedEmail]);
 
@@ -117,6 +114,17 @@ const RegisterAuthPage: NextPage = () => {
         setStatus('error');
         setFeedback('認証コードを入力してください。');
         autoSubmitAttemptedRef.current = false;
+        return;
+      }
+
+      if (normalizedEmail === PREVIEW_EMAIL && trimmedCode === PREVIEW_VERIFICATION_CODE) {
+        setStatus('success');
+        setFeedback('テスト用アカウントの認証が完了しました。次のフォームで会員情報を入力してください。');
+        const query = new URLSearchParams();
+        if (normalizedEmail) {
+          query.set('email', normalizedEmail);
+        }
+        void router.push(`${PREVIEW_REDIRECT_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
         return;
       }
 
@@ -141,21 +149,17 @@ const RegisterAuthPage: NextPage = () => {
 
         setStatus('success');
         setFeedback(data.message ?? '本登録が完了しました。');
-        if (normalizedEmail !== TEST_EMAIL) {
-          setCode('');
-        }
+        setCode('');
 
-        if (normalizedEmail === TEST_EMAIL) {
-          const query = new URLSearchParams();
-          if (data.member?.username) {
-            query.set('name', data.member.username);
-          }
-          const emailForRedirect = data.member?.email ?? normalizedEmail;
-          if (emailForRedirect) {
-            query.set('email', emailForRedirect);
-          }
-          void router.push(`${TEST_REDIRECT_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
+        const query = new URLSearchParams();
+        if (data.member?.username) {
+          query.set('name', data.member.username);
         }
+        const emailForRedirect = data.member?.email ?? normalizedEmail;
+        if (emailForRedirect) {
+          query.set('email', emailForRedirect);
+        }
+        void router.push(`${PREVIEW_REDIRECT_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
       } catch (error) {
         console.error(error);
         setStatus('error');
@@ -168,13 +172,14 @@ const RegisterAuthPage: NextPage = () => {
 
   useEffect(() => {
     if (
-      normalizedEmail === TEST_EMAIL &&
-      code === TEST_VERIFICATION_CODE &&
+      normalizedEmail === PREVIEW_EMAIL &&
+      PREVIEW_VERIFICATION_CODE &&
+      code === PREVIEW_VERIFICATION_CODE &&
       !autoSubmitAttemptedRef.current &&
       status === 'idle'
     ) {
       autoSubmitAttemptedRef.current = true;
-      void submitVerification(TEST_VERIFICATION_CODE);
+      void submitVerification(PREVIEW_VERIFICATION_CODE);
     }
   }, [code, normalizedEmail, status, submitVerification]);
 
@@ -184,13 +189,13 @@ const RegisterAuthPage: NextPage = () => {
   };
 
   useEffect(() => {
-    if (status === 'success' && normalizedEmail !== TEST_EMAIL) {
+    if (status === 'success' && normalizedEmail !== PREVIEW_EMAIL) {
       autoSubmitAttemptedRef.current = false;
     }
   }, [normalizedEmail, status]);
 
   useEffect(() => {
-    if (status === 'error' && normalizedEmail === TEST_EMAIL) {
+    if (status === 'error' && normalizedEmail === PREVIEW_EMAIL) {
       autoSubmitAttemptedRef.current = false;
     }
   }, [normalizedEmail, status]);
@@ -302,7 +307,7 @@ const RegisterAuthPage: NextPage = () => {
                   </Link>
                   してください。
                 </p>
-                {normalizedEmail === TEST_EMAIL && (
+                {normalizedEmail === PREVIEW_EMAIL && (
                   <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
                     テスト用のメールアドレスが検出されたため、自動で認証コードを入力し次のステップへ進みます。
                   </p>
