@@ -3,8 +3,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import AuthHeader from '../components/auth/AuthHeader';
-
 import type { FormEvent } from 'react';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -73,13 +71,6 @@ export default function SignupPage() {
       </Head>
 
       <div className="min-h-screen bg-white text-gray-900">
-        <AuthHeader
-          highlightHref="/signup"
-          highlightLabel="会員登録"
-          mobileCtaHref="/login"
-          mobileCtaLabel="ログイン"
-        />
-
         <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
           <nav aria-label="breadcrumb" className="mb-6">
             <ol className="flex items-center space-x-2 text-sm text-gray-500">

@@ -4,8 +4,6 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 
-import AuthHeader from '../components/auth/AuthHeader';
-
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -34,12 +32,6 @@ export default function LoginPage() {
         <title>ログイン</title>
       </Head>
       <div className="min-h-screen bg-white text-gray-900">
-        <AuthHeader
-          highlightHref="/signup"
-          highlightLabel="会員登録"
-          mobileCtaHref="/signup"
-          mobileCtaLabel="会員登録"
-        />
         <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
           <nav aria-label="breadcrumb" className="mb-6">
             <ol className="flex items-center space-x-2 text-sm text-gray-500">
