@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
+import verificationPreview from '../../data/registerVerificationMock.json';
 
 type RegisterFormData = {
   password: string;
@@ -32,7 +33,14 @@ type RegisterFormData = {
   enquete_chance: string;
 };
 
-const TEST_EMAIL = 'test@test.com';
+type VerificationPreviewSample = {
+  email: string;
+  code: string;
+};
+
+const verificationPreviewSample = verificationPreview as VerificationPreviewSample;
+
+const PREVIEW_EMAIL = verificationPreviewSample.email;
 const TEST_LICENSE_FILE_NAME = 'test_license.jpg';
 
 const testAutofillData: Partial<RegisterFormData> = {
@@ -112,8 +120,8 @@ const RegisterTestPage: NextPage = () => {
   const router = useRouter();
 
   const displayEmail = useMemo(() => {
-    const decoded = decodeParam(router.query.email, TEST_EMAIL).trim();
-    return decoded || TEST_EMAIL;
+    const decoded = decodeParam(router.query.email, PREVIEW_EMAIL).trim();
+    return decoded || PREVIEW_EMAIL;
   }, [router.query.email]);
 
   const rawName = useMemo(() => decodeParam(router.query.name).trim(), [router.query.name]);
@@ -173,7 +181,7 @@ const RegisterTestPage: NextPage = () => {
   }, [defaultFormData]);
 
   useEffect(() => {
-    if (displayEmail !== TEST_EMAIL) {
+    if (displayEmail !== PREVIEW_EMAIL) {
       return;
     }
     if (autofillRef.current) {
@@ -277,11 +285,16 @@ const RegisterTestPage: NextPage = () => {
               会員登録のために必要な情報をご入力ください。テスト用のメールアドレスをご利用の場合は、入力内容が自動で補完されます。
             </p>
 
-            {displayEmail === TEST_EMAIL && (
+            {displayEmail === PREVIEW_EMAIL && (
               <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
                 テスト用アカウントのため、よく使うサンプル値を自動入力しています。必要に応じて編集してください。
               </div>
             )}
+
+            <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-relaxed text-blue-800">
+              入力内容をご確認のうえ、ページ下部の「新規会員登録」ボタンを押して本登録を完了してください。実装が整い次第、送信
+              された情報は Amazon DynamoDB に保存されます。
+            </div>
 
             {submitMessage && (
               <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{submitMessage}</div>
