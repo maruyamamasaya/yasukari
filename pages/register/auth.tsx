@@ -72,6 +72,26 @@ const RegisterAuthPage: NextPage = () => {
     }
   }, [email]);
 
+  const isUsingPreviewEmail = useMemo(
+    () => normalizedEmail === verificationPreviewSample.email,
+    [normalizedEmail],
+  );
+
+  const handleApplyPreview = useCallback(() => {
+    const previewEmail = verificationPreviewSample.email;
+    if (!previewEmail) {
+      return;
+    }
+
+    const nextUrl = `${router.pathname}?email=${encodeURIComponent(previewEmail)}`;
+    void router.replace(nextUrl, undefined, { shallow: true });
+
+    setCode(verificationPreviewSample.code ?? '');
+    setStatus('idle');
+    setFeedback('');
+    autoSubmitAttemptedRef.current = false;
+  }, [router]);
+
   useEffect(() => {
     autoSubmitAttemptedRef.current = false;
   }, [normalizedEmail]);
