@@ -1,5 +1,7 @@
 import { createHash, randomUUID } from 'crypto';
 
+export type RegistrationStatus = 'provisional' | 'full';
+
 export type LightMember = {
   id: string;
   username?: string;
@@ -7,12 +9,16 @@ export type LightMember = {
   passwordHash?: string;
   createdAt: string;
   plan: 'ライトプラン';
+  phoneNumber?: string;
+  registrationStatus: RegistrationStatus;
 };
 
 type CreateLightMemberParams = {
   username?: string;
   password?: string;
   email?: string;
+  phoneNumber?: string;
+  registrationStatus?: RegistrationStatus;
 };
 
 const members = new Map<string, LightMember>();
@@ -48,6 +54,7 @@ function seedDefaultAccount() {
     passwordHash: hashPassword('adminuser'),
     createdAt: new Date().toISOString(),
     plan: 'ライトプラン',
+    registrationStatus: 'full',
   };
   storeMember(seededAccount);
 }
@@ -58,12 +65,21 @@ export function createLightMember(params: CreateLightMemberParams): LightMember 
   const username = params.username?.trim();
   const password = params.password ?? '';
   const email = params.email?.trim().toLowerCase();
+  const rawPhoneNumber = params.phoneNumber ?? '';
+  const registrationStatus: RegistrationStatus = params.registrationStatus ?? 'provisional';
+
+  const normalizedPhoneNumber = rawPhoneNumber.replace(/[^0-9]/g, '');
 
   const hasEmail = Boolean(email);
   const hasCredentials = Boolean(username && password);
+  const hasPhoneNumber = Boolean(normalizedPhoneNumber);
 
   if (!hasEmail && !hasCredentials) {
     throw new Error('メールアドレスを入力してください');
+  }
+
+  if (hasPhoneNumber && (normalizedPhoneNumber.length < 10 || normalizedPhoneNumber.length > 15)) {
+    throw new Error('電話番号は10桁以上15桁以下の数字で入力してください');
   }
 
   if (hasCredentials && password.length < 6) {
@@ -90,6 +106,8 @@ export function createLightMember(params: CreateLightMemberParams): LightMember 
     passwordHash: hasCredentials ? hashPassword(password) : undefined,
     createdAt: new Date().toISOString(),
     plan: 'ライトプラン',
+    phoneNumber: normalizedPhoneNumber || undefined,
+    registrationStatus,
   };
 
   storeMember(member);
