@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { recordLoginResult } from '../../lib/rateLimit';
-import { verifyLightMember } from '../../lib/mockUserDb';
+import {
+  authenticateTestUser,
+  normalizeLoginInput,
+} from '../../lib/testUser';
+import { createAuthCookie, signAuthToken } from '../../lib/authToken';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -9,12 +13,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const ip = req.socket.remoteAddress || '';
-  const { username, password } = req.body || {};
-  const member = verifyLightMember(username ?? '', password ?? '');
-  const isAdminUser = Boolean(
-    member && (member.username === 'adminuser' || member.email === 'adminuser@example.com')
-  );
-  const blocked = recordLoginResult(ip, isAdminUser);
+  const normalizedInput = normalizeLoginInput(req.body ?? {});
+  const member = authenticateTestUser(normalizedInput.identifier, normalizedInput.password);
+
+  const blocked = recordLoginResult(ip, Boolean(member));
   if (blocked) {
     return res.status(429).json({ message: 'Too many attempts. Please wait.' });
   }
@@ -23,17 +25,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
 
-  if (!isAdminUser) {
-    return res.status(403).json({ message: 'このデモでは管理者ユーザーのみログインできます' });
-  }
+  const token = signAuthToken(member);
+  res.setHeader('Set-Cookie', createAuthCookie(token));
 
-  res.setHeader('Set-Cookie', `auth=${member.id}; Path=/; HttpOnly; Max-Age=86400; SameSite=Lax`);
+  const phoneForFutureUse = normalizedInput.phone;
+  void phoneForFutureUse;
+
   return res.status(200).json({
     message: 'Logged in',
     member: {
       id: member.id,
       username: member.username,
-      plan: member.plan,
+      email: member.email,
+      registrationStatus: member.registrationStatus,
     },
   });
 }
