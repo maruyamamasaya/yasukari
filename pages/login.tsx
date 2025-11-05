@@ -10,20 +10,14 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, password }),
-    });
-    if (res.ok) {
-      router.push('/mypage');
-    } else {
-      const data = await res.json();
-      setError(data.message || 'Login failed');
+    if (!identifier.trim()) {
+      setError('メールアドレスを入力してください。');
+      return;
     }
+    setError('');
+    router.push('/mypage');
   };
 
   return (
@@ -81,22 +75,15 @@ export default function LoginPage() {
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="mb-6 space-y-2 text-center">
                 <h2 className="text-xl font-semibold text-gray-900">ログイン</h2>
-                <p className="text-xs text-gray-500">
-                  ご登録のメールアドレスとパスワードを入力してください。メールアドレスのみで登録された場合はパスワード入力は不要です。
-                </p>
+                <p className="text-xs text-gray-500">ご登録のメールアドレスとパスワードを入力してください。</p>
               </div>
               <div className="space-y-3">
                 <button
                   type="button"
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-400 cursor-not-allowed bg-gray-50"
+                  disabled
                 >
                   Google でログイン
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                >
-                  Apple でログイン
                 </button>
               </div>
               <div className="relative my-6">
@@ -120,7 +107,7 @@ export default function LoginPage() {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                    placeholder="adminuser または admin@example.com"
+                    placeholder="メールアドレスを入力"
                     required
                   />
                 </div>
@@ -134,7 +121,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                    placeholder="パスワードを入力（メール登録のみの場合は空欄でOK）"
+                    placeholder="パスワードを入力"
                   />
                 </div>
                 <button
@@ -144,6 +131,26 @@ export default function LoginPage() {
                   メールアドレスでログイン
                 </button>
               </form>
+              <div className="mt-8 rounded-xl bg-gray-50 p-4 text-left">
+                <h3 className="text-sm font-semibold text-gray-900">Googleログイン（準備中）</h3>
+                <p className="mt-2 text-xs leading-relaxed text-gray-600">
+                  現在、Googleアカウントによるログイン機能を構築中です。正式な連携が完了次第、Googleアカウントの選択画面からワンタップでログインできるようになります。
+                </p>
+                <ul className="mt-3 space-y-2 text-xs text-gray-600">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
+                    <span>Googleでの認証後に自動的にマイページへ遷移</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
+                    <span>メールアドレスとパスワードの入力は不要</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
+                    <span>正式リリースまで今しばらくお待ちください</span>
+                  </li>
+                </ul>
+              </div>
               <p className="mt-6 text-center text-xs text-gray-500">
                 アカウントをお持ちでない方は
                 <Link href="/signup" className="ml-1 font-semibold text-red-600 underline underline-offset-2">
