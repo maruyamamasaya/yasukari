@@ -8,6 +8,7 @@ describe('mockUserDb', () => {
     const member = createLightMember({ username, password });
     expect(member.username).toBe(username);
     expect(member.plan).toBe('ライトプラン');
+    expect(member.registrationStatus).toBe('provisional');
 
     const verified = verifyLightMember(username, password);
     expect(verified).not.toBeNull();
@@ -20,10 +21,27 @@ describe('mockUserDb', () => {
     const member = createLightMember({ email });
     expect(member.email).toBe(email.toLowerCase());
     expect(member.username).toBeUndefined();
+    expect(member.registrationStatus).toBe('provisional');
 
     const verified = verifyLightMember(email, '');
     expect(verified).not.toBeNull();
     expect(verified?.id).toBe(member.id);
+  });
+
+  it('normalizes phone numbers and respects registration status', () => {
+    const username = `user_${Date.now()}_phone`;
+    const email = `${username}@example.com`;
+
+    const member = createLightMember({
+      username,
+      password: 'secret123',
+      email,
+      phoneNumber: '090-1234-5678',
+      registrationStatus: 'full',
+    });
+
+    expect(member.phoneNumber).toBe('09012345678');
+    expect(member.registrationStatus).toBe('full');
   });
 
   it('lists registered members including the seeded account', () => {

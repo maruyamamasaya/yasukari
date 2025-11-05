@@ -185,18 +185,20 @@ AWS上での本番運用を想定し、メールリンクとワンタイム認�
   `data/bikes.json` を読み込んでバイクモデル一覧を返すユーティリティ。将来は DynamoDB などへの置き換えを想定しています。
 - `lib/mockUserDb.ts`
   ライト会員のモックデータベース。メモリ上の Map でユーザーを保持し、初期アカウントのシード、登録、認証、一覧取得を提供します。`/api/signup` と `/api/login` から利用し、登録直後に自動でログインする仕組みを支えます。
+- `lib/pendingRegistrations.ts`
+  仮登録フォームで送信された「メールアドレス・お名前・パスワード・電話番号」を本登録完了まで保持するインメモリの待機レコード管理です。認証コード検証時に取り出し、`createLightMember` へ引き渡します。
 
 ## ライト会員登録のモックDB設計
 
 - データ構造
-  - `LightMember` 型で `id`, `username?`, `email?`, `passwordHash?`, `createdAt`, `plan` を保持します。メールアドレスのみの登録と従来のユーザー名・パスワード登録の両方に対応できるようにしています。
+- `LightMember` 型で `id`, `username?`, `email?`, `passwordHash?`, `createdAt`, `plan`, `phoneNumber?`, `registrationStatus` を保持します。`registrationStatus` は `'provisional' | 'full'` のいずれかで、仮登録と本登録を判別します。
   - `plan` はライト会員を示す固定値 `"ライトプラン"` を採用しています。
 - 保存方式
   - 会員情報はIDをキーにした `Map<string, LightMember>` と、ユーザー名・メールアドレス用のインデックスMapでインメモリ管理します。Next.js のAPIルート内で共有され、簡易なテストやデモ用途を想定しています。
   - 起動直後に `adminuser` / `adminuser` のデフォルトアカウントを自動生成し、既存のログイン動作を維持します。
 - 提供機能
   - `createLightMember` がバリデーション付きで新規会員を登録し（メールアドレスのみの登録も可）、`verifyLightMember` がログイン照合を行います。
-  - `/api/signup` は登録成功時に `auth` クッキーを返して自動ログインを成立させ、ユーザーは即座に MYP-DASH ( `/mypage` ) へ遷移します。
+  - `/api/signup` は仮登録時に入力された情報を一時保存し、認証コードメールを送信します。コード検証が成功すると仮登録として `registrationStatus: 'provisional'` の会員が生成されます。
 - `lib/rateLimit.ts`
   APIやミドルウェアで使用する簡易メモリベースのレートリミッターを実装しています。
 - `middleware.ts`
@@ -236,6 +238,17 @@ AWS上での本番運用を想定し、メールリンクとワンタイム認�
   プロジェクト管理に使用する設定ファイル。Next.jsやReact、Swiper、react-iconsなど依存ライブラリのバージョンを記述し、npm scriptsとしてdev・build・startコマンドを登録しています。プライベートフラグによりnpm公開はされず、今後依存追加やバージョン更新を行う際はここを編集しチームの環境を統一します。設定内容はGitで管理されているため、全員が同じ環境で作業できます。
 - `tsconfig.json`  
   TypeScriptのコンパイル設定をまとめるファイル。ES2017ターゲットやモジュール解決方法、jsx設定などを定義し、strictモードは無効化。Next.js推奨のオプションをベースにインクリメンタルビルドやJSONモジュール読み込みを有効にしています。include/excludeを指定してnode_modulesを除外し、開発効率とビルド速度を向上させます。設定変更で型チェック厳格化も可能。
+### 仮登録で必要となる入力項目
+
+| 項目名 | キー | 形式 / 備考 |
+| --- | --- | --- |
+| メールアドレス | `email` | 有効なメールアドレス。既存会員と重複不可 |
+| お名前 | `fullName` | 全角可。前後の空白は自動で除去 |
+| パスワード | `password` | 6文字以上の半角英数字を推奨 |
+| 電話番号 | `phoneNumber` | ハイフン無しで 10〜15 桁の数字に正規化され保存 |
+
+入力内容は `docs/registration_parameters_sample.csv` に CSV 形式のサンプルを用意しています。`registration_type` 列で `provisional` を選択した行が仮登録に必要な最小セット、`full` 行が将来的に予定している本登録のフル項目例です。
+
 ## AWS連携例
 ログイン機能を本番運用する場合、Amazon Cognito を使って認証やユーザープールを管理することができます。EC2 上のアプリから Cognito を利用すれば、パスワードリセットや多要素認証なども簡単に設定できます。
 

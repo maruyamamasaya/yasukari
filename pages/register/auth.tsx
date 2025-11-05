@@ -12,6 +12,8 @@ type LightMember = {
   username?: string;
   plan: string;
   createdAt: string;
+  phoneNumber?: string;
+  registrationStatus: 'provisional' | 'full';
 };
 
 type ApiResponse = {

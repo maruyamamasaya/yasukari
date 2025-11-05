@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createLightMember, findLightMemberByEmail, hasLightMemberByEmail } from '../../../lib/mockUserDb';
+import type { LightMember } from '../../../lib/mockUserDb';
 import { verifyVerificationCode } from '../../../lib/verificationCodeService';
+import { clearPendingRegistration, getPendingRegistration } from '../../../lib/pendingRegistrations';
 
 const TEST_EMAIL = 'test@test.com';
 const TEST_VERIFICATION_CODE = '0000';
@@ -38,6 +40,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         username: member.username,
         plan: member.plan,
         createdAt: member.createdAt,
+        phoneNumber: member.phoneNumber,
+        registrationStatus: member.registrationStatus,
       },
     });
   }
@@ -69,17 +73,35 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     }
   }
 
-  const member = createLightMember({ email: sanitizedEmail });
+  const pendingRegistration = getPendingRegistration(sanitizedEmail);
+  let member: LightMember;
+  try {
+    member = pendingRegistration
+      ? createLightMember({
+          email: sanitizedEmail,
+          username: pendingRegistration.fullName,
+          password: pendingRegistration.password,
+          phoneNumber: pendingRegistration.phoneNumber,
+          registrationStatus: 'provisional',
+        })
+      : createLightMember({ email: sanitizedEmail });
+  } finally {
+    clearPendingRegistration(sanitizedEmail);
+  }
   res.setHeader('Set-Cookie', `auth=${member.id}; Path=/; HttpOnly; Max-Age=${60 * 60 * 24}; SameSite=Lax`);
 
   return res.status(200).json({
-    message: '本登録が完了しました。マイページからご利用を開始できます。',
+    message: pendingRegistration
+      ? '仮登録が完了しました。続きの本登録はマイページから行えます。'
+      : '本登録が完了しました。マイページからご利用を開始できます。',
     member: {
       id: member.id,
       email: member.email,
       username: member.username,
       plan: member.plan,
       createdAt: member.createdAt,
+      phoneNumber: member.phoneNumber,
+      registrationStatus: member.registrationStatus,
     },
   });
 }

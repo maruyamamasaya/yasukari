@@ -14,13 +14,44 @@ type ApiResponse = {
 export default function SignupPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [status, setStatus] = useState<FormStatus>('idle');
   const [feedback, setFeedback] = useState('');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!email.trim()) {
+    const trimmedEmail = email.trim();
+    const trimmedFullName = fullName.trim();
+    const sanitizedPhoneNumber = phoneNumber.replace(/[^0-9]/g, '');
+
+    if (!trimmedEmail) {
       setFeedback('メールアドレスを入力してください');
+      setStatus('error');
+      return;
+    }
+
+    if (!trimmedFullName) {
+      setFeedback('お名前を入力してください');
+      setStatus('error');
+      return;
+    }
+
+    if (password.length < 6) {
+      setFeedback('パスワードは6文字以上で入力してください');
+      setStatus('error');
+      return;
+    }
+
+    if (!sanitizedPhoneNumber) {
+      setFeedback('電話番号を入力してください');
+      setStatus('error');
+      return;
+    }
+
+    if (sanitizedPhoneNumber.length < 10 || sanitizedPhoneNumber.length > 15) {
+      setFeedback('電話番号は10桁以上15桁以下の数字で入力してください');
       setStatus('error');
       return;
     }
@@ -32,7 +63,12 @@ export default function SignupPage() {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email: trimmedEmail,
+          fullName: trimmedFullName,
+          password,
+          phoneNumber: sanitizedPhoneNumber,
+        }),
       });
 
       const data: ApiResponse = await res.json().catch(() => ({}));
@@ -46,10 +82,13 @@ export default function SignupPage() {
       setStatus('success');
       setFeedback(
         data.message ??
-          '入力いただいたメールアドレス宛に認証コードを送信しました。届いたメールから本登録を進めてください。',
+          '入力いただいたメールアドレス宛に仮登録用の認証コードを送信しました。届いたメールから本登録手続きを進めてください。',
       );
-      const redirectEmail = email.trim().toLowerCase();
+      const redirectEmail = trimmedEmail.toLowerCase();
       setEmail('');
+      setFullName('');
+      setPassword('');
+      setPhoneNumber('');
       void router.push(`/register/auth?email=${encodeURIComponent(redirectEmail)}`);
     } catch (error) {
       console.error(error);
@@ -66,7 +105,7 @@ export default function SignupPage() {
         <title>新規会員登録 | 激安・便利なレンタルバイクのヤスカリ。</title>
         <meta
           name="description"
-          content="中古バイク専門店が運営するレンタルバイク屋です。メールアドレスを入力して簡単に会員登録が行えます。"
+          content="中古バイク専門店が運営するレンタルバイク屋です。メールアドレスや基本情報を入力して簡単に仮登録が行えます。"
         />
       </Head>
 
@@ -89,7 +128,7 @@ export default function SignupPage() {
               <p className="text-xs font-semibold uppercase tracking-wide text-red-600">Trial plan</p>
               <h1 className="mt-2 text-3xl font-bold text-gray-900">最短1分で仮登録。バイク生活をもっと自由に。</h1>
               <p className="mt-4 text-sm leading-relaxed text-gray-600">
-                メールアドレスをご登録いただくだけで、ヤスカリ。のレンタルサービスをご利用いただく準備が整います。
+                メールアドレスや基本情報をご登録いただくだけで、ヤスカリ。のレンタルサービスをご利用いただく準備が整います。
                 後日届くメールから本登録を完了すると、車両の予約やレンタル状況の確認がマイページで可能になります。
               </p>
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
@@ -113,9 +152,9 @@ export default function SignupPage() {
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="mb-6 space-y-2 text-center">
-                <h2 className="text-xl font-semibold text-gray-900">メールアドレスで仮登録</h2>
+                <h2 className="text-xl font-semibold text-gray-900">必要事項を入力して仮登録</h2>
                 <p className="text-xs text-gray-500">
-                  入力いただいたメールアドレス宛に確認コードをお送りします。受信したメールから手続きを完了してください。
+                  メールアドレス・お名前・パスワード・電話番号をご入力ください。確認コードをお送りし、仮登録を完了できます。
                 </p>
               </div>
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -133,6 +172,22 @@ export default function SignupPage() {
                   </p>
                 )}
                 <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700" htmlFor="fullName">
+                    お名前
+                  </label>
+                  <input
+                    id="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                    placeholder="例）山田 太郎"
+                    autoComplete="name"
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700" htmlFor="email">
                     メールアドレス
                   </label>
@@ -147,6 +202,41 @@ export default function SignupPage() {
                     disabled={isLoading}
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700" htmlFor="password">
+                    パスワード
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                    placeholder="半角英数字6文字以上"
+                    autoComplete="new-password"
+                    disabled={isLoading}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700" htmlFor="phoneNumber">
+                    電話番号
+                  </label>
+                  <input
+                    id="phoneNumber"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(event) => setPhoneNumber(event.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                    placeholder="09012345678"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    disabled={isLoading}
+                    required
+                  />
+                  <p className="text-xs text-gray-500">ハイフンなしの半角数字で入力してください。</p>
                 </div>
                 <button
                   type="submit"
