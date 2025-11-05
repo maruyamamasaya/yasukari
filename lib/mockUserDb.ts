@@ -116,6 +116,14 @@ export function findLightMemberByEmail(email: string): LightMember | null {
   return member ? { ...member } : null;
 }
 
+export function findLightMemberById(id: string): LightMember | null {
+  if (!id) {
+    return null;
+  }
+  const member = members.get(id.trim());
+  return member ? { ...member } : null;
+}
+
 export function verifyLightMember(identifier: string, password: string): LightMember | null {
   const sanitizedIdentifier = identifier.trim();
   if (!sanitizedIdentifier) {
