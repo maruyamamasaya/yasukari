@@ -8,16 +8,51 @@ export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!identifier.trim()) {
       setError('メールアドレスを入力してください。');
       return;
     }
+    if (!password.trim()) {
+      setError('パスワードを入力してください。');
+      return;
+    }
+
     setError('');
-    router.push('/mypage');
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password }),
+      });
+
+      if (!response.ok) {
+        let message = 'ログインに失敗しました。内容をご確認ください。';
+        try {
+          const data = (await response.json()) as { message?: string };
+          if (typeof data?.message === 'string' && data.message.trim().length > 0) {
+            message = data.message;
+          }
+        } catch (jsonError) {
+          void jsonError;
+        }
+        setError(message);
+        return;
+      }
+
+      await router.push('/mypage');
+    } catch (fetchError) {
+      console.error(fetchError);
+      setError('ネットワークエラーが発生しました。時間をおいて再度お試しください。');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -126,9 +161,10 @@ export default function LoginPage() {
                 </div>
                 <button
                   type="submit"
-                  className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={isSubmitting}
                 >
-                  メールアドレスでログイン
+                  {isSubmitting ? 'ログイン中…' : 'メールアドレスでログイン'}
                 </button>
               </form>
               <div className="mt-8 rounded-xl bg-gray-50 p-4 text-left">
