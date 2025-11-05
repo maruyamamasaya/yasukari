@@ -5,7 +5,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function LoginPage() {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ identifier, password }),
     });
     if (res.ok) {
       router.push('/mypage');
@@ -112,15 +112,15 @@ export default function LoginPage() {
                   <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
                 )}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700" htmlFor="email">
-                    メールアドレス
+                  <label className="text-sm font-medium text-gray-700" htmlFor="identifier">
+                    ユーザー名またはメールアドレス
                   </label>
                   <input
-                    id="email"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    id="identifier"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
                     className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                    placeholder="example@company.jp"
+                    placeholder="adminuser または admin@example.com"
                     required
                   />
                 </div>
