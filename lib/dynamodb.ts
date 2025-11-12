@@ -1,8 +1,17 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
-// ScanCommand のコンストラクタ引数から入力型を推論
-type ScanInput = ConstructorParameters<typeof ScanCommand>[0];
+// ScanCommand に渡したい最小限の入力型を自前で定義する
+type ScanInput = {
+  TableName: string;
+  ExclusiveStartKey?: Record<string, unknown>;
+  ProjectionExpression?: string;
+  FilterExpression?: string;
+  ExpressionAttributeNames?: Record<string, string>;
+  ExpressionAttributeValues?: Record<string, unknown>;
+  // 他に使いたくなったらここに足す
+  [key: string]: unknown;
+};
 
 // DynamoDBDocumentClient.from(...) の戻り値の型
 type DocumentClient = ReturnType<typeof DynamoDBDocumentClient.from>;
@@ -27,9 +36,7 @@ export function getDocumentClient(): DocumentClient {
   return documentClient;
 }
 
-export async function scanAllItems<T>(
-  input: Omit<ScanInput, "TableName"> & { TableName: string }
-): Promise<T[]> {
+export async function scanAllItems<T>(input: ScanInput): Promise<T[]> {
   const client = getDocumentClient();
   let items: T[] = [];
   let lastEvaluatedKey: ScanInput["ExclusiveStartKey"] | undefined;
@@ -43,7 +50,7 @@ export async function scanAllItems<T>(
     );
 
     items = items.concat((response.Items ?? []) as T[]);
-    lastEvaluatedKey = response.LastEvaluatedKey;
+    lastEvaluatedKey = response.LastEvaluatedKey as ScanInput["ExclusiveStartKey"];
   } while (lastEvaluatedKey);
 
   return items;
@@ -73,7 +80,7 @@ export async function generateNextNumericId(
       }
     }
 
-    lastEvaluatedKey = response.LastEvaluatedKey;
+    lastEvaluatedKey = response.LastEvaluatedKey as ScanInput["ExclusiveStartKey"];
   } while (lastEvaluatedKey);
 
   return maxValue + 1;
