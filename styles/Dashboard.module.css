@@ -1,62 +1,85 @@
 .container {
   display: flex;
-  gap: clamp(1.5rem, 4vw, 3rem);
-  align-items: flex-start;
+  flex-direction: column;
+  gap: clamp(2rem, 5vw, 3.5rem);
 }
 
-.sidebar {
-  position: sticky;
-  top: 7rem;
-  width: clamp(220px, 22vw, 280px);
-  border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  box-shadow: 0 25px 40px -28px rgba(15, 23, 42, 0.35);
-  padding: 1.5rem;
-}
-
-.menuTitle {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  margin-bottom: 1rem;
-  color: rgba(15, 23, 42, 0.7);
-}
-
-.menuList {
+.menuSection {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  gap: clamp(1.1rem, 2vw, 1.8rem);
+  border-radius: 1.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 30px 45px -32px rgba(15, 23, 42, 0.4);
+  padding: clamp(1.5rem, 4vw, 2.75rem);
 }
 
-.menuButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.65rem 0.9rem;
+.pageTitle {
+  font-size: clamp(1.6rem, 1.1vw + 1.3rem, 2rem);
+  color: rgba(15, 23, 42, 0.92);
+  font-weight: 700;
+}
+
+.pageDescription {
+  color: rgba(71, 85, 105, 0.85);
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.menuCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(248, 250, 252, 0.65);
+  color: rgba(30, 41, 59, 0.9);
   font-weight: 600;
-  border-radius: 0.85rem;
-  border: 1px solid transparent;
-  background: rgba(248, 113, 113, 0.08);
-  color: var(--primary-color-dark);
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+    background 0.2s ease;
 }
 
-.menuButton:hover,
-.menuButton:focus {
-  background: rgba(248, 113, 113, 0.16);
-  border-color: rgba(248, 113, 113, 0.45);
-  transform: translateX(3px);
+.menuCard:hover,
+.menuCard:focus-visible {
+  outline: none;
+  background: rgba(248, 250, 252, 0.92);
+  border-color: rgba(248, 113, 113, 0.5);
+  box-shadow: 0 18px 32px -28px rgba(15, 23, 42, 0.45);
+  transform: translateY(-2px);
+}
+
+.menuCardActive {
+  border-color: rgba(248, 113, 113, 0.5);
+  box-shadow: 0 22px 38px -28px rgba(248, 113, 113, 0.6);
+  background: rgba(248, 113, 113, 0.14);
+  color: var(--primary-color-dark);
+}
+
+.menuCardLabel {
+  font-size: 1.05rem;
+}
+
+.menuCardNote {
+  font-size: 0.85rem;
+  color: rgba(71, 85, 105, 0.8);
+  font-weight: 500;
 }
 
 .main {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
+  gap: clamp(1.75rem, 4vw, 3rem);
 }
 
 .section {
@@ -96,6 +119,60 @@
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.sectionHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionActions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(30, 41, 59, 0.82);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.iconButton:hover,
+.iconButton:focus-visible {
+  outline: none;
+  background: #fff;
+  box-shadow: 0 16px 28px -26px rgba(15, 23, 42, 0.45);
+  transform: translateY(-1px);
+}
+
+.iconButtonAccent {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--primary-color), #f97316);
+  color: #fff;
+  box-shadow: 0 20px 34px -24px rgba(248, 113, 113, 0.75);
+}
+
+.iconButtonAccent:hover,
+.iconButtonAccent:focus-visible {
+  box-shadow: 0 26px 40px -24px rgba(248, 113, 113, 0.7);
+}
+
+.icon {
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
 .formCard {
@@ -203,10 +280,16 @@
   font-weight: 600;
 }
 
-.successList {
+.cardStack {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.formBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .tableWrapper {
@@ -272,25 +355,43 @@
   color: rgba(100, 116, 139, 0.9);
 }
 
-@media (max-width: 1100px) {
-  .sidebar {
-    position: static;
+@media (max-width: 960px) {
+  .menuSection {
+    padding: clamp(1.25rem, 3.5vw, 2.1rem);
+  }
+
+  .menuGrid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .sectionHeaderRow {
+    align-items: stretch;
+  }
+
+  .sectionActions {
     width: 100%;
+    justify-content: flex-start;
   }
 
-  .container {
-    flex-direction: column;
-  }
-
-  .menuList {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  .iconButton,
+  .iconButtonAccent {
+    width: 100%;
+    justify-content: center;
   }
 }
 
 @media (max-width: 640px) {
-  .menuList {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  .menuGrid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .sectionHeaderRow {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .sectionActions {
+    width: 100%;
   }
 
   .formGrid {
