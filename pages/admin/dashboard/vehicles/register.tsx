@@ -1,11 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import formStyles from "../../../styles/AdminForm.module.css";
-import styles from "../../../styles/Dashboard.module.css";
-import { BikeModel, PublishStatus, Vehicle } from "../../../lib/dashboard/types";
-import { parseTags } from "../../../lib/dashboard/utils";
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import formStyles from "../../../../styles/AdminForm.module.css";
+import styles from "../../../../styles/Dashboard.module.css";
+import { BikeModel, PublishStatus, Vehicle } from "../../../../lib/dashboard/types";
+import { parseTags } from "../../../../lib/dashboard/utils";
 
 type VehicleFormState = {
   managementNumber: string;
@@ -182,7 +182,7 @@ export default function VehicleRegisterPage() {
       <DashboardLayout
         title="車両登録"
         actions={
-          <Link href="/dashboard/vehicles" className={styles.iconButton}>
+          <Link href="/admin/dashboard/vehicles" className={styles.iconButton}>
             車両一覧へ戻る
           </Link>
         }

@@ -1,11 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import formStyles from "../../../styles/AdminForm.module.css";
-import tableStyles from "../../../styles/AdminTable.module.css";
-import styles from "../../../styles/Dashboard.module.css";
-import { BikeModel, Vehicle } from "../../../lib/dashboard/types";
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import formStyles from "../../../../styles/AdminForm.module.css";
+import tableStyles from "../../../../styles/AdminTable.module.css";
+import styles from "../../../../styles/Dashboard.module.css";
+import { BikeModel, Vehicle } from "../../../../lib/dashboard/types";
 
 const vehicleColumnDefinitions: { key: keyof Vehicle | "modelName"; label: string }[] = [
   { key: "managementNumber", label: "管理番号" },
@@ -99,7 +99,7 @@ export default function VehicleAllListPage() {
       <DashboardLayout
         title="バイク全件表示"
         actions={
-          <Link href="/dashboard/vehicles" className={styles.iconButton}>
+          <Link href="/admin/dashboard/vehicles" className={styles.iconButton}>
             車両一覧へ戻る
           </Link>
         }

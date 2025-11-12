@@ -1,11 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import formStyles from "../../../styles/AdminForm.module.css";
-import tableStyles from "../../../styles/AdminTable.module.css";
-import styles from "../../../styles/Dashboard.module.css";
-import { BikeModel, Vehicle } from "../../../lib/dashboard/types";
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import formStyles from "../../../../styles/AdminForm.module.css";
+import tableStyles from "../../../../styles/AdminTable.module.css";
+import styles from "../../../../styles/Dashboard.module.css";
+import { BikeModel, Vehicle } from "../../../../lib/dashboard/types";
 
 export default function VehicleListPage() {
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
@@ -141,10 +141,10 @@ export default function VehicleListPage() {
         title="車両一覧"
         actions={
           <>
-            <Link href="/dashboard/vehicles/all" className={styles.iconButton}>
+            <Link href="/admin/dashboard/vehicles/all" className={styles.iconButton}>
               バイク全件表示
             </Link>
-            <Link href="/dashboard/vehicles/register" className={styles.iconButton}>
+            <Link href="/admin/dashboard/vehicles/register" className={styles.iconButton}>
               <span aria-hidden>＋</span>
               車両登録
             </Link>

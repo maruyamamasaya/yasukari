@@ -1,7 +1,9 @@
 import Head from "next/head";
 import Link from "next/link";
-import DashboardLayout from "../../components/dashboard/DashboardLayout";
-import styles from "../../styles/Dashboard.module.css";
+import DashboardLayout from "../../../components/dashboard/DashboardLayout";
+import styles from "../../../styles/Dashboard.module.css";
+
+const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
 
 type MenuLink = {
   label: string;
@@ -19,22 +21,22 @@ type MenuSection = {
 const bikeManagementLinks: MenuLink[] = [
   {
     label: "クラス一覧",
-    href: "/dashboard/bike-classes",
-    actions: [{ label: "＋登録", href: "/dashboard/bike-classes/register" }],
+    href: `${ADMIN_DASHBOARD_ROOT}/bike-classes`,
+    actions: [{ label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/bike-classes/register` }],
   },
   {
     label: "車種一覧",
-    href: "/dashboard/bike-models",
-    actions: [{ label: "＋登録", href: "/dashboard/bike-models/register" }],
+    href: `${ADMIN_DASHBOARD_ROOT}/bike-models`,
+    actions: [{ label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/bike-models/register` }],
   },
   {
     label: "車両一覧",
-    href: "/dashboard/vehicles",
-    actions: [{ label: "＋登録", href: "/dashboard/vehicles/register" }],
+    href: `${ADMIN_DASHBOARD_ROOT}/vehicles`,
+    actions: [{ label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/vehicles/register` }],
   },
   {
     label: "バイク全件表示",
-    href: "/dashboard/vehicles/all",
+    href: `${ADMIN_DASHBOARD_ROOT}/vehicles/all`,
   },
 ];
 
