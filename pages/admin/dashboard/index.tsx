@@ -34,10 +34,6 @@ const bikeManagementLinks: MenuLink[] = [
     href: `${ADMIN_DASHBOARD_ROOT}/vehicles`,
     actions: [{ label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/vehicles/register` }],
   },
-  {
-    label: "バイク全件表示",
-    href: `${ADMIN_DASHBOARD_ROOT}/vehicles/all`,
-  },
 ];
 
 const menuSections: MenuSection[] = [

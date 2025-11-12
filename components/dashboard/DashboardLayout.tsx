@@ -37,7 +37,6 @@ const NAV_ITEMS: NavItem[] = [
       { label: "クラス一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-classes` },
       { label: "車種一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-models` },
       { label: "車両一覧", href: `${ADMIN_DASHBOARD_ROOT}/vehicles` },
-      { label: "バイク全件表示", href: `${ADMIN_DASHBOARD_ROOT}/vehicles/all` },
     ],
   },
   {
@@ -117,7 +116,6 @@ export default function DashboardLayout({
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarBrand}>管理メニュー</div>
-          <p className={styles.sidebarNote}>各カテゴリの設定や登録を行います。</p>
         </div>
         <nav className={styles.sidebarNav} aria-label="管理メニュー">
           <ul className={styles.sidebarNavList}>
