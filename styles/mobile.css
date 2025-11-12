@@ -55,4 +55,6 @@
 }
 .animate-fade {
   animation: fade-up 0.3s ease forwards;
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
 }
