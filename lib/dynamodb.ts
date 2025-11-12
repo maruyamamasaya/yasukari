@@ -2,8 +2,9 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
   ScanCommand,
-  ScanCommandInput,
 } from "@aws-sdk/lib-dynamodb";
+
+type ScanCommandInput = Parameters<typeof ScanCommand>[0];
 
 type DocumentClient = ReturnType<typeof DynamoDBDocumentClient.from>;
 
