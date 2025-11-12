@@ -1,5 +1,7 @@
 import Head from "next/head";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import formStyles from "../styles/AdminForm.module.css";
+import tableStyles from "../styles/AdminTable.module.css";
 import styles from "../styles/Dashboard.module.css";
 
 type BikeClass = {
@@ -623,7 +625,7 @@ export default function DashboardPage() {
                 <p>
                   IDはすべて自動採番され、UIからは確認できません。登録されたレコードは画面下部の一覧に即時反映され、API経由でDynamoDBへ永続化されます。
                 </p>
-                <p className={styles.hint}>
+                <p className={formStyles.hint}>
                   ※APIが利用するAWS認証情報とテーブル名（環境変数）を正しく設定してから運用を開始してください。
                 </p>
               </div>
@@ -664,18 +666,18 @@ export default function DashboardPage() {
               </div>
       
               {bikeView === "register" ? (
-                <div className={styles.cardStack}>
-                  <article className={styles.formCard}>
-                    <div className={styles.formHeader}>
-                      <h3 className={styles.formTitle}>バイククラス登録</h3>
-                      <p className={styles.formDescription}>
+                <div className={formStyles.cardStack}>
+                  <article className={formStyles.card}>
+                    <div className={formStyles.header}>
+                      <h3 className={formStyles.title}>バイククラス登録</h3>
+                      <p className={formStyles.description}>
                         例：スクーター、ネイキッド、大型ツアラーなど。クラス名のみを入力すれば自動でIDが採番されます。
                       </p>
                     </div>
-                    {classError && <p className={styles.errorMessage}>{classError}</p>}
-                    <form onSubmit={handleClassSubmit} className={styles.formBody}>
-                      <div className={styles.formGrid}>
-                        <div className={styles.field}>
+                    {classError && <p className={formStyles.error}>{classError}</p>}
+                    <form onSubmit={handleClassSubmit} className={formStyles.body}>
+                      <div className={formStyles.grid}>
+                        <div className={formStyles.field}>
                           <label htmlFor="className">クラス名</label>
                           <input
                             id="className"
@@ -686,25 +688,25 @@ export default function DashboardPage() {
                           />
                         </div>
                       </div>
-                      <div className={styles.formActions}>
-                        <button type="submit" className={styles.primaryButton}>
+                      <div className={formStyles.actions}>
+                        <button type="submit" className={formStyles.primaryButton}>
                           登録する
                         </button>
                       </div>
                     </form>
                   </article>
       
-                  <article className={styles.formCard}>
-                    <div className={styles.formHeader}>
-                      <h3 className={styles.formTitle}>車種登録</h3>
-                      <p className={styles.formDescription}>
+                  <article className={formStyles.card}>
+                    <div className={formStyles.header}>
+                      <h3 className={formStyles.title}>車種登録</h3>
+                      <p className={formStyles.description}>
                         クラスに紐づく車種を登録します。必要なスペックは任意で入力でき、未入力の場合は空欄のまま保持されます。
                       </p>
                     </div>
-                    {modelError && <p className={styles.errorMessage}>{modelError}</p>}
-                    <form onSubmit={handleModelSubmit} className={styles.formBody}>
-                      <div className={styles.formGrid}>
-                        <div className={styles.field}>
+                    {modelError && <p className={formStyles.error}>{modelError}</p>}
+                    <form onSubmit={handleModelSubmit} className={formStyles.body}>
+                      <div className={formStyles.grid}>
+                        <div className={formStyles.field}>
                           <label htmlFor="modelClass">所属クラス</label>
                           <select
                             id="modelClass"
@@ -721,7 +723,7 @@ export default function DashboardPage() {
                             ))}
                           </select>
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="modelName">車種名</label>
                           <input
                             id="modelName"
@@ -732,7 +734,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="modelStatus">掲載状態</label>
                           <select
                             id="modelStatus"
@@ -748,7 +750,7 @@ export default function DashboardPage() {
                             <option value="OFF">非公開 (OFF)</option>
                           </select>
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="displacement">排気量 (cc)</label>
                           <input
                             id="displacement"
@@ -760,7 +762,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="requiredLicense">必要免許</label>
                           <input
                             id="requiredLicense"
@@ -774,7 +776,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="length">全長 (mm)</label>
                           <input
                             id="length"
@@ -786,7 +788,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="width">全幅 (mm)</label>
                           <input
                             id="width"
@@ -798,7 +800,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="height">全高 (mm)</label>
                           <input
                             id="height"
@@ -810,7 +812,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="seatHeight">シート高 (mm)</label>
                           <input
                             id="seatHeight"
@@ -822,7 +824,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="seatCapacity">乗車定員 (人)</label>
                           <input
                             id="seatCapacity"
@@ -834,7 +836,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="weight">車両重量 (kg)</label>
                           <input
                             id="weight"
@@ -846,7 +848,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="tank">タンク容量 (L)</label>
                           <input
                             id="tank"
@@ -859,7 +861,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="fuelType">使用燃料</label>
                           <input
                             id="fuelType"
@@ -870,7 +872,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="maxPower">最高出力</label>
                           <input
                             id="maxPower"
@@ -881,7 +883,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="maxTorque">最大トルク</label>
                           <input
                             id="maxTorque"
@@ -892,7 +894,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="mainImageUrl">メイン画像URL</label>
                           <input
                             id="mainImageUrl"
@@ -905,25 +907,25 @@ export default function DashboardPage() {
                           />
                         </div>
                       </div>
-                      <div className={styles.formActions}>
-                        <button type="submit" className={styles.primaryButton}>
+                      <div className={formStyles.actions}>
+                        <button type="submit" className={formStyles.primaryButton}>
                           登録する
                         </button>
                       </div>
                     </form>
                   </article>
       
-                  <article className={styles.formCard}>
-                    <div className={styles.formHeader}>
-                      <h3 className={styles.formTitle}>車両登録</h3>
-                      <p className={styles.formDescription}>
+                  <article className={formStyles.card}>
+                    <div className={formStyles.header}>
+                      <h3 className={formStyles.title}>車両登録</h3>
+                      <p className={formStyles.description}>
                         レンタルに利用する実車の管理情報を登録します。管理番号はユニークとなるよう入力してください。
                       </p>
                     </div>
-                    {vehicleError && <p className={styles.errorMessage}>{vehicleError}</p>}
-                    <form onSubmit={handleVehicleSubmit} className={styles.formBody}>
-                      <div className={styles.formGrid}>
-                        <div className={styles.field}>
+                    {vehicleError && <p className={formStyles.error}>{vehicleError}</p>}
+                    <form onSubmit={handleVehicleSubmit} className={formStyles.body}>
+                      <div className={formStyles.grid}>
+                        <div className={formStyles.field}>
                           <label htmlFor="managementNumber">管理番号</label>
                           <input
                             id="managementNumber"
@@ -937,7 +939,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="vehicleModel">車種</label>
                           <select
                             id="vehicleModel"
@@ -954,7 +956,7 @@ export default function DashboardPage() {
                             ))}
                           </select>
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="storeId">店舗ID</label>
                           <input
                             id="storeId"
@@ -965,7 +967,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="vehicleStatus">掲載状態</label>
                           <select
                             id="vehicleStatus"
@@ -981,7 +983,7 @@ export default function DashboardPage() {
                             <option value="OFF">非公開 (OFF)</option>
                           </select>
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="tags">タグ</label>
                           <input
                             id="tags"
@@ -991,9 +993,9 @@ export default function DashboardPage() {
                               setVehicleForm((prev) => ({ ...prev, tags: event.target.value }))
                             }
                           />
-                          <p className={styles.hint}>※ カンマで区切ると複数タグになります。</p>
+                          <p className={formStyles.hint}>※ カンマで区切ると複数タグになります。</p>
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="policyNumber1">証券番号1</label>
                           <input
                             id="policyNumber1"
@@ -1006,7 +1008,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="policyBranchNumber1">枝番号1</label>
                           <input
                             id="policyBranchNumber1"
@@ -1019,7 +1021,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="policyNumber2">証券番号2</label>
                           <input
                             id="policyNumber2"
@@ -1032,7 +1034,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="policyBranchNumber2">枝番号2</label>
                           <input
                             id="policyBranchNumber2"
@@ -1045,7 +1047,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="inspectionExpiryDate">車検期日</label>
                           <input
                             id="inspectionExpiryDate"
@@ -1059,7 +1061,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="licensePlateNumber">ナンバープレート</label>
                           <input
                             id="licensePlateNumber"
@@ -1072,7 +1074,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="previousLicensePlateNumber">旧ナンバープレート</label>
                           <input
                             id="previousLicensePlateNumber"
@@ -1085,7 +1087,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="liabilityInsuranceExpiryDate">自賠責満了日</label>
                           <input
                             id="liabilityInsuranceExpiryDate"
@@ -1099,7 +1101,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="videoUrl">紹介動画URL</label>
                           <input
                             id="videoUrl"
@@ -1111,7 +1113,7 @@ export default function DashboardPage() {
                             }
                           />
                         </div>
-                        <div className={styles.field}>
+                        <div className={formStyles.field}>
                           <label htmlFor="notes">備考</label>
                           <textarea
                             id="notes"
@@ -1123,8 +1125,8 @@ export default function DashboardPage() {
                           />
                         </div>
                       </div>
-                      <div className={styles.formActions}>
-                        <button type="submit" className={styles.primaryButton}>
+                      <div className={formStyles.actions}>
+                        <button type="submit" className={formStyles.primaryButton}>
                           登録する
                         </button>
                       </div>
@@ -1132,11 +1134,11 @@ export default function DashboardPage() {
                   </article>
                 </div>
               ) : (
-                <div className={styles.cardStack}>
-                  <div className={styles.formCard}>
-                    <h3 className={styles.formTitle}>バイククラス一覧</h3>
-                    <div className={styles.tableWrapper}>
-                      <table className={styles.table}>
+                <div className={formStyles.cardStack}>
+                  <div className={formStyles.card}>
+                    <h3 className={formStyles.title}>バイククラス一覧</h3>
+                    <div className={tableStyles.wrapper}>
+                      <table className={tableStyles.table}>
                         <thead>
                           <tr>
                             <th>ID</th>
@@ -1161,10 +1163,10 @@ export default function DashboardPage() {
                     </div>
                   </div>
       
-                  <div className={styles.formCard}>
-                    <h3 className={styles.formTitle}>車種一覧</h3>
-                    <div className={styles.tableWrapper}>
-                      <table className={styles.table}>
+                  <div className={formStyles.card}>
+                    <h3 className={formStyles.title}>車種一覧</h3>
+                    <div className={tableStyles.wrapper}>
+                      <table className={tableStyles.table}>
                         <thead>
                           <tr>
                             <th>ID</th>
@@ -1186,10 +1188,10 @@ export default function DashboardPage() {
                                 <td>{classNameMap[model.classId] ?? "-"}</td>
                                 <td>
                                   <span
-                                    className={`${styles.badge} ${
+                                    className={`${tableStyles.badge} ${
                                       model.publishStatus === "ON"
-                                        ? styles.badgeOn
-                                        : styles.badgeOff
+                                        ? tableStyles.badgeOn
+                                        : tableStyles.badgeOff
                                     }`}
                                   >
                                     {model.publishStatus}
@@ -1203,10 +1205,10 @@ export default function DashboardPage() {
                     </div>
                   </div>
       
-                  <div className={styles.formCard}>
-                    <h3 className={styles.formTitle}>車両一覧</h3>
-                    <div className={styles.tableWrapper}>
-                      <table className={styles.table}>
+                  <div className={formStyles.card}>
+                    <h3 className={formStyles.title}>車両一覧</h3>
+                    <div className={tableStyles.wrapper}>
+                      <table className={tableStyles.table}>
                         <thead>
                           <tr>
                             <th>管理番号</th>
@@ -1228,10 +1230,10 @@ export default function DashboardPage() {
                                 <td>{vehicle.storeId}</td>
                                 <td>
                                   <span
-                                    className={`${styles.badge} ${
+                                    className={`${tableStyles.badge} ${
                                       vehicle.publishStatus === "ON"
-                                        ? styles.badgeOn
-                                        : styles.badgeOff
+                                        ? tableStyles.badgeOn
+                                        : tableStyles.badgeOff
                                     }`}
                                   >
                                     {vehicle.publishStatus}
