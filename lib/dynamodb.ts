@@ -1,7 +1,10 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
-// ScanCommand に渡したい最小限の入力型を自前で定義する
+// ★ここでリージョンを直接指定（東京リージョンなら ap-northeast-1）
+const REGION = "ap-northeast-1";
+
+// ScanCommand に渡したい最小限の入力型を自前で定義
 type ScanInput = {
   TableName: string;
   ExclusiveStartKey?: Record<string, unknown>;
@@ -9,7 +12,7 @@ type ScanInput = {
   FilterExpression?: string;
   ExpressionAttributeNames?: Record<string, string>;
   ExpressionAttributeValues?: Record<string, unknown>;
-  // 他に使いたくなったらここに足す
+  // 必要になったらここにプロパティを足していけばOK
   [key: string]: unknown;
 };
 
@@ -20,11 +23,8 @@ let documentClient: DocumentClient | null = null;
 
 export function getDocumentClient(): DocumentClient {
   if (!documentClient) {
-    const region = process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION;
-
-    if (!region) {
-      throw new Error("AWS_REGION or AWS_DEFAULT_REGION must be set");
-    }
+    // .env は使わず、上の REGION をそのまま使う
+    const region = REGION;
 
     documentClient = DynamoDBDocumentClient.from(
       new DynamoDBClient({ region }),
