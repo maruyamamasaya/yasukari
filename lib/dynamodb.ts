@@ -1,10 +1,10 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  ScanCommand,
-  ScanCommandInput,
-} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
+// ScanCommand のコンストラクタ引数から入力型を推論
+type ScanInput = ConstructorParameters<typeof ScanCommand>[0];
+
+// DynamoDBDocumentClient.from(...) の戻り値の型
 type DocumentClient = ReturnType<typeof DynamoDBDocumentClient.from>;
 
 let documentClient: DocumentClient | null = null;
@@ -12,6 +12,11 @@ let documentClient: DocumentClient | null = null;
 export function getDocumentClient(): DocumentClient {
   if (!documentClient) {
     const region = process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION;
+
+    if (!region) {
+      throw new Error("AWS_REGION or AWS_DEFAULT_REGION must be set");
+    }
+
     documentClient = DynamoDBDocumentClient.from(
       new DynamoDBClient({ region }),
       {
@@ -23,16 +28,20 @@ export function getDocumentClient(): DocumentClient {
 }
 
 export async function scanAllItems<T>(
-  input: Omit<ScanCommandInput, "TableName"> & { TableName: string }
+  input: Omit<ScanInput, "TableName"> & { TableName: string }
 ): Promise<T[]> {
   const client = getDocumentClient();
   let items: T[] = [];
-  let lastEvaluatedKey: ScanCommandInput["ExclusiveStartKey"] | undefined;
+  let lastEvaluatedKey: ScanInput["ExclusiveStartKey"] | undefined;
 
   do {
     const response = await client.send(
-      new ScanCommand({ ...input, ExclusiveStartKey: lastEvaluatedKey })
+      new ScanCommand({
+        ...input,
+        ExclusiveStartKey: lastEvaluatedKey,
+      })
     );
+
     items = items.concat((response.Items ?? []) as T[]);
     lastEvaluatedKey = response.LastEvaluatedKey;
   } while (lastEvaluatedKey);
@@ -45,7 +54,7 @@ export async function generateNextNumericId(
   fieldName: string
 ): Promise<number> {
   const client = getDocumentClient();
-  let lastEvaluatedKey: ScanCommandInput["ExclusiveStartKey"] | undefined;
+  let lastEvaluatedKey: ScanInput["ExclusiveStartKey"] | undefined;
   let maxValue = 0;
 
   do {
