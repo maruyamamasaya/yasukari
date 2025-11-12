@@ -1,11 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import formStyles from "../../../styles/AdminForm.module.css";
-import styles from "../../../styles/Dashboard.module.css";
-import { BikeClass, PublishStatus } from "../../../lib/dashboard/types";
-import { toNumber } from "../../../lib/dashboard/utils";
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import formStyles from "../../../../styles/AdminForm.module.css";
+import styles from "../../../../styles/Dashboard.module.css";
+import { BikeClass, PublishStatus } from "../../../../lib/dashboard/types";
+import { toNumber } from "../../../../lib/dashboard/utils";
 
 type ModelFormState = {
   classId: string;
@@ -173,7 +173,7 @@ export default function BikeModelRegisterPage() {
       <DashboardLayout
         title="車種登録"
         actions={
-          <Link href="/dashboard/bike-models" className={styles.iconButton}>
+          <Link href="/admin/dashboard/bike-models" className={styles.iconButton}>
             車種一覧へ戻る
           </Link>
         }

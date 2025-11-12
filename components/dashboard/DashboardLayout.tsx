@@ -18,10 +18,12 @@ type DashboardLayoutProps = {
   children: ReactNode;
 };
 
+const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
+
 const NAV_ITEMS: NavItem[] = [
   {
     label: "ダッシュボード",
-    href: "/dashboard",
+    href: ADMIN_DASHBOARD_ROOT,
   },
   {
     label: "新着情報管理",
@@ -30,10 +32,10 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: "バイク管理",
     children: [
-      { label: "クラス一覧", href: "/dashboard/bike-classes" },
-      { label: "車種一覧", href: "/dashboard/bike-models" },
-      { label: "車両一覧", href: "/dashboard/vehicles" },
-      { label: "バイク全件表示", href: "/dashboard/vehicles/all" },
+      { label: "クラス一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-classes` },
+      { label: "車種一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-models` },
+      { label: "車両一覧", href: `${ADMIN_DASHBOARD_ROOT}/vehicles` },
+      { label: "バイク全件表示", href: `${ADMIN_DASHBOARD_ROOT}/vehicles/all` },
     ],
   },
   {
@@ -71,7 +73,7 @@ const isActivePath = (pathname: string, href?: string): boolean => {
     return false;
   }
 
-  if (href === "/dashboard") {
+  if (href === ADMIN_DASHBOARD_ROOT) {
     return pathname === href;
   }
 

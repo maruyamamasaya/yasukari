@@ -1,11 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import formStyles from "../../../styles/AdminForm.module.css";
-import tableStyles from "../../../styles/AdminTable.module.css";
-import styles from "../../../styles/Dashboard.module.css";
-import { BikeClass, BikeModel } from "../../../lib/dashboard/types";
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import formStyles from "../../../../styles/AdminForm.module.css";
+import tableStyles from "../../../../styles/AdminTable.module.css";
+import styles from "../../../../styles/Dashboard.module.css";
+import { BikeClass, BikeModel } from "../../../../lib/dashboard/types";
 
 export default function BikeModelListPage() {
   const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
@@ -155,7 +155,7 @@ export default function BikeModelListPage() {
       <DashboardLayout
         title="車種一覧"
         actions={
-          <Link href="/dashboard/bike-models/register" className={styles.iconButton}>
+          <Link href="/admin/dashboard/bike-models/register" className={styles.iconButton}>
             <span aria-hidden>＋</span>
             車種登録
           </Link>

@@ -64,7 +64,7 @@
   color: rgba(226, 232, 240, 0.82);
   text-decoration: none;
   font-weight: 600;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: color 0.15s ease;
 }
 
 .sidebarNavLink:hover,
@@ -107,7 +107,7 @@
   color: rgba(226, 232, 240, 0.78);
   text-decoration: none;
   font-size: 0.9rem;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: color 0.15s ease;
 }
 
 .sidebarSubNavLink:hover,
@@ -281,7 +281,7 @@
   font-weight: 600;
   cursor: pointer;
   text-align: left;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.15s ease;
 }
 
 .menuCard:hover,
@@ -371,7 +371,7 @@
   color: rgba(30, 41, 59, 0.82);
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.15s ease;
   text-decoration: none;
 }
 

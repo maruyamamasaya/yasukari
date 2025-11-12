@@ -1,9 +1,9 @@
 import Head from "next/head";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import formStyles from "../../../styles/AdminForm.module.css";
-import styles from "../../../styles/Dashboard.module.css";
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import formStyles from "../../../../styles/AdminForm.module.css";
+import styles from "../../../../styles/Dashboard.module.css";
 
 export default function BikeClassRegisterPage() {
   const [className, setClassName] = useState("");
@@ -50,7 +50,7 @@ export default function BikeClassRegisterPage() {
       <DashboardLayout
         title="バイククラス登録"
         actions={
-          <Link href="/dashboard/bike-classes" className={styles.iconButton}>
+          <Link href="/admin/dashboard/bike-classes" className={styles.iconButton}>
             クラス一覧へ戻る
           </Link>
         }
