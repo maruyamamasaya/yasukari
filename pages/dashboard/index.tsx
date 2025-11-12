@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import styles from "../../styles/Dashboard.module.css";
 
 type MenuLink = {
@@ -87,9 +88,11 @@ export default function DashboardTopPage() {
       <Head>
         <title>管理ダッシュボード</title>
       </Head>
-      <div className={styles.container}>
+      <DashboardLayout
+        title="管理ダッシュボード"
+        description="レンタルバイク『ヤスカリ』の運用に必要な情報を確認・登録できる管理メニューです。"
+      >
         <section className={styles.menuSection}>
-          <h1 className={styles.pageTitle}>管理ダッシュボード</h1>
           <div className={styles.menuGroups}>
             {menuSections.map((section) => (
               <div key={section.title} className={styles.menuGroup}>
@@ -133,7 +136,7 @@ export default function DashboardTopPage() {
             ))}
           </div>
         </section>
-      </div>
+      </DashboardLayout>
     </>
   );
 }

@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../styles/AdminForm.module.css";
 import tableStyles from "../../../styles/AdminTable.module.css";
 import styles from "../../../styles/Dashboard.module.css";
@@ -34,14 +35,16 @@ export default function BikeClassListPage() {
       <Head>
         <title>バイククラス一覧 | 管理ダッシュボード</title>
       </Head>
-      <div className={styles.container}>
+      <DashboardLayout
+        title="バイククラス一覧"
+        actions={
+          <Link href="/dashboard/bike-classes/register" className={styles.iconButton}>
+            <span aria-hidden>＋</span>
+            バイククラス登録
+          </Link>
+        }
+      >
         <section className={styles.section}>
-          <div className={styles.sectionHeaderRow}>
-            <h1 className={styles.sectionTitle}>バイククラス一覧</h1>
-            <Link href="/dashboard/bike-classes/register" className={styles.iconButton}>
-              バイククラス登録
-            </Link>
-          </div>
           {error && <p className={formStyles.error}>{error}</p>}
           <div className={formStyles.card}>
             <div className={tableStyles.wrapper}>
@@ -70,7 +73,7 @@ export default function BikeClassListPage() {
             </div>
           </div>
         </section>
-      </div>
+      </DashboardLayout>
     </>
   );
 }

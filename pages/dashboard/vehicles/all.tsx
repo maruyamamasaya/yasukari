@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../styles/AdminForm.module.css";
 import tableStyles from "../../../styles/AdminTable.module.css";
 import styles from "../../../styles/Dashboard.module.css";
@@ -95,16 +96,15 @@ export default function VehicleAllListPage() {
       <Head>
         <title>バイク全件表示 | 管理ダッシュボード</title>
       </Head>
-      <div className={styles.container}>
+      <DashboardLayout
+        title="バイク全件表示"
+        actions={
+          <Link href="/dashboard/vehicles" className={styles.iconButton}>
+            車両一覧へ戻る
+          </Link>
+        }
+      >
         <section className={styles.section}>
-          <div className={styles.sectionHeaderRow}>
-            <h1 className={styles.sectionTitle}>バイク全件表示</h1>
-            <div className={styles.sectionActions}>
-              <Link href="/dashboard/vehicles" className={styles.iconButton}>
-                車両一覧へ戻る
-              </Link>
-            </div>
-          </div>
           {modelError && <p className={formStyles.error}>{modelError}</p>}
           {vehicleError && <p className={formStyles.error}>{vehicleError}</p>}
           <div className={formStyles.card}>
@@ -147,7 +147,7 @@ export default function VehicleAllListPage() {
             </div>
           </div>
         </section>
-      </div>
+      </DashboardLayout>
     </>
   );
 }

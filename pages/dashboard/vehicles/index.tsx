@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../styles/AdminForm.module.css";
 import tableStyles from "../../../styles/AdminTable.module.css";
 import styles from "../../../styles/Dashboard.module.css";
@@ -136,20 +137,21 @@ export default function VehicleListPage() {
       <Head>
         <title>車両一覧 | 管理ダッシュボード</title>
       </Head>
-      <div className={styles.container}>
+      <DashboardLayout
+        title="車両一覧"
+        actions={
+          <>
+            <Link href="/dashboard/vehicles/all" className={styles.iconButton}>
+              バイク全件表示
+            </Link>
+            <Link href="/dashboard/vehicles/register" className={styles.iconButton}>
+              <span aria-hidden>＋</span>
+              車両登録
+            </Link>
+          </>
+        }
+      >
         <section className={styles.section}>
-          <div className={styles.sectionHeaderRow}>
-            <h1 className={styles.sectionTitle}>車両一覧</h1>
-            <div className={styles.sectionActions}>
-              <Link href="/dashboard/vehicles/all" className={styles.iconButton}>
-                バイク全件表示
-              </Link>
-              <Link href="/dashboard/vehicles/register" className={styles.iconButton}>
-                <span aria-hidden>＋</span>
-                車両登録
-              </Link>
-            </div>
-          </div>
           {modelError && <p className={formStyles.error}>{modelError}</p>}
           {vehicleError && <p className={formStyles.error}>{vehicleError}</p>}
           <div className={formStyles.card}>
@@ -223,7 +225,7 @@ export default function VehicleListPage() {
             </div>
           )}
         </section>
-      </div>
+      </DashboardLayout>
     </>
   );
 }
