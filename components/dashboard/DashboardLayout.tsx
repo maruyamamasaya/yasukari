@@ -16,6 +16,8 @@ type DashboardLayoutProps = {
   description?: string;
   actions?: ReactNode;
   children: ReactNode;
+  showHomeAction?: boolean;
+  showDashboardLink?: boolean;
 };
 
 const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
@@ -93,17 +95,21 @@ export default function DashboardLayout({
   description,
   actions,
   children,
+  showHomeAction = true,
+  showDashboardLink = true,
 }: DashboardLayoutProps) {
   const router = useRouter();
 
   const navigation = useMemo(
     () =>
-      NAV_ITEMS.map((item) => ({
+      NAV_ITEMS.filter(
+        (item) => showDashboardLink || item.href !== ADMIN_DASHBOARD_ROOT
+      ).map((item) => ({
         ...item,
         isActive:
           isActivePath(router.pathname, item.href) || hasActiveChild(router.pathname, item),
       })),
-    [router.pathname]
+    [router.pathname, showDashboardLink]
   );
 
   return (
@@ -177,7 +183,16 @@ export default function DashboardLayout({
               <p className={styles.pageDescription}>{description}</p>
             )}
           </div>
-          {actions && <div className={styles.pageActions}>{actions}</div>}
+          {(showHomeAction || actions) && (
+            <div className={styles.pageActions}>
+              {showHomeAction && (
+                <Link href={ADMIN_DASHBOARD_ROOT} className={styles.iconButton}>
+                  管理ホームに戻る
+                </Link>
+              )}
+              {actions}
+            </div>
+          )}
         </header>
         <main className={styles.main}>{children}</main>
         <footer className={styles.footer}>

@@ -93,6 +93,7 @@ export default function DashboardTopPage() {
       <DashboardLayout
         title="管理ダッシュボード"
         description="レンタルバイク『ヤスカリ』の運用に必要な情報を確認・登録できる管理メニューです。"
+        showHomeAction={false}
       >
         <section className={styles.menuSection}>
           <div className={styles.menuGroups}>

@@ -103,6 +103,7 @@ export default function VehicleAllListPage() {
             車両一覧へ戻る
           </Link>
         }
+        showDashboardLink={false}
       >
         <section className={styles.section}>
           {modelError && <p className={formStyles.error}>{modelError}</p>}
