@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import styles from "../styles/Dashboard.module.css";
 
 type BikeClass = {
@@ -161,13 +161,53 @@ export default function DashboardPage() {
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [className, setClassName] = useState("");
-  const [classCounter, setClassCounter] = useState(1);
-  const [modelCounter, setModelCounter] = useState(1);
   const [classError, setClassError] = useState<string | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
   const [vehicleError, setVehicleError] = useState<string | null>(null);
   const [modelForm, setModelForm] = useState<ModelForm>(emptyModelForm);
   const [vehicleForm, setVehicleForm] = useState<VehicleForm>(emptyVehicleForm);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [classesResponse, modelsResponse, vehiclesResponse] = await Promise.all([
+          fetch("/api/bike-classes"),
+          fetch("/api/bike-models"),
+          fetch("/api/vehicles"),
+        ]);
+
+        if (classesResponse.ok) {
+          const data: BikeClass[] = await classesResponse.json();
+          setBikeClasses(data.sort((a, b) => a.classId - b.classId));
+        } else {
+          setClassError("クラス一覧の取得に失敗しました。");
+        }
+
+        if (modelsResponse.ok) {
+          const data: BikeModel[] = await modelsResponse.json();
+          setBikeModels(data.sort((a, b) => a.modelId - b.modelId));
+        } else {
+          setModelError("車種一覧の取得に失敗しました。");
+        }
+
+        if (vehiclesResponse.ok) {
+          const data: Vehicle[] = await vehiclesResponse.json();
+          setVehicles(
+            data.sort((a, b) => a.managementNumber.localeCompare(b.managementNumber))
+          );
+        } else {
+          setVehicleError("車両一覧の取得に失敗しました。");
+        }
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+        setClassError((prev) => prev ?? "クラス一覧の取得に失敗しました。");
+        setModelError((prev) => prev ?? "車種一覧の取得に失敗しました。");
+        setVehicleError((prev) => prev ?? "車両一覧の取得に失敗しました。");
+      }
+    };
+
+    void loadData();
+  }, []);
 
   const classNameMap = useMemo(
     () =>
@@ -187,28 +227,41 @@ export default function DashboardPage() {
     [bikeModels]
   );
 
-  const handleClassSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleClassSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!className.trim()) {
       setClassError("クラス名を入力してください。");
       return;
     }
-    const timestamp = new Date().toISOString();
-    setBikeClasses((prev) => [
-      ...prev,
-      {
-        classId: classCounter,
-        className: className.trim(),
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      },
-    ]);
-    setClassCounter((prev) => prev + 1);
-    setClassName("");
-    setClassError(null);
+
+    try {
+      const response = await fetch("/api/bike-classes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ className: className.trim() }),
+      });
+
+      if (!response.ok) {
+        const error = (await response.json().catch(() => null)) as
+          | { message?: string }
+          | null;
+        setClassError(error?.message ?? "クラスの登録に失敗しました。");
+        return;
+      }
+
+      const newClass: BikeClass = await response.json();
+      setBikeClasses((prev) =>
+        [...prev, newClass].sort((a, b) => a.classId - b.classId)
+      );
+      setClassName("");
+      setClassError(null);
+    } catch (error) {
+      console.error("Failed to register bike class", error);
+      setClassError("クラスの登録に失敗しました。");
+    }
   };
 
-  const handleModelSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleModelSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!modelForm.classId) {
       setModelError("所属クラスを選択してください。");
@@ -223,35 +276,84 @@ export default function DashboardPage() {
       setModelError("選択されたクラスが存在しません。");
       return;
     }
-    const timestamp = new Date().toISOString();
-    const newModel: BikeModel = {
-      modelId: modelCounter,
+    const payload: Record<string, unknown> = {
       classId,
       modelName: modelForm.modelName.trim(),
       publishStatus: modelForm.publishStatus,
-      displacementCc: toNumber(modelForm.displacementCc),
-      requiredLicense: modelForm.requiredLicense.trim() || undefined,
-      lengthMm: toNumber(modelForm.lengthMm),
-      widthMm: toNumber(modelForm.widthMm),
-      heightMm: toNumber(modelForm.heightMm),
-      seatHeightMm: toNumber(modelForm.seatHeightMm),
-      seatCapacity: toNumber(modelForm.seatCapacity),
-      vehicleWeightKg: toNumber(modelForm.vehicleWeightKg),
-      fuelTankCapacityL: toNumber(modelForm.fuelTankCapacityL),
-      fuelType: modelForm.fuelType.trim() || undefined,
-      maxPower: modelForm.maxPower.trim() || undefined,
-      maxTorque: modelForm.maxTorque.trim() || undefined,
-      mainImageUrl: modelForm.mainImageUrl.trim() || undefined,
-      createdAt: timestamp,
-      updatedAt: timestamp,
     };
-    setBikeModels((prev) => [...prev, newModel]);
-    setModelCounter((prev) => prev + 1);
-    setModelForm(emptyModelForm);
-    setModelError(null);
+
+    const numberFields: Array<
+      keyof Pick<
+        ModelForm,
+        | "displacementCc"
+        | "lengthMm"
+        | "widthMm"
+        | "heightMm"
+        | "seatHeightMm"
+        | "seatCapacity"
+        | "vehicleWeightKg"
+        | "fuelTankCapacityL"
+      >
+    > = [
+      "displacementCc",
+      "lengthMm",
+      "widthMm",
+      "heightMm",
+      "seatHeightMm",
+      "seatCapacity",
+      "vehicleWeightKg",
+      "fuelTankCapacityL",
+    ];
+
+    numberFields.forEach((field) => {
+      const value = toNumber(modelForm[field]);
+      if (value !== undefined) {
+        payload[field] = value;
+      }
+    });
+
+    const stringFields: Array<
+      keyof Pick<
+        ModelForm,
+        "requiredLicense" | "fuelType" | "maxPower" | "maxTorque" | "mainImageUrl"
+      >
+    > = ["requiredLicense", "fuelType", "maxPower", "maxTorque", "mainImageUrl"];
+
+    stringFields.forEach((field) => {
+      const value = modelForm[field].trim();
+      if (value) {
+        payload[field] = value;
+      }
+    });
+
+    try {
+      const response = await fetch("/api/bike-models", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = (await response.json().catch(() => null)) as
+          | { message?: string }
+          | null;
+        setModelError(error?.message ?? "車種の登録に失敗しました。");
+        return;
+      }
+
+      const newModel: BikeModel = await response.json();
+      setBikeModels((prev) =>
+        [...prev, newModel].sort((a, b) => a.modelId - b.modelId)
+      );
+      setModelForm(() => ({ ...emptyModelForm }));
+      setModelError(null);
+    } catch (error) {
+      console.error("Failed to register bike model", error);
+      setModelError("車種の登録に失敗しました。");
+    }
   };
 
-  const handleVehicleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleVehicleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!vehicleForm.managementNumber.trim()) {
       setVehicleError("管理番号を入力してください。");
@@ -274,29 +376,79 @@ export default function DashboardPage() {
       setVehicleError("同じ管理番号が既に登録されています。");
       return;
     }
-    const timestamp = new Date().toISOString();
-    const newVehicle: Vehicle = {
+    const payload: Record<string, unknown> = {
       managementNumber: vehicleForm.managementNumber.trim(),
       modelId,
       storeId: vehicleForm.storeId.trim(),
       publishStatus: vehicleForm.publishStatus,
       tags: parseTags(vehicleForm.tags),
-      policyNumber1: vehicleForm.policyNumber1.trim() || undefined,
-      policyBranchNumber1: vehicleForm.policyBranchNumber1.trim() || undefined,
-      policyNumber2: vehicleForm.policyNumber2.trim() || undefined,
-      policyBranchNumber2: vehicleForm.policyBranchNumber2.trim() || undefined,
-      inspectionExpiryDate: vehicleForm.inspectionExpiryDate || undefined,
-      licensePlateNumber: vehicleForm.licensePlateNumber.trim() || undefined,
-      previousLicensePlateNumber: vehicleForm.previousLicensePlateNumber.trim() || undefined,
-      liabilityInsuranceExpiryDate: vehicleForm.liabilityInsuranceExpiryDate || undefined,
-      videoUrl: vehicleForm.videoUrl.trim() || undefined,
-      notes: vehicleForm.notes.trim() || undefined,
-      createdAt: timestamp,
-      updatedAt: timestamp,
     };
-    setVehicles((prev) => [...prev, newVehicle]);
-    setVehicleForm(emptyVehicleForm);
-    setVehicleError(null);
+
+    const optionalVehicleFields: Array<
+      keyof Pick<
+        VehicleForm,
+        | "policyNumber1"
+        | "policyBranchNumber1"
+        | "policyNumber2"
+        | "policyBranchNumber2"
+        | "licensePlateNumber"
+        | "previousLicensePlateNumber"
+        | "videoUrl"
+        | "notes"
+      >
+    > = [
+      "policyNumber1",
+      "policyBranchNumber1",
+      "policyNumber2",
+      "policyBranchNumber2",
+      "licensePlateNumber",
+      "previousLicensePlateNumber",
+      "videoUrl",
+      "notes",
+    ];
+
+    optionalVehicleFields.forEach((field) => {
+      const value = vehicleForm[field].trim();
+      if (value) {
+        payload[field] = value;
+      }
+    });
+
+    if (vehicleForm.inspectionExpiryDate) {
+      payload.inspectionExpiryDate = vehicleForm.inspectionExpiryDate;
+    }
+
+    if (vehicleForm.liabilityInsuranceExpiryDate) {
+      payload.liabilityInsuranceExpiryDate = vehicleForm.liabilityInsuranceExpiryDate;
+    }
+
+    try {
+      const response = await fetch("/api/vehicles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = (await response.json().catch(() => null)) as
+          | { message?: string }
+          | null;
+        setVehicleError(error?.message ?? "車両の登録に失敗しました。");
+        return;
+      }
+
+      const newVehicle: Vehicle = await response.json();
+      setVehicles((prev) =>
+        [...prev, newVehicle].sort((a, b) =>
+          a.managementNumber.localeCompare(b.managementNumber)
+        )
+      );
+      setVehicleForm(() => ({ ...emptyVehicleForm }));
+      setVehicleError(null);
+    } catch (error) {
+      console.error("Failed to register vehicle", error);
+      setVehicleError("車両の登録に失敗しました。");
+    }
   };
 
   return (
@@ -330,15 +482,15 @@ export default function DashboardPage() {
                 DynamoDBで設計された各種マスタを整然と管理するための内部向けダッシュボードです。メニューから操作したい領域を選択し、必要情報を登録してください。
               </p>
             </div>
-            <div className={styles.placeholderCard}>
-              <strong>運用メモ</strong>
-              <p>
-                IDはすべて自動採番され、UIからは確認できません。登録されたレコードは画面下部の一覧に即時反映され、別途APIを通してDynamoDBへ永続化することを想定しています。
-              </p>
-              <p className={styles.hint}>
-                ※現在は画面内の一時データで動作しています。バックエンドが接続され次第、登録処理をAPI呼び出しに置き換えてください。
-              </p>
-            </div>
+              <div className={styles.placeholderCard}>
+                <strong>運用メモ</strong>
+                <p>
+                  IDはすべて自動採番され、UIからは確認できません。登録されたレコードは画面下部の一覧に即時反映され、API経由でDynamoDBへ永続化されます。
+                </p>
+                <p className={styles.hint}>
+                  ※APIが利用するAWS認証情報とテーブル名（環境変数）を正しく設定してから運用を開始してください。
+                </p>
+              </div>
           </section>
 
           <section id="bike" className={styles.section}>
