@@ -1,9 +1,8 @@
 .wrapper {
-  border-radius: 1.1rem;
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  background: rgba(255, 255, 255, 0.9);
+  border-radius: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: #fff;
   overflow: hidden;
-  box-shadow: 0 28px 48px -32px rgba(15, 23, 42, 0.45);
 }
 
 .table {
@@ -14,7 +13,7 @@
 }
 
 .table thead {
-  background: linear-gradient(135deg, rgba(248, 113, 113, 0.12), rgba(248, 250, 252, 0.8));
+  background: rgba(248, 250, 252, 0.85);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -36,12 +35,16 @@
 }
 
 .table tbody tr:nth-child(even) {
-  background: rgba(248, 113, 113, 0.05);
+  background: rgba(248, 250, 252, 0.6);
 }
 
 .table tbody tr:hover {
-  background: rgba(248, 113, 113, 0.12);
+  background: rgba(248, 113, 113, 0.08);
   transition: background 0.2s ease;
+}
+
+.selectedRow {
+  background: rgba(248, 113, 113, 0.15) !important;
 }
 
 .table tbody tr:last-child td {
@@ -66,6 +69,15 @@
 .badgeOff {
   background: rgba(248, 113, 113, 0.2);
   color: #b91c1c;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:focus-visible {
+  outline: 2px solid rgba(248, 113, 113, 0.6);
+  outline-offset: -2px;
 }
 
 @media (max-width: 768px) {
