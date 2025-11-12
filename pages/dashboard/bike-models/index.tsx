@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../styles/AdminForm.module.css";
 import tableStyles from "../../../styles/AdminTable.module.css";
 import styles from "../../../styles/Dashboard.module.css";
@@ -151,20 +152,16 @@ export default function BikeModelListPage() {
       <Head>
         <title>車種一覧 | 管理ダッシュボード</title>
       </Head>
-      <div className={styles.container}>
+      <DashboardLayout
+        title="車種一覧"
+        actions={
+          <Link href="/dashboard/bike-models/register" className={styles.iconButton}>
+            <span aria-hidden>＋</span>
+            車種登録
+          </Link>
+        }
+      >
         <section className={styles.section}>
-          <div className={styles.sectionHeaderRow}>
-            <h1 className={styles.sectionTitle}>車種一覧</h1>
-            <div className={styles.sectionActions}>
-              <Link
-                href="/dashboard/bike-models/register"
-                className={styles.iconButton}
-              >
-                <span aria-hidden>＋</span>
-                車種登録
-              </Link>
-            </div>
-          </div>
           {classError && <p className={formStyles.error}>{classError}</p>}
           {modelError && <p className={formStyles.error}>{modelError}</p>}
           <div className={formStyles.card}>
@@ -236,7 +233,7 @@ export default function BikeModelListPage() {
             </div>
           )}
         </section>
-      </div>
+      </DashboardLayout>
     </>
   );
 }

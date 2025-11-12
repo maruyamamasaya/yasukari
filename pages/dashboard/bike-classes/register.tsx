@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../styles/AdminForm.module.css";
 import styles from "../../../styles/Dashboard.module.css";
 
@@ -46,14 +47,15 @@ export default function BikeClassRegisterPage() {
       <Head>
         <title>バイククラス登録 | 管理ダッシュボード</title>
       </Head>
-      <div className={styles.container}>
+      <DashboardLayout
+        title="バイククラス登録"
+        actions={
+          <Link href="/dashboard/bike-classes" className={styles.iconButton}>
+            クラス一覧へ戻る
+          </Link>
+        }
+      >
         <section className={styles.section}>
-          <div className={styles.sectionHeaderRow}>
-            <h1 className={styles.sectionTitle}>バイククラス登録</h1>
-            <Link href="/dashboard/bike-classes" className={styles.iconButton}>
-              バイククラス一覧
-            </Link>
-          </div>
           {error && <p className={formStyles.error}>{error}</p>}
           {success && <p className={formStyles.hint}>{success}</p>}
           <article className={formStyles.card}>
@@ -78,7 +80,7 @@ export default function BikeClassRegisterPage() {
             </form>
           </article>
         </section>
-      </div>
+      </DashboardLayout>
     </>
   );
 }

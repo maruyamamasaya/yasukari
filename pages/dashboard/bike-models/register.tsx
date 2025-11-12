@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
+import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../styles/AdminForm.module.css";
 import styles from "../../../styles/Dashboard.module.css";
 import { BikeClass, PublishStatus } from "../../../lib/dashboard/types";
@@ -169,14 +170,15 @@ export default function BikeModelRegisterPage() {
       <Head>
         <title>車種登録 | 管理ダッシュボード</title>
       </Head>
-      <div className={styles.container}>
+      <DashboardLayout
+        title="車種登録"
+        actions={
+          <Link href="/dashboard/bike-models" className={styles.iconButton}>
+            車種一覧へ戻る
+          </Link>
+        }
+      >
         <section className={styles.section}>
-          <div className={styles.sectionHeaderRow}>
-            <h1 className={styles.sectionTitle}>車種登録</h1>
-            <Link href="/dashboard/bike-models" className={styles.iconButton}>
-              車種一覧
-            </Link>
-          </div>
           {loadError && <p className={formStyles.error}>{loadError}</p>}
           {error && <p className={formStyles.error}>{error}</p>}
           {success && <p className={formStyles.hint}>{success}</p>}
@@ -188,7 +190,9 @@ export default function BikeModelRegisterPage() {
                   <select
                     id="modelClass"
                     value={form.classId}
-                    onChange={(event) => setForm((prev) => ({ ...prev, classId: event.target.value }))}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, classId: event.target.value }))
+                    }
                   >
                     <option value="">クラスを選択</option>
                     {bikeClasses.map((item) => (
@@ -373,7 +377,7 @@ export default function BikeModelRegisterPage() {
             </form>
           </article>
         </section>
-      </div>
+      </DashboardLayout>
     </>
   );
 }

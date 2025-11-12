@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
+import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../styles/AdminForm.module.css";
 import styles from "../../../styles/Dashboard.module.css";
 import { BikeModel, PublishStatus, Vehicle } from "../../../lib/dashboard/types";
@@ -178,14 +179,15 @@ export default function VehicleRegisterPage() {
       <Head>
         <title>車両登録 | 管理ダッシュボード</title>
       </Head>
-      <div className={styles.container}>
+      <DashboardLayout
+        title="車両登録"
+        actions={
+          <Link href="/dashboard/vehicles" className={styles.iconButton}>
+            車両一覧へ戻る
+          </Link>
+        }
+      >
         <section className={styles.section}>
-          <div className={styles.sectionHeaderRow}>
-            <h1 className={styles.sectionTitle}>車両登録</h1>
-            <Link href="/dashboard/vehicles" className={styles.iconButton}>
-              車両一覧
-            </Link>
-          </div>
           {loadError && <p className={formStyles.error}>{loadError}</p>}
           {error && <p className={formStyles.error}>{error}</p>}
           {success && <p className={formStyles.hint}>{success}</p>}
@@ -363,7 +365,7 @@ export default function VehicleRegisterPage() {
             </form>
           </article>
         </section>
-      </div>
+      </DashboardLayout>
     </>
   );
 }
