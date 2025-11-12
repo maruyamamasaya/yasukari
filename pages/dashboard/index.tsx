@@ -2,13 +2,83 @@ import Head from "next/head";
 import Link from "next/link";
 import styles from "../../styles/Dashboard.module.css";
 
-const managementLinks = [
-  { href: "/dashboard/bike-classes", label: "バイククラス一覧" },
-  { href: "/dashboard/bike-models", label: "車種一覧" },
-  { href: "/dashboard/vehicles", label: "車両一覧" },
-  { href: "/dashboard/bike-classes/register", label: "バイククラス登録" },
-  { href: "/dashboard/bike-models/register", label: "車種登録" },
-  { href: "/dashboard/vehicles/register", label: "車両登録" },
+type MenuLink = {
+  label: string;
+  href: string;
+  actions?: { label: string; href: string }[];
+  disabled?: boolean;
+};
+
+type MenuSection = {
+  title: string;
+  description?: string;
+  links?: MenuLink[];
+};
+
+const bikeManagementLinks: MenuLink[] = [
+  {
+    label: "クラス一覧",
+    href: "/dashboard/bike-classes",
+    actions: [{ label: "＋登録", href: "/dashboard/bike-classes/register" }],
+  },
+  {
+    label: "車種一覧",
+    href: "/dashboard/bike-models",
+    actions: [{ label: "＋登録", href: "/dashboard/bike-models/register" }],
+  },
+  {
+    label: "車両一覧",
+    href: "/dashboard/vehicles",
+    actions: [{ label: "＋登録", href: "/dashboard/vehicles/register" }],
+  },
+  {
+    label: "バイク全件表示",
+    href: "/dashboard/vehicles/all",
+  },
+];
+
+const menuSections: MenuSection[] = [
+  {
+    title: "ダッシュボード",
+    description: "管理メニューのトップページです。",
+  },
+  {
+    title: "新着情報管理",
+    description: "新着情報の管理メニューは準備中です。",
+  },
+  {
+    title: "バイク管理",
+    description: "バイクに関する情報を確認・登録できます。",
+    links: bikeManagementLinks,
+  },
+  {
+    title: "オプション（用品）",
+    description: "オプション管理メニューは準備中です。",
+  },
+  {
+    title: "会員管理",
+    description: "会員管理メニューは準備中です。",
+  },
+  {
+    title: "予約管理",
+    description: "予約管理メニューは準備中です。",
+  },
+  {
+    title: "ブログ管理",
+    description: "ブログ管理メニューは準備中です。",
+  },
+  {
+    title: "祭日管理",
+    description: "祭日管理メニューは準備中です。",
+  },
+  {
+    title: "休日管理",
+    description: "休日管理メニューは準備中です。",
+  },
+  {
+    title: "クーポン管理",
+    description: "クーポン管理メニューは準備中です。",
+  },
 ];
 
 export default function DashboardTopPage() {
@@ -20,11 +90,46 @@ export default function DashboardTopPage() {
       <div className={styles.container}>
         <section className={styles.menuSection}>
           <h1 className={styles.pageTitle}>管理ダッシュボード</h1>
-          <div className={styles.menuGrid}>
-            {managementLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={styles.menuCard}>
-                <span className={styles.menuCardLabel}>{link.label}</span>
-              </Link>
+          <div className={styles.menuGroups}>
+            {menuSections.map((section) => (
+              <div key={section.title} className={styles.menuGroup}>
+                <div>
+                  <h2 className={styles.menuGroupTitle}>{section.title}</h2>
+                  {section.description && (
+                    <p className={styles.menuGroupNote}>{section.description}</p>
+                  )}
+                </div>
+                {section.links && section.links.length > 0 && (
+                  <div className={styles.menuLinkList}>
+                    {section.links.map((link) => (
+                      <div key={link.href} className={styles.menuLinkRow}>
+                        <Link
+                          href={link.href}
+                          className={`${styles.menuLink} ${
+                            link.disabled ? styles.menuLinkDisabled : ""
+                          }`}
+                          aria-disabled={link.disabled}
+                        >
+                          {link.label}
+                        </Link>
+                        {link.actions && link.actions.length > 0 && (
+                          <div className={styles.menuLinkRowActions}>
+                            {link.actions.map((action) => (
+                              <Link
+                                key={action.href}
+                                href={action.href}
+                                className={styles.menuLinkAction}
+                              >
+                                {action.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </section>

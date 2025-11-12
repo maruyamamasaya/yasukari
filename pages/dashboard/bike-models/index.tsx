@@ -11,6 +11,7 @@ export default function BikeModelListPage() {
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [classError, setClassError] = useState<string | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -54,6 +55,97 @@ export default function BikeModelListPage() {
     [bikeClasses]
   );
 
+  const selectedModel = useMemo(
+    () =>
+      selectedModelId == null
+        ? null
+        : bikeModels.find((model) => model.modelId === selectedModelId) ?? null,
+    [bikeModels, selectedModelId]
+  );
+
+  const modelDetailEntries = useMemo(() => {
+    if (!selectedModel) {
+      return [];
+    }
+
+    const entries: { label: string; value: string }[] = [];
+    const formatValue = (value: unknown): string => {
+      if (value === null || value === undefined || value === "") {
+        return "-";
+      }
+      if (Array.isArray(value)) {
+        return value.length ? value.join(", ") : "-";
+      }
+      if (typeof value === "number") {
+        return value.toLocaleString();
+      }
+      return String(value);
+    };
+
+    entries.push({ label: "車種ID", value: formatValue(selectedModel.modelId) });
+    entries.push({ label: "車種名", value: formatValue(selectedModel.modelName) });
+    entries.push({ label: "クラスID", value: formatValue(selectedModel.classId) });
+    entries.push({
+      label: "クラス名",
+      value: classNameMap[selectedModel.classId] ?? "-",
+    });
+    entries.push({
+      label: "掲載状態",
+      value: formatValue(selectedModel.publishStatus),
+    });
+    entries.push({
+      label: "排気量 (cc)",
+      value: formatValue(selectedModel.displacementCc),
+    });
+    entries.push({
+      label: "必要免許",
+      value: formatValue(selectedModel.requiredLicense),
+    });
+    entries.push({
+      label: "全長 (mm)",
+      value: formatValue(selectedModel.lengthMm),
+    });
+    entries.push({
+      label: "全幅 (mm)",
+      value: formatValue(selectedModel.widthMm),
+    });
+    entries.push({
+      label: "全高 (mm)",
+      value: formatValue(selectedModel.heightMm),
+    });
+    entries.push({
+      label: "シート高 (mm)",
+      value: formatValue(selectedModel.seatHeightMm),
+    });
+    entries.push({
+      label: "乗車定員",
+      value: formatValue(selectedModel.seatCapacity),
+    });
+    entries.push({
+      label: "車両重量 (kg)",
+      value: formatValue(selectedModel.vehicleWeightKg),
+    });
+    entries.push({
+      label: "燃料タンク容量 (L)",
+      value: formatValue(selectedModel.fuelTankCapacityL),
+    });
+    entries.push({ label: "燃料種別", value: formatValue(selectedModel.fuelType) });
+    entries.push({ label: "最高出力", value: formatValue(selectedModel.maxPower) });
+    entries.push({ label: "最大トルク", value: formatValue(selectedModel.maxTorque) });
+    entries.push({
+      label: "メイン画像URL",
+      value: formatValue(selectedModel.mainImageUrl),
+    });
+    entries.push({ label: "作成日時", value: formatValue(selectedModel.createdAt) });
+    entries.push({ label: "更新日時", value: formatValue(selectedModel.updatedAt) });
+
+    return entries;
+  }, [classNameMap, selectedModel]);
+
+  const handleRowSelect = (modelId: number) => {
+    setSelectedModelId((current) => (current === modelId ? null : modelId));
+  };
+
   return (
     <>
       <Head>
@@ -63,9 +155,15 @@ export default function BikeModelListPage() {
         <section className={styles.section}>
           <div className={styles.sectionHeaderRow}>
             <h1 className={styles.sectionTitle}>車種一覧</h1>
-            <Link href="/dashboard/bike-models/register" className={styles.iconButton}>
-              車種登録
-            </Link>
+            <div className={styles.sectionActions}>
+              <Link
+                href="/dashboard/bike-models/register"
+                className={styles.iconButton}
+              >
+                <span aria-hidden>＋</span>
+                車種登録
+              </Link>
+            </div>
           </div>
           {classError && <p className={formStyles.error}>{classError}</p>}
           {modelError && <p className={formStyles.error}>{modelError}</p>}
@@ -87,7 +185,20 @@ export default function BikeModelListPage() {
                     </tr>
                   ) : (
                     bikeModels.map((model) => (
-                      <tr key={model.modelId}>
+                      <tr
+                        key={model.modelId}
+                        tabIndex={0}
+                        className={`${tableStyles.clickableRow} ${
+                          selectedModelId === model.modelId ? tableStyles.selectedRow : ""
+                        }`}
+                        onClick={() => handleRowSelect(model.modelId)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            handleRowSelect(model.modelId);
+                          }
+                        }}
+                      >
                         <td>{model.modelId}</td>
                         <td>{model.modelName}</td>
                         <td>{classNameMap[model.classId] ?? "-"}</td>
@@ -109,6 +220,21 @@ export default function BikeModelListPage() {
               </table>
             </div>
           </div>
+          {selectedModel && (
+            <div className={styles.detailPanel}>
+              <h2 className={styles.detailTitle}>
+                {selectedModel.modelName}の詳細情報
+              </h2>
+              <dl className={styles.detailGrid}>
+                {modelDetailEntries.map(({ label, value }) => (
+                  <div key={label} className={styles.detailItem}>
+                    <dt>{label}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
         </section>
       </div>
     </>
