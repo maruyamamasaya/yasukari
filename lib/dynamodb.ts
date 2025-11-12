@@ -5,9 +5,11 @@ import {
   ScanCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 
-let documentClient: DynamoDBDocumentClient | null = null;
+type DocumentClient = ReturnType<typeof DynamoDBDocumentClient.from>;
 
-export function getDocumentClient(): DynamoDBDocumentClient {
+let documentClient: DocumentClient | null = null;
+
+export function getDocumentClient(): DocumentClient {
   if (!documentClient) {
     const region = process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION;
     documentClient = DynamoDBDocumentClient.from(
