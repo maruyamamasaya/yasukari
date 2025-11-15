@@ -52,6 +52,15 @@ const NAV_ITEMS: NavItem[] = [
     disabled: true,
   },
   {
+    label: "サポート",
+    children: [
+      {
+        label: "チャットボット問い合わせ一覧",
+        href: `${ADMIN_DASHBOARD_ROOT}/chatbot/inquiries`,
+      },
+    ],
+  },
+  {
     label: "ブログ管理",
     disabled: true,
   },
