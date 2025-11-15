@@ -63,6 +63,16 @@ const menuSections: MenuSection[] = [
     description: "予約管理メニューは準備中です。",
   },
   {
+    title: "サポート",
+    description: "チャットボットへの問い合わせ内容を確認できます。",
+    links: [
+      {
+        label: "チャットボット問い合わせ一覧",
+        href: `${ADMIN_DASHBOARD_ROOT}/chatbot/inquiries`,
+      },
+    ],
+  },
+  {
     title: "ブログ管理",
     description: "ブログ管理メニューは準備中です。",
   },

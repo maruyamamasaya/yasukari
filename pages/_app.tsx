@@ -16,6 +16,7 @@ import { useRouter } from 'next/router';
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const isEn = router.pathname.startsWith('/en');
+  const isAdminRoute = router.pathname.startsWith('/admin');
   return (
     <>
       {isEn ? <HeaderEn /> : <Header />}
@@ -23,7 +24,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <Component {...pageProps} />
       </Layout>
       {isEn ? <FooterEn /> : <Footer />}
-      <ChatBotWidget />
+      {!isAdminRoute && <ChatBotWidget />}
       <MobileNav />
     </>
   );
