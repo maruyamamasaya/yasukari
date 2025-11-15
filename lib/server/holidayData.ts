@@ -3,7 +3,7 @@ import path from "path";
 
 export type HolidayRecord = {
   date: string;
-  note?: string;
+  note: string;
 };
 
 const DATA_FILE_PATH = path.join(process.cwd(), "data", "holiday-calendar.json");
