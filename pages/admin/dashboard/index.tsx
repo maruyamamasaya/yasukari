@@ -78,7 +78,10 @@ const menuSections: MenuSection[] = [
   },
   {
     title: "祭日管理",
-    description: "祭日管理メニューは準備中です。",
+    description: "店舗の営業日と休日を管理できます。",
+    links: [
+      { label: "祭日管理", href: `${ADMIN_DASHBOARD_ROOT}/holiday-manager` },
+    ],
   },
   {
     title: "休日管理",
