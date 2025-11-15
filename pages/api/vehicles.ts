@@ -1,5 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  BatchWriteCommand,
+  GetCommand,
+  PutCommand,
+  ScanCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { getDocumentClient } from "../../lib/dynamodb";
 
 type Vehicle = {
@@ -81,7 +86,9 @@ async function handlePost(
   }
 
   const normalizedTags = Array.isArray(tags)
-    ? tags.filter((tag) => typeof tag === "string" && tag.trim().length > 0).map((tag) => tag.trim())
+    ? tags
+        .filter((tag) => typeof tag === "string" && tag.trim().length > 0)
+        .map((tag) => tag.trim())
     : [];
 
   try {
@@ -168,6 +175,74 @@ async function handlePost(
   }
 }
 
+function chunkArray<T>(items: T[], chunkSize: number): T[][] {
+  if (chunkSize <= 0) {
+    return [items];
+  }
+
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += chunkSize) {
+    chunks.push(items.slice(index, index + chunkSize));
+  }
+  return chunks;
+}
+
+async function handleDelete(
+  request: NextApiRequest,
+  response: NextApiResponse<{ deletedIds: string[] } | { message: string }>
+) {
+  const { managementNumbers } = request.body ?? {};
+
+  if (!Array.isArray(managementNumbers) || managementNumbers.length === 0) {
+    response.status(400).json({ message: "削除する車両を選択してください。" });
+    return;
+  }
+
+  const normalizedNumbers = Array.from(
+    new Set(
+      managementNumbers
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0)
+    )
+  );
+
+  if (normalizedNumbers.length === 0) {
+    response.status(400).json({ message: "車両IDの形式が正しくありません。" });
+    return;
+  }
+
+  try {
+    const client = getDocumentClient();
+
+    for (const chunk of chunkArray(normalizedNumbers, 25)) {
+      let pendingRequests = chunk.map((managementNumber) => ({
+        DeleteRequest: {
+          Key: { managementNumber },
+        },
+      }));
+
+      while (pendingRequests.length > 0) {
+        const { UnprocessedItems } = await client.send(
+          new BatchWriteCommand({
+            RequestItems: {
+              [VEHICLES_TABLE]: pendingRequests,
+            },
+          })
+        );
+
+        pendingRequests =
+          (UnprocessedItems?.[VEHICLES_TABLE] as typeof pendingRequests) ?? [];
+      }
+    }
+
+    response.status(200).json({ deletedIds: normalizedNumbers });
+  } catch (error) {
+    console.error("Failed to delete vehicles", error);
+    response.status(500).json({ message: "車両の削除に失敗しました。" });
+  }
+}
+
 export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse
@@ -182,6 +257,11 @@ export default async function handler(
     return;
   }
 
-  response.setHeader("Allow", ["GET", "POST"]);
+  if (request.method === "DELETE") {
+    await handleDelete(request, response);
+    return;
+  }
+
+  response.setHeader("Allow", ["GET", "POST", "DELETE"]);
   response.status(405).json({ message: "Method Not Allowed" });
 }
