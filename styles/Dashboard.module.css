@@ -6,6 +6,10 @@
   grid-template-columns: 240px minmax(0, 1fr);
 }
 
+.dashboardLayoutResizing {
+  user-select: none;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -14,6 +18,44 @@
   background: #ffffff;
   border-right: 1px solid rgba(203, 213, 225, 0.9);
   color: #1f2937;
+  position: relative;
+}
+
+.sidebarResizeHandle {
+  position: absolute;
+  top: 0;
+  right: -0.35rem;
+  width: 0.75rem;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+  display: none;
+  z-index: 2;
+}
+
+.sidebarResizeHandle::before {
+  content: "";
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  border-radius: 9999px;
+  background: rgba(148, 163, 184, 0.6);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sidebarResizeHandle:hover::before,
+.sidebarResizeHandleActive::before {
+  background: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+}
+
+@media (min-width: 961px) {
+  .sidebarResizeHandle {
+    display: block;
+  }
 }
 
 .sidebarHeader {

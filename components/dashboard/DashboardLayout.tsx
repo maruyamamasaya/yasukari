@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactNode, useMemo } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import styles from "../../styles/Dashboard.module.css";
 
@@ -21,6 +28,12 @@ type DashboardLayoutProps = {
 };
 
 const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
+
+const DEFAULT_SIDEBAR_WIDTH = 240;
+const MIN_SIDEBAR_WIDTH = 200;
+const MAX_SIDEBAR_WIDTH = 360;
+const MIN_MAIN_AREA_WIDTH = 520;
+const SIDEBAR_RESIZE_BREAKPOINT = 960;
 
 const NAV_ITEMS: NavItem[] = [
   {
@@ -107,6 +120,11 @@ export default function DashboardLayout({
   showDashboardLink = true,
 }: DashboardLayoutProps) {
   const router = useRouter();
+  const layoutRef = useRef<HTMLDivElement>(null);
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
+  const [isSidebarResizable, setIsSidebarResizable] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
 
   const navigation = useMemo(
     () =>
@@ -120,8 +138,130 @@ export default function DashboardLayout({
     [router.pathname, showDashboardLink]
   );
 
+  const clampSidebarWidth = useCallback(
+    (width: number) => {
+      const containerWidth = layoutRef.current?.clientWidth;
+      let maxWidth = MAX_SIDEBAR_WIDTH;
+
+      if (containerWidth && containerWidth > 0) {
+        const dynamicMax = containerWidth - MIN_MAIN_AREA_WIDTH;
+        if (dynamicMax > 0) {
+          maxWidth = Math.min(maxWidth, dynamicMax);
+        } else {
+          maxWidth = MIN_SIDEBAR_WIDTH;
+        }
+      }
+
+      return Math.min(
+        Math.max(width, MIN_SIDEBAR_WIDTH),
+        Math.max(MIN_SIDEBAR_WIDTH, maxWidth)
+      );
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const updateSidebarState = () => {
+      setIsSidebarResizable(window.innerWidth > SIDEBAR_RESIZE_BREAKPOINT);
+    };
+
+    updateSidebarState();
+    window.addEventListener("resize", updateSidebarState);
+
+    return () => {
+      window.removeEventListener("resize", updateSidebarState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isSidebarResizable) {
+      setSidebarWidth((current) => clampSidebarWidth(current));
+    } else {
+      resizeCleanupRef.current?.();
+    }
+  }, [clampSidebarWidth, isSidebarResizable]);
+
+  useEffect(() => {
+    return () => {
+      resizeCleanupRef.current?.();
+    };
+  }, []);
+
+  const handleSidebarResizeStart = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (!isSidebarResizable) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const pointerId = event.pointerId;
+      const startX = event.clientX;
+      const startWidth = sidebarWidth;
+      const handleElement = event.currentTarget;
+
+      const handlePointerMove = (moveEvent: PointerEvent) => {
+        const delta = moveEvent.clientX - startX;
+        setSidebarWidth(clampSidebarWidth(startWidth + delta));
+      };
+
+      const stopResize = () => {
+        setIsResizing(false);
+        const body = document.body;
+        if (body) {
+          body.style.cursor = "";
+          body.style.userSelect = "";
+        }
+
+        if (handleElement.hasPointerCapture(pointerId)) {
+          handleElement.releasePointerCapture(pointerId);
+        }
+
+        handleElement.removeEventListener("pointermove", handlePointerMove);
+        handleElement.removeEventListener("pointerup", stopResize);
+        handleElement.removeEventListener("pointercancel", stopResize);
+        resizeCleanupRef.current = null;
+      };
+
+      setIsResizing(true);
+      const body = document.body;
+      if (body) {
+        body.style.cursor = "col-resize";
+        body.style.userSelect = "none";
+      }
+
+      handleElement.setPointerCapture(pointerId);
+      handleElement.addEventListener("pointermove", handlePointerMove);
+      handleElement.addEventListener("pointerup", stopResize);
+      handleElement.addEventListener("pointercancel", stopResize);
+      resizeCleanupRef.current = stopResize;
+    },
+    [clampSidebarWidth, isSidebarResizable, sidebarWidth]
+  );
+
+  const layoutStyle = useMemo(() => {
+    if (!isSidebarResizable) {
+      return undefined;
+    }
+
+    return {
+      gridTemplateColumns: `${sidebarWidth}px minmax(0, 1fr)`,
+    } as const;
+  }, [isSidebarResizable, sidebarWidth]);
+
   return (
-    <div className={styles.dashboardLayout}>
+    <div
+      ref={layoutRef}
+      className={`${styles.dashboardLayout} ${
+        isResizing ? styles.dashboardLayoutResizing : ""
+      }`}
+      style={layoutStyle}
+    >
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarBrand}>管理メニュー</div>
@@ -181,6 +321,15 @@ export default function DashboardLayout({
             ))}
           </ul>
         </nav>
+        {isSidebarResizable && (
+          <div
+            className={`${styles.sidebarResizeHandle} ${
+              isResizing ? styles.sidebarResizeHandleActive : ""
+            }`}
+            onPointerDown={handleSidebarResizeStart}
+            aria-hidden="true"
+          />
+        )}
       </aside>
       <div className={styles.mainArea}>
         <header className={styles.pageHeader}>
