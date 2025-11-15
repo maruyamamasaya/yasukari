@@ -1,5 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  BatchWriteCommand,
+  GetCommand,
+  PutCommand,
+  ScanCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { generateNextNumericId, getDocumentClient } from "../../lib/dynamodb";
 
 type BikeModel = {
@@ -138,6 +143,70 @@ async function handlePost(
   }
 }
 
+function chunkArray<T>(items: T[], chunkSize: number): T[][] {
+  if (chunkSize <= 0) {
+    return [items];
+  }
+
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += chunkSize) {
+    chunks.push(items.slice(index, index + chunkSize));
+  }
+  return chunks;
+}
+
+async function handleDelete(
+  request: NextApiRequest,
+  response: NextApiResponse<{ deletedIds: number[] } | { message: string }>
+) {
+  const { modelIds } = request.body ?? {};
+
+  if (!Array.isArray(modelIds) || modelIds.length === 0) {
+    response.status(400).json({ message: "削除する車種IDを選択してください。" });
+    return;
+  }
+
+  const normalizedIds = Array.from(
+    new Set(
+      modelIds.filter((value): value is number => typeof value === "number")
+    )
+  );
+
+  if (normalizedIds.length === 0) {
+    response.status(400).json({ message: "車種IDの形式が正しくありません。" });
+    return;
+  }
+
+  try {
+    const client = getDocumentClient();
+
+    for (const chunk of chunkArray(normalizedIds, 25)) {
+      let pendingRequests = chunk.map((modelId) => ({
+        DeleteRequest: {
+          Key: { modelId },
+        },
+      }));
+
+      while (pendingRequests.length > 0) {
+        const { UnprocessedItems } = await client.send(
+          new BatchWriteCommand({
+            RequestItems: {
+              [MODELS_TABLE]: pendingRequests,
+            },
+          })
+        );
+
+        pendingRequests = (UnprocessedItems?.[MODELS_TABLE] as typeof pendingRequests) ?? [];
+      }
+    }
+
+    response.status(200).json({ deletedIds: normalizedIds });
+  } catch (error) {
+    console.error("Failed to delete bike models", error);
+    response.status(500).json({ message: "車種の削除に失敗しました。" });
+  }
+}
+
 export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse
@@ -152,6 +221,11 @@ export default async function handler(
     return;
   }
 
-  response.setHeader("Allow", ["GET", "POST"]);
+  if (request.method === "DELETE") {
+    await handleDelete(request, response);
+    return;
+  }
+
+  response.setHeader("Allow", ["GET", "POST", "DELETE"]);
   response.status(405).json({ message: "Method Not Allowed" });
 }

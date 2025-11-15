@@ -13,12 +13,18 @@ export default function BikeModelListPage() {
   const [classError, setClassError] = useState<string | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
+  const [selectedModelIds, setSelectedModelIds] = useState<Set<number>>(
+    () => new Set()
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ON" | "OFF">("ALL");
   const [sortState, setSortState] = useState<{
     key: "modelId" | "modelName" | "className" | "publishStatus";
     direction: "asc" | "desc";
   }>({ key: "modelId", direction: "asc" });
+  const [deleteConfirmationChecked, setDeleteConfirmationChecked] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -233,6 +239,91 @@ export default function BikeModelListPage() {
     setSelectedModelId((current) => (current === modelId ? null : modelId));
   };
 
+  const toggleModelSelection = (modelId: number) => {
+    setSelectedModelIds((current) => {
+      const next = new Set(current);
+      if (next.has(modelId)) {
+        next.delete(modelId);
+      } else {
+        next.add(modelId);
+      }
+
+      if (next.size === 0) {
+        setDeleteConfirmationChecked(false);
+      }
+
+      return next;
+    });
+  };
+
+  const handleDeleteSelectedModels = async () => {
+    const modelIds = Array.from(selectedModelIds);
+
+    if (modelIds.length === 0) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch("/api/bike-models", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ modelIds }),
+      });
+
+      const responseData: unknown = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message =
+          responseData &&
+          typeof responseData === "object" &&
+          responseData !== null &&
+          "message" in responseData &&
+          typeof (responseData as { message?: unknown }).message === "string"
+            ? ((responseData as { message: string }).message ?? "")
+            : "車種の削除に失敗しました。";
+        throw new Error(message || "車種の削除に失敗しました。");
+      }
+
+      const deletedIds = Array.isArray(
+        (responseData as { deletedIds?: unknown })?.deletedIds
+      )
+        ? ((responseData as { deletedIds: unknown[] }).deletedIds.filter(
+            (value): value is number => typeof value === "number"
+          ))
+        : modelIds;
+
+      setBikeModels((current) =>
+        current.filter((model) => !deletedIds.includes(model.modelId))
+      );
+      setSelectedModelIds(new Set<number>());
+      setDeleteConfirmationChecked(false);
+      setSelectedModelId((current) => {
+        if (current == null) {
+          return current;
+        }
+        return deletedIds.includes(current) ? null : current;
+      });
+    } catch (error) {
+      console.error("Failed to delete bike models", error);
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : "車種の削除に失敗しました。"
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const selectedModelCount = selectedModelIds.size;
+  const isDeleteDisabled =
+    selectedModelCount === 0 || !deleteConfirmationChecked || isDeleting;
+
   return (
     <>
       <Head>
@@ -250,6 +341,7 @@ export default function BikeModelListPage() {
         <section className={styles.section}>
           {classError && <p className={formStyles.error}>{classError}</p>}
           {modelError && <p className={formStyles.error}>{modelError}</p>}
+          {deleteError && <p className={formStyles.error}>{deleteError}</p>}
           <div className={formStyles.card}>
             <div className={styles.tableToolbar}>
               <div className={styles.tableToolbarGroup}>
@@ -297,6 +389,31 @@ export default function BikeModelListPage() {
                   }
                 >
                   {sortState.direction === "asc" ? "昇順" : "降順"}
+                </button>
+              </div>
+              <div className={styles.tableToolbarGroup}>
+                <span className={styles.tableSelectionCount}>
+                  選択中: {selectedModelCount}件
+                </span>
+                <label className={styles.confirmationCheckboxLabel}>
+                  <input
+                    type="checkbox"
+                    className={styles.confirmationCheckbox}
+                    checked={deleteConfirmationChecked}
+                    disabled={isDeleting || selectedModelCount === 0}
+                    onChange={(event) =>
+                      setDeleteConfirmationChecked(event.target.checked)
+                    }
+                  />
+                  削除することを確認しました
+                </label>
+                <button
+                  type="button"
+                  className={styles.tableDangerButton}
+                  disabled={isDeleteDisabled}
+                  onClick={handleDeleteSelectedModels}
+                >
+                  車種削除
                 </button>
               </div>
             </div>
@@ -463,7 +580,23 @@ export default function BikeModelListPage() {
                           }
                         }}
                       >
-                        <td>{model.modelId}</td>
+                        <td>
+                          <label className={tableStyles.selectionLabel}>
+                            <input
+                              type="checkbox"
+                              className={tableStyles.selectionCheckbox}
+                              checked={selectedModelIds.has(model.modelId)}
+                              disabled={isDeleting}
+                              onClick={(event) => event.stopPropagation()}
+                              onChange={(event) => {
+                                event.stopPropagation();
+                                toggleModelSelection(model.modelId);
+                              }}
+                              aria-label={`車種ID ${model.modelId} を削除対象として選択`}
+                            />
+                            <span>{model.modelId}</span>
+                          </label>
+                        </td>
                         <td>{model.modelName}</td>
                         <td>{classNameMap[model.classId] ?? "-"}</td>
                         <td>

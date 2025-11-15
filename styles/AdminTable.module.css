@@ -147,6 +147,23 @@
   outline-offset: -2px;
 }
 
+.selectionLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selectionCheckbox {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.selectionCheckbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 @media (max-width: 768px) {
   .table {
     font-size: 0.85rem;

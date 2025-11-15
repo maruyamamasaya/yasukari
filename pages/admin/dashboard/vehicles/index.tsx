@@ -13,12 +13,18 @@ export default function VehicleListPage() {
   const [modelError, setModelError] = useState<string | null>(null);
   const [vehicleError, setVehicleError] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+  const [selectedVehicleIds, setSelectedVehicleIds] = useState<Set<string>>(
+    () => new Set()
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ON" | "OFF">("ALL");
   const [sortState, setSortState] = useState<{
     key: "managementNumber" | "modelName" | "storeId" | "publishStatus";
     direction: "asc" | "desc";
   }>({ key: "managementNumber", direction: "asc" });
+  const [deleteConfirmationChecked, setDeleteConfirmationChecked] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -219,6 +225,91 @@ export default function VehicleListPage() {
     );
   };
 
+  const toggleVehicleSelection = (managementNumber: string) => {
+    setSelectedVehicleIds((current) => {
+      const next = new Set(current);
+      if (next.has(managementNumber)) {
+        next.delete(managementNumber);
+      } else {
+        next.add(managementNumber);
+      }
+
+      if (next.size === 0) {
+        setDeleteConfirmationChecked(false);
+      }
+
+      return next;
+    });
+  };
+
+  const handleDeleteSelectedVehicles = async () => {
+    const managementNumbers = Array.from(selectedVehicleIds);
+
+    if (managementNumbers.length === 0) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch("/api/vehicles", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ managementNumbers }),
+      });
+
+      const responseData: unknown = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message =
+          responseData &&
+          typeof responseData === "object" &&
+          responseData !== null &&
+          "message" in responseData &&
+          typeof (responseData as { message?: unknown }).message === "string"
+            ? ((responseData as { message: string }).message ?? "")
+            : "車両の削除に失敗しました。";
+        throw new Error(message || "車両の削除に失敗しました。");
+      }
+
+      const deletedIds = Array.isArray(
+        (responseData as { deletedIds?: unknown })?.deletedIds
+      )
+        ? ((responseData as { deletedIds: unknown[] }).deletedIds.filter(
+            (value): value is string => typeof value === "string"
+          ))
+        : managementNumbers;
+
+      setVehicles((current) =>
+        current.filter(
+          (vehicle) => !deletedIds.includes(vehicle.managementNumber)
+        )
+      );
+      setSelectedVehicleIds(new Set<string>());
+      setDeleteConfirmationChecked(false);
+      setSelectedVehicleId((current) => {
+        if (current == null) {
+          return current;
+        }
+        return deletedIds.includes(current) ? null : current;
+      });
+    } catch (error) {
+      console.error("Failed to delete vehicles", error);
+      setDeleteError(
+        error instanceof Error ? error.message : "車両の削除に失敗しました。"
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const selectedVehicleCount = selectedVehicleIds.size;
+  const isDeleteDisabled =
+    selectedVehicleCount === 0 || !deleteConfirmationChecked || isDeleting;
+
   return (
     <>
       <Head>
@@ -236,6 +327,7 @@ export default function VehicleListPage() {
         <section className={styles.section}>
           {modelError && <p className={formStyles.error}>{modelError}</p>}
           {vehicleError && <p className={formStyles.error}>{vehicleError}</p>}
+          {deleteError && <p className={formStyles.error}>{deleteError}</p>}
           <div className={formStyles.card}>
             <div className={styles.tableToolbar}>
               <div className={styles.tableToolbarGroup}>
@@ -283,6 +375,31 @@ export default function VehicleListPage() {
                   }
                 >
                   {sortState.direction === "asc" ? "昇順" : "降順"}
+                </button>
+              </div>
+              <div className={styles.tableToolbarGroup}>
+                <span className={styles.tableSelectionCount}>
+                  選択中: {selectedVehicleCount}件
+                </span>
+                <label className={styles.confirmationCheckboxLabel}>
+                  <input
+                    type="checkbox"
+                    className={styles.confirmationCheckbox}
+                    checked={deleteConfirmationChecked}
+                    disabled={isDeleting || selectedVehicleCount === 0}
+                    onChange={(event) =>
+                      setDeleteConfirmationChecked(event.target.checked)
+                    }
+                  />
+                  削除することを確認しました
+                </label>
+                <button
+                  type="button"
+                  className={styles.tableDangerButton}
+                  disabled={isDeleteDisabled}
+                  onClick={handleDeleteSelectedVehicles}
+                >
+                  車両削除
                 </button>
               </div>
             </div>
@@ -451,7 +568,25 @@ export default function VehicleListPage() {
                           }
                         }}
                       >
-                        <td>{vehicle.managementNumber}</td>
+                        <td>
+                          <label className={tableStyles.selectionLabel}>
+                            <input
+                              type="checkbox"
+                              className={tableStyles.selectionCheckbox}
+                              checked={selectedVehicleIds.has(
+                                vehicle.managementNumber
+                              )}
+                              disabled={isDeleting}
+                              onClick={(event) => event.stopPropagation()}
+                              onChange={(event) => {
+                                event.stopPropagation();
+                                toggleVehicleSelection(vehicle.managementNumber);
+                              }}
+                              aria-label={`管理番号 ${vehicle.managementNumber} を削除対象として選択`}
+                            />
+                            <span>{vehicle.managementNumber}</span>
+                          </label>
+                        </td>
                         <td>{modelNameMap[vehicle.modelId] ?? "-"}</td>
                         <td>{vehicle.storeId}</td>
                         <td>
