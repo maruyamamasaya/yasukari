@@ -66,7 +66,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "祭日管理",
-    disabled: true,
+    href: `${ADMIN_DASHBOARD_ROOT}/holiday-manager`,
   },
   {
     label: "休日管理",
