@@ -731,9 +731,7 @@ export default function BikeModelListPage() {
                   <div className={styles.detailItem}>
                     <dt>車種ID</dt>
                     <dd>
-                      <div className={formStyles.field}>
-                        <input value={selectedModel.modelId} readOnly />
-                      </div>
+                      {selectedModel.modelId}
                     </dd>
                   </div>
                   <div className={styles.detailItem}>

@@ -722,9 +722,7 @@ export default function VehicleListPage() {
                   <div className={styles.detailItem}>
                     <dt>管理番号</dt>
                     <dd>
-                      <div className={formStyles.field}>
-                        <input value={selectedVehicle.managementNumber} readOnly />
-                      </div>
+                      {selectedVehicle.managementNumber}
                     </dd>
                   </div>
                   <div className={styles.detailItem}>
