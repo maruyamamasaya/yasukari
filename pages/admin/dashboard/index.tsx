@@ -36,6 +36,14 @@ const bikeManagementLinks: MenuLink[] = [
   },
 ];
 
+const blogManagementLinks: MenuLink[] = [
+  {
+    label: "記事一覧",
+    href: `${ADMIN_DASHBOARD_ROOT}/blog`,
+    actions: [{ label: "＋投稿", href: `${ADMIN_DASHBOARD_ROOT}/blog/new` }],
+  },
+];
+
 const menuSections: MenuSection[] = [
   {
     title: "ダッシュボード",
@@ -74,7 +82,8 @@ const menuSections: MenuSection[] = [
   },
   {
     title: "ブログ管理",
-    description: "ブログ管理メニューは準備中です。",
+    description: "ブログ記事を確認・追加・編集できます。",
+    links: blogManagementLinks,
   },
   {
     title: "祭日管理",
