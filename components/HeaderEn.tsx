@@ -11,6 +11,7 @@ import {
   FaGlobe,
 } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
+import AnnouncementBar from './AnnouncementBar';
 
 export default function HeaderEn() {
   const suggestItems = [
@@ -54,9 +55,7 @@ export default function HeaderEn() {
   return (
     <div className="sticky top-0 z-50">
       {/* Top bar */}
-      <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm">
-        🎉 Limited time: 30% off first rental + new models in stock!
-      </div>
+      <AnnouncementBar />
       <header className="bg-white shadow-md border-b-2 border-red-600 relative">
         <div className="mx-auto flex items-center justify-between px-4 py-3 w-full max-w-screen-xl">
           {/* Logo */}

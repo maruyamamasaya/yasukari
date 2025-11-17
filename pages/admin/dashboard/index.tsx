@@ -51,7 +51,13 @@ const menuSections: MenuSection[] = [
   },
   {
     title: "新着情報管理",
-    description: "新着情報の管理メニューは準備中です。",
+    description: "トップページ上部の告知バーに表示される内容を編集できます。",
+    links: [
+      {
+        label: "トップバー設定",
+        href: `${ADMIN_DASHBOARD_ROOT}/announcements`,
+      },
+    ],
   },
   {
     title: "バイク管理",
