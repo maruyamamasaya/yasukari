@@ -170,12 +170,12 @@ export default function BikeClassListPage() {
       </Head>
       <DashboardLayout
         title="バイククラス一覧"
-        actions={
-          <Link href="/admin/dashboard/bike-classes/register" className={styles.iconButton}>
-            <span aria-hidden>＋</span>
-            バイククラス登録
-          </Link>
-        }
+        actions={[
+          {
+            label: "＋ バイククラス登録",
+            href: "/admin/dashboard/bike-classes/register",
+          },
+        ]}
       >
         <section className={styles.section}>
           {error && <p className={formStyles.error}>{error}</p>}

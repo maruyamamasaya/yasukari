@@ -181,11 +181,12 @@ export default function VehicleRegisterPage() {
       </Head>
       <DashboardLayout
         title="車両登録"
-        actions={
-          <Link href="/admin/dashboard/vehicles" className={styles.iconButton}>
-            車両一覧へ戻る
-          </Link>
-        }
+        actions={[
+          {
+            label: "車両一覧へ戻る",
+            href: "/admin/dashboard/vehicles",
+          },
+        ]}
       >
         <section className={styles.section}>
           {loadError && <p className={formStyles.error}>{loadError}</p>}

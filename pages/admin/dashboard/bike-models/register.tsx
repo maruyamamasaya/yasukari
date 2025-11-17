@@ -172,11 +172,12 @@ export default function BikeModelRegisterPage() {
       </Head>
       <DashboardLayout
         title="車種登録"
-        actions={
-          <Link href="/admin/dashboard/bike-models" className={styles.iconButton}>
-            車種一覧へ戻る
-          </Link>
-        }
+        actions={[
+          {
+            label: "車種一覧へ戻る",
+            href: "/admin/dashboard/bike-models",
+          },
+        ]}
       >
         <section className={styles.section}>
           {loadError && <p className={formStyles.error}>{loadError}</p>}
