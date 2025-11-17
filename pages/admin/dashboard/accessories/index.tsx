@@ -181,26 +181,49 @@ export default function AccessoryListPage() {
                   onChange={handleSearchChange}
                   aria-label="用品を検索"
                 />
-              </div>
-              <div className={styles.tableToolbarGroup}>
                 <button
                   type="button"
-                  className={styles.tableButton}
+                  className={styles.tableToolbarButton}
                   onClick={() => toggleAll(true)}
                 >
                   すべて選択
                 </button>
                 <button
                   type="button"
-                  className={styles.tableButton}
+                  className={styles.tableToolbarButton}
                   onClick={() => toggleAll(false)}
                 >
                   選択解除
                 </button>
               </div>
+              <div className={styles.tableToolbarGroup}>
+                <span className={styles.tableSelectionCount}>
+                  選択中: {selectedCount}件
+                </span>
+                <label className={styles.confirmationCheckboxLabel}>
+                  <input
+                    type="checkbox"
+                    className={styles.confirmationCheckbox}
+                    checked={deleteConfirmationChecked}
+                    onChange={(event) =>
+                      setDeleteConfirmationChecked(event.target.checked)
+                    }
+                    disabled={selectedIds.size === 0}
+                  />
+                  削除することを確認しました
+                </label>
+                <button
+                  type="button"
+                  className={styles.tableDangerButton}
+                  disabled={disableDelete}
+                  onClick={handleDelete}
+                >
+                  {isDeleting ? "削除中..." : "選択した用品を削除"}
+                </button>
+              </div>
             </div>
 
-            <div className={styles.tableWrapper}>
+            <div className={tableStyles.wrapper}>
               <table className={tableStyles.table}>
                 <thead>
                   <tr>
@@ -222,6 +245,7 @@ export default function AccessoryListPage() {
                       <td className={tableStyles.checkboxCell}>
                         <input
                           type="checkbox"
+                          className={tableStyles.selectionCheckbox}
                           aria-label={`${item.name} を削除対象に追加`}
                           checked={selectedIds.has(item.accessory_id)}
                           onChange={() => toggleSelection(item.accessory_id)}
@@ -246,7 +270,7 @@ export default function AccessoryListPage() {
                       <td className={tableStyles.actionCell}>
                         <Link
                           href={`/admin/dashboard/accessories/register?accessoryId=${item.accessory_id}`}
-                          className={styles.tableActionLink}
+                          className={tableStyles.link}
                         >
                           編集
                         </Link>
@@ -262,31 +286,6 @@ export default function AccessoryListPage() {
                   )}
                 </tbody>
               </table>
-            </div>
-
-            <div className={styles.tableActions}>
-              <label className={styles.checkboxWithLabel}>
-                <input
-                  type="checkbox"
-                  checked={deleteConfirmationChecked}
-                  onChange={(event) =>
-                    setDeleteConfirmationChecked(event.target.checked)
-                  }
-                  disabled={selectedIds.size === 0}
-                />
-                <span>選択した用品を削除する</span>
-              </label>
-              <button
-                type="button"
-                className={`${styles.tableButton} ${styles.dangerButton}`}
-                disabled={disableDelete}
-                onClick={handleDelete}
-              >
-                {isDeleting ? "削除中..." : "選択した用品を削除"}
-              </button>
-              <div className={styles.tableActionSummary}>
-                選択中: {selectedCount} 件
-              </div>
             </div>
           </div>
         </section>
