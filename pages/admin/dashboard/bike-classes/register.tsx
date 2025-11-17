@@ -4,15 +4,124 @@ import { useRouter } from "next/router";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
-import { BikeClass } from "../../../../lib/dashboard/types";
+import { BikeClass, DurationPriceKey } from "../../../../lib/dashboard/types";
+
+const durationOptions: { key: DurationPriceKey; label: string }[] = [
+  { key: "24h", label: "24時間" },
+  { key: "2d", label: "2日間" },
+  { key: "4d", label: "4日間" },
+  { key: "1w", label: "1週間" },
+  { key: "2w", label: "2週間" },
+  { key: "1m", label: "1ヶ月" },
+];
+
+const createEmptyPriceState = (): Record<DurationPriceKey, string> => ({
+  "24h": "",
+  "2d": "",
+  "4d": "",
+  "1w": "",
+  "2w": "",
+  "1m": "",
+});
+
+const normalizeClassIdentifier = (input: string): string | null => {
+  const numericPart = input.match(/\d+/)?.[0];
+  if (!numericPart) {
+    return null;
+  }
+
+  return `class_${numericPart}`;
+};
+
+const parsePriceValueFromInput = (value: string): number | null | undefined => {
+  const normalized = value.replace(/,/g, "").trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  const numericValue = Number(normalized);
+  return Number.isFinite(numericValue) ? numericValue : null;
+};
+
+const priceMapFromState = (
+  state: Record<DurationPriceKey, string>,
+  label: string
+): Partial<Record<DurationPriceKey, number>> | undefined => {
+  const entries: [DurationPriceKey, number][] = [];
+
+  durationOptions.forEach(({ key }) => {
+    const raw = state[key];
+    if (!raw.trim()) {
+      return;
+    }
+
+    const numericValue = parsePriceValueFromInput(raw);
+    if (numericValue == null) {
+      throw new Error(`${label}には数値を入力してください。`);
+    }
+
+    entries.push([key, numericValue]);
+  });
+
+  return entries.length > 0
+    ? (Object.fromEntries(entries) as Partial<Record<DurationPriceKey, number>>)
+    : undefined;
+};
+
+const priceStateFromClass = (
+  prices?: Partial<Record<string, number>>
+): Record<DurationPriceKey, string> => {
+  const nextState = createEmptyPriceState();
+  durationOptions.forEach(({ key }) => {
+    const value = prices?.[key];
+    if (typeof value === "number") {
+      nextState[key] = String(value);
+    }
+  });
+  return nextState;
+};
 
 export default function BikeClassRegisterPage() {
   const [className, setClassName] = useState("");
+  const [classIdentifier, setClassIdentifier] = useState("");
+  const [basePrices, setBasePrices] = useState<Record<DurationPriceKey, string>>(
+    createEmptyPriceState
+  );
+  const [insurancePrices, setInsurancePrices] = useState<
+    Record<DurationPriceKey, string>
+  >(createEmptyPriceState);
+  const [extraPrices, setExtraPrices] = useState<Record<DurationPriceKey, string>>(
+    createEmptyPriceState
+  );
+  const [theftInsurance, setTheftInsurance] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [currentClassId, setCurrentClassId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const resetFormState = () => {
+    setClassName("");
+    setClassIdentifier("");
+    setBasePrices(createEmptyPriceState());
+    setInsurancePrices(createEmptyPriceState());
+    setExtraPrices(createEmptyPriceState());
+    setTheftInsurance("");
+  };
+
+  const applyClassData = (targetClass: BikeClass) => {
+    setCurrentClassId(targetClass.classId);
+    setClassName(targetClass.className);
+    setClassIdentifier(targetClass.class_id ?? "");
+    setBasePrices(priceStateFromClass(targetClass.base_prices));
+    setInsurancePrices(priceStateFromClass(targetClass.insurance_prices));
+    setExtraPrices(priceStateFromClass(targetClass.extra_prices));
+    setTheftInsurance(
+      typeof targetClass.theft_insurance === "number"
+        ? String(targetClass.theft_insurance)
+        : ""
+    );
+  };
 
   useEffect(() => {
     if (!router.isReady) {
@@ -27,7 +136,7 @@ export default function BikeClassRegisterPage() {
 
     if (!classIdValue || Number.isNaN(parsedClassId)) {
       setCurrentClassId(null);
-      setClassName("");
+      resetFormState();
       return;
     }
 
@@ -51,16 +160,16 @@ export default function BikeClassRegisterPage() {
         if (!targetClass) {
           setError("指定されたクラスが見つかりませんでした。");
           setCurrentClassId(null);
-          setClassName("");
+          resetFormState();
           return;
         }
 
-        setCurrentClassId(targetClass.classId);
-        setClassName(targetClass.className);
+        applyClassData(targetClass);
       } catch (loadError) {
         console.error("Failed to load bike class", loadError);
         setError("クラス情報の取得に失敗しました。");
         setCurrentClassId(null);
+        resetFormState();
       } finally {
         setIsLoading(false);
       }
@@ -78,8 +187,51 @@ export default function BikeClassRegisterPage() {
       return;
     }
 
+    const normalizedIdentifier = classIdentifier.trim()
+      ? normalizeClassIdentifier(classIdentifier.trim())
+      : undefined;
+    if (classIdentifier.trim() && !normalizedIdentifier) {
+      setError("ID欄には #1 のように数字を含めて入力してください。");
+      return;
+    }
+
+    let normalizedBasePrices: Partial<Record<DurationPriceKey, number>> | undefined;
+    let normalizedInsurancePrices:
+      | Partial<Record<DurationPriceKey, number>>
+      | undefined;
+    let normalizedExtraPrices: Partial<Record<DurationPriceKey, number>> | undefined;
+    const normalizedTheftInsurance = parsePriceValueFromInput(theftInsurance);
+
     try {
-      const payload = { className: className.trim() };
+      normalizedBasePrices = priceMapFromState(basePrices, "基本料金");
+      normalizedInsurancePrices = priceMapFromState(
+        insurancePrices,
+        "車両保証"
+      );
+      normalizedExtraPrices = priceMapFromState(extraPrices, "追加料金");
+    } catch (parseError) {
+      setError(
+        parseError instanceof Error
+          ? parseError.message
+          : "金額の入力値を確認してください。"
+      );
+      return;
+    }
+
+    if (normalizedTheftInsurance === null) {
+      setError("盗難補償には数値を入力してください。");
+      return;
+    }
+
+    try {
+      const payload = {
+        className: className.trim(),
+        class_id: normalizedIdentifier,
+        base_prices: normalizedBasePrices,
+        insurance_prices: normalizedInsurancePrices,
+        extra_prices: normalizedExtraPrices,
+        theft_insurance: normalizedTheftInsurance ?? undefined,
+      };
       const response = await fetch("/api/bike-classes", {
         method: isEditMode ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,8 +252,7 @@ export default function BikeClassRegisterPage() {
       }
 
       const result: BikeClass = await response.json();
-      setClassName(result.className);
-      setCurrentClassId(isEditMode ? result.classId : null);
+      applyClassData(result);
       setError(null);
       setSuccess(
         isEditMode ? "クラス情報を更新しました。" : "クラスを登録しました。"
@@ -135,6 +286,20 @@ export default function BikeClassRegisterPage() {
             <form onSubmit={handleSubmit} className={formStyles.body}>
               <div className={formStyles.grid}>
                 <div className={formStyles.field}>
+                  <label htmlFor="classIdentifier">ID</label>
+                  <input
+                    id="classIdentifier"
+                    name="classIdentifier"
+                    placeholder="例：#1"
+                    value={classIdentifier}
+                    onChange={(event) => setClassIdentifier(event.target.value)}
+                    disabled={isLoading}
+                  />
+                  <p className={formStyles.hint}>
+                    ID #1 と入力すると class_1 として保存されます。
+                  </p>
+                </div>
+                <div className={formStyles.field}>
                   <label htmlFor="className">クラス名</label>
                   <input
                     id="className"
@@ -145,6 +310,96 @@ export default function BikeClassRegisterPage() {
                     disabled={isLoading}
                   />
                 </div>
+              </div>
+              <div className={formStyles.field}>
+                <label>基本料金</label>
+                <div className={formStyles.grid}>
+                  {durationOptions.map((option) => (
+                    <div className={formStyles.field} key={`base-${option.key}`}>
+                      <label htmlFor={`base-${option.key}`}>
+                        基本料金{option.label}
+                      </label>
+                      <input
+                        id={`base-${option.key}`}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={basePrices[option.key]}
+                        onChange={(event) =>
+                          setBasePrices((current) => ({
+                            ...current,
+                            [option.key]: event.target.value,
+                          }))
+                        }
+                        disabled={isLoading}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className={formStyles.field}>
+                <label>車両保証</label>
+                <div className={formStyles.grid}>
+                  {durationOptions.map((option) => (
+                    <div
+                      className={formStyles.field}
+                      key={`insurance-${option.key}`}
+                    >
+                      <label htmlFor={`insurance-${option.key}`}>
+                        車両保証{option.label}
+                      </label>
+                      <input
+                        id={`insurance-${option.key}`}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={insurancePrices[option.key]}
+                        onChange={(event) =>
+                          setInsurancePrices((current) => ({
+                            ...current,
+                            [option.key]: event.target.value,
+                          }))
+                        }
+                        disabled={isLoading}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className={formStyles.field}>
+                <label>追加料金</label>
+                <div className={formStyles.grid}>
+                  {durationOptions.map((option) => (
+                    <div className={formStyles.field} key={`extra-${option.key}`}>
+                      <label htmlFor={`extra-${option.key}`}>
+                        追加料金{option.label}
+                      </label>
+                      <input
+                        id={`extra-${option.key}`}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={extraPrices[option.key]}
+                        onChange={(event) =>
+                          setExtraPrices((current) => ({
+                            ...current,
+                            [option.key]: event.target.value,
+                          }))
+                        }
+                        disabled={isLoading}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className={formStyles.field}>
+                <label htmlFor="theftInsurance">盗難補償</label>
+                <input
+                  id="theftInsurance"
+                  name="theftInsurance"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={theftInsurance}
+                  onChange={(event) => setTheftInsurance(event.target.value)}
+                  disabled={isLoading}
+                />
               </div>
               <div className={formStyles.actions}>
                 <button
