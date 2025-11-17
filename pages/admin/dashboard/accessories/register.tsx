@@ -238,72 +238,77 @@ export default function AccessoryRegisterPage() {
         <section className={styles.section}>
           {error && <p className={formStyles.error}>{error}</p>}
           {success && <p className={formStyles.success}>{success}</p>}
-          <form className={formStyles.card} onSubmit={handleSubmit}>
-            <div className={formStyles.fieldRow}>
-              <label className={formStyles.label} htmlFor="accessory-name">
-                用品名
-              </label>
-              <div className={formStyles.inputWrapper}>
-                <input
-                  id="accessory-name"
-                  type="text"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="例：グローブ"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+          <article className={formStyles.card}>
+            <div className={formStyles.header}>
+              <h2 className={formStyles.title}>用品情報</h2>
+              <p className={formStyles.description}>
+                用品名と料金を入力し、登録または更新してください。
+              </p>
             </div>
+            <form className={formStyles.body} onSubmit={handleSubmit}>
+              <div className={formStyles.grid}>
+                <div className={formStyles.field}>
+                  <label htmlFor="accessory-name">用品名</label>
+                  <input
+                    id="accessory-name"
+                    type="text"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder="例：グローブ"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
 
-            <div className={formStyles.fieldGroup}>
-              <div className={formStyles.fieldGroupHeader}>
-                <h3>料金</h3>
-                <p className={formStyles.fieldNote}>
+              <div className={formStyles.field}>
+                <label>料金</label>
+                <p className={formStyles.hint}>
                   金額は数値のみ入力してください（カンマは不要です）。
                 </p>
+                <div className={formStyles.grid}>
+                  {PRICE_KEYS.map((key) => (
+                    <div key={key} className={formStyles.field}>
+                      <label htmlFor={`price-${key}`}>{priceLabels[key]}</label>
+                      <input
+                        id={`price-${key}`}
+                        type="text"
+                        inputMode="numeric"
+                        value={priceState[key]}
+                        onChange={(event) =>
+                          handlePriceChange(key, event.target.value)
+                        }
+                        placeholder="例：1240"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className={formStyles.fieldGrid}>
-                {PRICE_KEYS.map((key) => (
-                  <label key={key} className={formStyles.labelColumn}>
-                    <span className={formStyles.label}>{priceLabels[key]}</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={priceState[key]}
-                      onChange={(event) =>
-                        handlePriceChange(key, event.target.value)
-                      }
-                      placeholder="例：1240"
-                      disabled={isLoading}
-                    />
-                  </label>
-                ))}
-              </div>
-            </div>
 
-            <div className={formStyles.actions}>
-              <button
-                type="submit"
-                className={styles.primaryButton}
-                disabled={isLoading}
-              >
-                {isLoading
-                  ? "送信中..."
-                  : currentAccessoryId
-                    ? "用品を更新"
-                    : "用品を登録"}
-              </button>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={resetForm}
-                disabled={isLoading}
-              >
-                入力内容をリセット
-              </button>
-            </div>
-          </form>
+              <div className={formStyles.actions}>
+                <button
+                  type="submit"
+                  className={formStyles.primaryButton}
+                  disabled={isLoading}
+                >
+                  {isLoading
+                    ? "送信中..."
+                    : currentAccessoryId
+                      ? "用品を更新"
+                      : "用品を登録"}
+                </button>
+                <button
+                  type="button"
+                  className={formStyles.secondaryButton}
+                  onClick={resetForm}
+                  disabled={isLoading}
+                >
+                  入力内容をリセット
+                </button>
+              </div>
+            </form>
+          </article>
         </section>
       </DashboardLayout>
     </>
