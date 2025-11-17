@@ -62,11 +62,16 @@ export default function AnnouncementBar() {
     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm px-2">
       {linkHref ? (
         isExternal ? (
-          <a href={linkHref} target="_blank" rel="noreferrer" className="underline">
+          <a
+            href={linkHref}
+            target="_blank"
+            rel="noreferrer"
+            className="text-white no-underline"
+          >
             {message}
           </a>
         ) : (
-          <Link href={linkHref} className="underline">
+          <Link href={linkHref} className="text-white no-underline">
             {message}
           </Link>
         )
