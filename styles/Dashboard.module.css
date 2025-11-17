@@ -164,6 +164,14 @@
   flex-direction: column;
   min-height: 0;
   background: #f8fafc;
+  align-items: center;
+}
+
+.mainContent {
+  width: min(100%, 1440px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 

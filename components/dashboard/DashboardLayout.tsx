@@ -343,36 +343,38 @@ export default function DashboardLayout({
         )}
       </aside>
       <div className={styles.mainArea}>
-        <header className={styles.pageHeader}>
-          <div className={styles.pageHeaderContent}>
-            <h1 className={styles.pageTitle}>{title}</h1>
-            {description && (
-              <p className={styles.pageDescription}>{description}</p>
-            )}
-          </div>
-          {(showHomeAction || actions?.length) && (
-            <div className={styles.pageActions}>
-              {showHomeAction && (
-                <Link href={ADMIN_DASHBOARD_ROOT} className={styles.iconButton}>
-                  管理ホームに戻る
-                </Link>
+        <div className={styles.mainContent}>
+          <header className={styles.pageHeader}>
+            <div className={styles.pageHeaderContent}>
+              <h1 className={styles.pageTitle}>{title}</h1>
+              {description && (
+                <p className={styles.pageDescription}>{description}</p>
               )}
-              {actions?.map((action) => (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className={styles.iconButton}
-                >
-                  {action.label}
-                </Link>
-              ))}
             </div>
-          )}
-        </header>
-        <main className={styles.main}>{children}</main>
-        <footer className={styles.footer}>
-          <small>&copy; レンタルバイク『ヤスカリ』</small>
-        </footer>
+            {(showHomeAction || actions?.length) && (
+              <div className={styles.pageActions}>
+                {showHomeAction && (
+                  <Link href={ADMIN_DASHBOARD_ROOT} className={styles.iconButton}>
+                    管理ホームに戻る
+                  </Link>
+                )}
+                {actions?.map((action) => (
+                  <Link
+                    key={action.href}
+                    href={action.href}
+                    className={styles.iconButton}
+                  >
+                    {action.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </header>
+          <main className={styles.main}>{children}</main>
+          <footer className={styles.footer}>
+            <small>&copy; レンタルバイク『ヤスカリ』</small>
+          </footer>
+        </div>
       </div>
     </div>
   );
