@@ -4,6 +4,15 @@ export type DurationPriceKey = "24h" | "2d" | "4d" | "1w" | "2w" | "1m";
 
 export type DurationPriceMap = Partial<Record<DurationPriceKey, number>>;
 
+export type AccessoryPriceKey = "24h" | "2d" | "4d" | "1w";
+
+export type Accessory = {
+  accessory_id: number;
+  name: string;
+  prices: Partial<Record<AccessoryPriceKey, number>>;
+  updated_at: string;
+};
+
 export type BikeClass = {
   classId: number;
   class_id?: string;

@@ -66,7 +66,16 @@ const menuSections: MenuSection[] = [
   },
   {
     title: "オプション（用品）",
-    description: "オプション管理メニューは準備中です。",
+    description: "用品の料金を確認・登録できます。",
+    links: [
+      {
+        label: "用品一覧",
+        href: `${ADMIN_DASHBOARD_ROOT}/accessories`,
+        actions: [
+          { label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/accessories/register` },
+        ],
+      },
+    ],
   },
   {
     title: "会員管理",
