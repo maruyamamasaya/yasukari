@@ -143,6 +143,128 @@ async function handlePost(
   }
 }
 
+async function handlePut(
+  request: NextApiRequest,
+  response: NextApiResponse<BikeModel | { message: string }>
+) {
+  const {
+    modelId,
+    classId,
+    modelName,
+    publishStatus,
+    displacementCc,
+    requiredLicense,
+    lengthMm,
+    widthMm,
+    heightMm,
+    seatHeightMm,
+    seatCapacity,
+    vehicleWeightKg,
+    fuelTankCapacityL,
+    fuelType,
+    maxPower,
+    maxTorque,
+    mainImageUrl,
+  } = request.body ?? {};
+
+  if (typeof modelId !== "number") {
+    response.status(400).json({ message: "車種IDを正しく指定してください。" });
+    return;
+  }
+
+  if (typeof classId !== "number") {
+    response.status(400).json({ message: "所属クラスを正しく選択してください。" });
+    return;
+  }
+
+  if (typeof modelName !== "string" || modelName.trim().length === 0) {
+    response.status(400).json({ message: "車種名を正しく入力してください。" });
+    return;
+  }
+
+  if (publishStatus !== "ON" && publishStatus !== "OFF") {
+    response.status(400).json({ message: "掲載状態を正しく選択してください。" });
+    return;
+  }
+
+  try {
+    const client = getDocumentClient();
+
+    const [existingModel, classResult] = await Promise.all([
+      client.send(
+        new GetCommand({
+          TableName: MODELS_TABLE,
+          Key: { modelId },
+        })
+      ),
+      client.send(
+        new GetCommand({
+          TableName: CLASSES_TABLE,
+          Key: { classId },
+        })
+      ),
+    ]);
+
+    if (!existingModel.Item) {
+      response.status(404).json({ message: "指定された車種が見つかりません。" });
+      return;
+    }
+
+    if (!classResult.Item) {
+      response.status(400).json({ message: "選択されたクラスが存在しません。" });
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+    const item: BikeModel = {
+      modelId,
+      classId,
+      modelName: modelName.trim(),
+      publishStatus,
+      ...(typeof displacementCc === "number"
+        ? { displacementCc }
+        : {}),
+      ...(typeof requiredLicense === "string" && requiredLicense.trim()
+        ? { requiredLicense: requiredLicense.trim() }
+        : {}),
+      ...(typeof lengthMm === "number" ? { lengthMm } : {}),
+      ...(typeof widthMm === "number" ? { widthMm } : {}),
+      ...(typeof heightMm === "number" ? { heightMm } : {}),
+      ...(typeof seatHeightMm === "number" ? { seatHeightMm } : {}),
+      ...(typeof seatCapacity === "number" ? { seatCapacity } : {}),
+      ...(typeof vehicleWeightKg === "number" ? { vehicleWeightKg } : {}),
+      ...(typeof fuelTankCapacityL === "number" ? { fuelTankCapacityL } : {}),
+      ...(typeof fuelType === "string" && fuelType.trim()
+        ? { fuelType: fuelType.trim() }
+        : {}),
+      ...(typeof maxPower === "string" && maxPower.trim()
+        ? { maxPower: maxPower.trim() }
+        : {}),
+      ...(typeof maxTorque === "string" && maxTorque.trim()
+        ? { maxTorque: maxTorque.trim() }
+        : {}),
+      ...(typeof mainImageUrl === "string" && mainImageUrl.trim()
+        ? { mainImageUrl: mainImageUrl.trim() }
+        : {}),
+      createdAt: (existingModel.Item as BikeModel).createdAt,
+      updatedAt: timestamp,
+    };
+
+    await client.send(
+      new PutCommand({
+        TableName: MODELS_TABLE,
+        Item: item,
+        ConditionExpression: "attribute_exists(modelId)",
+      })
+    );
+
+    response.status(200).json(item);
+  } catch (error) {
+    console.error("Failed to update bike model", error);
+    response.status(500).json({ message: "車種の更新に失敗しました。" });
+  }
+}
+
 function chunkArray<T>(items: T[], chunkSize: number): T[][] {
   if (chunkSize <= 0) {
     return [items];
@@ -221,11 +343,16 @@ export default async function handler(
     return;
   }
 
+  if (request.method === "PUT") {
+    await handlePut(request, response);
+    return;
+  }
+
   if (request.method === "DELETE") {
     await handleDelete(request, response);
     return;
   }
 
-  response.setHeader("Allow", ["GET", "POST", "DELETE"]);
+  response.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
   response.status(405).json({ message: "Method Not Allowed" });
 }
