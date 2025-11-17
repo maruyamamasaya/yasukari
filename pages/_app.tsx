@@ -17,6 +17,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const isEn = router.pathname.startsWith('/en');
   const isAdminRoute = router.pathname.startsWith('/admin');
+
+  if (isAdminRoute) {
+    return <Component {...pageProps} />;
+  }
+
   return (
     <>
       {isEn ? <HeaderEn /> : <Header />}
@@ -24,7 +29,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <Component {...pageProps} />
       </Layout>
       {isEn ? <FooterEn /> : <Footer />}
-      {!isAdminRoute && <ChatBotWidget />}
+      <ChatBotWidget />
       <MobileNav />
     </>
   );
