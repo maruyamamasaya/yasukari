@@ -329,6 +329,16 @@ export default function VehicleListPage() {
           {vehicleError && <p className={formStyles.error}>{vehicleError}</p>}
           {deleteError && <p className={formStyles.error}>{deleteError}</p>}
           <div className={formStyles.card}>
+            <div className={styles.detailHeader}>
+              <h2 className={styles.detailTitle}>車両一覧</h2>
+              <Link
+                href="/admin/dashboard/vehicles/register"
+                className={styles.detailEditButton}
+                aria-label="車両一覧を編集"
+              >
+                ✎ 編集
+              </Link>
+            </div>
             <div className={styles.tableToolbar}>
               <div className={styles.tableToolbarGroup}>
                 <input
@@ -609,9 +619,18 @@ export default function VehicleListPage() {
           </div>
           {selectedVehicle && (
             <div className={styles.detailPanel}>
-              <h2 className={styles.detailTitle}>
-                {selectedVehicle.managementNumber}の詳細情報
-              </h2>
+              <div className={styles.detailHeader}>
+                <h2 className={styles.detailTitle}>
+                  {selectedVehicle.managementNumber}の詳細情報
+                </h2>
+                <Link
+                  href={`/admin/dashboard/vehicles/register?managementNumber=${selectedVehicle.managementNumber}`}
+                  className={styles.detailEditButton}
+                  aria-label={`${selectedVehicle.managementNumber}の詳細情報を編集`}
+                >
+                  ✎ 編集
+                </Link>
+              </div>
               <dl className={styles.detailGrid}>
                 {vehicleDetailEntries.map(({ label, value }) => (
                   <div key={label} className={styles.detailItem}>
