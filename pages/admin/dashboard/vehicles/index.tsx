@@ -4,7 +4,12 @@ import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
-import { BikeModel, PublishStatus, Vehicle } from "../../../../lib/dashboard/types";
+import {
+  BikeClass,
+  BikeModel,
+  PublishStatus,
+  Vehicle,
+} from "../../../../lib/dashboard/types";
 import { parseTags } from "../../../../lib/dashboard/utils";
 
 type VehicleFormState = {
@@ -26,10 +31,12 @@ type VehicleFormState = {
 };
 
 export default function VehicleListPage() {
+  const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [modelError, setModelError] = useState<string | null>(null);
   const [vehicleError, setVehicleError] = useState<string | null>(null);
+  const [classError, setClassError] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [selectedVehicleIds, setSelectedVehicleIds] = useState<Set<string>>(
     () => new Set()
@@ -52,9 +59,10 @@ export default function VehicleListPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [modelsResponse, vehiclesResponse] = await Promise.all([
+        const [modelsResponse, vehiclesResponse, classesResponse] = await Promise.all([
           fetch("/api/bike-models"),
           fetch("/api/vehicles"),
+          fetch("/api/bike-classes"),
         ]);
 
         if (modelsResponse.ok) {
@@ -63,6 +71,14 @@ export default function VehicleListPage() {
           setModelError(null);
         } else {
           setModelError("車種一覧の取得に失敗しました。");
+        }
+
+        if (classesResponse.ok) {
+          const classData: BikeClass[] = await classesResponse.json();
+          setBikeClasses(classData.sort((a, b) => a.classId - b.classId));
+          setClassError(null);
+        } else {
+          setClassError("バイククラス一覧の取得に失敗しました。");
         }
 
         if (vehiclesResponse.ok) {
@@ -77,6 +93,7 @@ export default function VehicleListPage() {
       } catch (loadError) {
         console.error("Failed to load vehicle list", loadError);
         setModelError((prev) => prev ?? "車種一覧の取得に失敗しました。");
+        setClassError((prev) => prev ?? "バイククラス一覧の取得に失敗しました。");
         setVehicleError((prev) => prev ?? "車両一覧の取得に失敗しました。");
       }
     };
@@ -84,14 +101,40 @@ export default function VehicleListPage() {
     void loadData();
   }, []);
 
-  const modelNameMap = useMemo(
+  const modelMap = useMemo(
     () =>
-      bikeModels.reduce<Record<number, string>>((acc, model) => {
-        acc[model.modelId] = model.modelName;
+      bikeModels.reduce<Record<number, BikeModel>>((acc, model) => {
+        acc[model.modelId] = model;
         return acc;
       }, {}),
     [bikeModels]
   );
+
+  const modelNameMap = useMemo(
+    () =>
+      Object.values(modelMap).reduce<Record<number, string>>((acc, model) => {
+        acc[model.modelId] = model.modelName;
+        return acc;
+      }, {}),
+    [modelMap]
+  );
+
+  const classNameMap = useMemo(
+    () =>
+      bikeClasses.reduce<Record<number, string>>((acc, bikeClass) => {
+        acc[bikeClass.classId] = bikeClass.className;
+        return acc;
+      }, {}),
+    [bikeClasses]
+  );
+
+  const getClassNameByModelId = (modelId: number) => {
+    const model = modelMap[modelId];
+    if (!model) {
+      return "-";
+    }
+    return classNameMap[model.classId] ?? "-";
+  };
 
   const selectedVehicle = useMemo(
     () =>
@@ -414,6 +457,7 @@ export default function VehicleListPage() {
         ]}
       >
         <section className={styles.section}>
+          {classError && <p className={formStyles.error}>{classError}</p>}
           {modelError && <p className={formStyles.error}>{modelError}</p>}
           {vehicleError && <p className={formStyles.error}>{vehicleError}</p>}
           {deleteError && <p className={formStyles.error}>{deleteError}</p>}
@@ -533,6 +577,7 @@ export default function VehicleListPage() {
                         </span>
                       </button>
                     </th>
+                    <th>バイククラス</th>
                     <th
                       aria-sort={
                         sortState.key === "modelName"
@@ -601,6 +646,8 @@ export default function VehicleListPage() {
                         </span>
                       </button>
                     </th>
+                    <th>車検満了日</th>
+                    <th>自賠責満了日</th>
                     <th
                       aria-sort={
                         sortState.key === "publishStatus"
@@ -640,7 +687,7 @@ export default function VehicleListPage() {
                 <tbody>
                   {filteredVehicles.length === 0 ? (
                     <tr>
-                      <td colSpan={4}>登録済みの車両はまだありません。</td>
+                      <td colSpan={7}>登録済みの車両はまだありません。</td>
                     </tr>
                   ) : (
                     filteredVehicles.map((vehicle) => (
@@ -679,8 +726,11 @@ export default function VehicleListPage() {
                             <span>{vehicle.managementNumber}</span>
                           </label>
                         </td>
+                        <td>{getClassNameByModelId(vehicle.modelId)}</td>
                         <td>{modelNameMap[vehicle.modelId] ?? "-"}</td>
                         <td>{vehicle.storeId}</td>
+                        <td>{vehicle.inspectionExpiryDate ?? "-"}</td>
+                        <td>{vehicle.liabilityInsuranceExpiryDate ?? "-"}</td>
                         <td>
                           <span
                             className={`${tableStyles.badge} ${
