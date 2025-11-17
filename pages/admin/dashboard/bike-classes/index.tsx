@@ -53,7 +53,8 @@ export default function BikeClassListPage() {
           const keyword = normalizedKeyword;
           return (
             item.className.toLowerCase().includes(keyword) ||
-            String(item.classId).includes(keyword)
+            String(item.classId).includes(keyword) ||
+            (item.class_id ?? "").toLowerCase().includes(keyword)
           );
         })
       : bikeClasses;
@@ -281,6 +282,7 @@ export default function BikeClassListPage() {
                         </span>
                       </button>
                     </th>
+                    <th scope="col">class_id</th>
                     <th
                       aria-sort={
                         sortState.key === "className"
@@ -321,7 +323,7 @@ export default function BikeClassListPage() {
               <tbody>
                 {filteredClasses.length === 0 ? (
                   <tr>
-                    <td colSpan={3}>登録済みのクラスはまだありません。</td>
+                    <td colSpan={4}>登録済みのクラスはまだありません。</td>
                   </tr>
                 ) : (
                   filteredClasses.map((item) => (
@@ -339,6 +341,7 @@ export default function BikeClassListPage() {
                           <span>{item.classId}</span>
                         </label>
                       </td>
+                      <td>{item.class_id ?? "-"}</td>
                       <td>{item.className}</td>
                       <td>
                         <Link

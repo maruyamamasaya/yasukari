@@ -1,8 +1,17 @@
 export type PublishStatus = "ON" | "OFF";
 
+export type DurationPriceKey = "24h" | "2d" | "4d" | "1w" | "2w" | "1m";
+
+export type DurationPriceMap = Partial<Record<DurationPriceKey, number>>;
+
 export type BikeClass = {
   classId: number;
+  class_id?: string;
   className: string;
+  base_prices?: DurationPriceMap;
+  insurance_prices?: DurationPriceMap;
+  extra_prices?: Partial<Record<string, number>>;
+  theft_insurance?: number;
   createdAt: string;
   updatedAt: string;
 };
