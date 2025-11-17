@@ -588,11 +588,45 @@
   background: #fff;
 }
 
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.detailHeader h2 {
+  margin: 0;
+}
+
 .detailTitle {
   font-size: 1.1rem;
   font-weight: 700;
   margin-bottom: 1rem;
   color: rgba(30, 41, 59, 0.92);
+}
+
+.detailEditButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: #fff;
+  color: rgba(30, 41, 59, 0.85);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.detailEditButton:hover,
+.detailEditButton:focus-visible {
+  outline: none;
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(148, 163, 184, 0.7);
 }
 
 .detailGrid {

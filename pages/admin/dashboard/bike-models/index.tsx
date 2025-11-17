@@ -343,6 +343,16 @@ export default function BikeModelListPage() {
           {modelError && <p className={formStyles.error}>{modelError}</p>}
           {deleteError && <p className={formStyles.error}>{deleteError}</p>}
           <div className={formStyles.card}>
+            <div className={styles.detailHeader}>
+              <h2 className={styles.detailTitle}>車種一覧</h2>
+              <Link
+                href="/admin/dashboard/bike-models/register"
+                className={styles.detailEditButton}
+                aria-label="車種一覧を編集"
+              >
+                ✎ 編集
+              </Link>
+            </div>
             <div className={styles.tableToolbar}>
               <div className={styles.tableToolbarGroup}>
                 <input
@@ -619,9 +629,18 @@ export default function BikeModelListPage() {
           </div>
           {selectedModel && (
             <div className={styles.detailPanel}>
-              <h2 className={styles.detailTitle}>
-                {selectedModel.modelName}の詳細情報
-              </h2>
+              <div className={styles.detailHeader}>
+                <h2 className={styles.detailTitle}>
+                  {selectedModel.modelName}の詳細情報
+                </h2>
+                <Link
+                  href={`/admin/dashboard/bike-models/register?modelId=${selectedModel.modelId}`}
+                  className={styles.detailEditButton}
+                  aria-label={`${selectedModel.modelName}の詳細情報を編集`}
+                >
+                  ✎ 編集
+                </Link>
+              </div>
               <dl className={styles.detailGrid}>
                 {modelDetailEntries.map(({ label, value }) => (
                   <div key={label} className={styles.detailItem}>
