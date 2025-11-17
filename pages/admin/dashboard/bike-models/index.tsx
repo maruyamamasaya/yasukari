@@ -1,11 +1,34 @@
 import Head from "next/head";
-import Link from "next/link";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
-import { BikeClass, BikeModel } from "../../../../lib/dashboard/types";
+import {
+  BikeClass,
+  BikeModel,
+  PublishStatus,
+} from "../../../../lib/dashboard/types";
+import { toNumber } from "../../../../lib/dashboard/utils";
+
+type ModelFormState = {
+  classId: string;
+  modelName: string;
+  publishStatus: PublishStatus;
+  displacementCc: string;
+  requiredLicense: string;
+  lengthMm: string;
+  widthMm: string;
+  heightMm: string;
+  seatHeightMm: string;
+  seatCapacity: string;
+  vehicleWeightKg: string;
+  fuelTankCapacityL: string;
+  fuelType: string;
+  maxPower: string;
+  maxTorque: string;
+  mainImageUrl: string;
+};
 
 export default function BikeModelListPage() {
   const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
@@ -25,6 +48,11 @@ export default function BikeModelListPage() {
   const [deleteConfirmationChecked, setDeleteConfirmationChecked] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [detailForm, setDetailForm] = useState<ModelFormState | null>(null);
+  const [isDetailEditing, setIsDetailEditing] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [detailSuccess, setDetailSuccess] = useState<string | null>(null);
+  const [isSavingDetail, setIsSavingDetail] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,6 +103,38 @@ export default function BikeModelListPage() {
         : bikeModels.find((model) => model.modelId === selectedModelId) ?? null,
     [bikeModels, selectedModelId]
   );
+
+  useEffect(() => {
+    if (!selectedModel) {
+      setDetailForm(null);
+      setIsDetailEditing(false);
+      setDetailError(null);
+      setDetailSuccess(null);
+      return;
+    }
+
+    setDetailForm({
+      classId: String(selectedModel.classId ?? ""),
+      modelName: selectedModel.modelName ?? "",
+      publishStatus: selectedModel.publishStatus ?? "ON",
+      displacementCc: selectedModel.displacementCc?.toString() ?? "",
+      requiredLicense: selectedModel.requiredLicense ?? "",
+      lengthMm: selectedModel.lengthMm?.toString() ?? "",
+      widthMm: selectedModel.widthMm?.toString() ?? "",
+      heightMm: selectedModel.heightMm?.toString() ?? "",
+      seatHeightMm: selectedModel.seatHeightMm?.toString() ?? "",
+      seatCapacity: selectedModel.seatCapacity?.toString() ?? "",
+      vehicleWeightKg: selectedModel.vehicleWeightKg?.toString() ?? "",
+      fuelTankCapacityL: selectedModel.fuelTankCapacityL?.toString() ?? "",
+      fuelType: selectedModel.fuelType ?? "",
+      maxPower: selectedModel.maxPower ?? "",
+      maxTorque: selectedModel.maxTorque ?? "",
+      mainImageUrl: selectedModel.mainImageUrl ?? "",
+    });
+    setIsDetailEditing(false);
+    setDetailError(null);
+    setDetailSuccess(null);
+  }, [selectedModel]);
 
   const filteredModels = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
@@ -156,84 +216,112 @@ export default function BikeModelListPage() {
     setStatusFilter(nextValue);
   };
 
-  const modelDetailEntries = useMemo(() => {
-    if (!selectedModel) {
-      return [];
+  const handleDetailSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedModel || !detailForm) {
+      return;
     }
 
-    const entries: { label: string; value: string }[] = [];
-    const formatValue = (value: unknown): string => {
-      if (value === null || value === undefined || value === "") {
-        return "-";
-      }
-      if (Array.isArray(value)) {
-        return value.length ? value.join(", ") : "-";
-      }
-      if (typeof value === "number") {
-        return value.toLocaleString();
-      }
-      return String(value);
+    setDetailSuccess(null);
+    setDetailError(null);
+
+    if (!detailForm.classId) {
+      setDetailError("所属クラスを選択してください。");
+      return;
+    }
+    if (!detailForm.modelName.trim()) {
+      setDetailError("車種名を入力してください。");
+      return;
+    }
+
+    const classId = Number(detailForm.classId);
+    if (!bikeClasses.some((item) => item.classId === classId)) {
+      setDetailError("選択されたクラスが存在しません。");
+      return;
+    }
+
+    const payload: Record<string, unknown> = {
+      modelId: selectedModel.modelId,
+      classId,
+      modelName: detailForm.modelName.trim(),
+      publishStatus: detailForm.publishStatus,
     };
 
-    entries.push({ label: "車種ID", value: formatValue(selectedModel.modelId) });
-    entries.push({ label: "車種名", value: formatValue(selectedModel.modelName) });
-    entries.push({ label: "クラスID", value: formatValue(selectedModel.classId) });
-    entries.push({
-      label: "クラス名",
-      value: classNameMap[selectedModel.classId] ?? "-",
-    });
-    entries.push({
-      label: "掲載状態",
-      value: formatValue(selectedModel.publishStatus),
-    });
-    entries.push({
-      label: "排気量 (cc)",
-      value: formatValue(selectedModel.displacementCc),
-    });
-    entries.push({
-      label: "必要免許",
-      value: formatValue(selectedModel.requiredLicense),
-    });
-    entries.push({
-      label: "全長 (mm)",
-      value: formatValue(selectedModel.lengthMm),
-    });
-    entries.push({
-      label: "全幅 (mm)",
-      value: formatValue(selectedModel.widthMm),
-    });
-    entries.push({
-      label: "全高 (mm)",
-      value: formatValue(selectedModel.heightMm),
-    });
-    entries.push({
-      label: "シート高 (mm)",
-      value: formatValue(selectedModel.seatHeightMm),
-    });
-    entries.push({
-      label: "乗車定員",
-      value: formatValue(selectedModel.seatCapacity),
-    });
-    entries.push({
-      label: "車両重量 (kg)",
-      value: formatValue(selectedModel.vehicleWeightKg),
-    });
-    entries.push({
-      label: "燃料タンク容量 (L)",
-      value: formatValue(selectedModel.fuelTankCapacityL),
-    });
-    entries.push({ label: "燃料種別", value: formatValue(selectedModel.fuelType) });
-    entries.push({ label: "最高出力", value: formatValue(selectedModel.maxPower) });
-    entries.push({ label: "最大トルク", value: formatValue(selectedModel.maxTorque) });
-    entries.push({
-      label: "メイン画像URL",
-      value: formatValue(selectedModel.mainImageUrl),
-    });
-    entries.push({ label: "作成日時", value: formatValue(selectedModel.createdAt) });
-    entries.push({ label: "更新日時", value: formatValue(selectedModel.updatedAt) });
+    const numberFields: Array<
+      keyof Pick<
+        ModelFormState,
+        | "displacementCc"
+        | "lengthMm"
+        | "widthMm"
+        | "heightMm"
+        | "seatHeightMm"
+        | "seatCapacity"
+        | "vehicleWeightKg"
+        | "fuelTankCapacityL"
+      >
+    > = [
+      "displacementCc",
+      "lengthMm",
+      "widthMm",
+      "heightMm",
+      "seatHeightMm",
+      "seatCapacity",
+      "vehicleWeightKg",
+      "fuelTankCapacityL",
+    ];
 
-    return entries;
-  }, [classNameMap, selectedModel]);
+    numberFields.forEach((field) => {
+      const value = toNumber(detailForm[field]);
+      if (value !== undefined) {
+        payload[field] = value;
+      }
+    });
+
+    const stringFields: Array<
+      keyof Pick<
+        ModelFormState,
+        "requiredLicense" | "fuelType" | "maxPower" | "maxTorque" | "mainImageUrl"
+      >
+    > = ["requiredLicense", "fuelType", "maxPower", "maxTorque", "mainImageUrl"];
+
+    stringFields.forEach((field) => {
+      const value = detailForm[field].trim();
+      if (value) {
+        payload[field] = value;
+      }
+    });
+
+    setIsSavingDetail(true);
+    try {
+      const response = await fetch("/api/bike-models", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorBody = (await response.json().catch(() => null)) as
+          | { message?: string }
+          | null;
+        setDetailError(errorBody?.message ?? "車種の更新に失敗しました。");
+        return;
+      }
+
+      const updatedModel: BikeModel = await response.json();
+      setBikeModels((current) =>
+        current
+          .map((model) => (model.modelId === updatedModel.modelId ? updatedModel : model))
+          .sort((a, b) => a.modelId - b.modelId)
+      );
+      setDetailSuccess("車種情報を更新しました。");
+      setIsDetailEditing(false);
+    } catch (saveError) {
+      console.error("Failed to update bike model", saveError);
+      setDetailError("車種の更新に失敗しました。");
+    } finally {
+      setIsSavingDetail(false);
+    }
+  };
 
   const handleRowSelect = (modelId: number) => {
     setSelectedModelId((current) => (current === modelId ? null : modelId));
@@ -345,13 +433,6 @@ export default function BikeModelListPage() {
           <div className={formStyles.card}>
             <div className={styles.detailHeader}>
               <h2 className={styles.detailTitle}>車種一覧</h2>
-              <Link
-                href="/admin/dashboard/bike-models/register"
-                className={styles.detailEditButton}
-                aria-label="車種一覧を編集"
-              >
-                ✎ 編集
-              </Link>
             </div>
             <div className={styles.tableToolbar}>
               <div className={styles.tableToolbarGroup}>
@@ -633,22 +714,459 @@ export default function BikeModelListPage() {
                 <h2 className={styles.detailTitle}>
                   {selectedModel.modelName}の詳細情報
                 </h2>
-                <Link
-                  href={`/admin/dashboard/bike-models/register?modelId=${selectedModel.modelId}`}
+                <button
+                  type="button"
                   className={styles.detailEditButton}
-                  aria-label={`${selectedModel.modelName}の詳細情報を編集`}
+                  onClick={() => setIsDetailEditing((current) => !current)}
+                  disabled={isSavingDetail}
+                  aria-pressed={isDetailEditing}
                 >
-                  ✎ 編集
-                </Link>
+                  {isDetailEditing ? "閲覧に戻る" : "編集に切り替え"}
+                </button>
               </div>
-              <dl className={styles.detailGrid}>
-                {modelDetailEntries.map(({ label, value }) => (
-                  <div key={label} className={styles.detailItem}>
-                    <dt>{label}</dt>
-                    <dd>{value}</dd>
+              {detailError && <p className={formStyles.error}>{detailError}</p>}
+              {detailSuccess && <p className={formStyles.hint}>{detailSuccess}</p>}
+              <form onSubmit={handleDetailSubmit}>
+                <dl className={styles.detailGrid}>
+                  <div className={styles.detailItem}>
+                    <dt>車種ID</dt>
+                    <dd>
+                      <div className={formStyles.field}>
+                        <input value={selectedModel.modelId} readOnly />
+                      </div>
+                    </dd>
                   </div>
-                ))}
-              </dl>
+                  <div className={styles.detailItem}>
+                    <dt>車種名</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.modelName ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, modelName: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : (
+                        selectedModel.modelName || "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>クラス</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <select
+                            value={detailForm?.classId ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, classId: event.target.value }
+                                  : prev
+                              )
+                            }
+                          >
+                            <option value="">クラスを選択</option>
+                            {bikeClasses.map((item) => (
+                              <option key={item.classId} value={item.classId}>
+                                {item.className}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        classNameMap[selectedModel.classId] ?? "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>掲載状態</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <select
+                            value={detailForm?.publishStatus ?? "ON"}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      publishStatus: event.target.value as PublishStatus,
+                                    }
+                                  : prev
+                              )
+                            }
+                          >
+                            <option value="ON">公開 (ON)</option>
+                            <option value="OFF">非公開 (OFF)</option>
+                          </select>
+                        </div>
+                      ) : (
+                        selectedModel.publishStatus
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>排気量 (cc)</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={detailForm?.displacementCc ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, displacementCc: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.displacementCc ? (
+                        selectedModel.displacementCc.toLocaleString()
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>必要免許</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.requiredLicense ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, requiredLicense: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.requiredLicense ? (
+                        selectedModel.requiredLicense
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>全長 (mm)</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={detailForm?.lengthMm ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, lengthMm: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.lengthMm ? (
+                        selectedModel.lengthMm.toLocaleString()
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>全幅 (mm)</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={detailForm?.widthMm ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, widthMm: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.widthMm ? (
+                        selectedModel.widthMm.toLocaleString()
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>全高 (mm)</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={detailForm?.heightMm ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, heightMm: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.heightMm ? (
+                        selectedModel.heightMm.toLocaleString()
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>シート高 (mm)</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={detailForm?.seatHeightMm ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, seatHeightMm: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.seatHeightMm ? (
+                        selectedModel.seatHeightMm.toLocaleString()
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>乗車定員</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={detailForm?.seatCapacity ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, seatCapacity: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.seatCapacity ? (
+                        selectedModel.seatCapacity.toLocaleString()
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>車両重量 (kg)</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={detailForm?.vehicleWeightKg ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, vehicleWeightKg: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.vehicleWeightKg ? (
+                        selectedModel.vehicleWeightKg.toLocaleString()
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>燃料タンク容量 (L)</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={detailForm?.fuelTankCapacityL ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, fuelTankCapacityL: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.fuelTankCapacityL ? (
+                        selectedModel.fuelTankCapacityL.toLocaleString()
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>燃料種別</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.fuelType ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, fuelType: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.fuelType ? (
+                        selectedModel.fuelType
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>最高出力</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.maxPower ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, maxPower: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.maxPower ? (
+                        selectedModel.maxPower
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>最大トルク</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.maxTorque ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, maxTorque: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.maxTorque ? (
+                        selectedModel.maxTorque
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>メイン画像URL</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="url"
+                            value={detailForm?.mainImageUrl ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, mainImageUrl: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedModel.mainImageUrl ? (
+                        selectedModel.mainImageUrl
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>作成日時</dt>
+                    <dd>{selectedModel.createdAt ?? "-"}</dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>更新日時</dt>
+                    <dd>{selectedModel.updatedAt ?? "-"}</dd>
+                  </div>
+                </dl>
+                {isDetailEditing && (
+                  <div className={formStyles.actions}>
+                    <button
+                      type="button"
+                      className={styles.tableToolbarButton}
+                      onClick={() => {
+                        if (!selectedModel) {
+                          return;
+                        }
+                        setDetailForm({
+                          classId: String(selectedModel.classId ?? ""),
+                          modelName: selectedModel.modelName ?? "",
+                          publishStatus: selectedModel.publishStatus ?? "ON",
+                          displacementCc: selectedModel.displacementCc?.toString() ?? "",
+                          requiredLicense: selectedModel.requiredLicense ?? "",
+                          lengthMm: selectedModel.lengthMm?.toString() ?? "",
+                          widthMm: selectedModel.widthMm?.toString() ?? "",
+                          heightMm: selectedModel.heightMm?.toString() ?? "",
+                          seatHeightMm: selectedModel.seatHeightMm?.toString() ?? "",
+                          seatCapacity: selectedModel.seatCapacity?.toString() ?? "",
+                          vehicleWeightKg:
+                            selectedModel.vehicleWeightKg?.toString() ?? "",
+                          fuelTankCapacityL:
+                            selectedModel.fuelTankCapacityL?.toString() ?? "",
+                          fuelType: selectedModel.fuelType ?? "",
+                          maxPower: selectedModel.maxPower ?? "",
+                          maxTorque: selectedModel.maxTorque ?? "",
+                          mainImageUrl: selectedModel.mainImageUrl ?? "",
+                        });
+                        setDetailError(null);
+                        setDetailSuccess(null);
+                        setIsDetailEditing(false);
+                      }}
+                    >
+                      変更を破棄
+                    </button>
+                    <button
+                      type="submit"
+                      className={formStyles.primaryButton}
+                      disabled={isSavingDetail}
+                    >
+                      {isSavingDetail ? "保存中..." : "変更を保存"}
+                    </button>
+                  </div>
+                )}
+              </form>
             </div>
           )}
         </section>

@@ -1,11 +1,29 @@
 import Head from "next/head";
-import Link from "next/link";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
-import { BikeModel, Vehicle } from "../../../../lib/dashboard/types";
+import { BikeModel, PublishStatus, Vehicle } from "../../../../lib/dashboard/types";
+import { parseTags } from "../../../../lib/dashboard/utils";
+
+type VehicleFormState = {
+  managementNumber: string;
+  modelId: string;
+  storeId: string;
+  publishStatus: PublishStatus;
+  tags: string;
+  policyNumber1: string;
+  policyBranchNumber1: string;
+  policyNumber2: string;
+  policyBranchNumber2: string;
+  inspectionExpiryDate: string;
+  licensePlateNumber: string;
+  previousLicensePlateNumber: string;
+  liabilityInsuranceExpiryDate: string;
+  videoUrl: string;
+  notes: string;
+};
 
 export default function VehicleListPage() {
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
@@ -25,6 +43,11 @@ export default function VehicleListPage() {
   const [deleteConfirmationChecked, setDeleteConfirmationChecked] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [detailForm, setDetailForm] = useState<VehicleFormState | null>(null);
+  const [isDetailEditing, setIsDetailEditing] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [detailSuccess, setDetailSuccess] = useState<string | null>(null);
+  const [isSavingDetail, setIsSavingDetail] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -77,6 +100,38 @@ export default function VehicleListPage() {
         : vehicles.find((vehicle) => vehicle.managementNumber === selectedVehicleId) ?? null,
     [selectedVehicleId, vehicles]
   );
+
+  useEffect(() => {
+    if (!selectedVehicle) {
+      setDetailForm(null);
+      setIsDetailEditing(false);
+      setDetailError(null);
+      setDetailSuccess(null);
+      return;
+    }
+
+    setDetailForm({
+      managementNumber: selectedVehicle.managementNumber ?? "",
+      modelId: selectedVehicle.modelId?.toString() ?? "",
+      storeId: selectedVehicle.storeId ?? "",
+      publishStatus: selectedVehicle.publishStatus ?? "ON",
+      tags: (selectedVehicle.tags ?? []).join(","),
+      policyNumber1: selectedVehicle.policyNumber1 ?? "",
+      policyBranchNumber1: selectedVehicle.policyBranchNumber1 ?? "",
+      policyNumber2: selectedVehicle.policyNumber2 ?? "",
+      policyBranchNumber2: selectedVehicle.policyBranchNumber2 ?? "",
+      inspectionExpiryDate: selectedVehicle.inspectionExpiryDate ?? "",
+      licensePlateNumber: selectedVehicle.licensePlateNumber ?? "",
+      previousLicensePlateNumber: selectedVehicle.previousLicensePlateNumber ?? "",
+      liabilityInsuranceExpiryDate:
+        selectedVehicle.liabilityInsuranceExpiryDate ?? "",
+      videoUrl: selectedVehicle.videoUrl ?? "",
+      notes: selectedVehicle.notes ?? "",
+    });
+    setIsDetailEditing(false);
+    setDetailError(null);
+    setDetailSuccess(null);
+  }, [selectedVehicle]);
 
   const filteredVehicles = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
@@ -159,65 +214,99 @@ export default function VehicleListPage() {
     setStatusFilter(nextStatus);
   };
 
-  const vehicleDetailEntries = useMemo(() => {
-    if (!selectedVehicle) {
-      return [];
+  const handleDetailSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedVehicle || !detailForm) {
+      return;
     }
 
-    const formatValue = (value: unknown): string => {
-      if (value === null || value === undefined || value === "") {
-        return "-";
-      }
-      if (Array.isArray(value)) {
-        return value.length ? value.join(", ") : "-";
-      }
-      if (typeof value === "number") {
-        return value.toLocaleString();
-      }
-      return String(value);
+    setDetailSuccess(null);
+    setDetailError(null);
+
+    if (!detailForm.modelId) {
+      setDetailError("車種を選択してください。");
+      return;
+    }
+
+    if (!detailForm.storeId.trim()) {
+      setDetailError("店舗IDを入力してください。");
+      return;
+    }
+
+    const modelId = Number(detailForm.modelId);
+    if (!bikeModels.some((model) => model.modelId === modelId)) {
+      setDetailError("選択された車種が存在しません。");
+      return;
+    }
+
+    const payload: Record<string, unknown> = {
+      managementNumber: selectedVehicle.managementNumber,
+      modelId,
+      storeId: detailForm.storeId.trim(),
+      publishStatus: detailForm.publishStatus,
+      tags: parseTags(detailForm.tags),
     };
 
-    return [
-      { label: "管理番号", value: formatValue(selectedVehicle.managementNumber) },
-      { label: "車種ID", value: formatValue(selectedVehicle.modelId) },
-      {
-        label: "車種名",
-        value:
-          modelNameMap[selectedVehicle.modelId] ??
-          formatValue(selectedVehicle.modelId),
-      },
-      { label: "店舗ID", value: formatValue(selectedVehicle.storeId) },
-      { label: "掲載状態", value: formatValue(selectedVehicle.publishStatus) },
-      { label: "タグ", value: formatValue(selectedVehicle.tags) },
-      { label: "保険証券番号1", value: formatValue(selectedVehicle.policyNumber1) },
-      {
-        label: "保険取扱支店番号1",
-        value: formatValue(selectedVehicle.policyBranchNumber1),
-      },
-      { label: "保険証券番号2", value: formatValue(selectedVehicle.policyNumber2) },
-      {
-        label: "保険取扱支店番号2",
-        value: formatValue(selectedVehicle.policyBranchNumber2),
-      },
-      {
-        label: "車検満了日",
-        value: formatValue(selectedVehicle.inspectionExpiryDate),
-      },
-      { label: "ナンバープレート", value: formatValue(selectedVehicle.licensePlateNumber) },
-      {
-        label: "前ナンバー",
-        value: formatValue(selectedVehicle.previousLicensePlateNumber),
-      },
-      {
-        label: "自賠責満了日",
-        value: formatValue(selectedVehicle.liabilityInsuranceExpiryDate),
-      },
-      { label: "動画URL", value: formatValue(selectedVehicle.videoUrl) },
-      { label: "備考", value: formatValue(selectedVehicle.notes) },
-      { label: "作成日時", value: formatValue(selectedVehicle.createdAt) },
-      { label: "更新日時", value: formatValue(selectedVehicle.updatedAt) },
+    const optionalFields: Array<
+      keyof Omit<
+        VehicleFormState,
+        "managementNumber" | "modelId" | "storeId" | "publishStatus" | "tags"
+      >
+    > = [
+      "policyNumber1",
+      "policyBranchNumber1",
+      "policyNumber2",
+      "policyBranchNumber2",
+      "inspectionExpiryDate",
+      "licensePlateNumber",
+      "previousLicensePlateNumber",
+      "liabilityInsuranceExpiryDate",
+      "videoUrl",
+      "notes",
     ];
-  }, [modelNameMap, selectedVehicle]);
+
+    optionalFields.forEach((field) => {
+      const value = detailForm[field].trim();
+      if (value) {
+        payload[field] = value;
+      }
+    });
+
+    setIsSavingDetail(true);
+    try {
+      const response = await fetch("/api/vehicles", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorBody = (await response.json().catch(() => null)) as
+          | { message?: string }
+          | null;
+        setDetailError(errorBody?.message ?? "車両の更新に失敗しました。");
+        return;
+      }
+
+      const updatedVehicle: Vehicle = await response.json();
+      setVehicles((current) =>
+        current
+          .map((vehicle) =>
+            vehicle.managementNumber === updatedVehicle.managementNumber
+              ? updatedVehicle
+              : vehicle
+          )
+          .sort((a, b) => a.managementNumber.localeCompare(b.managementNumber))
+      );
+      setDetailSuccess("車両情報を更新しました。");
+      setIsDetailEditing(false);
+    } catch (saveError) {
+      console.error("Failed to update vehicle", saveError);
+      setDetailError("車両の更新に失敗しました。");
+    } finally {
+      setIsSavingDetail(false);
+    }
+  };
 
   const handleRowSelect = (managementNumber: string) => {
     setSelectedVehicleId((current) =>
@@ -331,13 +420,6 @@ export default function VehicleListPage() {
           <div className={formStyles.card}>
             <div className={styles.detailHeader}>
               <h2 className={styles.detailTitle}>車両一覧</h2>
-              <Link
-                href="/admin/dashboard/vehicles/register"
-                className={styles.detailEditButton}
-                aria-label="車両一覧を編集"
-              >
-                ✎ 編集
-              </Link>
             </div>
             <div className={styles.tableToolbar}>
               <div className={styles.tableToolbarGroup}>
@@ -623,22 +705,410 @@ export default function VehicleListPage() {
                 <h2 className={styles.detailTitle}>
                   {selectedVehicle.managementNumber}の詳細情報
                 </h2>
-                <Link
-                  href={`/admin/dashboard/vehicles/register?managementNumber=${selectedVehicle.managementNumber}`}
+                <button
+                  type="button"
                   className={styles.detailEditButton}
-                  aria-label={`${selectedVehicle.managementNumber}の詳細情報を編集`}
+                  onClick={() => setIsDetailEditing((current) => !current)}
+                  disabled={isSavingDetail}
+                  aria-pressed={isDetailEditing}
                 >
-                  ✎ 編集
-                </Link>
+                  {isDetailEditing ? "閲覧に戻る" : "編集に切り替え"}
+                </button>
               </div>
-              <dl className={styles.detailGrid}>
-                {vehicleDetailEntries.map(({ label, value }) => (
-                  <div key={label} className={styles.detailItem}>
-                    <dt>{label}</dt>
-                    <dd>{value}</dd>
+              {detailError && <p className={formStyles.error}>{detailError}</p>}
+              {detailSuccess && <p className={formStyles.hint}>{detailSuccess}</p>}
+              <form onSubmit={handleDetailSubmit}>
+                <dl className={styles.detailGrid}>
+                  <div className={styles.detailItem}>
+                    <dt>管理番号</dt>
+                    <dd>
+                      <div className={formStyles.field}>
+                        <input value={selectedVehicle.managementNumber} readOnly />
+                      </div>
+                    </dd>
                   </div>
-                ))}
-              </dl>
+                  <div className={styles.detailItem}>
+                    <dt>車種</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <select
+                            value={detailForm?.modelId ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, modelId: event.target.value } : prev
+                              )
+                            }
+                          >
+                            <option value="">車種を選択</option>
+                            {bikeModels.map((model) => (
+                              <option key={model.modelId} value={model.modelId}>
+                                {model.modelName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        modelNameMap[selectedVehicle.modelId] ?? selectedVehicle.modelId
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>店舗ID</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.storeId ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, storeId: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : (
+                        selectedVehicle.storeId || "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>掲載状態</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <select
+                            value={detailForm?.publishStatus ?? "ON"}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      publishStatus: event.target.value as PublishStatus,
+                                    }
+                                  : prev
+                              )
+                            }
+                          >
+                            <option value="ON">公開 (ON)</option>
+                            <option value="OFF">非公開 (OFF)</option>
+                          </select>
+                        </div>
+                      ) : (
+                        selectedVehicle.publishStatus
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>タグ</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.tags ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, tags: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.tags?.length ? (
+                        selectedVehicle.tags.join(", ")
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>保険証券番号1</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.policyNumber1 ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, policyNumber1: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.policyNumber1 ? (
+                        selectedVehicle.policyNumber1
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>保険取扱支店番号1</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.policyBranchNumber1 ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, policyBranchNumber1: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.policyBranchNumber1 ? (
+                        selectedVehicle.policyBranchNumber1
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>保険証券番号2</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.policyNumber2 ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, policyNumber2: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.policyNumber2 ? (
+                        selectedVehicle.policyNumber2
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>保険取扱支店番号2</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.policyBranchNumber2 ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, policyBranchNumber2: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.policyBranchNumber2 ? (
+                        selectedVehicle.policyBranchNumber2
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>車検満了日</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="date"
+                            value={detailForm?.inspectionExpiryDate ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, inspectionExpiryDate: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.inspectionExpiryDate ? (
+                        selectedVehicle.inspectionExpiryDate
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>ナンバープレート</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.licensePlateNumber ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? { ...prev, licensePlateNumber: event.target.value }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.licensePlateNumber ? (
+                        selectedVehicle.licensePlateNumber
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>前ナンバー</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            value={detailForm?.previousLicensePlateNumber ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      previousLicensePlateNumber: event.target.value,
+                                    }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.previousLicensePlateNumber ? (
+                        selectedVehicle.previousLicensePlateNumber
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>自賠責満了日</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="date"
+                            value={detailForm?.liabilityInsuranceExpiryDate ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      liabilityInsuranceExpiryDate: event.target.value,
+                                    }
+                                  : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.liabilityInsuranceExpiryDate ? (
+                        selectedVehicle.liabilityInsuranceExpiryDate
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>動画URL</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <input
+                            type="url"
+                            value={detailForm?.videoUrl ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, videoUrl: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.videoUrl ? (
+                        selectedVehicle.videoUrl
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>備考</dt>
+                    <dd>
+                      {isDetailEditing ? (
+                        <div className={formStyles.field}>
+                          <textarea
+                            value={detailForm?.notes ?? ""}
+                            onChange={(event) =>
+                              setDetailForm((prev) =>
+                                prev ? { ...prev, notes: event.target.value } : prev
+                              )
+                            }
+                          />
+                        </div>
+                      ) : selectedVehicle.notes ? (
+                        selectedVehicle.notes
+                      ) : (
+                        "-"
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>作成日時</dt>
+                    <dd>{selectedVehicle.createdAt ?? "-"}</dd>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <dt>更新日時</dt>
+                    <dd>{selectedVehicle.updatedAt ?? "-"}</dd>
+                  </div>
+                </dl>
+                {isDetailEditing && (
+                  <div className={formStyles.actions}>
+                    <button
+                      type="button"
+                      className={styles.tableToolbarButton}
+                      onClick={() => {
+                        if (!selectedVehicle) {
+                          return;
+                        }
+                        setDetailForm({
+                          managementNumber: selectedVehicle.managementNumber ?? "",
+                          modelId: selectedVehicle.modelId?.toString() ?? "",
+                          storeId: selectedVehicle.storeId ?? "",
+                          publishStatus: selectedVehicle.publishStatus ?? "ON",
+                          tags: (selectedVehicle.tags ?? []).join(","),
+                          policyNumber1: selectedVehicle.policyNumber1 ?? "",
+                          policyBranchNumber1: selectedVehicle.policyBranchNumber1 ?? "",
+                          policyNumber2: selectedVehicle.policyNumber2 ?? "",
+                          policyBranchNumber2: selectedVehicle.policyBranchNumber2 ?? "",
+                          inspectionExpiryDate: selectedVehicle.inspectionExpiryDate ?? "",
+                          licensePlateNumber: selectedVehicle.licensePlateNumber ?? "",
+                          previousLicensePlateNumber:
+                            selectedVehicle.previousLicensePlateNumber ?? "",
+                          liabilityInsuranceExpiryDate:
+                            selectedVehicle.liabilityInsuranceExpiryDate ?? "",
+                          videoUrl: selectedVehicle.videoUrl ?? "",
+                          notes: selectedVehicle.notes ?? "",
+                        });
+                        setDetailError(null);
+                        setDetailSuccess(null);
+                        setIsDetailEditing(false);
+                      }}
+                    >
+                      変更を破棄
+                    </button>
+                    <button
+                      type="submit"
+                      className={formStyles.primaryButton}
+                      disabled={isSavingDetail}
+                    >
+                      {isSavingDetail ? "保存中..." : "変更を保存"}
+                    </button>
+                  </div>
+                )}
+              </form>
             </div>
           )}
         </section>

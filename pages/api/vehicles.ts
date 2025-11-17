@@ -175,6 +175,136 @@ async function handlePost(
   }
 }
 
+async function handlePut(
+  request: NextApiRequest,
+  response: NextApiResponse<Vehicle | { message: string }>
+) {
+  const {
+    managementNumber,
+    modelId,
+    storeId,
+    publishStatus,
+    tags,
+    policyNumber1,
+    policyBranchNumber1,
+    policyNumber2,
+    policyBranchNumber2,
+    inspectionExpiryDate,
+    licensePlateNumber,
+    previousLicensePlateNumber,
+    liabilityInsuranceExpiryDate,
+    videoUrl,
+    notes,
+  } = request.body ?? {};
+
+  if (typeof managementNumber !== "string" || managementNumber.trim().length === 0) {
+    response.status(400).json({ message: "管理番号を正しく入力してください。" });
+    return;
+  }
+
+  if (typeof modelId !== "number") {
+    response.status(400).json({ message: "車種を正しく選択してください。" });
+    return;
+  }
+
+  if (typeof storeId !== "string" || storeId.trim().length === 0) {
+    response.status(400).json({ message: "店舗IDを正しく入力してください。" });
+    return;
+  }
+
+  if (publishStatus !== "ON" && publishStatus !== "OFF") {
+    response.status(400).json({ message: "掲載状態を正しく選択してください。" });
+    return;
+  }
+
+  const normalizedTags = Array.isArray(tags)
+    ? tags
+        .filter((tag) => typeof tag === "string" && tag.trim().length > 0)
+        .map((tag) => tag.trim())
+    : [];
+
+  try {
+    const client = getDocumentClient();
+
+    const [existingVehicle, modelResult] = await Promise.all([
+      client.send(
+        new GetCommand({
+          TableName: VEHICLES_TABLE,
+          Key: { managementNumber: managementNumber.trim() },
+        })
+      ),
+      client.send(
+        new GetCommand({
+          TableName: MODELS_TABLE,
+          Key: { modelId },
+        })
+      ),
+    ]);
+
+    if (!existingVehicle.Item) {
+      response.status(404).json({ message: "指定された車両が見つかりません。" });
+      return;
+    }
+
+    if (!modelResult.Item) {
+      response.status(400).json({ message: "選択された車種が存在しません。" });
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+    const item: Vehicle = {
+      managementNumber: managementNumber.trim(),
+      modelId,
+      storeId: storeId.trim(),
+      publishStatus,
+      tags: normalizedTags,
+      ...(typeof policyNumber1 === "string" && policyNumber1.trim()
+        ? { policyNumber1: policyNumber1.trim() }
+        : {}),
+      ...(typeof policyBranchNumber1 === "string" && policyBranchNumber1.trim()
+        ? { policyBranchNumber1: policyBranchNumber1.trim() }
+        : {}),
+      ...(typeof policyNumber2 === "string" && policyNumber2.trim()
+        ? { policyNumber2: policyNumber2.trim() }
+        : {}),
+      ...(typeof policyBranchNumber2 === "string" && policyBranchNumber2.trim()
+        ? { policyBranchNumber2: policyBranchNumber2.trim() }
+        : {}),
+      ...(typeof inspectionExpiryDate === "string" && inspectionExpiryDate.trim()
+        ? { inspectionExpiryDate: inspectionExpiryDate.trim() }
+        : {}),
+      ...(typeof licensePlateNumber === "string" && licensePlateNumber.trim()
+        ? { licensePlateNumber: licensePlateNumber.trim() }
+        : {}),
+      ...(typeof previousLicensePlateNumber === "string" && previousLicensePlateNumber.trim()
+        ? { previousLicensePlateNumber: previousLicensePlateNumber.trim() }
+        : {}),
+      ...(typeof liabilityInsuranceExpiryDate === "string" && liabilityInsuranceExpiryDate.trim()
+        ? { liabilityInsuranceExpiryDate: liabilityInsuranceExpiryDate.trim() }
+        : {}),
+      ...(typeof videoUrl === "string" && videoUrl.trim()
+        ? { videoUrl: videoUrl.trim() }
+        : {}),
+      ...(typeof notes === "string" && notes.trim() ? { notes: notes.trim() } : {}),
+      createdAt: (existingVehicle.Item as Vehicle).createdAt,
+      updatedAt: timestamp,
+    };
+
+    await client.send(
+      new PutCommand({
+        TableName: VEHICLES_TABLE,
+        Item: item,
+        ConditionExpression: "attribute_exists(managementNumber)",
+      })
+    );
+
+    response.status(200).json(item);
+  } catch (error) {
+    console.error("Failed to update vehicle", error);
+    response.status(500).json({ message: "車両の更新に失敗しました。" });
+  }
+}
+
 function chunkArray<T>(items: T[], chunkSize: number): T[][] {
   if (chunkSize <= 0) {
     return [items];
@@ -257,11 +387,16 @@ export default async function handler(
     return;
   }
 
+  if (request.method === "PUT") {
+    await handlePut(request, response);
+    return;
+  }
+
   if (request.method === "DELETE") {
     await handleDelete(request, response);
     return;
   }
 
-  response.setHeader("Allow", ["GET", "POST", "DELETE"]);
+  response.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
   response.status(405).json({ message: "Method Not Allowed" });
 }
