@@ -60,7 +60,11 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "オプション（用品）",
-    disabled: true,
+    href: `${ADMIN_DASHBOARD_ROOT}/accessories`,
+    children: [
+      { label: "用品一覧", href: `${ADMIN_DASHBOARD_ROOT}/accessories` },
+      { label: "用品登録", href: `${ADMIN_DASHBOARD_ROOT}/accessories/register` },
+    ],
   },
   {
     label: "会員管理",
