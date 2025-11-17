@@ -122,11 +122,12 @@ export default function BikeClassRegisterPage() {
       </Head>
       <DashboardLayout
         title="バイククラス登録"
-        actions={
-          <Link href="/admin/dashboard/bike-classes" className={styles.iconButton}>
-            クラス一覧へ戻る
-          </Link>
-        }
+        actions={[
+          {
+            label: "クラス一覧へ戻る",
+            href: "/admin/dashboard/bike-classes",
+          },
+        ]}
       >
         <section className={styles.section}>
           {error && <p className={formStyles.error}>{error}</p>}

@@ -317,12 +317,12 @@ export default function VehicleListPage() {
       </Head>
       <DashboardLayout
         title="車両一覧"
-        actions={
-          <Link href="/admin/dashboard/vehicles/register" className={styles.iconButton}>
-            <span aria-hidden>＋</span>
-            車両登録
-          </Link>
-        }
+        actions={[
+          {
+            label: "＋ 車両登録",
+            href: "/admin/dashboard/vehicles/register",
+          },
+        ]}
       >
         <section className={styles.section}>
           {modelError && <p className={formStyles.error}>{modelError}</p>}

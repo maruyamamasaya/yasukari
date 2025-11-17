@@ -18,10 +18,15 @@ type NavItem = {
   children?: NavItem[];
 };
 
+type Action = {
+  label: string;
+  href: string;
+};
+
 type DashboardLayoutProps = {
   title: string;
   description?: string;
-  actions?: ReactNode;
+  actions?: Action[];
   children: ReactNode;
   showHomeAction?: boolean;
   showDashboardLink?: boolean;
@@ -339,14 +344,22 @@ export default function DashboardLayout({
               <p className={styles.pageDescription}>{description}</p>
             )}
           </div>
-          {(showHomeAction || actions) && (
+          {(showHomeAction || actions?.length) && (
             <div className={styles.pageActions}>
               {showHomeAction && (
                 <Link href={ADMIN_DASHBOARD_ROOT} className={styles.iconButton}>
                   管理ホームに戻る
                 </Link>
               )}
-              {actions}
+              {actions?.map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className={styles.iconButton}
+                >
+                  {action.label}
+                </Link>
+              ))}
             </div>
           )}
         </header>

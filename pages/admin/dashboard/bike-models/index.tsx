@@ -331,12 +331,12 @@ export default function BikeModelListPage() {
       </Head>
       <DashboardLayout
         title="車種一覧"
-        actions={
-          <Link href="/admin/dashboard/bike-models/register" className={styles.iconButton}>
-            <span aria-hidden>＋</span>
-            車種登録
-          </Link>
-        }
+        actions={[
+          {
+            label: "＋ 車種登録",
+            href: "/admin/dashboard/bike-models/register",
+          },
+        ]}
       >
         <section className={styles.section}>
           {classError && <p className={formStyles.error}>{classError}</p>}
