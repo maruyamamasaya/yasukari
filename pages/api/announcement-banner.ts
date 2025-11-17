@@ -6,9 +6,11 @@ import {
 } from "../../lib/server/announcementBanner";
 import { AnnouncementBannerSettings } from "../../types/announcement";
 
-function validatePayload(
-  body: unknown
-): { valid: true; data: AnnouncementBannerSettings } | { valid: false; message: string } {
+type ValidationResult =
+  | { valid: true; data: AnnouncementBannerSettings }
+  | { valid: false; message: string };
+
+function validatePayload(body: unknown): ValidationResult {
   if (typeof body !== "object" || body === null) {
     return { valid: false, message: "Invalid request body" };
   }
@@ -56,6 +58,12 @@ function validatePayload(
   return { valid: true, data: sanitized };
 }
 
+function isInvalidResult(
+  result: ValidationResult
+): result is { valid: false; message: string } {
+  return result.valid === false;
+}
+
 export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse<AnnouncementBannerSettings | { message: string }>
@@ -75,7 +83,7 @@ export default async function handler(
 
   if (request.method === "POST") {
     const result = validatePayload(request.body);
-    if (!result.valid) {
+    if (isInvalidResult(result)) {
       response.status(400).json({ message: result.message });
       return;
     }
