@@ -51,6 +51,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "バイク管理",
+    href: `${ADMIN_DASHBOARD_ROOT}/bike`,
     children: [
       { label: "クラス一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-classes` },
       { label: "車種一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-models` },
@@ -80,7 +81,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "ブログ管理",
-    disabled: true,
+    href: `${ADMIN_DASHBOARD_ROOT}/blog`,
   },
   {
     label: "祭日管理",
