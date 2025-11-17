@@ -42,7 +42,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "新着情報管理",
-    disabled: true,
+    href: `${ADMIN_DASHBOARD_ROOT}/announcements`,
   },
   {
     label: "バイク管理",
