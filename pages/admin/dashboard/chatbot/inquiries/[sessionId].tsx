@@ -79,12 +79,14 @@ export default function ChatbotInquiryDetailPage() {
     setReplyText("");
   };
 
-  const sortedMessages = useMemo(() => {
+  const sortedUserMessages = useMemo(() => {
     if (!selectedInquiry) {
       return [];
     }
 
-    return [...selectedInquiry.messages].sort((a, b) => a.messageIndex - b.messageIndex);
+    return [...selectedInquiry.messages]
+      .filter((message) => message.role === "user")
+      .sort((a, b) => a.messageIndex - b.messageIndex);
   }, [selectedInquiry]);
 
   return (
@@ -163,8 +165,8 @@ export default function ChatbotInquiryDetailPage() {
                     <dd>{selectedInquiry.contact}</dd>
                   </div>
                   <div className={styles.detailItem}>
-                    <dt>メッセージ数</dt>
-                    <dd>{selectedInquiry.messages.length} 件</dd>
+                    <dt>ユーザーメッセージ数</dt>
+                    <dd>{sortedUserMessages.length} 件</dd>
                   </div>
                 </dl>
               </div>
@@ -173,12 +175,12 @@ export default function ChatbotInquiryDetailPage() {
                 <div className={styles.detailHeader}>
                   <h3 className={styles.detailTitle}>会話履歴</h3>
                   <p className={styles.sectionDescription}>
-                    DynamoDB の ChatMessages テーブルに保存されるメッセージ順に表示しています。
+                    DynamoDB の ChatMessages テーブルに保存されるメッセージ順に、ユーザー発言のみを表示しています。
                   </p>
                 </div>
 
                 <ol className={styles.conversationList}>
-                  {sortedMessages.map((message) => (
+                  {sortedUserMessages.map((message) => (
                     <li key={message.messageId} className={styles.conversationItem}>
                       <div className={styles.conversationMeta}>
                         <div className={styles.conversationMetaLeft}>
