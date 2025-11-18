@@ -73,8 +73,8 @@ export default function ChatbotInquiryListPage() {
               現在はダミーデータを表示しています。実際の問い合わせデータ連携は今後の開発予定です。
             </p>
           </div>
-          <div className={tableStyles.wrapper}>
-            <table className={tableStyles.table}>
+          <div className={`${tableStyles.wrapper} ${tableStyles.tableWrapper}`}>
+            <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
               <thead>
                 <tr>
                   <th scope="col">チケットID</th>

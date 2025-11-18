@@ -82,8 +82,8 @@ export default function CustomerBlogListPage() {
 
             {error && <div className={formStyles.error}>{error}</div>}
 
-            <div className={tableStyles.wrapper}>
-              <table className={tableStyles.table}>
+            <div className={`${tableStyles.wrapper} ${tableStyles.tableWrapper}`}>
+              <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
                 <thead>
                   <tr>
                     <th>タイトル</th>
