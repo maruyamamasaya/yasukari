@@ -93,7 +93,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "クーポン管理",
-    disabled: true,
+    href: `${ADMIN_DASHBOARD_ROOT}/coupon-rules`,
   },
 ];
 
