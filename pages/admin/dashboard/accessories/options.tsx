@@ -73,11 +73,13 @@ export default function AccessoryOptionsPage() {
       </Head>
       <DashboardLayout
         title="オプション（用品）"
-        description="用品の料金を確認できます。"
+        description="用品の料金を確認・登録できます。"
         actions={[
           { label: "用品一覧", href: "/admin/dashboard/accessories" },
-          { label: "＋ 用品登録", href: "/admin/dashboard/accessories/register" },
+          { label: "＋登録", href: "/admin/dashboard/accessories/register" },
+          { label: "用品登録", href: "/admin/dashboard/accessories/register" },
         ]}
+        showHomeAction={false}
       >
         <section className={styles.section}>
           {error && <p className={formStyles.error}>{error}</p>}
