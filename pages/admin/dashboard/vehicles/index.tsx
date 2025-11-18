@@ -541,8 +541,8 @@ export default function VehicleListPage() {
                 </button>
               </div>
             </div>
-            <div className={tableStyles.wrapper}>
-              <table className={tableStyles.table}>
+            <div className={`${tableStyles.wrapper} ${tableStyles.tableWrapper}`}>
+              <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
                 <thead>
                   <tr>
                     <th
