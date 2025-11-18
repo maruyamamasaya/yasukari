@@ -113,14 +113,6 @@ const isActivePath = (pathname: string, href?: string): boolean => {
   return pathname === href || pathname.startsWith(`${href}/`);
 };
 
-const hasActiveChild = (pathname: string, item: NavItem): boolean => {
-  if (!item.children) {
-    return false;
-  }
-
-  return item.children.some((child) => isActivePath(pathname, child.href));
-};
-
 export default function DashboardLayout({
   title,
   description,
@@ -142,8 +134,7 @@ export default function DashboardLayout({
         (item) => showDashboardLink || item.href !== ADMIN_DASHBOARD_ROOT
       ).map((item) => ({
         ...item,
-        isActive:
-          isActivePath(router.pathname, item.href) || hasActiveChild(router.pathname, item),
+        isActive: isActivePath(router.pathname, item.href),
       })),
     [router.pathname, showDashboardLink]
   );
