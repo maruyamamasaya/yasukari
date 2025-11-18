@@ -68,7 +68,8 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "会員管理",
-    disabled: true,
+    href: `${ADMIN_DASHBOARD_ROOT}/members`,
+    children: [{ label: "会員一覧", href: `${ADMIN_DASHBOARD_ROOT}/members` }],
   },
   {
     label: "予約管理",
