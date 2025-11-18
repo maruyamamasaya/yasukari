@@ -17,7 +17,7 @@
   border-collapse: separate;
   border-spacing: 0;
   background: #ffffff;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .table thead {
@@ -33,6 +33,9 @@
   padding: 0.85rem 1rem;
   border-bottom: 1px solid rgba(226, 232, 240, 1);
   background: inherit;
+  overflow: auto;
+  resize: horizontal;
+  min-width: 7.5rem;
 }
 
 .table td {
