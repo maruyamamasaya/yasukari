@@ -168,7 +168,7 @@
 }
 
 .mainContent {
-  width: min(100%, 1440px);
+  width: min(100%, 1536px);
   display: flex;
   flex-direction: column;
   min-height: 0;
