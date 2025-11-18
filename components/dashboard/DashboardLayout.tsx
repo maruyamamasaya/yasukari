@@ -124,16 +124,26 @@ export default function DashboardLayout({
   const [isResizing, setIsResizing] = useState(false);
   const resizeCleanupRef = useRef<(() => void) | null>(null);
 
-  const navigation = useMemo(
-    () =>
-      NAV_ITEMS.filter(
-        (item) => showDashboardLink || item.href !== ADMIN_DASHBOARD_ROOT
-      ).map((item) => ({
-        ...item,
-        isActive: isActivePath(router.pathname, item.href),
-      })),
-    [router.pathname, showDashboardLink]
-  );
+  const navigation = useMemo(() => {
+    const resolveIsActive = (item: NavItem): boolean => {
+      if (isActivePath(router.pathname, item.href)) {
+        return true;
+      }
+
+      return (
+        item.children?.some((child) =>
+          isActivePath(router.pathname, child.href)
+        ) ?? false
+      );
+    };
+
+    return NAV_ITEMS.filter(
+      (item) => showDashboardLink || item.href !== ADMIN_DASHBOARD_ROOT
+    ).map((item) => ({
+      ...item,
+      isActive: resolveIsActive(item),
+    }));
+  }, [router.pathname, showDashboardLink]);
 
   const clampSidebarWidth = useCallback(
     (width: number) => {
