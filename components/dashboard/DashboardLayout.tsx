@@ -72,7 +72,8 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "予約管理",
-    disabled: true,
+    href: `${ADMIN_DASHBOARD_ROOT}/reservations`,
+    children: [{ label: "予約一覧", href: `${ADMIN_DASHBOARD_ROOT}/reservations` }],
   },
   {
     label: "サポート",
