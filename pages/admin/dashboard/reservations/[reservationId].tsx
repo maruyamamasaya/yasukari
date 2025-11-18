@@ -3,10 +3,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
-import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import { Reservation, reservations } from "../../../lib/reservations";
-import styles from "../../../styles/Dashboard.module.css";
-import tableStyles from "../../../styles/AdminTable.module.css";
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import { Reservation, reservations } from "../../../../lib/reservations";
+import styles from "../../../../styles/Dashboard.module.css";
+import tableStyles from "../../../../styles/AdminTable.module.css";
 
 const statusClassName = (status: Reservation["status"]): string => {
   if (status === "予約受付完了") {

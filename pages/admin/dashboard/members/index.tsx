@@ -1,11 +1,11 @@
 import Head from "next/head";
 import { Fragment, KeyboardEvent, useState } from "react";
 
-import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import { Member, members } from "../../../lib/members";
-import styles from "../../../styles/Dashboard.module.css";
-import tableStyles from "../../../styles/AdminTable.module.css";
-import memberStyles from "../../../styles/AdminMember.module.css";
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import { Member, members } from "../../../../lib/members";
+import styles from "../../../../styles/Dashboard.module.css";
+import tableStyles from "../../../../styles/AdminTable.module.css";
+import memberStyles from "../../../../styles/AdminMember.module.css";
 
 const statusBadgeClassName = (status: Member["status"]): string => {
   if (status === "認証済") {
