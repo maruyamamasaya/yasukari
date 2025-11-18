@@ -37,12 +37,16 @@ export default function ChatBot({
   const [step, setStep] = useState<"survey" | "free">("survey");
   const [selectedCategory, setSelectedCategory] =
     useState<Category | null>(null);
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(448);
   const startYRef = useRef(0);
   const startHeightRef = useRef(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -50,6 +54,37 @@ export default function ChatBot({
       el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storedClientId = localStorage.getItem("chatbot_client_id");
+    if (storedClientId) {
+      setClientId(storedClientId);
+    } else {
+      const generatedId = crypto.randomUUID?.() ?? `client-${Date.now()}`;
+      setClientId(generatedId);
+      localStorage.setItem("chatbot_client_id", generatedId);
+    }
+
+    const storedSessionId = localStorage.getItem("chatbot_session_id");
+    if (storedSessionId) {
+      setSessionId(storedSessionId);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user?.id) {
+          setUserId(data.user.id);
+        }
+      })
+      .catch(() => {
+        setUserId(null);
+      });
+  }, []);
 
   function addMessage(from: "bot" | "user", text: string) {
     const d = new Date();
@@ -86,7 +121,7 @@ export default function ChatBot({
     );
   }
 
-  function handleFreeSubmit(e: React.FormEvent) {
+  async function handleFreeSubmit(e: React.FormEvent) {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const input = form.elements.namedItem("free") as HTMLInputElement;
@@ -94,8 +129,53 @@ export default function ChatBot({
     if (!text) return;
     addMessage("user", text);
     input.value = "";
-    // ここでは OpenAI 連携の代わりにプレースホルダー応答を返す
-    addMessage("bot", "ただいま確認中です。後ほどご回答いたします。");
+
+    const ensuredClientId = clientId ?? crypto.randomUUID?.() ?? `client-${Date.now()}`;
+    if (!clientId) {
+      setClientId(ensuredClientId);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("chatbot_client_id", ensuredClientId);
+      }
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/chatbot/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          clientId: ensuredClientId,
+          sessionId,
+          userId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save chat message");
+      }
+
+      const data = await response.json();
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("chatbot_session_id", data.sessionId);
+        }
+      }
+      addMessage(
+        "bot",
+        data.assistantMessage?.content ??
+          "ただいま確認中です。後ほどご回答いたします。"
+      );
+    } catch (error) {
+      addMessage(
+        "bot",
+        "メッセージの送信中にエラーが発生しました。時間をおいて再度お試しください。"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function handleYes() {
@@ -277,7 +357,11 @@ export default function ChatBot({
               className="flex-1 border rounded-full p-1 px-2 sm:p-2 sm:px-3"
               placeholder="質問を入力してください"
             />
-            <button type="submit" className="btn-primary rounded-full px-4">
+            <button
+              type="submit"
+              className="btn-primary rounded-full px-4"
+              disabled={isSubmitting}
+            >
               送信
             </button>
           </form>
