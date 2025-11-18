@@ -13,6 +13,10 @@ type NormalizedIds = number[] | undefined | null;
 type ValidatedCoupon = Omit<CouponRule, "updated_at">;
 
 const parseNumberValue = (value: unknown): number | undefined | null => {
+  if (value == null) {
+    return undefined;
+  }
+
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
   }
