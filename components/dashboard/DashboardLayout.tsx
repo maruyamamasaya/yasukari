@@ -124,26 +124,42 @@ export default function DashboardLayout({
   const [isResizing, setIsResizing] = useState(false);
   const resizeCleanupRef = useRef<(() => void) | null>(null);
 
+  const activeHref = useMemo(() => {
+    const hrefs = NAV_ITEMS.flatMap((item) => [
+      ...(item.href ? [item.href] : []),
+      ...((item.children ?? [])
+        .map((child) => child.href)
+        .filter((href): href is string => Boolean(href))),
+    ]);
+
+    const matchingHrefs = hrefs.filter((href) =>
+      isActivePath(router.pathname, href)
+    );
+
+    if (matchingHrefs.length === 0) {
+      return null;
+    }
+
+    return matchingHrefs.reduce((longest, current) =>
+      current.length > longest.length ? current : longest
+    );
+  }, [router.pathname]);
+
   const navigation = useMemo(() => {
-    const resolveIsActive = (item: NavItem): boolean => {
-      if (isActivePath(router.pathname, item.href)) {
-        return true;
-      }
-
-      return (
-        item.children?.some((child) =>
-          isActivePath(router.pathname, child.href)
-        ) ?? false
-      );
-    };
-
     return NAV_ITEMS.filter(
       (item) => showDashboardLink || item.href !== ADMIN_DASHBOARD_ROOT
     ).map((item) => ({
       ...item,
-      isActive: resolveIsActive(item),
+      isActive:
+        (item.href && item.href === activeHref) ||
+        (item.children?.some((child) => child.href === activeHref) ??
+          (!activeHref &&
+            (isActivePath(router.pathname, item.href) ||
+              (item.children?.some((child) =>
+                isActivePath(router.pathname, child.href)
+              ) ?? false)))),
     }));
-  }, [router.pathname, showDashboardLink]);
+  }, [activeHref, router.pathname, showDashboardLink]);
 
   const clampSidebarWidth = useCallback(
     (width: number) => {
@@ -298,7 +314,9 @@ export default function DashboardLayout({
                 {item.children && item.children.length > 0 && (
                   <ul className={styles.sidebarSubNav}>
                     {item.children.map((child) => {
-                      const childActive = isActivePath(router.pathname, child.href);
+                      const childActive = activeHref
+                        ? child.href === activeHref
+                        : isActivePath(router.pathname, child.href);
                       return (
                         <li key={child.label} className={styles.sidebarSubNavItem}>
                           {child.href && !child.disabled ? (
