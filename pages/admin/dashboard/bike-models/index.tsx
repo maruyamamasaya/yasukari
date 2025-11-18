@@ -686,7 +686,21 @@ export default function BikeModelListPage() {
                               }}
                               aria-label={`車種ID ${model.modelId} を削除対象として選択`}
                             />
-                            <span>{model.modelId}</span>
+                            <div className={tableStyles.modelIdCell}>
+                              <div className={tableStyles.thumbnailWrapper}>
+                                {model.mainImageUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={model.mainImageUrl}
+                                    alt={`${model.modelName}のサムネイル`}
+                                    className={tableStyles.thumbnailImage}
+                                  />
+                                ) : (
+                                  <span className={tableStyles.thumbnailPlaceholder}>No image</span>
+                                )}
+                              </div>
+                              <span className={tableStyles.modelIdText}>{model.modelId}</span>
+                            </div>
                           </label>
                         </td>
                         <td>{model.modelName}</td>

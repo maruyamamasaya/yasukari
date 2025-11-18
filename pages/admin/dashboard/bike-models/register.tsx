@@ -1,5 +1,6 @@
 import Head from "next/head";
-import { FormEvent, useEffect, useState } from "react";
+import { Buffer } from "buffer";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
@@ -23,7 +24,6 @@ type ModelFormState = {
   fuelType: string;
   maxPower: string;
   maxTorque: string;
-  mainImageUrl: string;
 };
 
 const emptyForm: ModelFormState = {
@@ -42,7 +42,6 @@ const emptyForm: ModelFormState = {
   fuelType: "",
   maxPower: "",
   maxTorque: "",
-  mainImageUrl: "",
 };
 
 export default function BikeModelRegisterPage() {
@@ -51,6 +50,9 @@ export default function BikeModelRegisterPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const loadClasses = async () => {
@@ -72,9 +74,39 @@ export default function BikeModelRegisterPage() {
     void loadClasses();
   }, []);
 
+  const uploadMainImage = async () => {
+    if (!mainImageFile) {
+      throw new Error("メイン画像を選択してください。");
+    }
+
+    const arrayBuffer = await mainImageFile.arrayBuffer();
+    const base64Data = Buffer.from(arrayBuffer).toString("base64");
+
+    const response = await fetch("/api/bike-models/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fileName: mainImageFile.name,
+        contentType: mainImageFile.type || "application/octet-stream",
+        data: base64Data,
+      }),
+    });
+
+    const result = (await response.json().catch(() => null)) as
+      | { url?: string; message?: string }
+      | null;
+
+    if (!response.ok || !result?.url) {
+      throw new Error(result?.message ?? "メイン画像のアップロードに失敗しました。");
+    }
+
+    return result.url;
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSuccess(null);
+    setError(null);
 
     if (!form.classId) {
       setError("所属クラスを選択してください。");
@@ -84,6 +116,10 @@ export default function BikeModelRegisterPage() {
       setError("車種名を入力してください。");
       return;
     }
+    if (!mainImageFile) {
+      setError("メイン画像を選択してください。");
+      return;
+    }
 
     const classId = Number(form.classId);
     if (!bikeClasses.some((item) => item.classId === classId)) {
@@ -91,57 +127,59 @@ export default function BikeModelRegisterPage() {
       return;
     }
 
-    const payload: Record<string, unknown> = {
-      classId,
-      modelName: form.modelName.trim(),
-      publishStatus: form.publishStatus,
-    };
-
-    const numberFields: Array<
-      keyof Pick<
-        ModelFormState,
-        | "displacementCc"
-        | "lengthMm"
-        | "widthMm"
-        | "heightMm"
-        | "seatHeightMm"
-        | "seatCapacity"
-        | "vehicleWeightKg"
-        | "fuelTankCapacityL"
-      >
-    > = [
-      "displacementCc",
-      "lengthMm",
-      "widthMm",
-      "heightMm",
-      "seatHeightMm",
-      "seatCapacity",
-      "vehicleWeightKg",
-      "fuelTankCapacityL",
-    ];
-
-    numberFields.forEach((field) => {
-      const value = toNumber(form[field]);
-      if (value !== undefined) {
-        payload[field] = value;
-      }
-    });
-
-    const stringFields: Array<
-      keyof Pick<
-        ModelFormState,
-        "requiredLicense" | "fuelType" | "maxPower" | "maxTorque" | "mainImageUrl"
-      >
-    > = ["requiredLicense", "fuelType", "maxPower", "maxTorque", "mainImageUrl"];
-
-    stringFields.forEach((field) => {
-      const value = form[field].trim();
-      if (value) {
-        payload[field] = value;
-      }
-    });
+    setIsSubmitting(true);
 
     try {
+      const mainImageUrl = await uploadMainImage();
+
+      const payload: Record<string, unknown> = {
+        classId,
+        modelName: form.modelName.trim(),
+        publishStatus: form.publishStatus,
+        mainImageUrl,
+      };
+
+      const numberFields: Array<
+        keyof Pick<
+          ModelFormState,
+          | "displacementCc"
+          | "lengthMm"
+          | "widthMm"
+          | "heightMm"
+          | "seatHeightMm"
+          | "seatCapacity"
+          | "vehicleWeightKg"
+          | "fuelTankCapacityL"
+        >
+      > = [
+        "displacementCc",
+        "lengthMm",
+        "widthMm",
+        "heightMm",
+        "seatHeightMm",
+        "seatCapacity",
+        "vehicleWeightKg",
+        "fuelTankCapacityL",
+      ];
+
+      numberFields.forEach((field) => {
+        const value = toNumber(form[field]);
+        if (value !== undefined) {
+          payload[field] = value;
+        }
+      });
+
+      const stringFields: Array<
+        keyof Pick<ModelFormState, "requiredLicense" | "fuelType" | "maxPower" | "maxTorque">
+      > = ["requiredLicense", "fuelType", "maxPower", "maxTorque"];
+
+      stringFields.forEach((field) => {
+        const value = form[field].trim();
+        if (value) {
+          payload[field] = value;
+        }
+      });
+
       const response = await fetch("/api/bike-models", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -157,11 +195,21 @@ export default function BikeModelRegisterPage() {
       }
 
       setForm({ ...emptyForm });
+      setMainImageFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       setError(null);
       setSuccess("車種を登録しました。");
     } catch (submitError) {
       console.error("Failed to register bike model", submitError);
-      setError("車種の登録に失敗しました。");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "車種の登録に失敗しました。"
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -364,21 +412,29 @@ export default function BikeModelRegisterPage() {
                   />
                 </div>
                 <div className={formStyles.field}>
-                  <label htmlFor="mainImageUrl">メイン画像URL</label>
+                  <label htmlFor="mainImage">メイン画像</label>
                   <input
-                    id="mainImageUrl"
-                    type="url"
-                    value={form.mainImageUrl}
-                    placeholder="https://example.com/bikes/model.jpg"
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, mainImageUrl: event.target.value }))
-                    }
+                    id="mainImage"
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] ?? null;
+                      setMainImageFile(file);
+                    }}
                   />
+                  <p className={formStyles.hint}>
+                    100px 四方以内で表示されるサムネイル用の画像をアップロードしてください。
+                  </p>
                 </div>
               </div>
               <div className={formStyles.actions}>
-                <button type="submit" className={formStyles.primaryButton}>
-                  登録する
+                <button
+                  type="submit"
+                  className={formStyles.primaryButton}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "登録中..." : "登録する"}
                 </button>
               </div>
             </form>
