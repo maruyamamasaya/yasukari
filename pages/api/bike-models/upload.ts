@@ -154,10 +154,7 @@ async function uploadToS3({
     headers["x-amz-security-token"] = sessionToken;
   }
 
-  const requestBody = body.buffer.slice(
-    body.byteOffset,
-    body.byteOffset + body.byteLength
-  );
+  const requestBody = Buffer.from(body);
 
   const response = await fetch(endpoint, {
     method: "PUT",
