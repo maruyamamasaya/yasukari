@@ -17,6 +17,18 @@ export type Accessory = {
   updated_at: string;
 };
 
+export type CouponRule = {
+  coupon_code: string;
+  title: string;
+  start_date: string;
+  end_date: string;
+  discount_amount?: number;
+  discount_percentage?: number;
+  target_bike_class_ids?: number[];
+  target_user_class_ids?: number[];
+  updated_at?: string;
+};
+
 export type BikeClass = {
   classId: number;
   class_id?: string;

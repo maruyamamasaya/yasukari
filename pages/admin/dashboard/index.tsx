@@ -44,6 +44,16 @@ const blogManagementLinks: MenuLink[] = [
   },
 ];
 
+const couponManagementLinks: MenuLink[] = [
+  {
+    label: "クーポン一覧",
+    href: `${ADMIN_DASHBOARD_ROOT}/coupon-rules`,
+    actions: [
+      { label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/coupon-rules/register` },
+    ],
+  },
+];
+
 const menuSections: MenuSection[] = [
   {
     title: "ダッシュボード",
@@ -113,7 +123,9 @@ const menuSections: MenuSection[] = [
   },
   {
     title: "クーポン管理",
-    description: "クーポン管理メニューは準備中です。",
+    description:
+      "クーポンの登録・編集や対象クラスの設定を行う管理メニューです。",
+    links: couponManagementLinks,
   },
 ];
 
