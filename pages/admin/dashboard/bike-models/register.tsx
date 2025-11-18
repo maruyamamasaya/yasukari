@@ -4,6 +4,7 @@ import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
 import { BikeClass, PublishStatus } from "../../../../lib/dashboard/types";
+import { REQUIRED_LICENSE_OPTIONS } from "../../../../lib/dashboard/licenseOptions";
 import { toNumber } from "../../../../lib/dashboard/utils";
 
 type ModelFormState = {
@@ -241,14 +242,20 @@ export default function BikeModelRegisterPage() {
                 </div>
                 <div className={formStyles.field}>
                   <label htmlFor="requiredLicense">必要免許</label>
-                  <input
+                  <select
                     id="requiredLicense"
                     value={form.requiredLicense}
-                    placeholder="例：普通二輪"
                     onChange={(event) =>
                       setForm((prev) => ({ ...prev, requiredLicense: event.target.value }))
                     }
-                  />
+                  >
+                    <option value="">選択してください</option>
+                    {REQUIRED_LICENSE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className={formStyles.field}>
                   <label htmlFor="length">全長 (mm)</label>
