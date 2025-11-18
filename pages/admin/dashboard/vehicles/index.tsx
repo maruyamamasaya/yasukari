@@ -10,6 +10,7 @@ import {
   PublishStatus,
   Vehicle,
 } from "../../../../lib/dashboard/types";
+import { STORE_OPTIONS, getStoreLabel } from "../../../../lib/dashboard/storeOptions";
 import { parseTags } from "../../../../lib/dashboard/utils";
 
 type VehicleFormState = {
@@ -181,11 +182,12 @@ export default function VehicleListPage() {
 
     const filtered = vehicles.filter((vehicle) => {
       const modelName = modelNameMap[vehicle.modelId] ?? "";
+      const storeLabel = getStoreLabel(vehicle.storeId);
       const matchesKeyword = keyword
         ? [
             vehicle.managementNumber,
             modelName,
-            vehicle.storeId ?? "",
+            storeLabel,
           ].some((value) =>
             String(value ?? "").toLowerCase().includes(keyword)
           )
@@ -209,7 +211,7 @@ export default function VehicleListPage() {
           case "modelName":
             return modelNameMap[vehicle.modelId] ?? "";
           case "storeId":
-            return vehicle.storeId ?? "";
+            return getStoreLabel(vehicle.storeId);
           case "publishStatus":
             return vehicle.publishStatus ?? "";
           default:
@@ -272,7 +274,7 @@ export default function VehicleListPage() {
     }
 
     if (!detailForm.storeId.trim()) {
-      setDetailError("店舗IDを入力してください。");
+      setDetailError("店舗を選択してください。");
       return;
     }
 
@@ -470,7 +472,7 @@ export default function VehicleListPage() {
                 <input
                   type="search"
                   className={styles.tableSearchInput}
-                  placeholder="管理番号・車種名・店舗IDで検索"
+                  placeholder="管理番号・車種名・店舗名で検索"
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   aria-label="車両一覧を検索"
@@ -496,7 +498,7 @@ export default function VehicleListPage() {
                   >
                     <option value="managementNumber">管理番号で並び替え</option>
                     <option value="modelName">車種名で並び替え</option>
-                    <option value="storeId">店舗IDで並び替え</option>
+                    <option value="storeId">店舗で並び替え</option>
                     <option value="publishStatus">掲載状態で並び替え</option>
                   </select>
                 </label>
@@ -626,7 +628,7 @@ export default function VehicleListPage() {
                         className={tableStyles.sortableHeaderButton}
                         onClick={() => handleSort("storeId")}
                       >
-                        <span>店舗ID</span>
+                        <span>店舗</span>
                         <span
                           aria-hidden
                           className={`${tableStyles.sortIcon} ${
@@ -728,7 +730,7 @@ export default function VehicleListPage() {
                         </td>
                         <td>{getClassNameByModelId(vehicle.modelId)}</td>
                         <td>{modelNameMap[vehicle.modelId] ?? "-"}</td>
-                        <td>{vehicle.storeId}</td>
+                    <td>{getStoreLabel(vehicle.storeId)}</td>
                         <td>{vehicle.inspectionExpiryDate ?? "-"}</td>
                         <td>{vehicle.liabilityInsuranceExpiryDate ?? "-"}</td>
                         <td>
@@ -802,21 +804,28 @@ export default function VehicleListPage() {
                     </dd>
                   </div>
                   <div className={styles.detailItem}>
-                    <dt>店舗ID</dt>
+                    <dt>店舗</dt>
                     <dd>
                       {isDetailEditing ? (
                         <div className={formStyles.field}>
-                          <input
+                          <select
                             value={detailForm?.storeId ?? ""}
                             onChange={(event) =>
                               setDetailForm((prev) =>
                                 prev ? { ...prev, storeId: event.target.value } : prev
                               )
                             }
-                          />
+                          >
+                            <option value="">店舗を選択</option>
+                            {STORE_OPTIONS.map((store) => (
+                              <option key={store.id} value={store.id}>
+                                {store.label}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       ) : (
-                        selectedVehicle.storeId || "-"
+                        getStoreLabel(selectedVehicle.storeId)
                       )}
                     </dd>
                   </div>

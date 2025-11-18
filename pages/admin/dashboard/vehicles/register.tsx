@@ -4,6 +4,7 @@ import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
 import { BikeModel, PublishStatus, Vehicle } from "../../../../lib/dashboard/types";
+import { STORE_OPTIONS } from "../../../../lib/dashboard/storeOptions";
 import { parseTags } from "../../../../lib/dashboard/utils";
 
 type VehicleFormState = {
@@ -100,7 +101,7 @@ export default function VehicleRegisterPage() {
       return;
     }
     if (!form.storeId.trim()) {
-      setError("店舗IDを入力してください。");
+      setError("店舗を選択してください。");
       return;
     }
 
@@ -220,12 +221,21 @@ export default function VehicleRegisterPage() {
                   </select>
                 </div>
                 <div className={formStyles.field}>
-                  <label htmlFor="storeId">店舗ID</label>
-                  <input
+                  <label htmlFor="storeId">店舗</label>
+                  <select
                     id="storeId"
                     value={form.storeId}
-                    onChange={(event) => setForm((prev) => ({ ...prev, storeId: event.target.value }))}
-                  />
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, storeId: event.target.value }))
+                    }
+                  >
+                    <option value="">店舗を選択</option>
+                    {STORE_OPTIONS.map((store) => (
+                      <option key={store.id} value={store.id}>
+                        {store.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className={formStyles.field}>
                   <label htmlFor="publishStatus">掲載状態</label>
