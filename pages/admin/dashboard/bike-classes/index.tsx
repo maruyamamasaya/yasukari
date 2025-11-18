@@ -38,15 +38,6 @@ const extraDurationLabels: Record<ExtraPriceKey, string> = {
 const formatPrice = (value?: number) =>
   typeof value === "number" ? `${value.toLocaleString()}円` : "-";
 
-const formatDateTime = (value?: string) => {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleString("ja-JP");
-};
-
 const PriceList = <K extends string>({
   prices,
   order,
@@ -378,15 +369,13 @@ export default function BikeClassListPage() {
                     <th scope="col">車両保証</th>
                     <th scope="col">追加料金(24時間)</th>
                     <th scope="col">盗難補償</th>
-                    <th scope="col">作成日時</th>
-                    <th scope="col">更新日時</th>
                     <th scope="col">操作</th>
                   </tr>
                 </thead>
               <tbody>
                 {filteredClasses.length === 0 ? (
                   <tr>
-                    <td colSpan={9}>登録済みのクラスはまだありません。</td>
+                    <td colSpan={7}>登録済みのクラスはまだありません。</td>
                   </tr>
                 ) : (
                   filteredClasses.map((item) => (
@@ -427,8 +416,6 @@ export default function BikeClassListPage() {
                         />
                       </td>
                       <td>{formatPrice(item.theft_insurance)}</td>
-                      <td>{formatDateTime(item.createdAt)}</td>
-                      <td>{formatDateTime(item.updatedAt)}</td>
                       <td>
                         <Link
                           href={`/admin/dashboard/bike-classes/register?classId=${item.classId}`}
