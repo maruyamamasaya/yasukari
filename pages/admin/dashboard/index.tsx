@@ -107,7 +107,10 @@ const menuSections: MenuSection[] = [
   },
   {
     title: "会員管理",
-    description: "会員管理メニューは準備中です。",
+    description: "会員情報の確認や状態の把握を行うための管理メニューです。",
+    links: [
+      { label: "会員一覧", href: `${ADMIN_DASHBOARD_ROOT}/members` },
+    ],
   },
   {
     title: "予約管理",
