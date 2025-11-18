@@ -1,9 +1,23 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import styles from "../../../styles/Dashboard.module.css";
 
 const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
+const ANALYTICS_ROOT = `${ADMIN_DASHBOARD_ROOT}/analytics`;
+
+type PublishStatus = "ON" | "OFF";
+
+type BikeModel = {
+  modelId: number;
+  publishStatus: PublishStatus;
+};
+
+type Vehicle = {
+  managementNumber: string;
+  publishStatus: PublishStatus;
+};
 
 type MenuLink = {
   label: string;
@@ -130,6 +144,118 @@ const menuSections: MenuSection[] = [
 ];
 
 export default function DashboardTopPage() {
+  const [modelCounts, setModelCounts] = useState({
+    total: 0,
+    published: 0,
+    isLoading: true,
+    error: false,
+  });
+  const [vehicleCounts, setVehicleCounts] = useState({
+    total: 0,
+    published: 0,
+    isLoading: true,
+    error: false,
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [modelsResponse, vehiclesResponse] = await Promise.all([
+          fetch("/api/bike-models"),
+          fetch("/api/vehicles"),
+        ]);
+
+        if (modelsResponse.ok) {
+          const models: BikeModel[] = await modelsResponse.json();
+          setModelCounts({
+            total: models.length,
+            published: models.filter((model) => model.publishStatus === "ON")
+              .length,
+            isLoading: false,
+            error: false,
+          });
+        } else {
+          setModelCounts((prev) => ({ ...prev, isLoading: false, error: true }));
+        }
+
+        if (vehiclesResponse.ok) {
+          const vehicles: Vehicle[] = await vehiclesResponse.json();
+          setVehicleCounts({
+            total: vehicles.length,
+            published: vehicles.filter(
+              (vehicle) => vehicle.publishStatus === "ON"
+            ).length,
+            isLoading: false,
+            error: false,
+          });
+        } else {
+          setVehicleCounts((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: true,
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats", error);
+        setModelCounts((prev) => ({ ...prev, isLoading: false, error: true }));
+        setVehicleCounts((prev) => ({ ...prev, isLoading: false, error: true }));
+      }
+    };
+
+    void fetchCounts();
+  }, []);
+
+  const formatCountDisplay = (counts: {
+    total: number;
+    published: number;
+    isLoading: boolean;
+    error: boolean;
+  }) => {
+    if (counts.isLoading) {
+      return "計測中...";
+    }
+
+    if (counts.error) {
+      return "取得に失敗しました";
+    }
+
+    return `${counts.total.toLocaleString()} (${counts.published.toLocaleString()})`;
+  };
+
+  const stats = useMemo(
+    () => [
+      {
+        key: "members",
+        label: "会員数 (認証済)",
+        value: "一旦ダミーで",
+        note: "準備中のため仮表示です。",
+        href: `${ANALYTICS_ROOT}/members`,
+      },
+      {
+        key: "reservations",
+        label: "予約数 (予約受付完了)",
+        value: "一旦ダミーで",
+        note: "準備中のため仮表示です。",
+        href: `${ANALYTICS_ROOT}/reservations`,
+      },
+      {
+        key: "bikeModels",
+        label: "登録車種数 (掲載)",
+        value: formatCountDisplay(modelCounts),
+        note: "総数（掲載中）",
+        href: `${ANALYTICS_ROOT}/bike-models`,
+      },
+      {
+        key: "vehicles",
+        label: "登録車両数 (掲載)",
+        value: formatCountDisplay(vehicleCounts),
+        note: "総数（掲載中）",
+        href: `${ANALYTICS_ROOT}/vehicles`,
+      },
+    ],
+    [modelCounts, vehicleCounts]
+  );
+
   return (
     <>
       <Head>
@@ -140,6 +266,31 @@ export default function DashboardTopPage() {
         description="レンタルバイク『ヤスカリ』の運用に必要な情報を確認・登録できる管理メニューです。"
         showHomeAction={false}
       >
+        <section className={styles.dashboardStats} aria-label="ダッシュボードサマリー">
+          <div className={styles.dashboardStatsHeader}>
+            <div>
+              <p className={styles.dashboardSectionKicker}>ホーム</p>
+              <h2 className={styles.dashboardSectionTitle}>運用指標のハイライト</h2>
+              <p className={styles.dashboardSectionNote}>
+                テーブルの総数を表示します。（掲載）は掲載中フラグONの件数です。
+              </p>
+            </div>
+          </div>
+          <div className={styles.dashboardStatsGrid}>
+            {stats.map((stat) => (
+              <Link
+                key={stat.key}
+                href={stat.href}
+                className={styles.dashboardStatCard}
+              >
+                <p className={styles.dashboardStatLabel}>{stat.label}</p>
+                <p className={styles.dashboardStatValue}>{stat.value}</p>
+                {stat.note && <p className={styles.dashboardStatNote}>{stat.note}</p>}
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <section className={styles.menuSection}>
           <div className={styles.menuGroups}>
             {menuSections.map((section) => (
