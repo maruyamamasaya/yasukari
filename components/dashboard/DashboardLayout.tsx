@@ -92,10 +92,6 @@ const NAV_ITEMS: NavItem[] = [
     href: `${ADMIN_DASHBOARD_ROOT}/holiday-manager`,
   },
   {
-    label: "休日管理",
-    disabled: true,
-  },
-  {
     label: "クーポン管理",
     disabled: true,
   },
