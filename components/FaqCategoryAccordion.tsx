@@ -26,27 +26,35 @@ export default function FaqCategoryAccordion({
 
   return (
     <div className="faq-category-accordion space-y-4">
-      {categories.map((cat, idx) => (
-        <div key={cat.id}>
-          <button
-            type="button"
-            onClick={() => toggle(idx)}
-            className={`flex items-center gap-2 w-full text-left font-semibold p-2 ${
-              openIndexes[idx] ? '' : 'collapsed'
-            }`}
-          >
-            <span className="flex-1">{cat.title}</span>
-            <FaChevronDown
-              className={`transition-transform ${openIndexes[idx] ? 'rotate-180' : ''}`}
-            />
-          </button>
-          {openIndexes[idx] && (
-            <div className="mt-2 ml-4">
+      {categories.map((cat, idx) => {
+        const isOpen = openIndexes[idx];
+
+        return (
+          <div key={cat.id} className="faq-category-card">
+            <button
+              type="button"
+              onClick={() => toggle(idx)}
+              className={`faq-category-trigger ${isOpen ? 'open' : ''}`}
+              aria-expanded={isOpen}
+            >
+              <div className="faq-category-trigger__text">
+                <span className="faq-category-trigger__badge">カテゴリ</span>
+                <span className="flex-1">{cat.title}</span>
+                <span className="faq-category-trigger__count">{cat.faqs.length} 件</span>
+              </div>
+              <FaChevronDown
+                className={`faq-category-trigger__icon ${isOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            <div
+              className={`faq-category-panel ${isOpen ? 'open' : ''}`}
+              aria-hidden={!isOpen}
+            >
               <FaqAccordion faqs={cat.faqs} />
             </div>
-          )}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
