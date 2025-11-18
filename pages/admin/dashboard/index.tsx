@@ -112,10 +112,6 @@ const menuSections: MenuSection[] = [
     ],
   },
   {
-    title: "休日管理",
-    description: "休日管理メニューは準備中です。",
-  },
-  {
     title: "クーポン管理",
     description: "クーポン管理メニューは準備中です。",
   },
