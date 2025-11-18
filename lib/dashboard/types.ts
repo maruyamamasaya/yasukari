@@ -4,6 +4,10 @@ export type DurationPriceKey = "24h" | "2d" | "4d" | "1w" | "2w" | "1m";
 
 export type DurationPriceMap = Partial<Record<DurationPriceKey, number>>;
 
+export type ExtraPriceKey = "24h";
+
+export type ExtraPriceMap = Partial<Record<ExtraPriceKey, number>>;
+
 export type AccessoryPriceKey = "24h" | "2d" | "4d" | "1w";
 
 export type Accessory = {
@@ -19,7 +23,7 @@ export type BikeClass = {
   className: string;
   base_prices?: DurationPriceMap;
   insurance_prices?: DurationPriceMap;
-  extra_prices?: Partial<Record<string, number>>;
+  extra_prices?: ExtraPriceMap;
   theft_insurance?: number;
   createdAt: string;
   updatedAt: string;

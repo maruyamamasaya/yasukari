@@ -6,7 +6,12 @@ import {
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { generateNextNumericId, getDocumentClient } from "../../lib/dynamodb";
-import { DurationPriceKey, DurationPriceMap } from "../../lib/dashboard/types";
+import {
+  DurationPriceKey,
+  DurationPriceMap,
+  ExtraPriceKey,
+  ExtraPriceMap,
+} from "../../lib/dashboard/types";
 
 type BikeClass = {
   classId: number;
@@ -14,7 +19,7 @@ type BikeClass = {
   className: string;
   base_prices?: DurationPriceMap;
   insurance_prices?: DurationPriceMap;
-  extra_prices?: Partial<Record<string, number>>;
+  extra_prices?: ExtraPriceMap;
   theft_insurance?: number;
   createdAt: string;
   updatedAt: string;
@@ -22,6 +27,7 @@ type BikeClass = {
 
 const TABLE_NAME = process.env.BIKE_CLASSES_TABLE ?? "BikeClasses";
 const durationKeys: DurationPriceKey[] = ["24h", "2d", "4d", "1w", "2w", "1m"];
+const extraDurationKeys: ExtraPriceKey[] = ["24h"];
 
 function normalizeClassIdentifier(raw: unknown): string | undefined {
   if (typeof raw !== "string") {
@@ -123,7 +129,7 @@ async function handlePost(
     insurance_prices,
     durationKeys
   );
-  const normalizedExtraPrices = normalizePriceMap(extra_prices, durationKeys);
+  const normalizedExtraPrices = normalizePriceMap(extra_prices, extraDurationKeys);
   const normalizedTheftInsurance = normalizePriceValue(theft_insurance);
 
   try {
@@ -192,7 +198,7 @@ async function handlePut(
     insurance_prices,
     durationKeys
   );
-  const normalizedExtraPrices = normalizePriceMap(extra_prices, durationKeys);
+  const normalizedExtraPrices = normalizePriceMap(extra_prices, extraDurationKeys);
   const normalizedTheftInsurance = normalizePriceValue(theft_insurance);
 
   try {
