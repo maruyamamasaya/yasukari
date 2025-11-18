@@ -275,31 +275,6 @@ export default function DashboardTopPage() {
         description="レンタルバイク『ヤスカリ』の運用に必要な情報を確認・登録できる管理メニューです。"
         showHomeAction={false}
       >
-        <section className={styles.dashboardStats} aria-label="ダッシュボードサマリー">
-          <div className={styles.dashboardStatsHeader}>
-            <div>
-              <p className={styles.dashboardSectionKicker}>ホーム</p>
-              <h2 className={styles.dashboardSectionTitle}>運用指標のハイライト</h2>
-              <p className={styles.dashboardSectionNote}>
-                テーブルの総数を表示します。（掲載）は掲載中フラグONの件数です。
-              </p>
-            </div>
-          </div>
-          <div className={styles.dashboardStatsGrid}>
-            {stats.map((stat) => (
-              <Link
-                key={stat.key}
-                href={stat.href}
-                className={styles.dashboardStatCard}
-              >
-                <p className={styles.dashboardStatLabel}>{stat.label}</p>
-                <p className={styles.dashboardStatValue}>{stat.value}</p>
-                {stat.note && <p className={styles.dashboardStatNote}>{stat.note}</p>}
-              </Link>
-            ))}
-          </div>
-        </section>
-
         <section className={styles.menuSection}>
           <div className={styles.menuGroups}>
             {menuSections.map((section) => (
@@ -310,6 +285,39 @@ export default function DashboardTopPage() {
                     <p className={styles.menuGroupNote}>{section.description}</p>
                   )}
                 </div>
+                {section.title === "ダッシュボード" && (
+                  <div
+                    className={styles.dashboardStats}
+                    aria-label="ダッシュボードサマリー"
+                  >
+                    <div className={styles.dashboardStatsHeader}>
+                      <div>
+                        <p className={styles.dashboardSectionKicker}>ホーム</p>
+                        <h2 className={styles.dashboardSectionTitle}>
+                          運用指標のハイライト
+                        </h2>
+                        <p className={styles.dashboardSectionNote}>
+                          テーブルの総数を表示します。（掲載）は掲載中フラグONの件数です。
+                        </p>
+                      </div>
+                    </div>
+                    <div className={styles.dashboardStatsGrid}>
+                      {stats.map((stat) => (
+                        <Link
+                          key={stat.key}
+                          href={stat.href}
+                          className={styles.dashboardStatCard}
+                        >
+                          <p className={styles.dashboardStatLabel}>{stat.label}</p>
+                          <p className={styles.dashboardStatValue}>{stat.value}</p>
+                          {stat.note && (
+                            <p className={styles.dashboardStatNote}>{stat.note}</p>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {section.links && section.links.length > 0 && (
                   <div className={styles.menuLinkList}>
                     {section.links.map((link) => (
