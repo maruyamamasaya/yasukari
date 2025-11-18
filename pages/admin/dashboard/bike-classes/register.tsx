@@ -4,7 +4,11 @@ import { useRouter } from "next/router";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
-import { BikeClass, DurationPriceKey } from "../../../../lib/dashboard/types";
+import {
+  BikeClass,
+  DurationPriceKey,
+  ExtraPriceKey,
+} from "../../../../lib/dashboard/types";
 
 const durationOptions: { key: DurationPriceKey; label: string }[] = [
   { key: "24h", label: "24時間" },
@@ -15,14 +19,20 @@ const durationOptions: { key: DurationPriceKey; label: string }[] = [
   { key: "1m", label: "1ヶ月" },
 ];
 
-const createEmptyPriceState = (): Record<DurationPriceKey, string> => ({
-  "24h": "",
-  "2d": "",
-  "4d": "",
-  "1w": "",
-  "2w": "",
-  "1m": "",
-});
+const extraDurationOptions: { key: ExtraPriceKey; label: string }[] = [
+  { key: "24h", label: "24時間" },
+];
+
+const createEmptyPriceState = <K extends string>(
+  options: readonly { key: K }[]
+): Record<K, string> =>
+  options.reduce(
+    (state, option) => ({
+      ...state,
+      [option.key]: "",
+    }),
+    {} as Record<K, string>
+  );
 
 const normalizeClassIdentifier = (input: string): string | null => {
   const numericPart = input.match(/\d+/)?.[0];
@@ -43,13 +53,14 @@ const parsePriceValueFromInput = (value: string): number | null | undefined => {
   return Number.isFinite(numericValue) ? numericValue : null;
 };
 
-const priceMapFromState = (
-  state: Record<DurationPriceKey, string>,
-  label: string
-): Partial<Record<DurationPriceKey, number>> | undefined => {
-  const entries: [DurationPriceKey, number][] = [];
+const priceMapFromState = <K extends string>(
+  state: Record<K, string>,
+  label: string,
+  options: readonly { key: K }[]
+): Partial<Record<K, number>> | undefined => {
+  const entries: [K, number][] = [];
 
-  durationOptions.forEach(({ key }) => {
+  options.forEach(({ key }) => {
     const raw = state[key];
     if (!raw.trim()) {
       return;
@@ -64,15 +75,16 @@ const priceMapFromState = (
   });
 
   return entries.length > 0
-    ? (Object.fromEntries(entries) as Partial<Record<DurationPriceKey, number>>)
+    ? (Object.fromEntries(entries) as Partial<Record<K, number>>)
     : undefined;
 };
 
-const priceStateFromClass = (
-  prices?: Partial<Record<string, number>>
-): Record<DurationPriceKey, string> => {
-  const nextState = createEmptyPriceState();
-  durationOptions.forEach(({ key }) => {
+const priceStateFromClass = <K extends string>(
+  prices: Partial<Record<K, number>> | undefined,
+  options: readonly { key: K }[]
+): Record<K, string> => {
+  const nextState = createEmptyPriceState(options);
+  options.forEach(({ key }) => {
     const value = prices?.[key];
     if (typeof value === "number") {
       nextState[key] = String(value);
@@ -85,13 +97,13 @@ export default function BikeClassRegisterPage() {
   const [className, setClassName] = useState("");
   const [classIdentifier, setClassIdentifier] = useState("");
   const [basePrices, setBasePrices] = useState<Record<DurationPriceKey, string>>(
-    createEmptyPriceState
+    () => createEmptyPriceState(durationOptions)
   );
   const [insurancePrices, setInsurancePrices] = useState<
     Record<DurationPriceKey, string>
-  >(createEmptyPriceState);
-  const [extraPrices, setExtraPrices] = useState<Record<DurationPriceKey, string>>(
-    createEmptyPriceState
+  >(() => createEmptyPriceState(durationOptions));
+  const [extraPrices, setExtraPrices] = useState<Record<ExtraPriceKey, string>>(
+    () => createEmptyPriceState(extraDurationOptions)
   );
   const [theftInsurance, setTheftInsurance] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -103,9 +115,9 @@ export default function BikeClassRegisterPage() {
   const resetFormState = () => {
     setClassName("");
     setClassIdentifier("");
-    setBasePrices(createEmptyPriceState());
-    setInsurancePrices(createEmptyPriceState());
-    setExtraPrices(createEmptyPriceState());
+    setBasePrices(createEmptyPriceState(durationOptions));
+    setInsurancePrices(createEmptyPriceState(durationOptions));
+    setExtraPrices(createEmptyPriceState(extraDurationOptions));
     setTheftInsurance("");
   };
 
@@ -113,9 +125,15 @@ export default function BikeClassRegisterPage() {
     setCurrentClassId(targetClass.classId);
     setClassName(targetClass.className);
     setClassIdentifier(targetClass.class_id ?? "");
-    setBasePrices(priceStateFromClass(targetClass.base_prices));
-    setInsurancePrices(priceStateFromClass(targetClass.insurance_prices));
-    setExtraPrices(priceStateFromClass(targetClass.extra_prices));
+    setBasePrices(
+      priceStateFromClass(targetClass.base_prices, durationOptions)
+    );
+    setInsurancePrices(
+      priceStateFromClass(targetClass.insurance_prices, durationOptions)
+    );
+    setExtraPrices(
+      priceStateFromClass(targetClass.extra_prices, extraDurationOptions)
+    );
     setTheftInsurance(
       typeof targetClass.theft_insurance === "number"
         ? String(targetClass.theft_insurance)
@@ -199,16 +217,27 @@ export default function BikeClassRegisterPage() {
     let normalizedInsurancePrices:
       | Partial<Record<DurationPriceKey, number>>
       | undefined;
-    let normalizedExtraPrices: Partial<Record<DurationPriceKey, number>> | undefined;
+    let normalizedExtraPrices:
+      | Partial<Record<ExtraPriceKey, number>>
+      | undefined;
     const normalizedTheftInsurance = parsePriceValueFromInput(theftInsurance);
 
     try {
-      normalizedBasePrices = priceMapFromState(basePrices, "基本料金");
+      normalizedBasePrices = priceMapFromState(
+        basePrices,
+        "基本料金",
+        durationOptions
+      );
       normalizedInsurancePrices = priceMapFromState(
         insurancePrices,
-        "車両保証"
+        "車両保証",
+        durationOptions
       );
-      normalizedExtraPrices = priceMapFromState(extraPrices, "追加料金");
+      normalizedExtraPrices = priceMapFromState(
+        extraPrices,
+        "追加料金",
+        extraDurationOptions
+      );
     } catch (parseError) {
       setError(
         parseError instanceof Error
@@ -367,7 +396,7 @@ export default function BikeClassRegisterPage() {
               <div className={formStyles.field}>
                 <label>追加料金</label>
                 <div className={formStyles.grid}>
-                  {durationOptions.map((option) => (
+                  {extraDurationOptions.map((option) => (
                     <div className={formStyles.field} key={`extra-${option.key}`}>
                       <label htmlFor={`extra-${option.key}`}>
                         追加料金{option.label}

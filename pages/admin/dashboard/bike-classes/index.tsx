@@ -5,7 +5,66 @@ import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
-import { BikeClass } from "../../../../lib/dashboard/types";
+import {
+  BikeClass,
+  DurationPriceKey,
+  ExtraPriceKey,
+} from "../../../../lib/dashboard/types";
+
+const durationOrder: DurationPriceKey[] = [
+  "24h",
+  "2d",
+  "4d",
+  "1w",
+  "2w",
+  "1m",
+];
+
+const durationLabels: Record<DurationPriceKey, string> = {
+  "24h": "24時間",
+  "2d": "2日間",
+  "4d": "4日間",
+  "1w": "1週間",
+  "2w": "2週間",
+  "1m": "1ヶ月",
+};
+
+const extraDurationOrder: ExtraPriceKey[] = ["24h"];
+
+const extraDurationLabels: Record<ExtraPriceKey, string> = {
+  "24h": "24時間",
+};
+
+const formatPrice = (value?: number) =>
+  typeof value === "number" ? `${value.toLocaleString()}円` : "-";
+
+const formatDateTime = (value?: string) => {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleString("ja-JP");
+};
+
+const PriceList = <K extends string>({
+  prices,
+  order,
+  labels,
+}: {
+  prices?: Partial<Record<K, number>>;
+  order: readonly K[];
+  labels: Record<K, string>;
+}) => (
+  <ul className={tableStyles.priceList}>
+    {order.map((key) => (
+      <li key={key} className={tableStyles.priceListItem}>
+        <span className={tableStyles.priceListLabel}>{labels[key]}</span>
+        <span className={tableStyles.priceValue}>{formatPrice(prices?.[key])}</span>
+      </li>
+    ))}
+  </ul>
+);
 
 export default function BikeClassListPage() {
   const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
@@ -53,8 +112,7 @@ export default function BikeClassListPage() {
           const keyword = normalizedKeyword;
           return (
             item.className.toLowerCase().includes(keyword) ||
-            String(item.classId).includes(keyword) ||
-            (item.class_id ?? "").toLowerCase().includes(keyword)
+            String(item.classId).includes(keyword)
           );
         })
       : bikeClasses;
@@ -256,11 +314,11 @@ export default function BikeClassListPage() {
                             : "descending"
                           : "none"
                       }
-                    >
-                      <button
-                        type="button"
-                        className={tableStyles.sortableHeaderButton}
-                        onClick={() => handleSort("classId")}
+                      >
+                        <button
+                          type="button"
+                          className={tableStyles.sortableHeaderButton}
+                          onClick={() => handleSort("classId")}
                       >
                         <span>ID</span>
                         <span
@@ -282,7 +340,6 @@ export default function BikeClassListPage() {
                         </span>
                       </button>
                     </th>
-                    <th scope="col">class_id</th>
                     <th
                       aria-sort={
                         sortState.key === "className"
@@ -309,21 +366,27 @@ export default function BikeClassListPage() {
                           }`}
                         />
                         <span className={tableStyles.visuallyHidden}>
-                      {sortState.key === "className"
-                        ? sortState.direction === "asc"
-                          ? "昇順に並び替え"
-                          : "降順に並び替え"
-                        : "クリックして並び替え"}
-                      </span>
-                    </button>
-                  </th>
-                  <th scope="col">操作</th>
-                </tr>
-              </thead>
+                          {sortState.key === "className"
+                            ? sortState.direction === "asc"
+                              ? "昇順に並び替え"
+                              : "降順に並び替え"
+                            : "クリックして並び替え"}
+                        </span>
+                      </button>
+                    </th>
+                    <th scope="col">基本料金</th>
+                    <th scope="col">車両保証</th>
+                    <th scope="col">追加料金(24時間)</th>
+                    <th scope="col">盗難補償</th>
+                    <th scope="col">作成日時</th>
+                    <th scope="col">更新日時</th>
+                    <th scope="col">操作</th>
+                  </tr>
+                </thead>
               <tbody>
                 {filteredClasses.length === 0 ? (
                   <tr>
-                    <td colSpan={4}>登録済みのクラスはまだありません。</td>
+                    <td colSpan={9}>登録済みのクラスはまだありません。</td>
                   </tr>
                 ) : (
                   filteredClasses.map((item) => (
@@ -341,8 +404,31 @@ export default function BikeClassListPage() {
                           <span>{item.classId}</span>
                         </label>
                       </td>
-                      <td>{item.class_id ?? "-"}</td>
                       <td>{item.className}</td>
+                      <td>
+                        <PriceList
+                          prices={item.base_prices}
+                          order={durationOrder}
+                          labels={durationLabels}
+                        />
+                      </td>
+                      <td>
+                        <PriceList
+                          prices={item.insurance_prices}
+                          order={durationOrder}
+                          labels={durationLabels}
+                        />
+                      </td>
+                      <td>
+                        <PriceList
+                          prices={item.extra_prices}
+                          order={extraDurationOrder}
+                          labels={extraDurationLabels}
+                        />
+                      </td>
+                      <td>{formatPrice(item.theft_insurance)}</td>
+                      <td>{formatDateTime(item.createdAt)}</td>
+                      <td>{formatDateTime(item.updatedAt)}</td>
                       <td>
                         <Link
                           href={`/admin/dashboard/bike-classes/register?classId=${item.classId}`}
