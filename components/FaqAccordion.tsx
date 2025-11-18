@@ -15,28 +15,33 @@ export default function FaqAccordion({ faqs }: { faqs: FAQItem[] }) {
 
   return (
     <div className="faq-accordion">
-      {faqs.map((faq, idx) => (
-        <dl key={idx} className="py-2 sm:py-3">
-          <dt className="mt-0">
-            <button
-              type="button"
-              onClick={() => toggle(idx)}
-              className={`flex items-baseline gap-2 w-full text-left ${openIndex === idx ? '' : 'collapsed'}`}
-            >
-              <span className="text-primary">Q</span>
-              <span className="flex-1">{faq.q}</span>
-              <FaChevronDown
-                className={`transition-transform ${openIndex === idx ? 'rotate-180' : ''}`}
-              />
-            </button>
-          </dt>
-          <dd
-            className={`faq-answer my-0 ${openIndex === idx ? 'open' : ''}`}
-          >
-            <p>{faq.a}</p>
-          </dd>
-        </dl>
-      ))}
+      {faqs.map((faq, idx) => {
+        const isOpen = openIndex === idx;
+
+        return (
+          <dl key={idx} className="faq-row">
+            <dt>
+              <button
+                type="button"
+                onClick={() => toggle(idx)}
+                className={`faq-question ${isOpen ? 'open' : ''}`}
+                aria-expanded={isOpen}
+              >
+                <span className="faq-question__eyebrow">Q</span>
+                <span className="flex-1">{faq.q}</span>
+                <FaChevronDown
+                  className={`faq-question__icon ${isOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+            </dt>
+            <dd className={`faq-answer ${isOpen ? 'open' : ''}`} aria-hidden={!isOpen}>
+              <div className="faq-answer__surface">
+                <p>{faq.a}</p>
+              </div>
+            </dd>
+          </dl>
+        );
+      })}
     </div>
   );
 }

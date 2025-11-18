@@ -8,21 +8,36 @@ export default function HelpPage() {
   const faqs: FAQItem[] = categories.flatMap((c) => c.faqs);
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-8 text-sm leading-relaxed">
+    <div className="help-page">
       <Head>
         <title>ヘルプ - yasukari</title>
       </Head>
 
-      <img
-        src="https://yasukari.com/static/images/faq/barner.jpg"
-        alt="ヘルプバナー"
-        className="w-full h-[300px] object-cover mb-6"
-      />
+      <section className="help-hero">
+        <div className="help-hero__orbit" aria-hidden />
+        <div className="help-hero__media">
+          <img
+            src="https://yasukari.com/static/images/faq/barner.jpg"
+            alt="ヘルプバナー"
+            className="help-hero__image"
+          />
+        </div>
+        <div className="help-hero__content">
+          <p className="help-hero__eyebrow">Support Center</p>
+          <h1>ヘルプ</h1>
+          <p>
+            よくある質問やお問い合わせ方法をまとめました。必要な情報を最速で見つけられるよう、
+            スムーズなアニメーションとシンプルな導線にアップデートしています。
+          </p>
+        </div>
+      </section>
 
-      <h1 className="text-2xl font-bold mb-6 text-center">ヘルプ</h1>
-
-      <section>
-        <h2 className="text-lg font-semibold mb-4 text-center">よくある質問</h2>
+      <section className="help-section">
+        <div className="help-section__header">
+          <span className="help-section__eyebrow">FAQ</span>
+          <h2>よくある質問</h2>
+          <p>カテゴリ別に整理された質問をアコーディオンで確認できます。</p>
+        </div>
         <FaqCategoryAccordion categories={categories} />
         <script
           type="application/ld+json"
@@ -40,12 +55,25 @@ export default function HelpPage() {
         />
       </section>
 
-      <section className="space-y-2 text-center">
-        <h2 className="text-lg font-semibold">お問い合わせ</h2>
-        <ul className="space-y-1">
-          <li>電話: 03-5856-8075</li>
-          <li>メール: info@yasukari.com</li>
-          <li>住所: 東京都足立区小台2-9-7 1階</li>
+      <section className="help-section help-contact">
+        <div className="help-section__header">
+          <span className="help-section__eyebrow">Contact</span>
+          <h2>お問い合わせ</h2>
+          <p>お急ぎの際はお電話で、その他はメールや来店でも承ります。</p>
+        </div>
+        <ul className="help-contact__list">
+          <li>
+            <span className="help-contact__label">電話</span>
+            <span className="help-contact__value">03-5856-8075</span>
+          </li>
+          <li>
+            <span className="help-contact__label">メール</span>
+            <span className="help-contact__value">info@yasukari.com</span>
+          </li>
+          <li>
+            <span className="help-contact__label">住所</span>
+            <span className="help-contact__value">東京都足立区小台2-9-7 1階</span>
+          </li>
         </ul>
       </section>
     </div>
