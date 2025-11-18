@@ -69,18 +69,15 @@ const menuSections: MenuSection[] = [
     description: "用品の料金を確認・登録できます。",
     links: [
       {
-        label: "オプション（用品）",
-        href: `${ADMIN_DASHBOARD_ROOT}/accessories/options`,
-        actions: [
-          { label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/accessories/register` },
-        ],
-      },
-      {
         label: "用品一覧",
         href: `${ADMIN_DASHBOARD_ROOT}/accessories`,
         actions: [
           { label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/accessories/register` },
         ],
+      },
+      {
+        label: "用品登録",
+        href: `${ADMIN_DASHBOARD_ROOT}/accessories/register`,
       },
     ],
   },
