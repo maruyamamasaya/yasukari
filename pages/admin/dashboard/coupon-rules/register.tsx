@@ -30,13 +30,23 @@ const parseTextToIds = (value: string): number[] | undefined => {
   return entries.length > 0 ? entries : undefined;
 };
 
+const normalizeNumberInput = (value: string): string =>
+  value
+    .trim()
+    // convert full-width numbers to half-width
+    .replace(/[０-９．－]/g, (char) =>
+      String.fromCharCode(char.charCodeAt(0) - 0xfee0)
+    )
+    // remove comma separators and spaces
+    .replace(/[\s,]/g, "");
+
 const parseNumberInput = (value: string): number | undefined => {
-  const trimmed = value.trim();
-  if (!trimmed) {
+  const normalized = normalizeNumberInput(value);
+  if (!normalized) {
     return undefined;
   }
 
-  const parsed = Number(trimmed);
+  const parsed = Number(normalized);
   if (Number.isFinite(parsed)) {
     return parsed;
   }
