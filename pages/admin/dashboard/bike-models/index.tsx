@@ -9,6 +9,7 @@ import {
   BikeModel,
   PublishStatus,
 } from "../../../../lib/dashboard/types";
+import { REQUIRED_LICENSE_OPTIONS } from "../../../../lib/dashboard/licenseOptions";
 import { toNumber } from "../../../../lib/dashboard/utils";
 
 type ModelFormState = {
@@ -840,7 +841,7 @@ export default function BikeModelListPage() {
                     <dd>
                       {isDetailEditing ? (
                         <div className={formStyles.field}>
-                          <input
+                          <select
                             value={detailForm?.requiredLicense ?? ""}
                             onChange={(event) =>
                               setDetailForm((prev) =>
@@ -849,7 +850,14 @@ export default function BikeModelListPage() {
                                   : prev
                               )
                             }
-                          />
+                          >
+                            <option value="">選択してください</option>
+                            {REQUIRED_LICENSE_OPTIONS.map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       ) : selectedModel.requiredLicense ? (
                         selectedModel.requiredLicense
