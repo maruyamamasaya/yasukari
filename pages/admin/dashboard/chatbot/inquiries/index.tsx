@@ -2,10 +2,10 @@ import { KeyboardEvent } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
-import { ChatbotInquiry, chatbotInquiries } from "../../../../lib/chatbot/inquiries";
-import styles from "../../../../styles/Dashboard.module.css";
-import tableStyles from "../../../../styles/AdminTable.module.css";
+import DashboardLayout from "../../../../../components/dashboard/DashboardLayout";
+import { ChatbotInquiry, chatbotInquiries } from "../../../../../lib/chatbot/inquiries";
+import styles from "../../../../../styles/Dashboard.module.css";
+import tableStyles from "../../../../../styles/AdminTable.module.css";
 
 const statusClassName = (status: ChatbotInquiry["status"]): string => {
   if (status === "対応済み") {
