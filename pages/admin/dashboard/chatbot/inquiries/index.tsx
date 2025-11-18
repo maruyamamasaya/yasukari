@@ -56,41 +56,50 @@ export default function ChatbotInquiryListPage() {
             </p>
           </div>
 
-          <div className={`${tableStyles.wrapper} ${tableStyles.tableWrapper}`}>
-            <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
-              <thead>
-                <tr>
-                  <th scope="col">セッションID</th>
-                  <th scope="col">受付日時</th>
-                  <th scope="col">トピック</th>
-                  <th scope="col">要約</th>
-                  <th scope="col">最終更新</th>
-                  <th scope="col">対応状況</th>
-                </tr>
-              </thead>
-              <tbody>
-                {chatbotInquiries.map((inquiry) => (
-                  <tr
-                    key={inquiry.sessionId}
-                    className={tableStyles.clickableRow}
-                    onClick={() => void router.push(`/admin/dashboard/chatbot/inquiries/${inquiry.sessionId}`)}
-                    onKeyDown={(event) => handleRowKeyDown(event, inquiry.sessionId)}
-                    tabIndex={0}
-                    aria-label={`${inquiry.ticketId} の詳細を開く`}
-                  >
-                    <td className={tableStyles.monospace}>{inquiry.sessionId}</td>
-                    <td>{formatDatetime(inquiry.createdAt)}</td>
-                    <td>{inquiry.topic}</td>
-                    <td>{inquiry.summary}</td>
-                    <td>{formatDatetime(inquiry.lastActivityAt)}</td>
-                    <td>
-                      <span className={statusClassName(inquiry.status)}>{inquiry.status}</span>
-                    </td>
+          {chatbotInquiries.length === 0 ? (
+            <div className={styles.placeholderCard}>
+              <p>チャットボット問い合わせのサンプルデータは空になっています。</p>
+              <p className={styles.sectionDescription}>
+                実データ連携後は、DynamoDB のレコードを一覧・検索できるようになります。
+              </p>
+            </div>
+          ) : (
+            <div className={`${tableStyles.wrapper} ${tableStyles.tableWrapper}`}>
+              <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
+                <thead>
+                  <tr>
+                    <th scope="col">セッションID</th>
+                    <th scope="col">受付日時</th>
+                    <th scope="col">トピック</th>
+                    <th scope="col">要約</th>
+                    <th scope="col">最終更新</th>
+                    <th scope="col">対応状況</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {chatbotInquiries.map((inquiry) => (
+                    <tr
+                      key={inquiry.sessionId}
+                      className={tableStyles.clickableRow}
+                      onClick={() => void router.push(`/admin/dashboard/chatbot/inquiries/${inquiry.sessionId}`)}
+                      onKeyDown={(event) => handleRowKeyDown(event, inquiry.sessionId)}
+                      tabIndex={0}
+                      aria-label={`${inquiry.ticketId} の詳細を開く`}
+                    >
+                      <td className={tableStyles.monospace}>{inquiry.sessionId}</td>
+                      <td>{formatDatetime(inquiry.createdAt)}</td>
+                      <td>{inquiry.topic}</td>
+                      <td>{inquiry.summary}</td>
+                      <td>{formatDatetime(inquiry.lastActivityAt)}</td>
+                      <td>
+                        <span className={statusClassName(inquiry.status)}>{inquiry.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       </DashboardLayout>
     </>
