@@ -375,6 +375,108 @@
   color: rgba(100, 116, 139, 0.9);
 }
 
+.chartBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chartContent {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .chartContent {
+    grid-template-columns: minmax(240px, 1fr) 1.1fr;
+    align-items: center;
+  }
+}
+
+.chartError,
+.chartEmptyState {
+  margin: 0;
+  color: var(--primary-color-dark);
+  font-weight: 700;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+}
+
+.chartEmptyState {
+  background: #f8fafc;
+  color: rgba(30, 41, 59, 0.88);
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+.pieChartWrapper {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.pieSegment {
+  fill: none;
+  transition: opacity 0.2s ease;
+}
+
+.pieSegment:hover,
+.pieSegment:focus {
+  opacity: 0.85;
+}
+
+.pieChartCenter {
+  pointer-events: none;
+}
+
+.pieCenterLabel {
+  font-size: 1rem;
+  font-weight: 800;
+  fill: rgba(30, 41, 59, 0.92);
+}
+
+.pieLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.pieLegendItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.85rem;
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.legendSwatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
+.legendLabels {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.legendLabels dt {
+  font-weight: 800;
+  color: rgba(30, 41, 59, 0.9);
+}
+
+.legendLabels dd {
+  margin: 0;
+  color: rgba(71, 85, 105, 0.9);
+}
+
 .placeholderList {
   display: flex;
   flex-direction: column;
