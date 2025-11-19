@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactElement } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import styles from "../../../../styles/Dashboard.module.css";
 import { BikeClass, BikeModel, Vehicle } from "../../../../lib/dashboard/types";
@@ -156,7 +156,7 @@ export default function BikeModelAnalyticsPage() {
                   <div className={styles.chartContent}>
                     <div className={styles.pieChartWrapper}>
                       <svg viewBox="0 0 42 42" role="img" aria-label="車両クラス構成比">
-                        {classShares.reduce<{ offset: number; segments: JSX.Element[] }>(
+                        {classShares.reduce<{ offset: number; segments: ReactElement[] }>(
                           (state, share) => {
                             const segmentLength = (share.percentage / 100) * 100;
                             const segment = (
