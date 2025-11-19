@@ -23,4 +23,18 @@ export type ChatbotInquiry = {
   messages: ChatMessage[];
 };
 
-export const chatbotInquiries: ChatbotInquiry[] = [];
+export type ChatbotInquirySummary = {
+  sessionId: string;
+  isLoggedIn: boolean;
+  userId: string | null;
+  clientId: string;
+  createdAt: string;
+  lastActivityAt: string;
+  messageCount: number;
+  userMessageCount: number;
+  firstUserMessage?: string;
+};
+
+export type ChatbotInquiryDetail = ChatbotInquirySummary & {
+  messages: ChatMessage[];
+};
