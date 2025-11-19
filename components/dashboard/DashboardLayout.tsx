@@ -77,7 +77,8 @@ const NAV_ITEMS: NavItem[] = [
     children: [{ label: "予約一覧", href: `${ADMIN_DASHBOARD_ROOT}/reservations` }],
   },
   {
-    label: "サポート",
+    label: "チャットボット",
+    href: `${ADMIN_DASHBOARD_ROOT}/chatbot/inquiries`,
     children: [
       {
         label: "チャットボット問い合わせ一覧",
