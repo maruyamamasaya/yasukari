@@ -59,3 +59,7 @@ python app.py
 - マイページ（`/mypage`）は `/api/me` のレスポンスを用いて表示し、未ログイン時は `/login` へリダイレクト
 
 この構成で、Cognito が管理するトークンをバックエンドで検証しつつ、サーバー側セッションでログイン状態を維持できます。
+
+## 追加要件（共有用の短文）
+
+追加要件：Google アカウントでのログイン対応（Cognito ユーザープールの IdP に Google を追加し、Hosted UI で通常ログインと Google ログインを並列表示、フロントはヘッダーなどに `/auth/login` と `/auth/login/google` ボタンを出し `/auth/login/google` で identity_provider=Google を付けた Cognito の `/oauth2/authorize` へリダイレクトさせ、どちらのログインも共通の `/auth/callback` でトークン検証とセッション作成を行う）。
