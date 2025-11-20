@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { MouseEvent } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import tableStyles from "../../../../styles/AdminTable.module.css";
@@ -228,7 +228,10 @@ export default function BikeScheduleDetailPage() {
     setFormError(null);
   };
 
-  const handleOpenStatusEditor = (cell: CalendarCell, event: MouseEvent<HTMLTableCellElement>) => {
+  const handleOpenStatusEditor = (
+    cell: CalendarCell,
+    event: ReactMouseEvent<HTMLTableCellElement>
+  ) => {
     event.stopPropagation();
     handleSelectDate(cell.key);
 
