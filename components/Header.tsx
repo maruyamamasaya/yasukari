@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
@@ -25,12 +25,17 @@ export default function Header() {
   const [showSuggest, setShowSuggest] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
   const isEn = router.pathname.startsWith('/en');
   const langHref = isEn ? '/' : '/en';
   const langLabel = isEn ? 'JP' : 'EN';
+  const apiBase = (process.env.NEXT_PUBLIC_API_ORIGIN ?? '').replace(/\/$/, '');
+  const loginHref = `${apiBase}/auth/login`;
+  const logoutHref = `${apiBase}/auth/logout`;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -51,6 +56,35 @@ export default function Header() {
   const filteredSuggest = suggestItems.filter((s) =>
     s.toLowerCase().includes(query.toLowerCase())
   );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchSession = async () => {
+      try {
+        const response = await fetch(`${apiBase}/api/me`, {
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (response.status === 401) {
+          setSessionUser(null);
+          return;
+        }
+
+        if (response.ok) {
+          const data = (await response.json()) as { email?: string; username?: string };
+          setSessionUser(data);
+        }
+      } catch (error) {
+        console.error('Failed to check session', error);
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+
+    void fetchSession();
+    return () => controller.abort();
+  }, [apiBase]);
 
   return (
     <div className="sticky top-0 z-50">
@@ -120,9 +154,23 @@ export default function Header() {
               <Link href="/">
                 <NavItem label="ホーム" />
               </Link>
-              <Link href="/login">
-                <NavItem icon={<FaUser />} label="ログイン" />
-              </Link>
+              {authChecked && sessionUser ? (
+                <>
+                  <Link href="/mypage">
+                    <NavItem
+                      icon={<FaUser />}
+                      label={`${sessionUser.username ?? sessionUser.email ?? 'マイページ'}`}
+                    />
+                  </Link>
+                  <a href={logoutHref} className="hidden sm:inline-flex">
+                    <NavItem label="ログアウト" />
+                  </a>
+                </>
+              ) : (
+                <a href={loginHref} className="hidden sm:inline-flex">
+                  <NavItem icon={<FaUser />} label="ログイン" />
+                </a>
+              )}
               <Link href="/pricing">
                 <NavItem icon={<FaClipboardList />} label="車種・料金" />
               </Link>
@@ -190,9 +238,20 @@ export default function Header() {
                 </Link>
               </li>
               <li>
-                <Link href="/login">
-                  <NavItem icon={<FaUser />} label="ログイン" />
-                </Link>
+                {authChecked && sessionUser ? (
+                  <>
+                    <Link href="/mypage">
+                      <NavItem icon={<FaUser />} label="マイページ" />
+                    </Link>
+                    <a href={logoutHref} className="mt-2 inline-flex">
+                      <NavItem label="ログアウト" />
+                    </a>
+                  </>
+                ) : (
+                  <a href={loginHref} className="inline-flex">
+                    <NavItem icon={<FaUser />} label="ログイン" />
+                  </a>
+                )}
               </li>
               <li>
                 <Link href="/pricing">
@@ -224,9 +283,9 @@ export default function Header() {
 
 function NavItem({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (
-    <button className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors">
+    <span className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors">
       {icon && <span>{icon}</span>}
       <span>{label}</span>
-    </button>
+    </span>
   );
 }

@@ -72,6 +72,11 @@ yasukari公式ホームページリニューアル
 - 認証コード入力ページ `/register/auth` を追加し、本登録の2段階認証フローを導入
 - サインアップAPIで認証コードを発行しAWS SESによるメール送信（ローカルはモック送信）に対応
 - 認証コード検証API `/api/register/verify` を実装し、成功時にライト会員を作成するよう変更
+
+### v0.62
+- Amazon Cognito 連携の Flask バックエンドと連携するログインフローを整備
+- `/auth/login`・`/auth/callback`・`/auth/logout`・`/api/me` エンドポイントを追加
+- ヘッダーと `/login` `/mypage` の UI を Cognito セッションに対応させ、サインイン状態を表示
 ## 主要ディレクトリ
 - `components/` - React コンポーネント群
 - `pages/` - Next.js ページ
