@@ -198,103 +198,132 @@ export default function ChatbotInquiryDetailPage() {
             </div>
           ) : (
             <div className={styles.detailStack}>
-              <div className={styles.detailPanel}>
-                <div className={styles.detailHeader}>
-                  <div>
-                    <p className={styles.tagline}>Session: {inquiry.sessionId}</p>
-                    <h3 className={styles.detailTitle}>チャットボット問い合わせ</h3>
+              <div className={`${styles.detailPanel} ${styles.splitLayout}`}>
+                <div className={styles.detailSection}>
+                  <div className={styles.detailHeader}>
+                    <div>
+                      <p className={styles.tagline}>Session: {inquiry.sessionId}</p>
+                      <h3 className={styles.detailTitle}>チャットボット問い合わせ</h3>
+                      <p className={styles.sectionDescription}>
+                        ChatSessions / ChatMessages に保存されたユーザーとボットのやり取りを、そのまま確認できます。
+                      </p>
+                    </div>
+                    <span className={statusClassName(deriveStatus())}>{deriveStatus()}</span>
+                  </div>
+
+                  <dl className={styles.detailGrid}>
+                    <div className={styles.detailItem}>
+                      <dt>ログイン状態</dt>
+                      <dd>{inquiry.isLoggedIn ? "ログイン済み" : "未ログイン (client_id で紐付け)"}</dd>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <dt>user_id</dt>
+                      <dd className={styles.monospace}>{inquiry.userId ?? "(null)"}</dd>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <dt>client_id</dt>
+                      <dd className={styles.monospace}>{inquiry.clientId}</dd>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <dt>作成日時</dt>
+                      <dd>{formatDatetime(inquiry.createdAt)}</dd>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <dt>最終アクティビティ</dt>
+                      <dd>{formatDatetime(inquiry.lastActivityAt)}</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className={styles.detailSection}>
+                  <div className={styles.detailHeader}>
+                    <h3 className={styles.detailTitle}>ステータス</h3>
                     <p className={styles.sectionDescription}>
-                      DynamoDB に保存された session_id / user_id / client_id をキーに会話履歴を参照し、問い合わせごとに返信できます。
+                      メッセージ件数と役割を分けて記録しています。返信は ChatMessages に assistant ロールで追記されます。
                     </p>
                   </div>
-                  <span className={statusClassName(deriveStatus())}>{deriveStatus()}</span>
-                </div>
+                  <div className={styles.statGrid}>
+                    <div className={styles.statCard}>
+                      <p className={styles.statLabel}>メッセージ総数</p>
+                      <p className={styles.statValue}>{sortedMessages.length} 件</p>
+                    </div>
+                    <div className={styles.statCard}>
+                      <p className={styles.statLabel}>ユーザー発言</p>
+                      <p className={styles.statValue}>{userMessages.length} 件</p>
+                    </div>
+                    <div className={styles.statCard}>
+                      <p className={styles.statLabel}>ボット発言</p>
+                      <p className={styles.statValue}>{sortedMessages.length - userMessages.length} 件</p>
+                    </div>
+                  </div>
 
-                <dl className={styles.detailGrid}>
-                  <div className={styles.detailItem}>
-                    <dt>ログイン状態</dt>
-                    <dd>{inquiry.isLoggedIn ? "ログイン済み" : "未ログイン (client_id で紐付け)"}</dd>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <dt>user_id</dt>
-                    <dd className={styles.monospace}>{inquiry.userId ?? "(null)"}</dd>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <dt>client_id</dt>
-                    <dd className={styles.monospace}>{inquiry.clientId}</dd>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <dt>作成日時</dt>
-                    <dd>{formatDatetime(inquiry.createdAt)}</dd>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <dt>最終アクティビティ</dt>
-                    <dd>{formatDatetime(inquiry.lastActivityAt)}</dd>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <dt>メッセージ総数</dt>
-                    <dd>{sortedMessages.length} 件</dd>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <dt>ユーザーメッセージ数</dt>
-                    <dd>{userMessages.length} 件</dd>
-                  </div>
-                </dl>
+                  <form className={styles.replyForm} onSubmit={handleReplySubmit}>
+                    <label className={styles.replyLabel} htmlFor="chatbot-reply">
+                      返信内容
+                    </label>
+                    <textarea
+                      id="chatbot-reply"
+                      className={styles.replyTextarea}
+                      placeholder="ここに管理者からの返信を入力し、ChatMessages に assistant ロールとして保存します。"
+                      rows={4}
+                      value={replyText}
+                      onChange={(event) => setReplyText(event.target.value)}
+                    />
+                    <div className={styles.replyActions}>
+                      <button
+                        type="submit"
+                        className={`${styles.iconButton} ${styles.iconButtonAccent}`}
+                        disabled={!replyText.trim() || isSubmitting}
+                      >
+                        返信を追加
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
 
-              <div className={styles.detailPanel}>
+              <div className={`${styles.detailPanel} ${styles.chatBoard}`}>
                 <div className={styles.detailHeader}>
-                  <h3 className={styles.detailTitle}>会話履歴</h3>
-                  <p className={styles.sectionDescription}>
-                    DynamoDB の ChatMessages テーブルに保存されるメッセージ順に表示しています。
-                  </p>
+                  <div>
+                    <h3 className={styles.detailTitle}>会話履歴</h3>
+                    <p className={styles.sectionDescription}>
+                      ユーザーとボットのメッセージを時系列に並べたチャットビューです。LINE のように左右に分けて確認できます。
+                    </p>
+                  </div>
+                  <span className={`${tableStyles.badge} ${tableStyles.badgeNeutral}`}>
+                    {sortedMessages.length} 件
+                  </span>
                 </div>
 
-                <ol className={styles.conversationList}>
-                  {sortedMessages.map((message) => (
-                    <li key={message.messageId} className={styles.conversationItem}>
-                      <div className={styles.conversationMeta}>
-                        <div className={styles.conversationMetaLeft}>
-                          <span
-                            className={`${tableStyles.badge} ${message.role === "assistant" ? tableStyles.badgeOn : tableStyles.badgeOff}`}
-                          >
-                            {message.role === "assistant" ? "ボット" : "ユーザー"}
-                          </span>
-                          <span className={styles.monospace}># {message.messageIndex}</span>
-                        </div>
-                        <div className={styles.conversationMetaRight}>
-                          <span className={styles.monospace}>{message.userId ?? "(null)"}</span>
-                          <span className={styles.monospace}>{message.clientId}</span>
-                          <span>{formatDatetime(message.createdAt)}</span>
-                        </div>
-                      </div>
-                      <p className={styles.conversationContent}>{message.content}</p>
-                    </li>
-                  ))}
-                </ol>
+                <ol className={styles.chatMessageList}>
+                  {sortedMessages.map((message) => {
+                    const isAssistant = message.role === "assistant";
+                    const roleClassName = `${tableStyles.badge} ${isAssistant ? tableStyles.badgeOn : tableStyles.badgeOff}`;
 
-                <form className={styles.replyForm} onSubmit={handleReplySubmit}>
-                  <label className={styles.replyLabel} htmlFor="chatbot-reply">
-                    返信内容
-                  </label>
-                  <textarea
-                    id="chatbot-reply"
-                    className={styles.replyTextarea}
-                    placeholder="ここに管理者からの返信を入力し、ChatMessages に assistant ロールとして保存します。"
-                    rows={4}
-                    value={replyText}
-                    onChange={(event) => setReplyText(event.target.value)}
-                  />
-                  <div className={styles.replyActions}>
-                    <button
-                      type="submit"
-                      className={`${styles.iconButton} ${styles.iconButtonAccent}`}
-                      disabled={!replyText.trim() || isSubmitting}
-                    >
-                      返信を追加
-                    </button>
-                  </div>
-                </form>
+                    return (
+                      <li
+                        key={message.messageId}
+                        className={`${styles.chatMessage} ${isAssistant ? styles.chatMessageAssistant : styles.chatMessageUser}`}
+                      >
+                        <div className={styles.chatAvatar} aria-hidden>
+                          {isAssistant ? "🤖" : "👤"}
+                        </div>
+                        <div className={styles.chatBubbleWrapper}>
+                          <div className={styles.chatBubbleHeader}>
+                            <span className={roleClassName}>{isAssistant ? "ボット" : "ユーザー"}</span>
+                            <span className={styles.chatTimestamp}>{formatDatetime(message.createdAt)}</span>
+                          </div>
+                          <p className={styles.chatBubble}>{message.content}</p>
+                          <div className={styles.chatMeta}>
+                            <span className={styles.monospace}># {message.messageIndex}</span>
+                            <span className={styles.monospace}>{message.userId ?? "(null)"}</span>
+                            <span className={styles.monospace}>{message.clientId}</span>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
               </div>
             </div>
           )}
