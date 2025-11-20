@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
@@ -32,6 +33,7 @@ type ModelFormState = {
 };
 
 export default function BikeModelListPage() {
+  const router = useRouter();
   const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [classError, setClassError] = useState<string | null>(null);
@@ -325,7 +327,7 @@ export default function BikeModelListPage() {
   };
 
   const handleRowSelect = (modelId: number) => {
-    setSelectedModelId((current) => (current === modelId ? null : modelId));
+    void router.push(`/admin/dashboard/bike-models/${modelId}`);
   };
 
   const toggleModelSelection = (modelId: number) => {
@@ -723,7 +725,7 @@ export default function BikeModelListPage() {
               </table>
             </div>
           </div>
-          {selectedModel && (
+          {false && selectedModel && (
             <div className={styles.detailPanel}>
               <div className={styles.detailHeader}>
                 <h2 className={styles.detailTitle}>
