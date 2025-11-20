@@ -5,24 +5,119 @@ import tableStyles from "../../../../styles/AdminTable.module.css";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
 import {
+  RentalAvailabilityDay,
   RentalAvailabilityMap,
-  RentalAvailabilitySlot,
+  RentalAvailabilityStatus,
   Vehicle,
 } from "../../../../lib/dashboard/types";
 import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
 
 type SlotFormState = {
   date: string;
-  startTime: string;
-  endTime: string;
+  status: RentalAvailabilityStatus;
   note: string;
+};
+
+const STATUS_LABELS: Record<RentalAvailabilityStatus, string> = {
+  AVAILABLE: "レンタル可",
+  UNAVAILABLE: "貸出不可",
+  MAINTENANCE: "メンテナンス",
 };
 
 const initialSlotForm: SlotFormState = {
   date: "",
-  startTime: "",
-  endTime: "",
+  status: "AVAILABLE",
   note: "",
+};
+
+const formatDateInput = (date: Date) => date.toISOString().split("T")[0];
+
+const getUpcomingWeekDates = () => {
+  const today = new Date();
+  return Array.from({ length: 7 }, (_, offset) => {
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + offset);
+    return formatDateInput(nextDate);
+  });
+};
+
+const buildCalendarWeeks = (month: Date) => {
+  const firstDayOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+  const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const startDay = firstDayOfMonth.getDay();
+
+  const cells: (Date | null)[] = Array.from({ length: startDay }, () => null);
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    cells.push(new Date(month.getFullYear(), month.getMonth(), day));
+  }
+
+  while (cells.length % 7 !== 0) {
+    cells.push(null);
+  }
+
+  const weeks: (Date | null)[][] = [];
+  for (let index = 0; index < cells.length; index += 7) {
+    weeks.push(cells.slice(index, index + 7));
+  }
+
+  return weeks;
+};
+
+const normalizeAvailabilityMap = (value: unknown): RentalAvailabilityMap => {
+  if (typeof value !== "object" || value === null) {
+    return {};
+  }
+
+  return Object.entries(value as Record<string, unknown>).reduce<RentalAvailabilityMap>(
+    (acc, [date, raw]) => {
+      if (typeof date !== "string") {
+        return acc;
+      }
+
+      const normalizedEntry = (() => {
+        if (Array.isArray(raw)) {
+          if (raw.length === 0) {
+            return null;
+          }
+
+          const [firstSlot] = raw as Record<string, unknown>[];
+          const noteCandidate =
+            typeof firstSlot?.note === "string" && firstSlot.note.trim().length > 0
+              ? firstSlot.note.trim()
+              : undefined;
+
+          return {
+            status: "AVAILABLE",
+            ...(noteCandidate ? { note: noteCandidate } : {}),
+          } satisfies RentalAvailabilityDay;
+        }
+
+        if (typeof raw !== "object" || raw === null) {
+          return null;
+        }
+
+        const { status, note } = raw as Record<string, unknown>;
+        const isValidStatus =
+          status === "AVAILABLE" || status === "UNAVAILABLE" || status === "MAINTENANCE";
+        if (!isValidStatus) {
+          return null;
+        }
+
+        const trimmedNote =
+          typeof note === "string" && note.trim().length > 0 ? note.trim() : undefined;
+
+        return { status, ...(trimmedNote ? { note: trimmedNote } : {}) } satisfies RentalAvailabilityDay;
+      })();
+
+      if (normalizedEntry) {
+        acc[date] = normalizedEntry;
+      }
+
+      return acc;
+    },
+    {}
+  );
 };
 
 export default function BikeScheduleManagementPage() {
@@ -36,6 +131,8 @@ export default function BikeScheduleManagementPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -68,13 +165,27 @@ export default function BikeScheduleManagementPage() {
 
   useEffect(() => {
     if (selectedVehicle) {
-      setAvailabilityMap(selectedVehicle.rentalAvailability ?? {});
+      setAvailabilityMap(
+        normalizeAvailabilityMap(selectedVehicle.rentalAvailability)
+      );
     } else {
       setAvailabilityMap({});
     }
     setSaveSuccess(null);
     setSaveError(null);
   }, [selectedVehicle]);
+
+  const upcomingWeekDates = useMemo(() => getUpcomingWeekDates(), []);
+
+  const displayMonth = useMemo(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth() + calendarMonthOffset, 1);
+  }, [calendarMonthOffset]);
+
+  const calendarWeeks = useMemo(
+    () => buildCalendarWeeks(displayMonth),
+    [displayMonth]
+  );
 
   const sortedDates = useMemo(
     () => Object.keys(availabilityMap).sort((a, b) => a.localeCompare(b)),
@@ -88,40 +199,30 @@ export default function BikeScheduleManagementPage() {
       return;
     }
 
-    if (!slotForm.date || !slotForm.startTime || !slotForm.endTime) {
-      setFormError("日付、開始時間、終了時間をすべて入力してください。");
+    if (!slotForm.date) {
+      setFormError("日付と状態を入力してください。");
       return;
     }
 
     setFormError(null);
-    const { date, startTime, endTime, note } = slotForm;
-    const newSlot: RentalAvailabilitySlot = {
-      startTime: `${date}T${startTime}`,
-      endTime: `${date}T${endTime}`,
-      ...(note.trim() ? { note: note.trim() } : {}),
-    };
+    const { date, status, note } = slotForm;
+    const trimmedNote = note.trim();
 
-    setAvailabilityMap((prev) => {
-      const existingSlots = prev[date] ?? [];
-      return {
-        ...prev,
-        [date]: [...existingSlots, newSlot],
-      };
-    });
+    setAvailabilityMap((prev) => ({
+      ...prev,
+      [date]: {
+        status,
+        ...(trimmedNote ? { note: trimmedNote } : {}),
+      },
+    }));
 
-    setSlotForm(initialSlotForm);
+    setSlotForm((prev) => ({ ...initialSlotForm, status: prev.status }));
   };
 
-  const handleRemoveSlot = (date: string, index: number) => {
+  const handleRemoveSlot = (date: string) => {
     setAvailabilityMap((prev) => {
-      const slots = prev[date] ?? [];
-      const updatedSlots = slots.filter((_, slotIndex) => slotIndex !== index);
       const nextMap = { ...prev };
-      if (updatedSlots.length > 0) {
-        nextMap[date] = updatedSlots;
-      } else {
-        delete nextMap[date];
-      }
+      delete nextMap[date];
       return nextMap;
     });
   };
@@ -168,7 +269,7 @@ export default function BikeScheduleManagementPage() {
       }
 
       const updated = (await response.json()) as Vehicle;
-      setSaveSuccess("レンタル可能日時の更新が完了しました。");
+      setSaveSuccess("レンタル可能日の更新が完了しました。");
       setVehicles((prev) =>
         prev.map((vehicle) =>
           vehicle.managementNumber === updated.managementNumber ? updated : vehicle
@@ -179,7 +280,7 @@ export default function BikeScheduleManagementPage() {
       setSaveError(
         error instanceof Error
           ? error.message
-          : "レンタル可能日時の保存に失敗しました。"
+          : "レンタル可能日の保存に失敗しました。"
       );
     } finally {
       setIsSaving(false);
@@ -193,7 +294,7 @@ export default function BikeScheduleManagementPage() {
       </Head>
       <DashboardLayout
         title="バイクスケジュール管理"
-        description="車両ごとにレンタル可能な日時をカレンダーマップ形式で管理します。"
+        description="車両ごとにレンタル可能日をカレンダー形式で管理します。"
         showDashboardLink
       >
         <section className={styles.menuSection}>
@@ -202,10 +303,10 @@ export default function BikeScheduleManagementPage() {
               <div>
                 <h2 className={styles.menuGroupTitle}>スケジュール設定</h2>
                 <p className={styles.menuGroupNote}>
-                  各車両のレンタル可能な日時をMap形式（キー: 日付、値: 時間帯の配列）で保存します。
+                  各車両のレンタル可能日を日単位で管理します（キー: 日付、値: ステータス）。
                 </p>
                 <p className={styles.menuGroupNote}>
-                  車両一覧のカラム単位でスケジュールを管理する前提で、データベースに保存される形をそのまま編集できます。
+                  直近1週間の状況を確認しつつ、詳細カレンダーを開いて任意の日を登録・更新できます。
                 </p>
               </div>
             </div>
@@ -239,7 +340,142 @@ export default function BikeScheduleManagementPage() {
 
               {selectedVehicle && (
                 <div className={formStyles.formRow}>
-                  <div className={formStyles.formLabel}>現在のマップ</div>
+                  <div className={formStyles.formLabel}>直近1週間</div>
+                  <div>
+                    <p className={styles.menuGroupNote}>
+                      今日から7日間の公開状態とメモを一覧表示します。
+                    </p>
+                    <table className={tableStyles.table}>
+                      <thead>
+                        <tr>
+                          <th>日付</th>
+                          <th>状態</th>
+                          <th>メモ</th>
+                          <th>クイック操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {upcomingWeekDates.map((date) => {
+                          const entry = availabilityMap[date];
+                          return (
+                            <tr key={date}>
+                              <td>{date}</td>
+                              <td>{entry ? STATUS_LABELS[entry.status] : "未設定"}</td>
+                              <td>{entry?.note ?? "-"}</td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className={formStyles.secondaryButton}
+                                  onClick={() =>
+                                    setSlotForm((prev) => ({ ...prev, date }))
+                                  }
+                                >
+                                  フォームに反映
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    <div className={styles.buttonRow} style={{ marginTop: "0.75rem" }}>
+                      <button
+                        type="button"
+                        className={formStyles.secondaryButton}
+                        onClick={() => setShowCalendar((prev) => !prev)}
+                      >
+                        {showCalendar ? "詳細カレンダーを閉じる" : "詳細カレンダーを表示"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedVehicle && showCalendar && (
+                <div className={formStyles.formRow}>
+                  <div className={formStyles.formLabel}>詳細カレンダー</div>
+                  <div>
+                    <div className={styles.buttonRow} style={{ alignItems: "center" }}>
+                      <button
+                        type="button"
+                        className={formStyles.secondaryButton}
+                        onClick={() => setCalendarMonthOffset((prev) => prev - 1)}
+                      >
+                        前月
+                      </button>
+                      <div className={styles.menuGroupTitle}>
+                        {displayMonth.getFullYear()}年{displayMonth.getMonth() + 1}月
+                      </div>
+                      <button
+                        type="button"
+                        className={formStyles.secondaryButton}
+                        onClick={() => setCalendarMonthOffset((prev) => prev + 1)}
+                      >
+                        翌月
+                      </button>
+                    </div>
+                    <table className={tableStyles.table}>
+                      <thead>
+                        <tr>
+                          {"日月火水木金土".split("").map((weekday) => (
+                            <th key={weekday}>{weekday}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {calendarWeeks.map((week, weekIndex) => (
+                          <tr key={`week-${weekIndex}`}>
+                            {week.map((day, dayIndex) => {
+                              if (!day) {
+                                return <td key={`${weekIndex}-${dayIndex}`}></td>;
+                              }
+
+                              const dateKey = formatDateInput(day);
+                              const entry = availabilityMap[dateKey];
+                              return (
+                                <td
+                                  key={`${weekIndex}-${dayIndex}`}
+                                  style={{ verticalAlign: "top", minWidth: "120px" }}
+                                  onClick={() =>
+                                    setSlotForm((prev) => ({ ...prev, date: dateKey }))
+                                  }
+                                >
+                                  <div className={styles.menuGroupTitle}>{day.getDate()}日</div>
+                                  <div className={styles.menuGroupNote}>
+                                    {entry ? STATUS_LABELS[entry.status] : "未設定"}
+                                  </div>
+                                  {entry?.note && (
+                                    <div className={styles.menuGroupNote}>{entry.note}</div>
+                                  )}
+                                  <button
+                                    type="button"
+                                    className={formStyles.secondaryButton}
+                                    onClick={() =>
+                                      setSlotForm((prev) => ({
+                                        ...prev,
+                                        date: dateKey,
+                                      }))
+                                    }
+                                  >
+                                    この日を編集
+                                  </button>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p className={styles.menuGroupNote}>
+                      カレンダーセルをクリックすると、下の入力フォームに日付が自動入力されます。
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {selectedVehicle && (
+                <div className={formStyles.formRow}>
+                  <div className={formStyles.formLabel}>登録済み一覧</div>
                   <div>
                     {sortedDates.length === 0 ? (
                       <p className={styles.menuGroupNote}>まだスケジュールは登録されていません。</p>
@@ -248,32 +484,34 @@ export default function BikeScheduleManagementPage() {
                         <thead>
                           <tr>
                             <th>日付</th>
-                            <th>時間帯</th>
+                            <th>状態</th>
                             <th>メモ</th>
                             <th>操作</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {sortedDates.map((date) =>
-                            (availabilityMap[date] ?? []).map((slot, index) => (
-                              <tr key={`${date}-${index}`}>
+                          {sortedDates.map((date) => {
+                            const entry = availabilityMap[date];
+                            if (!entry) {
+                              return null;
+                            }
+                            return (
+                              <tr key={date}>
                                 <td>{date}</td>
-                                <td>
-                                  {slot.startTime} - {slot.endTime}
-                                </td>
-                                <td>{slot.note ?? "-"}</td>
+                                <td>{STATUS_LABELS[entry.status]}</td>
+                                <td>{entry.note ?? "-"}</td>
                                 <td>
                                   <button
                                     type="button"
                                     className={formStyles.secondaryButton}
-                                    onClick={() => handleRemoveSlot(date, index)}
+                                    onClick={() => handleRemoveSlot(date)}
                                   >
                                     削除
                                   </button>
                                 </td>
                               </tr>
-                            ))
-                          )}
+                            );
+                          })}
                         </tbody>
                       </table>
                     )}
@@ -300,32 +538,28 @@ export default function BikeScheduleManagementPage() {
                       />
                     </div>
                     <div className={formStyles.formRow}>
-                      <label className={formStyles.formLabel} htmlFor="startTime">
-                        開始時間
+                      <label className={formStyles.formLabel} htmlFor="status">
+                        状態
                       </label>
-                      <input
-                        type="time"
-                        id="startTime"
-                        className={formStyles.formInput}
-                        value={slotForm.startTime}
+                      <select
+                        id="status"
+                        className={formStyles.formSelect}
+                        value={slotForm.status}
                         onChange={(event) =>
-                          setSlotForm((prev) => ({ ...prev, startTime: event.target.value }))
+                          setSlotForm((prev) => ({
+                            ...prev,
+                            status: event.target.value as RentalAvailabilityStatus,
+                          }))
                         }
-                      />
-                    </div>
-                    <div className={formStyles.formRow}>
-                      <label className={formStyles.formLabel} htmlFor="endTime">
-                        終了時間
-                      </label>
-                      <input
-                        type="time"
-                        id="endTime"
-                        className={formStyles.formInput}
-                        value={slotForm.endTime}
-                        onChange={(event) =>
-                          setSlotForm((prev) => ({ ...prev, endTime: event.target.value }))
-                        }
-                      />
+                      >
+                        {(
+                          ["AVAILABLE", "UNAVAILABLE", "MAINTENANCE"] as RentalAvailabilityStatus[]
+                        ).map((status) => (
+                          <option key={status} value={status}>
+                            {STATUS_LABELS[status]}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className={formStyles.formRow}>
                       <label className={formStyles.formLabel} htmlFor="note">
@@ -345,7 +579,7 @@ export default function BikeScheduleManagementPage() {
                   </div>
                   {formError && <p className={formStyles.formError}>{formError}</p>}
                   <button type="submit" className={formStyles.submitButton}>
-                    スロットを追加
+                    スケジュールを追加
                   </button>
                 </form>
               )}

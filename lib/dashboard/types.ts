@@ -17,13 +17,14 @@ export type Accessory = {
   updated_at: string;
 };
 
-export type RentalAvailabilitySlot = {
-  startTime: string;
-  endTime: string;
+export type RentalAvailabilityStatus = "AVAILABLE" | "UNAVAILABLE" | "MAINTENANCE";
+
+export type RentalAvailabilityDay = {
+  status: RentalAvailabilityStatus;
   note?: string;
 };
 
-export type RentalAvailabilityMap = Record<string, RentalAvailabilitySlot[]>;
+export type RentalAvailabilityMap = Record<string, RentalAvailabilityDay>;
 
 export type CouponRule = {
   coupon_code: string;

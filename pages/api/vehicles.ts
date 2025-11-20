@@ -28,16 +28,52 @@ type Vehicle = {
   updatedAt: string;
 };
 
-type RentalAvailabilitySlot = {
-  startTime: string;
-  endTime: string;
+type RentalAvailabilityStatus = "AVAILABLE" | "UNAVAILABLE" | "MAINTENANCE";
+
+type RentalAvailabilityDay = {
+  status: RentalAvailabilityStatus;
   note?: string;
 };
 
-type RentalAvailabilityMap = Record<string, RentalAvailabilitySlot[]>;
+type RentalAvailabilityMap = Record<string, RentalAvailabilityDay>;
 
 const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
 const MODELS_TABLE = process.env.BIKE_MODELS_TABLE ?? "BikeModels";
+
+const isValidRentalStatus = (value: unknown): value is RentalAvailabilityStatus =>
+  value === "AVAILABLE" || value === "UNAVAILABLE" || value === "MAINTENANCE";
+
+const normalizeRentalAvailabilityDay = (
+  value: unknown
+): RentalAvailabilityDay | null => {
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return null;
+    }
+
+    const [firstSlot] = value as Record<string, unknown>[];
+    const noteCandidate =
+      typeof firstSlot?.note === "string" && firstSlot.note.trim().length > 0
+        ? firstSlot.note.trim()
+        : undefined;
+
+    return { status: "AVAILABLE", ...(noteCandidate ? { note: noteCandidate } : {}) };
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+
+  const { status, note } = value as Record<string, unknown>;
+  if (!isValidRentalStatus(status)) {
+    return null;
+  }
+
+  const trimmedNote =
+    typeof note === "string" && note.trim().length > 0 ? note.trim() : undefined;
+
+  return { status, ...(trimmedNote ? { note: trimmedNote } : {}) } satisfies RentalAvailabilityDay;
+};
 
 const normalizeRentalAvailability = (
   value: unknown
@@ -50,60 +86,23 @@ const normalizeRentalAvailability = (
     return undefined;
   }
 
-  const recordEntries = Object.entries(value as Record<string, unknown>);
-
-  const normalizedEntries = recordEntries
-    .map(([date, slots]): [string, RentalAvailabilitySlot[]] | null => {
+  const normalizedEntries = Object.entries(value as Record<string, unknown>)
+    .map(([date, day]): [string, RentalAvailabilityDay] | null => {
       if (typeof date !== "string") {
         return null;
       }
 
-      if (!Array.isArray(slots)) {
+      const normalizedDay = normalizeRentalAvailabilityDay(day);
+      if (!normalizedDay) {
         return null;
       }
 
-      const normalizedSlots = slots
-        .map((slot) => {
-          if (typeof slot !== "object" || slot === null) {
-            return null;
-          }
-
-          const { startTime, endTime, note } = slot as Record<string, unknown>;
-
-          if (typeof startTime !== "string" || typeof endTime !== "string") {
-            return null;
-          }
-
-          const trimmedStart = startTime.trim();
-          const trimmedEnd = endTime.trim();
-
-          if (!trimmedStart || !trimmedEnd) {
-            return null;
-          }
-
-          const trimmedNote =
-            typeof note === "string" && note.trim().length > 0
-              ? note.trim()
-              : undefined;
-
-          return {
-            startTime: trimmedStart,
-            endTime: trimmedEnd,
-            ...(trimmedNote ? { note: trimmedNote } : {}),
-          } satisfies RentalAvailabilitySlot;
-        })
-        .filter((slot): slot is RentalAvailabilitySlot => slot !== null);
-
-      if (normalizedSlots.length === 0) {
-        return null;
-      }
-
-      return [date, normalizedSlots];
+      return [date, normalizedDay];
     })
-    .filter((entry): entry is [string, RentalAvailabilitySlot[]] => entry !== null);
+    .filter((entry): entry is [string, RentalAvailabilityDay] => entry !== null);
 
-  return normalizedEntries.reduce<RentalAvailabilityMap>((acc, [date, slots]) => {
-    acc[date] = slots;
+  return normalizedEntries.reduce<RentalAvailabilityMap>((acc, [date, day]) => {
+    acc[date] = day;
     return acc;
   }, {});
 };
@@ -113,8 +112,20 @@ async function handleGet(response: NextApiResponse<Vehicle[] | { message: string
     const client = getDocumentClient();
     const result = await client.send(new ScanCommand({ TableName: VEHICLES_TABLE }));
     const items = (result.Items ?? []) as Vehicle[];
-    items.sort((a, b) => a.managementNumber.localeCompare(b.managementNumber));
-    response.status(200).json(items);
+    const normalizedItems = items.map((item) => {
+      const normalizedAvailability = normalizeRentalAvailability(item.rentalAvailability);
+      if (normalizedAvailability !== undefined) {
+        item.rentalAvailability = normalizedAvailability;
+      } else if (item.rentalAvailability !== undefined) {
+        delete (item as Partial<Vehicle>).rentalAvailability;
+      }
+      return item;
+    });
+
+    normalizedItems.sort((a, b) =>
+      a.managementNumber.localeCompare(b.managementNumber)
+    );
+    response.status(200).json(normalizedItems);
   } catch (error) {
     console.error("Failed to fetch vehicles", error);
     response.status(500).json({ message: "車両情報の取得に失敗しました。" });
