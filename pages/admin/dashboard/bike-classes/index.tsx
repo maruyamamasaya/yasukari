@@ -417,13 +417,22 @@ export default function BikeClassListPage() {
                       </td>
                       <td>{formatPrice(item.theft_insurance)}</td>
                       <td>
-                        <Link
-                          href={`/admin/dashboard/bike-classes/register?classId=${item.classId}`}
-                          className={styles.tableToolbarButton}
-                          aria-label={`クラスID ${item.classId} を編集`}
-                        >
-                          ✎ 編集
-                        </Link>
+                        <div className={styles.tableActionList}>
+                          <Link
+                            href={`/admin/dashboard/bike-classes/${item.classId}/monthly-pricing`}
+                            className={styles.tableToolbarButton}
+                            aria-label={`クラスID ${item.classId} の1ヶ月料金表を表示`}
+                          >
+                            1ヶ月料金表
+                          </Link>
+                          <Link
+                            href={`/admin/dashboard/bike-classes/register?classId=${item.classId}`}
+                            className={styles.tableToolbarButton}
+                            aria-label={`クラスID ${item.classId} を編集`}
+                          >
+                            ✎ 編集
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   ))
