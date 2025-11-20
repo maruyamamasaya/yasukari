@@ -27,6 +27,13 @@ type ChatbotResponseBody = {
   };
 };
 
+type ChatHistoryEntry = {
+  messageId: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+};
+
 function nowIsoString(): string {
   return new Date().toISOString();
 }
@@ -59,6 +66,27 @@ async function findLatestMessageIndex(
   }
 
   return 0;
+}
+
+async function fetchHistory(sessionId: string): Promise<ChatHistoryEntry[]> {
+  const client = getDocumentClient();
+  const response = await client.send(
+    new QueryCommand({
+      TableName: "ChatMessages",
+      KeyConditionExpression: "session_id = :sessionId",
+      ExpressionAttributeValues: { ":sessionId": sessionId },
+      ProjectionExpression: "message_id, #role, content, created_at",
+      ExpressionAttributeNames: { "#role": "role" },
+      ScanIndexForward: true,
+    })
+  );
+
+  return (response.Items ?? []).map((item) => ({
+    messageId: String(item.message_id),
+    role: (item.role as ChatHistoryEntry["role"]) ?? "user",
+    content: String(item.content ?? ""),
+    createdAt: String(item.created_at ?? ""),
+  }));
 }
 
 async function ensureSessionRecord(
@@ -154,6 +182,22 @@ export default async function handler(
   const assistantMessageId = randomUUID();
   const assistantContent = "ただいま確認中です。後ほどご回答いたします。";
 
+  const history = await fetchHistory(normalizedSessionId);
+  const updatedHistory: ChatHistoryEntry[] = history.concat([
+    {
+      messageId: userMessageId,
+      role: "user",
+      content: message,
+      createdAt: now,
+    },
+    {
+      messageId: assistantMessageId,
+      role: "assistant",
+      content: assistantContent,
+      createdAt: now,
+    },
+  ]);
+
   const client = getDocumentClient();
   await client.send(
     new PutCommand({
@@ -167,6 +211,7 @@ export default async function handler(
         client_id: clientId,
         created_at: now,
         message_index: userMessageIndex,
+        history: updatedHistory,
       },
     })
   );
@@ -183,6 +228,7 @@ export default async function handler(
         client_id: clientId,
         created_at: now,
         message_index: assistantMessageIndex,
+        history: updatedHistory,
       },
     })
   );
