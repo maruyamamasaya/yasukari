@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 import DashboardLayout from "../../../../../components/dashboard/DashboardLayout";
-import { ChatbotInquiryDetail } from "../../../../../lib/chatbot/inquiries";
+import { ChatHistoryEntry, ChatbotInquiryDetail } from "../../../../../lib/chatbot/inquiries";
 import styles from "../../../../../styles/Dashboard.module.css";
 import tableStyles from "../../../../../styles/AdminTable.module.css";
 
@@ -50,6 +50,7 @@ export default function ChatbotInquiryDetailPage() {
           setInquiry({
             ...data.inquiry,
             messages: [...data.inquiry.messages].sort((a, b) => a.messageIndex - b.messageIndex),
+            history: data.inquiry.history,
           });
         } else {
           setInquiry(null);
@@ -108,6 +109,7 @@ export default function ChatbotInquiryDetailPage() {
               ...previous,
               lastActivityAt: data.inquiry.lastActivityAt ?? previous.lastActivityAt,
               messages: nextMessages.sort((a, b) => a.messageIndex - b.messageIndex),
+              history: data.inquiry.history ?? previous.history,
             };
           });
         }
@@ -136,6 +138,25 @@ export default function ChatbotInquiryDetailPage() {
     () => sortedMessages.filter((message) => message.role === "user"),
     [sortedMessages],
   );
+
+  const storedHistory: ChatHistoryEntry[] = useMemo(() => {
+    if (!inquiry) {
+      return [];
+    }
+
+    if (inquiry.history?.length) {
+      return inquiry.history;
+    }
+
+    return inquiry.messages.map((message) => ({
+      messageId: message.messageId,
+      role: message.role,
+      content: message.content,
+      createdAt: message.createdAt,
+      userId: message.userId,
+      clientId: message.clientId,
+    }));
+  }, [inquiry]);
 
   const deriveStatus = (): InquiryStatus => {
     if (!sortedMessages.length || userMessages.length === 0) {
@@ -324,6 +345,54 @@ export default function ChatbotInquiryDetailPage() {
                     );
                   })}
                 </ol>
+              </div>
+
+              <div className={styles.detailPanel}>
+                <div className={styles.detailHeader}>
+                  <div>
+                    <h3 className={styles.detailTitle}>保存済み履歴 (ChatMessages.history)</h3>
+                    <p className={styles.sectionDescription}>
+                      DynamoDB に保存された history フィールドをそのまま表示します。未ログインの利用者は client_id で追跡されます。
+                    </p>
+                  </div>
+                  <span className={`${tableStyles.badge} ${tableStyles.badgeNeutral}`}>
+                    {storedHistory.length} 件
+                  </span>
+                </div>
+
+                {storedHistory.length === 0 ? (
+                  <p className={styles.sectionDescription}>保存された履歴がありません。</p>
+                ) : (
+                  <ol className={styles.chatMessageList}>
+                    {storedHistory.map((entry, index) => {
+                      const isAssistant = entry.role === "assistant";
+                      const badgeClassName = `${tableStyles.badge} ${isAssistant ? tableStyles.badgeOn : tableStyles.badgeOff}`;
+
+                      return (
+                        <li
+                          key={`${entry.messageId}-${index}`}
+                          className={`${styles.chatMessage} ${isAssistant ? styles.chatMessageAssistant : styles.chatMessageUser}`}
+                        >
+                          <div className={styles.chatAvatar} aria-hidden>
+                            {isAssistant ? "🤖" : "👤"}
+                          </div>
+                          <div className={styles.chatBubbleWrapper}>
+                            <div className={styles.chatBubbleHeader}>
+                              <span className={badgeClassName}>{isAssistant ? "ボット" : "ユーザー"}</span>
+                              <span className={styles.chatTimestamp}>{formatDatetime(entry.createdAt)}</span>
+                            </div>
+                            <p className={styles.chatBubble}>{entry.content}</p>
+                            <div className={styles.chatMeta}>
+                              <span className={styles.monospace}>ID: {entry.messageId}</span>
+                              <span className={styles.monospace}>{entry.userId ?? "(null)"}</span>
+                              <span className={styles.monospace}>{entry.clientId}</span>
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                )}
               </div>
             </div>
           )}

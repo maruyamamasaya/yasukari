@@ -6,6 +6,16 @@ export type ChatMessage = {
   clientId: string;
   createdAt: string;
   messageIndex: number;
+  history?: ChatHistoryEntry[];
+};
+
+export type ChatHistoryEntry = {
+  messageId: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+  userId: string | null;
+  clientId: string;
 };
 
 export type ChatbotInquiry = {
@@ -37,4 +47,5 @@ export type ChatbotInquirySummary = {
 
 export type ChatbotInquiryDetail = ChatbotInquirySummary & {
   messages: ChatMessage[];
+  history?: ChatHistoryEntry[];
 };

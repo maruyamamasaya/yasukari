@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient } from "../../../lib/dynamodb";
+import { ChatHistoryEntry } from "../../../lib/chatbot/inquiries";
 
 type ChatbotRequestBody = {
   message?: string;
@@ -25,13 +26,6 @@ type ChatbotResponseBody = {
     createdAt: string;
     content: string;
   };
-};
-
-type ChatHistoryEntry = {
-  messageId: string;
-  role: "user" | "assistant";
-  content: string;
-  createdAt: string;
 };
 
 function nowIsoString(): string {
@@ -75,7 +69,7 @@ async function fetchHistory(sessionId: string): Promise<ChatHistoryEntry[]> {
       TableName: "ChatMessages",
       KeyConditionExpression: "session_id = :sessionId",
       ExpressionAttributeValues: { ":sessionId": sessionId },
-      ProjectionExpression: "message_id, #role, content, created_at",
+      ProjectionExpression: "message_id, #role, content, created_at, user_id, client_id",
       ExpressionAttributeNames: { "#role": "role" },
       ScanIndexForward: true,
     })
@@ -86,6 +80,8 @@ async function fetchHistory(sessionId: string): Promise<ChatHistoryEntry[]> {
     role: (item.role as ChatHistoryEntry["role"]) ?? "user",
     content: String(item.content ?? ""),
     createdAt: String(item.created_at ?? ""),
+    userId: typeof item.user_id === "string" ? item.user_id : null,
+    clientId: String(item.client_id ?? ""),
   }));
 }
 
@@ -189,12 +185,16 @@ export default async function handler(
       role: "user",
       content: message,
       createdAt: now,
+      userId: normalizedUserId,
+      clientId,
     },
     {
       messageId: assistantMessageId,
       role: "assistant",
       content: assistantContent,
       createdAt: now,
+      userId: normalizedUserId,
+      clientId,
     },
   ]);
 
