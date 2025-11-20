@@ -121,6 +121,51 @@ const RegisterAuthPage: NextPage = () => {
     void submitVerification(code);
   };
 
+  const handleTemporaryRegistration = useCallback(async () => {
+    if (!normalizedEmail) {
+      setStatus('error');
+      setFeedback('メールアドレス情報が見つかりません。最初から手続きをやり直してください。');
+      return;
+    }
+
+    setStatus('loading');
+    setFeedback('');
+
+    try {
+      const res = await fetch('/api/register/temporary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail }),
+      });
+
+      const data: ApiResponse = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setStatus('error');
+        setFeedback(data.message ?? '臨時登録に失敗しました。時間を置いて再度お試しください。');
+        return;
+      }
+
+      setStatus('success');
+      setFeedback(data.message ?? '臨時登録が完了しました。');
+      setCode('');
+
+      const query = new URLSearchParams();
+      if (data.member?.username) {
+        query.set('name', data.member.username);
+      }
+      const emailForRedirect = data.member?.email ?? normalizedEmail;
+      if (emailForRedirect) {
+        query.set('email', emailForRedirect);
+      }
+      void router.push(`${REGISTER_COMPLETION_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+      setFeedback('通信エラーが発生しました。ネットワーク環境をご確認のうえ、再度お試しください。');
+    }
+  }, [normalizedEmail, router]);
+
   return (
     <>
       <Head>
@@ -242,13 +287,24 @@ const RegisterAuthPage: NextPage = () => {
                 maxLength={6}
               />
               <p className="text-xs text-gray-500">半角英数字4〜6桁で入力してください。</p>
-              <button
-                type="submit"
-                className="w-full rounded-full bg-red-600 py-3 text-lg font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
-                disabled={status === 'loading' || !normalizedEmail}
-              >
-                {status === 'loading' ? '認証中…' : '認証して本登録を完了する'}
-              </button>
+              <div className="space-y-3">
+                <button
+                  type="submit"
+                  className="w-full rounded-full bg-red-600 py-3 text-lg font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+                  disabled={status === 'loading' || !normalizedEmail}
+                >
+                  {status === 'loading' ? '認証中…' : '認証して本登録を完了する'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleTemporaryRegistration()}
+                  className="w-full rounded-full border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400"
+                  disabled={status === 'loading' || !normalizedEmail}
+                >
+                  臨時で登録をする
+                </button>
+                <p className="text-center text-xs text-gray-500">メールが届かない場合の一時登録にご利用ください。</p>
+              </div>
             </form>
             <div className="mt-6 text-center text-sm text-gray-600">
               認証コードの有効期限はメール送信から24時間です。期限切れの場合は再度メールアドレスを入力してください。
