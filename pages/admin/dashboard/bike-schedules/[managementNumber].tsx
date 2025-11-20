@@ -584,48 +584,28 @@ export default function BikeScheduleDetailPage() {
                           ))}
                         </div>
                       </div>
-                    </div>
-                    <div className={styles.menuGroup} style={{ minHeight: "100%" }}>
-                      <div className={styles.menuGroupTitle}>ステータスの保存</div>
-                      <p className={styles.menuGroupNote}>
-                        カレンダーで設定したステータスとメモを保存すると、データベースに反映されます。
-                      </p>
-                      {formError && <p className={formStyles.formError}>{formError}</p>}
-                      <div className={formStyles.formGrid}>
-                        <div className={formStyles.formRow}>
-                          <div className={formStyles.formLabel}>現在の選択</div>
-                          <div>
-                            <div className={styles.menuGroupNote}>{activeDate ?? "未選択"}</div>
-                            {activeDate && (
-                              <div className={styles.menuGroupNote}>
-                                {STATUS_LABELS[activeStatus]}
-                                {activeNote ? ` / ${activeNote}` : ""}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.buttonRow}>
-                        <button
-                          type="button"
-                          className={formStyles.secondaryButton}
-                          onClick={handleResetDate}
-                        >
-                          未設定に戻す
-                        </button>
-                        <button
-                          type="button"
-                          className={formStyles.submitButton}
-                          onClick={handleSave}
-                          disabled={isSaving}
-                        >
-                          {isSaving ? "保存中..." : "保存"}
-                        </button>
-                      </div>
-                      {saveError && <p className={formStyles.formError}>{saveError}</p>}
-                      {saveSuccess && <p className={formStyles.formSuccess}>{saveSuccess}</p>}
-                    </div>
                   </div>
+                  </div>
+                  <div className={styles.menuGroup} style={{ minHeight: "100%" }}>
+                    <div className={styles.menuGroupTitle}>ステータスの保存</div>
+                    <p className={styles.menuGroupNote}>
+                      カレンダーで設定したステータスとメモを保存すると、データベースに反映されます。
+                    </p>
+                    {formError && <p className={formStyles.formError}>{formError}</p>}
+                    <div className={styles.buttonRow}>
+                      <button
+                        type="button"
+                        className={formStyles.submitButton}
+                        onClick={handleSave}
+                        disabled={isSaving}
+                      >
+                        {isSaving ? "保存中..." : "保存"}
+                      </button>
+                    </div>
+                    {saveError && <p className={formStyles.formError}>{saveError}</p>}
+                    {saveSuccess && <p className={formStyles.formSuccess}>{saveSuccess}</p>}
+                  </div>
+                </div>
                 </>
               )}
             </div>
