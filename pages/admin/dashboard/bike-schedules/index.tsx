@@ -9,9 +9,9 @@ import {
   RentalAvailabilityMap,
   RentalAvailabilityStatus,
   Vehicle,
+  BikeModel,
 } from "../../../../lib/dashboard/types";
 import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
-import { BikeModel } from "../../../../types/bikeModel";
 
 const STATUS_LABELS: Record<RentalAvailabilityStatus, string> = {
   AVAILABLE: "レンタル可",
