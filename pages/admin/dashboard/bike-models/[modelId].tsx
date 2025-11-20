@@ -200,7 +200,10 @@ export default function BikeModelDetailPage() {
       <Head>
         <title>車種詳細</title>
       </Head>
-      <DashboardLayout>
+      <DashboardLayout
+        title="車種詳細"
+        actions={[{ label: "車種一覧へ戻る", href: "/admin/dashboard/bike-models" }]}
+      >
         <div className={styles.detailHeader}>
           <h1 className={styles.detailTitle}>車種詳細</h1>
           <button type="button" className={styles.tableToolbarButton} onClick={handleBack}>
