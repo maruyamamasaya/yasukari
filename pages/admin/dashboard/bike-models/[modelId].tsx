@@ -206,9 +206,20 @@ export default function BikeModelDetailPage() {
       >
         <div className={styles.detailHeader}>
           <h1 className={styles.detailTitle}>車種詳細</h1>
-          <button type="button" className={styles.tableToolbarButton} onClick={handleBack}>
-            戻る
-          </button>
+          <div className={styles.detailActions}>
+            <button
+              type="button"
+              className={styles.detailEditButton}
+              onClick={() => setIsDetailEditing((current) => !current)}
+              disabled={isSavingDetail || !detailForm}
+              aria-pressed={isDetailEditing}
+            >
+              {isDetailEditing ? "閲覧に戻る" : "編集に切り替え"}
+            </button>
+            <button type="button" className={styles.tableToolbarButton} onClick={handleBack}>
+              戻る
+            </button>
+          </div>
         </div>
         {classError && <p className={formStyles.error}>{classError}</p>}
         {modelError && <p className={formStyles.error}>{modelError}</p>}
@@ -580,17 +591,6 @@ export default function BikeModelDetailPage() {
                 <dd>{model.updatedAt ?? "-"}</dd>
               </div>
             </dl>
-            <div className={styles.detailHeader}>
-              <button
-                type="button"
-                className={styles.detailEditButton}
-                onClick={() => setIsDetailEditing((current) => !current)}
-                disabled={isSavingDetail || !detailForm}
-                aria-pressed={isDetailEditing}
-              >
-                {isDetailEditing ? "閲覧に戻る" : "編集に切り替え"}
-              </button>
-            </div>
             {detailError && <p className={formStyles.error}>{detailError}</p>}
             {detailSuccess && <p className={formStyles.hint}>{detailSuccess}</p>}
             {isDetailEditing && (
