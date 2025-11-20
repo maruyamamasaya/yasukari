@@ -28,7 +28,11 @@ type Vehicle = {
   updatedAt: string;
 };
 
-type RentalAvailabilityStatus = "AVAILABLE" | "UNAVAILABLE" | "MAINTENANCE";
+type RentalAvailabilityStatus =
+  | "AVAILABLE"
+  | "UNAVAILABLE"
+  | "MAINTENANCE"
+  | "RENTED";
 
 type RentalAvailabilityDay = {
   status: RentalAvailabilityStatus;
@@ -41,7 +45,10 @@ const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
 const MODELS_TABLE = process.env.BIKE_MODELS_TABLE ?? "BikeModels";
 
 const isValidRentalStatus = (value: unknown): value is RentalAvailabilityStatus =>
-  value === "AVAILABLE" || value === "UNAVAILABLE" || value === "MAINTENANCE";
+  value === "AVAILABLE" ||
+  value === "UNAVAILABLE" ||
+  value === "MAINTENANCE" ||
+  value === "RENTED";
 
 const normalizeRentalAvailabilityDay = (
   value: unknown

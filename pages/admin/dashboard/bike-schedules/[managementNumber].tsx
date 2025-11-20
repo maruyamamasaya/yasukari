@@ -18,38 +18,45 @@ import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
 const STATUS_LABELS: Record<RentalAvailabilityStatus, string> = {
   AVAILABLE: "レンタル可",
   UNAVAILABLE: "貸出不可",
-  MAINTENANCE: "メンテナンス",
+  MAINTENANCE: "メンテナンス中",
+  RENTED: "レンタル中",
+};
+
+const STATUS_COLORS: Record<RentalAvailabilityStatus, string> = {
+  AVAILABLE: "#22c55e",
+  UNAVAILABLE: "#ef4444",
+  MAINTENANCE: "#f59e0b",
+  RENTED: "#3b82f6",
 };
 
 const formatDateInput = (date: Date) => date.toISOString().split("T")[0];
 
-const getUpcomingWeekDates = () => {
-  const today = new Date();
-  return Array.from({ length: 7 }, (_, offset) => {
-    const nextDate = new Date(today);
-    nextDate.setDate(today.getDate() + offset);
-    return formatDateInput(nextDate);
-  });
+type CalendarCell = {
+  date: Date;
+  key: string;
+  isCurrentMonth: boolean;
 };
 
-const buildCalendarWeeks = (month: Date) => {
-  const firstDayOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
-  const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-  const startDay = firstDayOfMonth.getDay();
+const buildCalendarGrid = (month: Date): CalendarCell[][] => {
+  const firstDay = new Date(month.getFullYear(), month.getMonth(), 1);
+  const startDate = new Date(firstDay);
+  startDate.setDate(firstDay.getDate() - firstDay.getDay());
 
-  const cells: (Date | null)[] = Array.from({ length: startDay }, () => null);
+  const weeks: CalendarCell[][] = [];
+  const current = new Date(startDate);
 
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    cells.push(new Date(month.getFullYear(), month.getMonth(), day));
-  }
-
-  while (cells.length % 7 !== 0) {
-    cells.push(null);
-  }
-
-  const weeks: (Date | null)[][] = [];
-  for (let index = 0; index < cells.length; index += 7) {
-    weeks.push(cells.slice(index, index + 7));
+  for (let weekIndex = 0; weekIndex < 6; weekIndex += 1) {
+    const row: CalendarCell[] = [];
+    for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
+      const cellDate = new Date(current);
+      row.push({
+        date: cellDate,
+        key: formatDateInput(cellDate),
+        isCurrentMonth: cellDate.getMonth() === month.getMonth(),
+      });
+      current.setDate(current.getDate() + 1);
+    }
+    weeks.push(row);
   }
 
   return weeks;
@@ -90,7 +97,10 @@ const normalizeAvailabilityMap = (value: unknown): RentalAvailabilityMap => {
 
         const { status, note } = raw as Record<string, unknown>;
         const isValidStatus =
-          status === "AVAILABLE" || status === "UNAVAILABLE" || status === "MAINTENANCE";
+          status === "AVAILABLE" ||
+          status === "UNAVAILABLE" ||
+          status === "MAINTENANCE" ||
+          status === "RENTED";
         if (!isValidStatus) {
           return null;
         }
@@ -183,15 +193,13 @@ export default function BikeScheduleDetailPage() {
     setSaveError(null);
   }, [selectedVehicle]);
 
-  const upcomingWeekDates = useMemo(() => getUpcomingWeekDates(), []);
-
   const displayMonth = useMemo(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth() + calendarMonthOffset, 1);
   }, [calendarMonthOffset]);
 
   const calendarWeeks = useMemo(
-    () => buildCalendarWeeks(displayMonth),
+    () => buildCalendarGrid(displayMonth),
     [displayMonth]
   );
 
@@ -291,7 +299,7 @@ export default function BikeScheduleDetailPage() {
       </Head>
       <DashboardLayout
         title="バイクスケジュール詳細"
-        description="直近1週間の概要とカレンダーのみで予定を更新できます。"
+        description="カレンダーを使って日毎のステータスとメモを編集し、データベースへ保存します。"
         showDashboardLink
       >
         <section className={styles.menuSection}>
@@ -315,43 +323,55 @@ export default function BikeScheduleDetailPage() {
 
               {selectedVehicle && (
                 <div className={styles.cardGrid} style={{ gap: "1rem" }}>
-                  <div className={styles.menuGroup}>
-                    <div className={styles.menuGroupTitle}>直近1週間</div>
+                  <div className={styles.menuGroup} style={{ minHeight: "100%" }}>
+                    <div className={styles.menuGroupTitle}>車両情報</div>
                     <table className={tableStyles.table}>
-                      <thead>
-                        <tr>
-                          <th>日</th>
-                          <th>ステータス</th>
-                          <th>メモ</th>
-                          <th>操作</th>
-                        </tr>
-                      </thead>
                       <tbody>
-                        {upcomingWeekDates.map((date) => {
-                          const entry = availabilityMap[date];
-                          return (
-                            <tr key={date}>
-                              <td>{date}</td>
-                              <td>{entry ? STATUS_LABELS[entry.status] : "未設定"}</td>
-                              <td>{entry?.note ?? "-"}</td>
-                              <td>
-                                <button
-                                  type="button"
-                                  className={formStyles.secondaryButton}
-                                  onClick={() => handleSelectDate(date)}
-                                >
-                                  選択
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        <tr>
+                          <th style={{ width: "140px" }}>管理番号</th>
+                          <td>{selectedVehicle.managementNumber}</td>
+                        </tr>
+                        <tr>
+                          <th>モデル</th>
+                          <td>
+                            {bikeModels.find((model) => model.modelId === selectedVehicle.modelId)?.modelName ??
+                              "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>店舗</th>
+                          <td>{getStoreLabel(selectedVehicle.storeId)}</td>
+                        </tr>
                       </tbody>
                     </table>
+                    <div className={styles.menuGroupTitle} style={{ marginTop: "1rem" }}>
+                      ステータス凡例
+                    </div>
+                    <div className={styles.menuGroupNote} style={{ display: "grid", gap: "0.4rem" }}>
+                      {(Object.keys(STATUS_LABELS) as RentalAvailabilityStatus[]).map((status) => (
+                        <div key={status} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: "12px",
+                              height: "12px",
+                              borderRadius: "9999px",
+                              backgroundColor: STATUS_COLORS[status],
+                            }}
+                          ></span>
+                          <span>{STATUS_LABELS[status]}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div className={styles.menuGroup}>
-                    <div className={styles.menuGroupTitle}>カレンダー</div>
+                    <div className={styles.buttonRow} style={{ alignItems: "center", gap: "0.5rem" }}>
+                      <div className={styles.menuGroupTitle}>カレンダー</div>
+                      <span className={styles.menuGroupNote}>
+                        休日管理と同じ6週表示のカレンダーで設定できます。日付を押して詳細を編集してください。
+                      </span>
+                    </div>
                     <div className={styles.buttonRow} style={{ alignItems: "center" }}>
                       <button
                         type="button"
@@ -382,31 +402,59 @@ export default function BikeScheduleDetailPage() {
                       <tbody>
                         {calendarWeeks.map((week, weekIndex) => (
                           <tr key={`week-${weekIndex}`}>
-                            {week.map((day, dayIndex) => {
-                              if (!day) {
-                                return <td key={`${weekIndex}-${dayIndex}`}></td>;
-                              }
-
-                              const dateKey = formatDateInput(day);
-                              const entry = availabilityMap[dateKey];
-                              const isSelected = activeDate === dateKey;
+                            {week.map((cell, dayIndex) => {
+                              const entry = availabilityMap[cell.key];
+                              const isSelected = activeDate === cell.key;
+                              const muted = !cell.isCurrentMonth;
                               return (
                                 <td
                                   key={`${weekIndex}-${dayIndex}`}
                                   style={{
                                     verticalAlign: "top",
-                                    minWidth: "120px",
+                                    minWidth: "140px",
                                     backgroundColor: isSelected ? "#f4f6fb" : undefined,
+                                    opacity: muted ? 0.6 : 1,
                                     cursor: "pointer",
+                                    borderLeft: muted ? "1px dashed #e5e7eb" : undefined,
+                                    borderRight: muted ? "1px dashed #e5e7eb" : undefined,
                                   }}
-                                  onClick={() => handleSelectDate(dateKey)}
+                                  onClick={() => handleSelectDate(cell.key)}
                                 >
-                                  <div className={styles.menuGroupTitle}>{day.getDate()}日</div>
-                                  <div className={styles.menuGroupNote}>
-                                    {entry ? STATUS_LABELS[entry.status] : "未設定"}
+                                  <div className={styles.menuGroupTitle} style={{ display: "flex", gap: "0.5rem" }}>
+                                    <span>{cell.date.getDate()}日</span>
+                                    {entry && (
+                                      <span
+                                        style={{
+                                          padding: "2px 8px",
+                                          borderRadius: "9999px",
+                                          backgroundColor: `${STATUS_COLORS[entry.status]}1a`,
+                                          color: STATUS_COLORS[entry.status],
+                                          fontSize: "0.85rem",
+                                          fontWeight: 700,
+                                        }}
+                                      >
+                                        {STATUS_LABELS[entry.status]}
+                                      </span>
+                                    )}
                                   </div>
+                                  {!entry && (
+                                    <div className={styles.menuGroupNote} style={{ marginTop: "4px" }}>
+                                      未設定
+                                    </div>
+                                  )}
                                   {entry?.note && (
-                                    <div className={styles.menuGroupNote}>{entry.note}</div>
+                                    <div
+                                      className={styles.menuGroupNote}
+                                      style={{
+                                        marginTop: "4px",
+                                        padding: "6px 8px",
+                                        borderRadius: "8px",
+                                        backgroundColor: "#f9fafb",
+                                        border: "1px solid #e5e7eb",
+                                      }}
+                                    >
+                                      {entry.note}
+                                    </div>
                                   )}
                                 </td>
                               );
@@ -416,7 +464,7 @@ export default function BikeScheduleDetailPage() {
                       </tbody>
                     </table>
                     <p className={styles.menuGroupNote}>
-                      セルを選択すると下部の入力欄に反映されます。
+                      セルを選択すると下部の入力欄に反映されます。月を跨いだ日付も同じ操作で更新できます。
                     </p>
 
                     <div className={styles.menuGroup} style={{ marginTop: "1rem" }}>
@@ -437,7 +485,7 @@ export default function BikeScheduleDetailPage() {
                             }
                           >
                             {(
-                              ["AVAILABLE", "UNAVAILABLE", "MAINTENANCE"] as RentalAvailabilityStatus[]
+                              ["AVAILABLE", "UNAVAILABLE", "MAINTENANCE", "RENTED"] as RentalAvailabilityStatus[]
                             ).map((status) => (
                               <option key={status} value={status}>
                                 {STATUS_LABELS[status]}
@@ -459,10 +507,30 @@ export default function BikeScheduleDetailPage() {
                       <div className={styles.buttonRow}>
                         <button
                           type="button"
+                          className={formStyles.secondaryButton}
+                          onClick={() => {
+                            if (!activeDate) {
+                              setFormError("日を選択してください。");
+                              return;
+                            }
+                            setAvailabilityMap((prev) => {
+                              const { [activeDate]: _, ...rest } = prev;
+                              return rest;
+                            });
+                            setActiveNote("");
+                            setActiveStatus("AVAILABLE");
+                            setSaveSuccess(null);
+                            setFormError(null);
+                          }}
+                        >
+                          未設定に戻す
+                        </button>
+                        <button
+                          type="button"
                           className={formStyles.submitButton}
                           onClick={handleApplyDate}
                         >
-                          更新
+                          ステータスを反映
                         </button>
                         <button
                           type="button"

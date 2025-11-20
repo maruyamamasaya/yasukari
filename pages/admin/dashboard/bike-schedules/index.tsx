@@ -1,91 +1,12 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import tableStyles from "../../../../styles/AdminTable.module.css";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
-import {
-  RentalAvailabilityDay,
-  RentalAvailabilityMap,
-  RentalAvailabilityStatus,
-  Vehicle,
-  BikeModel,
-} from "../../../../lib/dashboard/types";
+import { Vehicle, BikeModel } from "../../../../lib/dashboard/types";
 import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
-
-const STATUS_LABELS: Record<RentalAvailabilityStatus, string> = {
-  AVAILABLE: "レンタル可",
-  UNAVAILABLE: "貸出不可",
-  MAINTENANCE: "メンテナンス",
-};
-
-const formatDateInput = (date: Date) => date.toISOString().split("T")[0];
-
-const getUpcomingWeekDates = () => {
-  const today = new Date();
-  return Array.from({ length: 7 }, (_, offset) => {
-    const nextDate = new Date(today);
-    nextDate.setDate(today.getDate() + offset);
-    return formatDateInput(nextDate);
-  });
-};
-
-const normalizeAvailabilityMap = (value: unknown): RentalAvailabilityMap => {
-  if (typeof value !== "object" || value === null) {
-    return {};
-  }
-
-  return Object.entries(value as Record<string, unknown>).reduce<RentalAvailabilityMap>(
-    (acc, [date, raw]) => {
-      if (typeof date !== "string") {
-        return acc;
-      }
-
-      const normalizedEntry = (() => {
-        if (Array.isArray(raw)) {
-          if (raw.length === 0) {
-            return null;
-          }
-
-          const [firstSlot] = raw as Record<string, unknown>[];
-          const noteCandidate =
-            typeof firstSlot?.note === "string" && firstSlot.note.trim().length > 0
-              ? firstSlot.note.trim()
-              : undefined;
-
-          return {
-            status: "AVAILABLE",
-            ...(noteCandidate ? { note: noteCandidate } : {}),
-          } satisfies RentalAvailabilityDay;
-        }
-
-        if (typeof raw !== "object" || raw === null) {
-          return null;
-        }
-
-        const { status, note } = raw as Record<string, unknown>;
-        const isValidStatus =
-          status === "AVAILABLE" || status === "UNAVAILABLE" || status === "MAINTENANCE";
-        if (!isValidStatus) {
-          return null;
-        }
-
-        const trimmedNote =
-          typeof note === "string" && note.trim().length > 0 ? note.trim() : undefined;
-
-        return { status, ...(trimmedNote ? { note: trimmedNote } : {}) } satisfies RentalAvailabilityDay;
-      })();
-
-      if (normalizedEntry) {
-        acc[date] = normalizedEntry;
-      }
-
-      return acc;
-    },
-    {}
-  );
-};
 
 export default function BikeScheduleManagementPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -121,8 +42,6 @@ export default function BikeScheduleManagementPage() {
     void fetchVehicles();
   }, []);
 
-  const upcomingWeekDates = useMemo(() => getUpcomingWeekDates(), []);
-
   return (
     <>
       <Head>
@@ -130,7 +49,7 @@ export default function BikeScheduleManagementPage() {
       </Head>
       <DashboardLayout
         title="バイクスケジュール管理"
-        description="車両ごとにレンタル可能日をカレンダー形式で管理します。"
+        description="車両ごとのスケジュールをカレンダーから直接更新できます。"
         showDashboardLink
       >
         <section className={styles.menuSection}>
@@ -139,17 +58,16 @@ export default function BikeScheduleManagementPage() {
               {loadError && <p className={styles.menuGroupNote}>{loadError}</p>}
               <div className={styles.menuGroupTitle}>車両別スケジュール</div>
               <p className={styles.menuGroupNote}>
-                直近1週間のステータスを一覧で確認し、詳細カレンダーを別ページで開けます。
+                各車両のスケジュールを詳細カレンダーで管理します。ボタンを押して日別の
+                ステータスとメモを設定してください。
               </p>
               <table className={tableStyles.table}>
                 <thead>
                   <tr>
                     <th>ID</th>
                     <th>車両名</th>
-                    {upcomingWeekDates.map((date) => (
-                      <th key={date}>{date.split("-")[2]}日</th>
-                    ))}
-                    <th>詳細カレンダー</th>
+                    <th>店舗</th>
+                    <th>スケジュール設定</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -157,22 +75,11 @@ export default function BikeScheduleManagementPage() {
                     const modelName =
                       bikeModels.find((model) => model.modelId === vehicle.modelId)?.modelName ??
                       "-";
-                    const map = normalizeAvailabilityMap(vehicle.rentalAvailability);
                     return (
                       <tr key={vehicle.managementNumber}>
                         <td>{vehicle.managementNumber}</td>
-                        <td>
-                          <div>{modelName}</div>
-                          <div className={styles.menuGroupNote}>{getStoreLabel(vehicle.storeId)}</div>
-                        </td>
-                        {upcomingWeekDates.map((date) => {
-                          const entry = map[date];
-                          return (
-                            <td key={`${vehicle.managementNumber}-${date}`}>
-                              {entry ? STATUS_LABELS[entry.status] : "-"}
-                            </td>
-                          );
-                        })}
+                        <td>{modelName}</td>
+                        <td>{getStoreLabel(vehicle.storeId)}</td>
                         <td>
                           <Link
                             href={`/admin/dashboard/bike-schedules/${vehicle.managementNumber}`}
