@@ -35,8 +35,8 @@ export async function readHolidayRecords(): Promise<HolidayRecord[]> {
       return [];
     }
 
-    return parsed
-      .map((item) => {
+    return (parsed as unknown[])
+      .map<HolidayRecord | null>((item) => {
         if (typeof item !== "object" || item === null) {
           return null;
         }
