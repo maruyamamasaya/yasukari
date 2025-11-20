@@ -12,9 +12,13 @@ from jose import jwt
 
 load_dotenv()
 
+FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY")
+if not FLASK_SECRET_KEY:
+    raise RuntimeError("FLASK_SECRET_KEY environment variable must be set.")
+
 app = Flask(__name__)
 app.config.update(
-    SECRET_KEY=os.environ.get("FLASK_SECRET_KEY", "change-me"),
+    SECRET_KEY=FLASK_SECRET_KEY,
     SESSION_COOKIE_NAME="yasukari_session",
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
@@ -81,10 +85,16 @@ def get_jwks() -> Dict[str, Any]:
 
 def verify_id_token(id_token: str) -> Dict[str, Any]:
     jwks = get_jwks()
+    header = jwt.get_unverified_header(id_token)
+    kid = header.get("kid")
+    keys = jwks.get("keys", [])
+    matching_key = next((key for key in keys if key.get("kid") == kid), None)
+    if not matching_key:
+        raise TokenVerificationError("No matching JWK found for token")
     try:
         claims = jwt.decode(
             id_token,
-            jwks,
+            matching_key,
             algorithms=["RS256"],
             audience=COGNITO_CLIENT_ID,
             issuer=ISSUER,
