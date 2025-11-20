@@ -1,58 +1,50 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function LoginPage() {
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [error, setError] = useState('');
+  const apiBase = (process.env.NEXT_PUBLIC_API_ORIGIN ?? '').replace(/\/$/, '');
+  const loginHref = `${apiBase}/auth/login`;
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!identifier.trim()) {
-      setError('メールアドレスを入力してください。');
-      return;
-    }
-    if (!password.trim()) {
-      setError('パスワードを入力してください。');
-      return;
-    }
+  useEffect(() => {
+    const controller = new AbortController();
+    const checkSession = async () => {
+      try {
+        const response = await fetch(`${apiBase}/api/me`, {
+          credentials: 'include',
+          signal: controller.signal,
+        });
 
-    setError('');
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, password }),
-      });
-
-      if (!response.ok) {
-        let message = 'ログインに失敗しました。内容をご確認ください。';
-        try {
-          const data = (await response.json()) as { message?: string };
-          if (typeof data?.message === 'string' && data.message.trim().length > 0) {
-            message = data.message;
-          }
-        } catch (jsonError) {
-          void jsonError;
+        if (response.ok) {
+          await router.replace('/mypage');
+          return;
         }
-        setError(message);
-        return;
-      }
 
-      await router.push('/mypage');
-    } catch (fetchError) {
-      console.error(fetchError);
-      setError('ネットワークエラーが発生しました。時間をおいて再度お試しください。');
-    } finally {
-      setIsSubmitting(false);
-    }
+        if (response.status !== 401) {
+          throw new Error('unexpected status');
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          console.error(err);
+          setError('ログイン状態の確認に失敗しました。時間をおいて再度お試しください。');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCheckingSession(false);
+        }
+      }
+    };
+
+    void checkSession();
+    return () => controller.abort();
+  }, [apiBase, router]);
+
+  const handleLogin = () => {
+    window.location.href = loginHref;
   };
 
   return (
@@ -82,18 +74,14 @@ export default function LoginPage() {
                 会員ならではの限定キャンペーンもこちらでお知らせしています。
               </p>
               <ul className="mt-4 space-y-3 text-sm text-gray-700">
-                {[{
-                  text: '最新のレンタル状況と履歴をいつでもチェック'
-                }, {
-                  text: 'オンラインで延長・オプション追加が完結'
-                }, {
-                  text: '会員限定クーポンや新着車両をいち早くご案内'
-                }].map((item) => (
-                  <li key={item.text} className="flex items-start gap-3">
-                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-red-500" aria-hidden="true" />
-                    <span>{item.text}</span>
-                  </li>
-                ))}
+                {[{ text: '最新のレンタル状況と履歴をいつでもチェック' }, { text: 'オンラインで延長・オプション追加が完結' }, { text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
+                  (item) => (
+                    <li key={item.text} className="flex items-start gap-3">
+                      <span className="mt-1 h-2.5 w-2.5 rounded-full bg-red-500" aria-hidden="true" />
+                      <span>{item.text}</span>
+                    </li>
+                  )
+                )}
               </ul>
               <div className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
                 <p className="font-semibold">はじめての方へ</p>
@@ -109,83 +97,27 @@ export default function LoginPage() {
 
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="mb-6 space-y-2 text-center">
-                <h2 className="text-xl font-semibold text-gray-900">ログイン</h2>
-                <p className="text-xs text-gray-500">ご登録のメールアドレスとパスワードを入力してください。</p>
+                <h2 className="text-xl font-semibold text-gray-900">Cognito でログイン</h2>
+                <p className="text-xs text-gray-500">Amazon Cognito Hosted UI にリダイレクトします。</p>
               </div>
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-400 cursor-not-allowed bg-gray-50"
-                  disabled
-                >
-                  Google でログイン
-                </button>
-              </div>
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <span className="w-full border-t border-gray-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-3 text-gray-400">または</span>
-                </div>
-              </div>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {error && (
-                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-                )}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700" htmlFor="identifier">
-                    ユーザー名またはメールアドレス
-                  </label>
-                  <input
-                    id="identifier"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                    placeholder="メールアドレスを入力"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700" htmlFor="password">
-                    パスワード
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                    placeholder="パスワードを入力"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'ログイン中…' : 'メールアドレスでログイン'}
-                </button>
-              </form>
-              <div className="mt-8 rounded-xl bg-gray-50 p-4 text-left">
-                <h3 className="text-sm font-semibold text-gray-900">Googleログイン（準備中）</h3>
-                <p className="mt-2 text-xs leading-relaxed text-gray-600">
-                  現在、Googleアカウントによるログイン機能を構築中です。正式な連携が完了次第、Googleアカウントの選択画面からワンタップでログインできるようになります。
-                </p>
-                <ul className="mt-3 space-y-2 text-xs text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
-                    <span>Googleでの認証後に自動的にマイページへ遷移</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
-                    <span>メールアドレスとパスワードの入力は不要</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
-                    <span>正式リリースまで今しばらくお待ちください</span>
-                  </li>
-                </ul>
+              {error ? (
+                <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleLogin}
+                className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={checkingSession}
+              >
+                {checkingSession ? 'ログイン状態を確認中…' : 'ログイン画面へ進む'}
+              </button>
+              <div className="mt-6 rounded-xl bg-gray-50 p-4 text-left text-xs leading-relaxed text-gray-600">
+                <p className="font-semibold text-gray-900">ログインの流れ</p>
+                <ol className="mt-2 list-decimal space-y-1 pl-4">
+                  <li>「ログイン画面へ進む」ボタンを押して Cognito のログイン画面へ</li>
+                  <li>認証後は {process.env.NEXT_PUBLIC_SITE_NAME ?? 'マイページ'} にリダイレクト</li>
+                  <li>ログイン状態はサーバー側セッションで管理されます</li>
+                </ol>
               </div>
               <p className="mt-6 text-center text-xs text-gray-500">
                 アカウントをお持ちでない方は
