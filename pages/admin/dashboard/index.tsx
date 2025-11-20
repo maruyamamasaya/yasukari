@@ -70,6 +70,10 @@ const couponManagementLinks: MenuLink[] = [
       { label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/coupon-rules/register` },
     ],
   },
+  {
+    label: "メルマガ配信設定",
+    href: `${ADMIN_DASHBOARD_ROOT}/newsletter-settings`,
+  },
 ];
 
 const menuSections: MenuSection[] = [

@@ -1,0 +1,49 @@
+.metaList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(59, 130, 246, 0.08);
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.previewGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.previewFrame {
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.05);
+}
+
+.previewHint {
+  font-size: 0.9rem;
+  color: rgba(71, 85, 105, 0.82);
+  line-height: 1.6;
+}
+
+.emptyPreview {
+  display: grid;
+  place-items: center;
+  height: 360px;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, rgba(226, 232, 240, 0.35), rgba(241, 245, 249, 0.6));
+  color: rgba(71, 85, 105, 0.95);
+  font-weight: 600;
+}
