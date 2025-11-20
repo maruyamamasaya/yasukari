@@ -1,10 +1,15 @@
 export type Holiday = {
   date: string;
+  isHoliday: boolean;
+  store: string;
   note?: string;
 };
 
-export async function fetchMonthlyHolidays(month: string): Promise<Holiday[]> {
-  const response = await fetch(`/api/calendar?month=${month}`);
+export async function fetchMonthlyHolidays(
+  month: string,
+  store: string
+): Promise<Holiday[]> {
+  const response = await fetch(`/api/calendar?month=${month}&store=${store}`);
   if (!response.ok) {
     throw new Error("Failed to fetch holiday calendar");
   }
@@ -12,13 +17,18 @@ export async function fetchMonthlyHolidays(month: string): Promise<Holiday[]> {
   return data.holidays;
 }
 
-export async function setHoliday(date: string, note = ""): Promise<void> {
-  const response = await fetch(`/api/calendar/${date}`, {
+export async function setHoliday(
+  date: string,
+  store: string,
+  isHoliday: boolean,
+  note = ""
+): Promise<void> {
+  const response = await fetch(`/api/calendar/${date}?store=${store}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ is_holiday: true, note }),
+    body: JSON.stringify({ is_holiday: isHoliday, note }),
   });
 
   if (!response.ok) {
@@ -26,8 +36,8 @@ export async function setHoliday(date: string, note = ""): Promise<void> {
   }
 }
 
-export async function deleteHoliday(date: string): Promise<void> {
-  const response = await fetch(`/api/calendar/${date}`, {
+export async function deleteHoliday(date: string, store: string): Promise<void> {
+  const response = await fetch(`/api/calendar/${date}?store=${store}`, {
     method: "DELETE",
   });
 

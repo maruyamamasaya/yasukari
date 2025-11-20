@@ -4,6 +4,34 @@
   gap: clamp(1.5rem, 3vw, 2.5rem);
 }
 
+.storeSection {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 1.25rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+}
+
+.storeHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.storeTitle {
+  font-size: clamp(1.1rem, 1vw + 1rem, 1.5rem);
+  font-weight: 800;
+  color: rgba(15, 23, 42, 0.95);
+}
+
+.storeLead {
+  color: rgba(71, 85, 105, 0.9);
+  font-size: 0.95rem;
+}
+
 .calendarCard {
   background: #ffffff;
   border-radius: 1rem;
@@ -277,6 +305,11 @@
 .noteModal button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.noteMeta {
+  font-size: 0.85rem;
+  color: rgba(100, 116, 139, 0.9);
 }
 
 @media (max-width: 768px) {
