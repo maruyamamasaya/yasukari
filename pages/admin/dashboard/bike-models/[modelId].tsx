@@ -327,8 +327,8 @@ export default function BikeModelDetailPage() {
                       >
                         <option value="">免許を選択</option>
                         {REQUIRED_LICENSE_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
+                          <option key={option} value={option}>
+                            {option}
                           </option>
                         ))}
                       </select>
