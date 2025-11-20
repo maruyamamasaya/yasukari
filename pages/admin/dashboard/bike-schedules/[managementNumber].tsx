@@ -1,7 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import type { MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import tableStyles from "../../../../styles/AdminTable.module.css";
 import formStyles from "../../../../styles/AdminForm.module.css";
@@ -40,6 +41,12 @@ type CalendarCell = {
   date: Date;
   key: string;
   isCurrentMonth: boolean;
+};
+
+type StatusEditorState = {
+  date: string;
+  x: number;
+  y: number;
 };
 
 const buildCalendarGrid = (month: Date): CalendarCell[][] => {
@@ -143,6 +150,10 @@ export default function BikeScheduleDetailPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
+  const [statusEditor, setStatusEditor] = useState<StatusEditorState | null>(null);
+
+  const calendarWrapperRef = useRef<HTMLDivElement | null>(null);
+  const statusEditorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!managementNumber) {
@@ -187,16 +198,17 @@ export default function BikeScheduleDetailPage() {
   useEffect(() => {
     if (selectedVehicle) {
       const normalized = normalizeAvailabilityMap(selectedVehicle.rentalAvailability);
-      setAvailabilityMap(normalized);
-    } else {
-      setAvailabilityMap({});
-    }
-    setActiveDate(null);
-    setActiveNote("");
-    setActiveStatus("AVAILABLE");
-    setSaveSuccess(null);
-    setSaveError(null);
-  }, [selectedVehicle]);
+    setAvailabilityMap(normalized);
+  } else {
+    setAvailabilityMap({});
+  }
+  setActiveDate(null);
+  setActiveNote("");
+  setActiveStatus("AVAILABLE");
+  setStatusEditor(null);
+  setSaveSuccess(null);
+  setSaveError(null);
+}, [selectedVehicle]);
 
   const displayMonth = useMemo(() => {
     const today = new Date();
@@ -215,6 +227,40 @@ export default function BikeScheduleDetailPage() {
     setActiveNote(entry?.note ?? "");
     setFormError(null);
   };
+
+  const handleOpenStatusEditor = (cell: CalendarCell, event: MouseEvent<HTMLTableCellElement>) => {
+    event.stopPropagation();
+    handleSelectDate(cell.key);
+
+    if (!calendarWrapperRef.current) {
+      setStatusEditor({ date: cell.key, x: event.clientX, y: event.clientY });
+      return;
+    }
+
+    const containerRect = calendarWrapperRef.current.getBoundingClientRect();
+    const targetRect = event.currentTarget.getBoundingClientRect();
+    setStatusEditor({
+      date: cell.key,
+      x: targetRect.left - containerRect.left + targetRect.width / 2,
+      y: targetRect.top - containerRect.top + targetRect.height + 8,
+    });
+  };
+
+  useEffect(() => {
+    const closeEditor = (event: MouseEvent) => {
+      if (
+        statusEditorRef.current &&
+        !statusEditorRef.current.contains(event.target as Node)
+      ) {
+        setStatusEditor(null);
+      }
+    };
+
+    document.addEventListener("click", closeEditor);
+    return () => {
+      document.removeEventListener("click", closeEditor);
+    };
+  }, []);
 
   const handleApplyDate = () => {
     if (!selectedVehicle) {
@@ -237,6 +283,24 @@ export default function BikeScheduleDetailPage() {
     }));
     setFormError(null);
     setSaveSuccess(null);
+    setStatusEditor(null);
+  };
+
+  const handleResetDate = () => {
+    if (!activeDate) {
+      setFormError("日を選択してください。");
+      return;
+    }
+
+    setAvailabilityMap((prev) => {
+      const { [activeDate]: _, ...rest } = prev;
+      return rest;
+    });
+    setActiveNote("");
+    setActiveStatus("AVAILABLE");
+    setSaveSuccess(null);
+    setFormError(null);
+    setStatusEditor(null);
   };
 
   const handleSave = async () => {
@@ -327,8 +391,8 @@ export default function BikeScheduleDetailPage() {
               )}
 
               {selectedVehicle && (
-                <div className={styles.cardGrid} style={{ gap: "1rem" }}>
-                  <div className={styles.menuGroup} style={{ minHeight: "100%" }}>
+                <>
+                  <div className={styles.menuGroup}>
                     <div className={styles.menuGroupTitle}>車両情報</div>
                     <table className={tableStyles.table}>
                       <tbody>
@@ -339,8 +403,7 @@ export default function BikeScheduleDetailPage() {
                         <tr>
                           <th>モデル</th>
                           <td>
-                            {bikeModels.find((model) => model.modelId === selectedVehicle.modelId)?.modelName ??
-                              "-"}
+                            {bikeModels.find((model) => model.modelId === selectedVehicle.modelId)?.modelName ?? "-"}
                           </td>
                         </tr>
                         <tr>
@@ -349,171 +412,203 @@ export default function BikeScheduleDetailPage() {
                         </tr>
                       </tbody>
                     </table>
-                    <div className={styles.menuGroupTitle} style={{ marginTop: "1rem" }}>
-                      ステータス凡例
-                    </div>
-                    <div className={styles.menuGroupNote} style={{ display: "grid", gap: "0.4rem" }}>
-                      {(Object.keys(STATUS_LABELS) as RentalAvailabilityStatus[]).map((status) => (
-                        <div key={status} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                          <span
-                            style={{
-                              display: "inline-block",
-                              width: "12px",
-                              height: "12px",
-                              borderRadius: "9999px",
-                              backgroundColor: STATUS_COLORS[status],
-                            }}
-                          ></span>
-                          <span>{STATUS_LABELS[status]}</span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
 
-                  <div className={styles.menuGroup}>
-                    <div className={styles.calendarHeader}>
-                      <div>
-                        <div className={styles.menuGroupTitle}>カレンダー</div>
-                        <p className={styles.menuGroupNote}>日付を押して詳細を編集してください。</p>
-                      </div>
-                      <div className={styles.calendarControls}>
-                        <button
-                          type="button"
-                          className={formStyles.secondaryButton}
-                          onClick={() => setCalendarMonthOffset((prev) => prev - 1)}
-                        >
-                          前月
-                        </button>
-                        <div className={styles.calendarMonthLabel}>
-                          {displayMonth.getFullYear()}年{displayMonth.getMonth() + 1}月
+                  <div className={styles.cardGrid} style={{ gap: "1.25rem" }}>
+                    <div className={styles.menuGroup} style={{ minHeight: "100%" }}>
+                      <div className={styles.calendarHeader}>
+                        <div>
+                          <div className={styles.menuGroupTitle}>カレンダー</div>
+                          <div className={styles.menuGroupNote}>日付の枠をクリックしてステータスとメモを設定してください。</div>
                         </div>
-                        <button
-                          type="button"
-                          className={formStyles.secondaryButton}
-                          onClick={() => setCalendarMonthOffset((prev) => prev + 1)}
-                        >
-                          翌月
-                        </button>
+                        <div className={styles.calendarControls}>
+                          <button
+                            type="button"
+                            className={formStyles.secondaryButton}
+                            onClick={() => {
+                              setStatusEditor(null);
+                              setCalendarMonthOffset((prev) => prev - 1);
+                            }}
+                          >
+                            前の月
+                          </button>
+                          <div className={styles.calendarMonthLabel}>
+                            {displayMonth.getFullYear()}年{displayMonth.getMonth() + 1}月
+                          </div>
+                          <button
+                            type="button"
+                            className={formStyles.secondaryButton}
+                            onClick={() => {
+                              setStatusEditor(null);
+                              setCalendarMonthOffset((prev) => prev + 1);
+                            }}
+                          >
+                            次の月
+                          </button>
+                        </div>
+                      </div>
+                      <div className={`${styles.calendarCard} ${styles.calendarCardRaised}`} ref={calendarWrapperRef}>
+                        <table className={styles.calendarTable}>
+                          <thead>
+                            <tr>
+                              {"日月火水木金土".split("").map((weekday) => (
+                                <th key={weekday}>{weekday}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {calendarWeeks.map((week, weekIndex) => (
+                              <tr key={`week-${weekIndex}`}>
+                                {week.map((cell, dayIndex) => {
+                                  const entry = availabilityMap[cell.key];
+                                  const isSelected = activeDate === cell.key;
+                                  const muted = !cell.isCurrentMonth;
+                                  return (
+                                    <td
+                                      key={`${weekIndex}-${dayIndex}`}
+                                      className={`${styles.calendarCell} ${muted ? styles.calendarCellMuted : ""} ${
+                                        isSelected ? styles.calendarCellSelected : ""
+                                      }`}
+                                      onClick={(event) => handleOpenStatusEditor(cell, event)}
+                                    >
+                                      <div className={styles.calendarCellHeader}>
+                                        <span className={styles.calendarDateLabel}>{cell.date.getDate()}日</span>
+                                        {entry && (
+                                          <span
+                                            className={styles.calendarStatusChip}
+                                            style={{
+                                              backgroundColor: `${STATUS_COLORS[entry.status]}1a`,
+                                              color: STATUS_COLORS[entry.status],
+                                            }}
+                                          >
+                                            {STATUS_LABELS[entry.status]}
+                                          </span>
+                                        )}
+                                      </div>
+                                      {!entry && <div className={styles.calendarEmpty}>未設定</div>}
+                                      {entry?.note && <div className={styles.calendarNote}>{entry.note}</div>}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        {statusEditor && (
+                          <div
+                            className={styles.calendarStatusEditor}
+                            style={{ left: statusEditor.x, top: statusEditor.y }}
+                            ref={statusEditorRef}
+                          >
+                            <div className={styles.calendarStatusEditorHeader}>
+                              <div>
+                                <div className={styles.menuGroupNote}>対象日</div>
+                                <div className={styles.calendarStatusEditorDate}>{statusEditor.date}</div>
+                              </div>
+                              <button
+                                type="button"
+                                className={styles.iconButton}
+                                onClick={() => setStatusEditor(null)}
+                                aria-label="ポップアップを閉じる"
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <div className={styles.calendarStatusEditorBody}>
+                              <label className={styles.calendarStatusEditorLabel}>
+                                ステータス
+                                <select
+                                  className={formStyles.formSelect}
+                                  value={activeStatus}
+                                  onChange={(event) =>
+                                    setActiveStatus(event.target.value as RentalAvailabilityStatus)
+                                  }
+                                >
+                                  {(
+                                    ["AVAILABLE", "UNAVAILABLE", "MAINTENANCE", "RENTED"] as RentalAvailabilityStatus[]
+                                  ).map((status) => (
+                                    <option key={status} value={status}>
+                                      {STATUS_LABELS[status]}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <label className={styles.calendarStatusEditorLabel}>
+                                メモ
+                                <input
+                                  type="text"
+                                  className={formStyles.formInput}
+                                  value={activeNote}
+                                  onChange={(event) => setActiveNote(event.target.value)}
+                                  placeholder="任意で入力"
+                                />
+                              </label>
+                              <div className={styles.calendarStatusEditorActions}>
+                                <button
+                                  type="button"
+                                  className={formStyles.secondaryButton}
+                                  onClick={handleResetDate}
+                                >
+                                  未設定に戻す
+                                </button>
+                                <button
+                                  type="button"
+                                  className={formStyles.submitButton}
+                                  onClick={handleApplyDate}
+                                >
+                                  ステータスを反映
+                                </button>
+                              </div>
+                            </div>
+                            {formError && <p className={formStyles.formError}>{formError}</p>}
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles.statusLegend}>
+                        <div className={styles.menuGroupTitle}>ステータス凡例</div>
+                        <div className={styles.statusLegendGrid}>
+                          {(Object.keys(STATUS_LABELS) as RentalAvailabilityStatus[]).map((status) => (
+                            <div key={status} className={styles.statusLegendItem}>
+                              <span
+                                className={styles.statusLegendDot}
+                                style={{ backgroundColor: STATUS_COLORS[status] }}
+                              />
+                              <div>
+                                <div className={styles.statusLegendLabel}>{STATUS_LABELS[status]}</div>
+                                <div className={styles.menuGroupNote}>コード: {status}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    <div className={styles.calendarCard}>
-                      <table className={styles.calendarTable}>
-                        <thead>
-                          <tr>
-                            {"日月火水木金土".split("").map((weekday) => (
-                              <th key={weekday}>{weekday}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {calendarWeeks.map((week, weekIndex) => (
-                            <tr key={`week-${weekIndex}`}>
-                              {week.map((cell, dayIndex) => {
-                                const entry = availabilityMap[cell.key];
-                                const isSelected = activeDate === cell.key;
-                                const muted = !cell.isCurrentMonth;
-                                return (
-                                  <td
-                                    key={`${weekIndex}-${dayIndex}`}
-                                    className={`${styles.calendarCell} ${muted ? styles.calendarCellMuted : ""} ${
-                                      isSelected ? styles.calendarCellSelected : ""
-                                    }`}
-                                    onClick={() => handleSelectDate(cell.key)}
-                                  >
-                                    <div className={styles.calendarCellHeader}>
-                                      <span className={styles.calendarDateLabel}>{cell.date.getDate()}日</span>
-                                      {entry && (
-                                        <span
-                                          className={styles.calendarStatusChip}
-                                          style={{
-                                            backgroundColor: `${STATUS_COLORS[entry.status]}1a`,
-                                            color: STATUS_COLORS[entry.status],
-                                          }}
-                                        >
-                                          {STATUS_LABELS[entry.status]}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {!entry && <div className={styles.calendarEmpty}>未設定</div>}
-                                    {entry?.note && (
-                                      <div className={styles.calendarNote}>{entry.note}</div>
-                                    )}
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className={styles.menuGroup} style={{ minHeight: "100%" }}>
+                      <div className={styles.menuGroupTitle}>ステータスの保存</div>
                       <p className={styles.menuGroupNote}>
-                        セルを選択すると下部の入力欄に反映されます。月を跨いだ日付も同じ操作で更新できます。
+                        カレンダーで設定したステータスとメモを保存すると、データベースに反映されます。
                       </p>
-                    </div>
-
-                    <div className={styles.menuGroup} style={{ marginTop: "1rem" }}>
-                      <div className={styles.menuGroupTitle}>ステータス更新</div>
                       {formError && <p className={formStyles.formError}>{formError}</p>}
                       <div className={formStyles.formGrid}>
                         <div className={formStyles.formRow}>
-                          <div className={formStyles.formLabel}>対象日</div>
-                          <div className={styles.menuGroupNote}>{activeDate ?? "未選択"}</div>
-                        </div>
-                        <div className={formStyles.formRow}>
-                          <div className={formStyles.formLabel}>ステータス</div>
-                          <select
-                            className={formStyles.formSelect}
-                            value={activeStatus}
-                            onChange={(event) =>
-                              setActiveStatus(event.target.value as RentalAvailabilityStatus)
-                            }
-                          >
-                            {(
-                              ["AVAILABLE", "UNAVAILABLE", "MAINTENANCE", "RENTED"] as RentalAvailabilityStatus[]
-                            ).map((status) => (
-                              <option key={status} value={status}>
-                                {STATUS_LABELS[status]}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className={formStyles.formRow}>
-                          <div className={formStyles.formLabel}>メモ</div>
-                          <input
-                            type="text"
-                            className={formStyles.formInput}
-                            value={activeNote}
-                            onChange={(event) => setActiveNote(event.target.value)}
-                            placeholder="任意で入力"
-                          />
+                          <div className={formStyles.formLabel}>現在の選択</div>
+                          <div>
+                            <div className={styles.menuGroupNote}>{activeDate ?? "未選択"}</div>
+                            {activeDate && (
+                              <div className={styles.menuGroupNote}>
+                                {STATUS_LABELS[activeStatus]}
+                                {activeNote ? ` / ${activeNote}` : ""}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className={styles.buttonRow}>
                         <button
                           type="button"
                           className={formStyles.secondaryButton}
-                          onClick={() => {
-                            if (!activeDate) {
-                              setFormError("日を選択してください。");
-                              return;
-                            }
-                            setAvailabilityMap((prev) => {
-                              const { [activeDate]: _, ...rest } = prev;
-                              return rest;
-                            });
-                            setActiveNote("");
-                            setActiveStatus("AVAILABLE");
-                            setSaveSuccess(null);
-                            setFormError(null);
-                          }}
+                          onClick={handleResetDate}
                         >
                           未設定に戻す
-                        </button>
-                        <button
-                          type="button"
-                          className={formStyles.submitButton}
-                          onClick={handleApplyDate}
-                        >
-                          ステータスを反映
                         </button>
                         <button
                           type="button"
@@ -521,14 +616,14 @@ export default function BikeScheduleDetailPage() {
                           onClick={handleSave}
                           disabled={isSaving}
                         >
-                          {isSaving ? "保存中..." : "データベースへ保存"}
+                          {isSaving ? "保存中..." : "保存"}
                         </button>
                       </div>
                       {saveError && <p className={formStyles.formError}>{saveError}</p>}
                       {saveSuccess && <p className={formStyles.formSuccess}>{saveSuccess}</p>}
                     </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
           </div>
