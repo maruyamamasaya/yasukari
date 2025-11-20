@@ -444,6 +444,49 @@ export default function VehicleListPage() {
   const isDeleteDisabled =
     selectedVehicleCount === 0 || !deleteConfirmationChecked || isDeleting;
 
+  const createCsvCell = (value: string | number | null | undefined) => {
+    const textValue = value ?? "";
+    const escapedValue = String(textValue).replace(/"/g, '""');
+    return /[",\n]/.test(escapedValue)
+      ? `"${escapedValue}"`
+      : escapedValue;
+  };
+
+  const handleDownloadCsv = () => {
+    const headers = [
+      "管理番号",
+      "クラス",
+      "車種名",
+      "店舗",
+      "車検有効期限",
+      "自賠責保険有効期限",
+      "掲載状態",
+    ];
+    const rows = filteredVehicles.map((vehicle) => [
+      vehicle.managementNumber,
+      getClassNameByModelId(vehicle.modelId),
+      modelNameMap[vehicle.modelId] ?? "",
+      getStoreLabel(vehicle.storeId),
+      vehicle.inspectionExpiryDate ?? "",
+      vehicle.liabilityInsuranceExpiryDate ?? "",
+      vehicle.publishStatus ?? "",
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map(createCsvCell).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "vehicles.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <Head>
@@ -538,6 +581,18 @@ export default function VehicleListPage() {
                   onClick={handleDeleteSelectedVehicles}
                 >
                   車両削除
+                </button>
+              </div>
+              <div
+                className={styles.tableToolbarGroup}
+                style={{ marginLeft: "auto" }}
+              >
+                <button
+                  type="button"
+                  className={styles.tableToolbarButton}
+                  onClick={handleDownloadCsv}
+                >
+                  CSVダウンロード
                 </button>
               </div>
             </div>
