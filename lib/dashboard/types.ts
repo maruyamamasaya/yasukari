@@ -17,6 +17,14 @@ export type Accessory = {
   updated_at: string;
 };
 
+export type RentalAvailabilitySlot = {
+  startTime: string;
+  endTime: string;
+  note?: string;
+};
+
+export type RentalAvailabilityMap = Record<string, RentalAvailabilitySlot[]>;
+
 export type CouponRule = {
   coupon_code: string;
   title: string;
@@ -69,6 +77,7 @@ export type Vehicle = {
   storeId: string;
   publishStatus: PublishStatus;
   tags: string[];
+  rentalAvailability?: RentalAvailabilityMap;
   policyNumber1?: string;
   policyBranchNumber1?: string;
   policyNumber2?: string;

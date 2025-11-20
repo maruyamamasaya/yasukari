@@ -13,6 +13,7 @@ type Vehicle = {
   storeId: string;
   publishStatus: "ON" | "OFF";
   tags: string[];
+  rentalAvailability?: RentalAvailabilityMap;
   policyNumber1?: string;
   policyBranchNumber1?: string;
   policyNumber2?: string;
@@ -27,8 +28,85 @@ type Vehicle = {
   updatedAt: string;
 };
 
+type RentalAvailabilitySlot = {
+  startTime: string;
+  endTime: string;
+  note?: string;
+};
+
+type RentalAvailabilityMap = Record<string, RentalAvailabilitySlot[]>;
+
 const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
 const MODELS_TABLE = process.env.BIKE_MODELS_TABLE ?? "BikeModels";
+
+const normalizeRentalAvailability = (
+  value: unknown
+): RentalAvailabilityMap | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return undefined;
+  }
+
+  const recordEntries = Object.entries(value as Record<string, unknown>);
+
+  const normalizedEntries = recordEntries
+    .map(([date, slots]): [string, RentalAvailabilitySlot[]] | null => {
+      if (typeof date !== "string") {
+        return null;
+      }
+
+      if (!Array.isArray(slots)) {
+        return null;
+      }
+
+      const normalizedSlots = slots
+        .map((slot) => {
+          if (typeof slot !== "object" || slot === null) {
+            return null;
+          }
+
+          const { startTime, endTime, note } = slot as Record<string, unknown>;
+
+          if (typeof startTime !== "string" || typeof endTime !== "string") {
+            return null;
+          }
+
+          const trimmedStart = startTime.trim();
+          const trimmedEnd = endTime.trim();
+
+          if (!trimmedStart || !trimmedEnd) {
+            return null;
+          }
+
+          const trimmedNote =
+            typeof note === "string" && note.trim().length > 0
+              ? note.trim()
+              : undefined;
+
+          return {
+            startTime: trimmedStart,
+            endTime: trimmedEnd,
+            ...(trimmedNote ? { note: trimmedNote } : {}),
+          } satisfies RentalAvailabilitySlot;
+        })
+        .filter((slot): slot is RentalAvailabilitySlot => slot !== null);
+
+      if (normalizedSlots.length === 0) {
+        return null;
+      }
+
+      return [date, normalizedSlots];
+    })
+    .filter((entry): entry is [string, RentalAvailabilitySlot[]] => entry !== null);
+
+  return normalizedEntries.reduce<RentalAvailabilityMap>((acc, [date, slots]) => {
+    acc[date] = slots;
+    return acc;
+  }, {});
+};
 
 async function handleGet(response: NextApiResponse<Vehicle[] | { message: string }>) {
   try {
@@ -53,6 +131,7 @@ async function handlePost(
     storeId,
     publishStatus,
     tags,
+    rentalAvailability,
     policyNumber1,
     policyBranchNumber1,
     policyNumber2,
@@ -91,6 +170,8 @@ async function handlePost(
         .map((tag) => tag.trim())
     : [];
 
+  const normalizedAvailability = normalizeRentalAvailability(rentalAvailability);
+
   try {
     const client = getDocumentClient();
 
@@ -126,6 +207,9 @@ async function handlePost(
       storeId: storeId.trim(),
       publishStatus,
       tags: normalizedTags,
+      ...(normalizedAvailability !== undefined
+        ? { rentalAvailability: normalizedAvailability }
+        : {}),
       policyNumber1:
         typeof policyNumber1 === "string" && policyNumber1.trim() ? policyNumber1.trim() : undefined,
       policyBranchNumber1:
@@ -185,6 +269,7 @@ async function handlePut(
     storeId,
     publishStatus,
     tags,
+    rentalAvailability,
     policyNumber1,
     policyBranchNumber1,
     policyNumber2,
@@ -223,6 +308,8 @@ async function handlePut(
         .map((tag) => tag.trim())
     : [];
 
+  const normalizedAvailability = normalizeRentalAvailability(rentalAvailability);
+
   try {
     const client = getDocumentClient();
 
@@ -252,7 +339,9 @@ async function handlePut(
     }
 
     const timestamp = new Date().toISOString();
+    const existingVehicleItem = existingVehicle.Item as Vehicle;
     const item: Vehicle = {
+      ...existingVehicleItem,
       managementNumber: managementNumber.trim(),
       modelId,
       storeId: storeId.trim(),
@@ -286,9 +375,13 @@ async function handlePut(
         ? { videoUrl: videoUrl.trim() }
         : {}),
       ...(typeof notes === "string" && notes.trim() ? { notes: notes.trim() } : {}),
-      createdAt: (existingVehicle.Item as Vehicle).createdAt,
+      createdAt: existingVehicleItem.createdAt,
       updatedAt: timestamp,
     };
+
+    if (normalizedAvailability !== undefined) {
+      item.rentalAvailability = normalizedAvailability;
+    }
 
     await client.send(
       new PutCommand({

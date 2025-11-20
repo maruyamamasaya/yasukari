@@ -56,6 +56,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "クラス一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-classes` },
       { label: "車種一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-models` },
       { label: "車両一覧", href: `${ADMIN_DASHBOARD_ROOT}/vehicles` },
+      { label: "バイクスケジュール管理", href: `${ADMIN_DASHBOARD_ROOT}/bike-schedules` },
     ],
   },
   {
