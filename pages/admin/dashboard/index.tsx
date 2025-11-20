@@ -48,6 +48,10 @@ const bikeManagementLinks: MenuLink[] = [
     href: `${ADMIN_DASHBOARD_ROOT}/vehicles`,
     actions: [{ label: "＋登録", href: `${ADMIN_DASHBOARD_ROOT}/vehicles/register` }],
   },
+  {
+    label: "バイクスケジュール管理",
+    href: `${ADMIN_DASHBOARD_ROOT}/bike-schedules`,
+  },
 ];
 
 const blogManagementLinks: MenuLink[] = [
