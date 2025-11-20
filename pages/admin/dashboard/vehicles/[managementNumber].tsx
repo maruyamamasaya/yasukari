@@ -112,7 +112,7 @@ export default function VehicleDetailPage() {
       <Head>
         <title>車両詳細</title>
       </Head>
-      <DashboardLayout>
+      <DashboardLayout title="車両詳細">
         <div className={styles.detailHeader}>
           <h1 className={styles.detailTitle}>車両詳細</h1>
           <button type="button" className={styles.tableToolbarButton} onClick={handleBack}>
