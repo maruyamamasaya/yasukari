@@ -5,7 +5,7 @@ import DashboardLayout from "../../../../../components/dashboard/DashboardLayout
 import formStyles from "../../../../../styles/AdminForm.module.css";
 import tableStyles from "../../../../../styles/AdminTable.module.css";
 import styles from "../../../../../styles/Dashboard.module.css";
-import { BikeClass, DurationPriceKey, ExtraPriceKey } from "../../../../../lib/dashboard/types";
+import { BikeClass, DurationPriceKey } from "../../../../../lib/dashboard/types";
 
 type RateOption = {
   days: number;
@@ -15,7 +15,7 @@ type RateOption = {
 
 type Plan = {
   cost: number;
-  usage: RateOption[];
+  breakdown: string;
 };
 
 const durationLabels: Record<DurationPriceKey, string> = {
@@ -36,20 +36,12 @@ const durationDays: Record<DurationPriceKey, number> = {
   "1m": 31,
 };
 
-const extraDurationDays: Record<ExtraPriceKey, number> = {
-  "24h": 1,
-};
-
-const EXTRA_PRICE_LABEL: Record<ExtraPriceKey, string> = {
-  "24h": "追加料金 (24時間)",
-};
-
 const MAX_DAYS = 31;
 
 const buildRateOptions = (bikeClass: BikeClass): RateOption[] => {
   const options: RateOption[] = [];
 
-  (Object.entries(bikeClass.base_prices ?? {}) as [DurationPriceKey, number][]) 
+  (Object.entries(bikeClass.base_prices ?? {}) as [DurationPriceKey, number][])
     .forEach(([key, price]) => {
       if (typeof price === "number" && Number.isFinite(price)) {
         options.push({
@@ -60,60 +52,44 @@ const buildRateOptions = (bikeClass: BikeClass): RateOption[] => {
       }
     });
 
-  (Object.entries(bikeClass.extra_prices ?? {}) as [ExtraPriceKey, number][]) 
-    .forEach(([key, price]) => {
-      if (typeof price === "number" && Number.isFinite(price)) {
-        options.push({
-          days: extraDurationDays[key],
-          label: EXTRA_PRICE_LABEL[key],
-          price,
-        });
-      }
-    });
-
   return options.sort((a, b) => a.days - b.days || a.price - b.price);
 };
 
 const buildPlans = (options: RateOption[], maxDays: number): (Plan | null)[] => {
+  const sorted = [...options].sort((a, b) => a.days - b.days || a.price - b.price);
+  const reversed = [...sorted].reverse();
   const plans: (Plan | null)[] = Array.from({ length: maxDays + 1 }, () => null);
-  plans[0] = { cost: 0, usage: [] };
 
   for (let day = 1; day <= maxDays; day += 1) {
-    let bestPlan: Plan | null = null;
+    const lower = reversed.find((option) => option.days <= day);
+    const upper = sorted.find((option) => option.days >= day);
 
-    options.forEach((option) => {
-      if (option.days > day) return;
-      const previous = plans[day - option.days];
-      if (!previous) return;
+    if (!lower && !upper) {
+      plans[day] = null;
+      continue;
+    }
 
-      const nextCost = previous.cost + option.price;
-      if (!bestPlan || nextCost < bestPlan.cost) {
-        bestPlan = { cost: nextCost, usage: [...previous.usage, option] };
-      }
-    });
+    const fallbackUpper = upper ?? lower!;
+    const fallbackLower = lower ?? upper!;
 
-    plans[day] = bestPlan;
+    const isSameDay = fallbackLower.days === fallbackUpper.days;
+    const baseLower = lower ?? fallbackLower;
+    const baseUpper = upper ?? fallbackUpper;
+    const spanDays = baseUpper.days - baseLower.days;
+    const increment = spanDays === 0 ? 0 : (baseUpper.price - baseLower.price) / spanDays;
+    const rawPrice = baseLower.price + increment * (day - baseLower.days);
+    const roundedPrice = Math.floor(rawPrice / 10) * 10;
+
+    const breakdown = isSameDay
+      ? `${baseLower.label}の設定料金`
+      : `${baseLower.label}から${baseUpper.label}までを等間隔に調整（1日あたり約${Math.round(
+          increment
+        ).toLocaleString()}円ずつ増加、10円単位で切り捨て）`;
+
+    plans[day] = { cost: roundedPrice, breakdown };
   }
 
   return plans;
-};
-
-const formatUsage = (usage: RateOption[]) => {
-  const counts = usage.reduce<Record<string, { count: number; days: number }>>(
-    (map, option) => {
-      const current = map[option.label];
-      map[option.label] = {
-        count: (current?.count ?? 0) + 1,
-        days: option.days,
-      };
-      return map;
-    },
-    {}
-  );
-
-  return Object.entries(counts)
-    .map(([label, { count }]) => `${label}×${count}`)
-    .join(" + ");
 };
 
 const formatPrice = (price: number | null) =>
@@ -223,7 +199,7 @@ export default function BikeClassMonthlyPricingPage() {
                     </div>
                   </dl>
                   <p className={formStyles.hint}>
-                    スポット料金と追加料金を組み合わせ、1日〜31日までの最安料金を自動計算しています。
+                    設定されたスポット料金をもとに、区間ごとに等間隔で補間した1日〜31日の料金を表示します（10円単位で切り捨て）。
                   </p>
                 </div>
               </div>
@@ -248,9 +224,7 @@ export default function BikeClassMonthlyPricingPage() {
                         <tr key={day}>
                           <td>{day}日</td>
                           <td>{formatPrice(plan?.cost ?? null)}</td>
-                          <td>
-                            {plan ? formatUsage(plan.usage) : "計算できませんでした"}
-                          </td>
+                          <td>{plan ? plan.breakdown : "計算できませんでした"}</td>
                         </tr>
                       ))}
                     </tbody>
