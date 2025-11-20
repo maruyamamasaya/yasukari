@@ -11,7 +11,15 @@ import { toNumber } from "../../../../lib/dashboard/utils";
 export default function BikeModelDetailPage() {
   const router = useRouter();
   const modelIdParam = router.query.modelId;
-  const modelId = useMemo(() => toNumber(modelIdParam), [modelIdParam]);
+  const modelId = useMemo(() => {
+    const modelIdValue = Array.isArray(modelIdParam) ? modelIdParam[0] : modelIdParam;
+
+    if (typeof modelIdValue !== "string") {
+      return undefined;
+    }
+
+    return toNumber(modelIdValue);
+  }, [modelIdParam]);
 
   const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
   const [model, setModel] = useState<BikeModel | null>(null);
