@@ -550,6 +550,13 @@
   color: rgba(100, 116, 139, 0.85);
 }
 
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
 .calendarHeader {
   display: flex;
   align-items: center;
