@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../../components/dashboard/DashboardLayout";
+import { HOLIDAY_MANAGER_STORES } from "../../../lib/dashboard/holidayStores";
 import styles from "../../../styles/Dashboard.module.css";
 
 const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
@@ -146,11 +147,12 @@ const menuSections: MenuSection[] = [
     links: blogManagementLinks,
   },
   {
-    title: "祭日管理",
+    title: "休日管理",
     description: "店舗の営業日と休日を管理できます。",
-    links: [
-      { label: "祭日管理", href: `${ADMIN_DASHBOARD_ROOT}/holiday-manager` },
-    ],
+    links: HOLIDAY_MANAGER_STORES.map((store) => ({
+      label: `${store.label}の休日`,
+      href: `${ADMIN_DASHBOARD_ROOT}/holiday-manager/${store.id}`,
+    })),
   },
   {
     title: "クーポン管理",

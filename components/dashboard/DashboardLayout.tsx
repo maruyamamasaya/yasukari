@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 
+import { HOLIDAY_MANAGER_STORES } from "../../lib/dashboard/holidayStores";
 import styles from "../../styles/Dashboard.module.css";
 
 type NavItem = {
@@ -92,8 +93,12 @@ const NAV_ITEMS: NavItem[] = [
     href: `${ADMIN_DASHBOARD_ROOT}/blog`,
   },
   {
-    label: "祭日管理",
+    label: "休日管理",
     href: `${ADMIN_DASHBOARD_ROOT}/holiday-manager`,
+    children: HOLIDAY_MANAGER_STORES.map((store) => ({
+      label: `${store.label}の休日`,
+      href: `${ADMIN_DASHBOARD_ROOT}/holiday-manager/${store.id}`,
+    })),
   },
   {
     label: "クーポン管理",
