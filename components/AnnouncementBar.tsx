@@ -21,6 +21,7 @@ function buildLink(settings: AnnouncementBannerSettings): string | undefined {
 
 export default function AnnouncementBar() {
   const [banner, setBanner] = useState<BannerState>(null);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -51,7 +52,7 @@ export default function AnnouncementBar() {
 
   const message = useMemo(() => banner?.text?.trim() ?? "", [banner]);
 
-  if (!message) {
+  if (!message || dismissed) {
     return null;
   }
 
@@ -59,7 +60,15 @@ export default function AnnouncementBar() {
   const isExternal = linkHref ? /^https?:\/\//.test(linkHref) : false;
 
   return (
-    <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm px-2">
+    <div className="relative bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm px-8">
+      <button
+        type="button"
+        aria-label="Close announcement"
+        onClick={() => setDismissed(true)}
+        className="absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/10 text-xs font-bold text-white shadow-sm transition hover:bg-white/20"
+      >
+        ×
+      </button>
       {linkHref ? (
         isExternal ? (
           <a
