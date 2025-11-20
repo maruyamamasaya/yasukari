@@ -47,7 +47,7 @@ if not all(
     raise RuntimeError("Missing required Cognito configuration environment variables.")
 
 ISSUER = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/{COGNITO_USER_POOL_ID}"
-JWKS_URL = f"{COGNITO_DOMAIN}/.well-known/jwks.json"
+JWKS_URL = f"{ISSUER}/.well-known/jwks.json"
 
 _jwks_client: PyJWKClient | None = None
 _jwks_cache_time: float | None = None
