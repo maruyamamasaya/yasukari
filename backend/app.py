@@ -8,7 +8,8 @@ from urllib.parse import urlencode
 import requests
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template_string, request, session
-from jose import jwt
+import jwt
+from jwt import PyJWKClient
 
 load_dotenv()
 
@@ -46,9 +47,9 @@ if not all(
     raise RuntimeError("Missing required Cognito configuration environment variables.")
 
 ISSUER = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/{COGNITO_USER_POOL_ID}"
-JWKS_URL = f"{ISSUER}/.well-known/jwks.json"
+JWKS_URL = f"{COGNITO_DOMAIN}/.well-known/jwks.json"
 
-_jwks_cache: Dict[str, Any] | None = None
+_jwks_client: PyJWKClient | None = None
 _jwks_cache_time: float | None = None
 
 
@@ -64,37 +65,32 @@ def login_required(view_func):
     @wraps(view_func)
     def wrapped(*args, **kwargs):
         if not session.get("user"):
-            return redirect("/login")
+            return redirect("/auth/login")
         return view_func(*args, **kwargs)
 
     return wrapped
 
 
-def get_jwks() -> Dict[str, Any]:
-    global _jwks_cache, _jwks_cache_time
+def get_jwks_client() -> PyJWKClient:
+    global _jwks_client, _jwks_cache_time
     now = time.time()
-    if _jwks_cache and _jwks_cache_time and now - _jwks_cache_time < 3600:
-        return _jwks_cache
+    if _jwks_client and _jwks_cache_time and now - _jwks_cache_time < 3600:
+        return _jwks_client
 
     response = requests.get(JWKS_URL, timeout=5)
     response.raise_for_status()
-    _jwks_cache = response.json()
     _jwks_cache_time = now
-    return _jwks_cache
+    _jwks_client = PyJWKClient(JWKS_URL)
+    return _jwks_client
 
 
 def verify_id_token(id_token: str) -> Dict[str, Any]:
-    jwks = get_jwks()
-    header = jwt.get_unverified_header(id_token)
-    kid = header.get("kid")
-    keys = jwks.get("keys", [])
-    matching_key = next((key for key in keys if key.get("kid") == kid), None)
-    if not matching_key:
-        raise TokenVerificationError("No matching JWK found for token")
+    jwks_client = get_jwks_client()
     try:
+        signing_key = jwks_client.get_signing_key_from_jwt(id_token).key
         claims = jwt.decode(
             id_token,
-            matching_key,
+            signing_key,
             algorithms=["RS256"],
             audience=COGNITO_CLIENT_ID,
             issuer=ISSUER,
@@ -112,7 +108,7 @@ def build_authorize_url(state: str) -> str:
     params = {
         "client_id": COGNITO_CLIENT_ID,
         "response_type": "code",
-        "scope": "openid email profile",
+        "scope": "openid email phone",
         "redirect_uri": COGNITO_REDIRECT_URI,
         "state": state,
     }
@@ -123,14 +119,14 @@ def exchange_code_for_tokens(code: str) -> Dict[str, Any]:
     token_url = f"{COGNITO_DOMAIN}/oauth2/token"
     data = {
         "grant_type": "authorization_code",
+        "client_id": COGNITO_CLIENT_ID,
+        "client_secret": COGNITO_CLIENT_SECRET,
         "code": code,
         "redirect_uri": COGNITO_REDIRECT_URI,
-        "client_id": COGNITO_CLIENT_ID,
     }
     response = requests.post(
         token_url,
         data=data,
-        auth=(COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET),
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         timeout=5,
     )
@@ -183,6 +179,7 @@ def auth_callback():
     try:
         token_response = exchange_code_for_tokens(code)
         id_token = token_response.get("id_token")
+        access_token = token_response.get("access_token")
         if not id_token:
             return "ID token not returned by Cognito", 400
         claims = verify_id_token(id_token)
@@ -194,6 +191,10 @@ def auth_callback():
         "sub": claims.get("sub"),
         "email": claims.get("email"),
         "username": claims.get("cognito:username"),
+    }
+    session["tokens"] = {
+        "id_token": id_token,
+        "access_token": access_token,
     }
 
     session.pop("oauth_state", None)
@@ -231,7 +232,9 @@ def api_me():
     user = session.get("user")
     if not user:
         return jsonify({"message": "Unauthorized"}), 401
-    return jsonify({"sub": user.get("sub"), "email": user.get("email"), "username": user.get("username")})
+    return jsonify(
+        {"sub": user.get("sub"), "email": user.get("email"), "username": user.get("username")}
+    )
 
 
 @app.route("/auth/logout")
