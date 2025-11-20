@@ -1,0 +1,207 @@
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
+
+import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import { Member, members } from "../../../../lib/members";
+import styles from "../../../../styles/Dashboard.module.css";
+import memberStyles from "../../../../styles/AdminMember.module.css";
+
+const statusBadgeClassName = (status: Member["status"]): string => {
+  if (status === "認証済") {
+    return `${memberStyles.statusBadge} ${memberStyles.statusBadgeOn}`;
+  }
+
+  if (status === "未認証") {
+    return `${memberStyles.statusBadge} ${memberStyles.statusBadgePending}`;
+  }
+
+  return `${memberStyles.statusBadge} ${memberStyles.statusBadgeOff}`;
+};
+
+export default function MemberDetailPage() {
+  const router = useRouter();
+  const memberId = useMemo(() => {
+    const { id } = router.query;
+    return Array.isArray(id) ? id[0] : id;
+  }, [router.query]);
+
+  const member = useMemo(
+    () => members.find((item) => item.id === memberId),
+    [memberId]
+  );
+
+  const [noteEdit, setNoteEdit] = useState(member?.notes ?? "");
+
+  useEffect(() => {
+    setNoteEdit(member?.notes ?? "");
+  }, [member]);
+
+  const handleBackToList = () => {
+    router.push("/admin/dashboard/members");
+  };
+
+  if (!member) {
+    return (
+      <DashboardLayout
+        title="会員管理"
+        description="会員情報の確認や状態の把握を行うためのダッシュボードです。"
+      >
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>会員詳細</h2>
+            <p className={styles.sectionDescription}>
+              該当する会員情報が見つかりませんでした。会員一覧に戻って再度お試しください。
+            </p>
+          </div>
+
+          <div className={memberStyles.buttonRow}>
+            <button
+              type="button"
+              className={memberStyles.backButton}
+              onClick={handleBackToList}
+            >
+              会員一覧に戻る
+            </button>
+          </div>
+        </section>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <>
+      <Head>
+        <title>{`${member.name} の会員詳細 | 管理ダッシュボード`}</title>
+      </Head>
+      <DashboardLayout
+        title="会員管理"
+        description="会員情報の確認や状態の把握を行うためのダッシュボードです。"
+      >
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>会員詳細</h2>
+            <p className={styles.sectionDescription}>
+              会員一覧から遷移した詳細ページです。ブラウザの戻る操作または下部のボタンで一覧へ戻れます。
+            </p>
+          </div>
+
+          <div className={memberStyles.detailCard}>
+            <div className={memberStyles.detailHeader}>
+              <div>
+                <div className={memberStyles.detailTitle}>会員詳細</div>
+                <div className={memberStyles.metaRow}>
+                  <span>会員番号: {member.memberNumber}</span>
+                  <span>登録日時: {member.registeredAt}</span>
+                </div>
+              </div>
+              <span className={statusBadgeClassName(member.status)}>
+                {member.status}
+              </span>
+            </div>
+
+            <div className={memberStyles.fieldGrid}>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>会員名</div>
+                <div className={memberStyles.fieldValue}>
+                  {member.name} ({member.nameKana})
+                </div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>権限</div>
+                <div className={memberStyles.fieldValue}>{member.role}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>メールアドレス</div>
+                <div className={memberStyles.fieldValue}>{member.email}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>状態</div>
+                <div className={memberStyles.fieldValue}>{member.status}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>携帯電話</div>
+                <div className={memberStyles.fieldValue}>{member.mobilePhone}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>電話番号</div>
+                <div className={memberStyles.fieldValue}>{member.phoneNumber}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>生年月日</div>
+                <div className={memberStyles.fieldValue}>{member.birthDate}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>郵便番号</div>
+                <div className={memberStyles.fieldValue}>{member.postalCode}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>住所</div>
+                <div className={memberStyles.fieldValue}>{member.address}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>免許番号</div>
+                <div className={memberStyles.fieldValue}>{member.licenseNumber}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>通勤先名</div>
+                <div className={memberStyles.fieldValue}>{member.workplaceName}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>通勤先住所</div>
+                <div className={memberStyles.fieldValue}>{member.workplaceAddress}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>通勤先電話番号</div>
+                <div className={memberStyles.fieldValue}>{member.workplacePhone}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>その他連絡先名</div>
+                <div className={memberStyles.fieldValue}>{member.otherContactName}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>その他連絡先住所</div>
+                <div className={memberStyles.fieldValue}>{member.otherContactAddress}</div>
+              </div>
+              <div className={memberStyles.fieldBlock}>
+                <div className={memberStyles.fieldLabel}>その他連絡先電話番号</div>
+                <div className={memberStyles.fieldValue}>{member.otherContactPhone}</div>
+              </div>
+            </div>
+
+            <div className={memberStyles.noteArea}>
+              <div className={memberStyles.sectionTitle}>備考</div>
+              <textarea
+                className={memberStyles.noteTextarea}
+                value={noteEdit}
+                onChange={(event) => setNoteEdit(event.target.value)}
+                aria-label={`${member.name} の備考`}
+                placeholder="備考を編集"
+              />
+              <p className={memberStyles.sectionHelper}>
+                ここは編集できる感じのダミーUIです。保存の挙動はまだありません。
+              </p>
+            </div>
+
+            <div className={memberStyles.divider} />
+
+            <div>
+              <div className={memberStyles.sectionTitle}>予約一覧</div>
+              <p className={memberStyles.sectionHelper}>まだ予約はありません</p>
+            </div>
+
+            <div className={memberStyles.buttonRow}>
+              <button
+                type="button"
+                className={memberStyles.backButton}
+                onClick={handleBackToList}
+              >
+                会員一覧に戻る
+              </button>
+            </div>
+          </div>
+        </section>
+      </DashboardLayout>
+    </>
+  );
+}
