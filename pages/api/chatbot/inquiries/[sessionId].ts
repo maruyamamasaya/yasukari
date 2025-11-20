@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient } from "../../../../lib/dynamodb";
+import { ChatHistoryEntry } from "../../../../lib/chatbot/inquiries";
 
 type ChatSessionRecord = {
   session_id: string;
@@ -22,6 +23,7 @@ type ChatMessageRecord = {
   user_id?: string | null;
   client_id: string;
   created_at: string;
+  history?: ChatHistoryEntry[];
 };
 
 type InquiryDetailResponse = {
@@ -41,6 +43,7 @@ type InquiryDetailResponse = {
       createdAt: string;
       messageIndex: number;
     }>;
+    history?: ChatHistoryEntry[];
   };
 };
 
@@ -67,6 +70,7 @@ function normalizeMessages(records: ChatMessageRecord[]) {
       typeof message.message_index === "number"
         ? message.message_index
         : Number(message.message_index),
+    history: message.history,
   }));
 }
 
@@ -118,11 +122,43 @@ async function fetchMessages(sessionId: string) {
   return normalizeMessages((response.Items ?? []) as ChatMessageRecord[]);
 }
 
+async function fetchHistory(sessionId: string): Promise<ChatHistoryEntry[]> {
+  const client = getDocumentClient();
+  const response = await client.send(
+    new QueryCommand({
+      TableName: "ChatMessages",
+      KeyConditionExpression: "session_id = :sessionId",
+      ExpressionAttributeValues: { ":sessionId": sessionId },
+      ProjectionExpression: "message_id, #role, content, created_at, user_id, client_id",
+      ExpressionAttributeNames: { "#role": "role" },
+      ScanIndexForward: true,
+    })
+  );
+
+  return (response.Items ?? []).map((item) => ({
+    messageId: String(item.message_id ?? ""),
+    role: (item.role as ChatHistoryEntry["role"]) ?? "user",
+    content: String(item.content ?? ""),
+    createdAt: String(item.created_at ?? ""),
+    userId: typeof item.user_id === "string" ? item.user_id : null,
+    clientId: String(item.client_id ?? ""),
+  }));
+}
+
 async function appendReply(session: ChatSessionRecord, content: string) {
   const client = getDocumentClient();
   const now = new Date().toISOString();
   const nextIndex = (await findLatestMessageIndex(session.session_id)) + 1;
   const messageId = randomUUID();
+  const history = await fetchHistory(session.session_id);
+  const updatedHistory: ChatHistoryEntry[] = history.concat({
+    messageId,
+    role: "assistant",
+    content,
+    createdAt: now,
+    userId: typeof session.user_id === "string" ? session.user_id : null,
+    clientId: session.client_id,
+  });
 
   await client.send(
     new PutCommand({
@@ -136,6 +172,7 @@ async function appendReply(session: ChatSessionRecord, content: string) {
         user_id: session.user_id ?? null,
         client_id: session.client_id,
         created_at: now,
+        history: updatedHistory,
       },
     })
   );
@@ -170,6 +207,7 @@ async function appendReply(session: ChatSessionRecord, content: string) {
     createdAt: now,
     messageIndex: nextIndex,
     lastActivityAt: now,
+    history: updatedHistory,
   };
 }
 
@@ -200,6 +238,7 @@ export default async function handler(
       inquiry: {
         ...normalizeSession({ ...session, last_activity_at: reply.lastActivityAt }),
         messages: [reply],
+        history: reply.history,
       },
     });
   }
@@ -210,11 +249,14 @@ export default async function handler(
   }
 
   const messages = await fetchMessages(sessionId);
+  const history =
+    messages[messages.length - 1]?.history ?? (await fetchHistory(sessionId));
 
   return res.status(200).json({
     inquiry: {
       ...normalizeSession(session),
       messages,
+      history,
     },
   });
 }
