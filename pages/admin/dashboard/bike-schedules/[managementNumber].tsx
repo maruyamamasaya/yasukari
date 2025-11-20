@@ -29,7 +29,12 @@ const STATUS_COLORS: Record<RentalAvailabilityStatus, string> = {
   RENTED: "#3b82f6",
 };
 
-const formatDateInput = (date: Date) => date.toISOString().split("T")[0];
+const formatDateInput = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 type CalendarCell = {
   date: Date;
@@ -366,106 +371,84 @@ export default function BikeScheduleDetailPage() {
                   </div>
 
                   <div className={styles.menuGroup}>
-                    <div className={styles.buttonRow} style={{ alignItems: "center", gap: "0.5rem" }}>
-                      <div className={styles.menuGroupTitle}>カレンダー</div>
-                      <span className={styles.menuGroupNote}>
-                        休日管理と同じ6週表示のカレンダーで設定できます。日付を押して詳細を編集してください。
-                      </span>
-                    </div>
-                    <div className={styles.buttonRow} style={{ alignItems: "center" }}>
-                      <button
-                        type="button"
-                        className={formStyles.secondaryButton}
-                        onClick={() => setCalendarMonthOffset((prev) => prev - 1)}
-                      >
-                        前月
-                      </button>
-                      <div className={styles.menuGroupTitle}>
-                        {displayMonth.getFullYear()}年{displayMonth.getMonth() + 1}月
+                    <div className={styles.calendarHeader}>
+                      <div>
+                        <div className={styles.menuGroupTitle}>カレンダー</div>
+                        <p className={styles.menuGroupNote}>日付を押して詳細を編集してください。</p>
                       </div>
-                      <button
-                        type="button"
-                        className={formStyles.secondaryButton}
-                        onClick={() => setCalendarMonthOffset((prev) => prev + 1)}
-                      >
-                        翌月
-                      </button>
+                      <div className={styles.calendarControls}>
+                        <button
+                          type="button"
+                          className={formStyles.secondaryButton}
+                          onClick={() => setCalendarMonthOffset((prev) => prev - 1)}
+                        >
+                          前月
+                        </button>
+                        <div className={styles.calendarMonthLabel}>
+                          {displayMonth.getFullYear()}年{displayMonth.getMonth() + 1}月
+                        </div>
+                        <button
+                          type="button"
+                          className={formStyles.secondaryButton}
+                          onClick={() => setCalendarMonthOffset((prev) => prev + 1)}
+                        >
+                          翌月
+                        </button>
+                      </div>
                     </div>
-                    <table className={tableStyles.table}>
-                      <thead>
-                        <tr>
-                          {"日月火水木金土".split("").map((weekday) => (
-                            <th key={weekday}>{weekday}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {calendarWeeks.map((week, weekIndex) => (
-                          <tr key={`week-${weekIndex}`}>
-                            {week.map((cell, dayIndex) => {
-                              const entry = availabilityMap[cell.key];
-                              const isSelected = activeDate === cell.key;
-                              const muted = !cell.isCurrentMonth;
-                              return (
-                                <td
-                                  key={`${weekIndex}-${dayIndex}`}
-                                  style={{
-                                    verticalAlign: "top",
-                                    minWidth: "140px",
-                                    backgroundColor: isSelected ? "#f4f6fb" : undefined,
-                                    opacity: muted ? 0.6 : 1,
-                                    cursor: "pointer",
-                                    borderLeft: muted ? "1px dashed #e5e7eb" : undefined,
-                                    borderRight: muted ? "1px dashed #e5e7eb" : undefined,
-                                  }}
-                                  onClick={() => handleSelectDate(cell.key)}
-                                >
-                                  <div className={styles.menuGroupTitle} style={{ display: "flex", gap: "0.5rem" }}>
-                                    <span>{cell.date.getDate()}日</span>
-                                    {entry && (
-                                      <span
-                                        style={{
-                                          padding: "2px 8px",
-                                          borderRadius: "9999px",
-                                          backgroundColor: `${STATUS_COLORS[entry.status]}1a`,
-                                          color: STATUS_COLORS[entry.status],
-                                          fontSize: "0.85rem",
-                                          fontWeight: 700,
-                                        }}
-                                      >
-                                        {STATUS_LABELS[entry.status]}
-                                      </span>
-                                    )}
-                                  </div>
-                                  {!entry && (
-                                    <div className={styles.menuGroupNote} style={{ marginTop: "4px" }}>
-                                      未設定
-                                    </div>
-                                  )}
-                                  {entry?.note && (
-                                    <div
-                                      className={styles.menuGroupNote}
-                                      style={{
-                                        marginTop: "4px",
-                                        padding: "6px 8px",
-                                        borderRadius: "8px",
-                                        backgroundColor: "#f9fafb",
-                                        border: "1px solid #e5e7eb",
-                                      }}
-                                    >
-                                      {entry.note}
-                                    </div>
-                                  )}
-                                </td>
-                              );
-                            })}
+                    <div className={styles.calendarCard}>
+                      <table className={styles.calendarTable}>
+                        <thead>
+                          <tr>
+                            {"日月火水木金土".split("").map((weekday) => (
+                              <th key={weekday}>{weekday}</th>
+                            ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <p className={styles.menuGroupNote}>
-                      セルを選択すると下部の入力欄に反映されます。月を跨いだ日付も同じ操作で更新できます。
-                    </p>
+                        </thead>
+                        <tbody>
+                          {calendarWeeks.map((week, weekIndex) => (
+                            <tr key={`week-${weekIndex}`}>
+                              {week.map((cell, dayIndex) => {
+                                const entry = availabilityMap[cell.key];
+                                const isSelected = activeDate === cell.key;
+                                const muted = !cell.isCurrentMonth;
+                                return (
+                                  <td
+                                    key={`${weekIndex}-${dayIndex}`}
+                                    className={`${styles.calendarCell} ${muted ? styles.calendarCellMuted : ""} ${
+                                      isSelected ? styles.calendarCellSelected : ""
+                                    }`}
+                                    onClick={() => handleSelectDate(cell.key)}
+                                  >
+                                    <div className={styles.calendarCellHeader}>
+                                      <span className={styles.calendarDateLabel}>{cell.date.getDate()}日</span>
+                                      {entry && (
+                                        <span
+                                          className={styles.calendarStatusChip}
+                                          style={{
+                                            backgroundColor: `${STATUS_COLORS[entry.status]}1a`,
+                                            color: STATUS_COLORS[entry.status],
+                                          }}
+                                        >
+                                          {STATUS_LABELS[entry.status]}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {!entry && <div className={styles.calendarEmpty}>未設定</div>}
+                                    {entry?.note && (
+                                      <div className={styles.calendarNote}>{entry.note}</div>
+                                    )}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <p className={styles.menuGroupNote}>
+                        セルを選択すると下部の入力欄に反映されます。月を跨いだ日付も同じ操作で更新できます。
+                      </p>
+                    </div>
 
                     <div className={styles.menuGroup} style={{ marginTop: "1rem" }}>
                       <div className={styles.menuGroupTitle}>ステータス更新</div>
