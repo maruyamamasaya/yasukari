@@ -3,7 +3,6 @@ import type { MouseEvent as ReactMouseEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import {
-  Holiday,
   deleteHoliday,
   fetchMonthlyHolidays,
   setHoliday,
@@ -12,6 +11,11 @@ import styles from "../../../../styles/HolidayManager.module.css";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const WEEKDAY_TOGGLE_LABELS = ["月", "火", "水", "木", "金", "土", "日"];
+
+const STORES = [
+  { id: "adachi-odai", label: "足立小台店" },
+  { id: "minowa", label: "三ノ輪店" },
+];
 
 const formatDateKey = (date: Date): string => {
   const year = date.getFullYear();
@@ -47,6 +51,11 @@ type NoteEditorState = {
   note: string;
 };
 
+type HolidayMapEntry = {
+  isHoliday: boolean;
+  note?: string;
+};
+
 const buildCalendar = (reference: Date): CalendarCell[][] => {
   const firstDay = new Date(reference.getFullYear(), reference.getMonth(), 1);
   const startDate = new Date(firstDay);
@@ -80,12 +89,18 @@ const buildCalendar = (reference: Date): CalendarCell[][] => {
   return weeks;
 };
 
-export default function HolidayManagerPage() {
+function StoreHolidayManager({
+  storeId,
+  storeLabel,
+}: {
+  storeId: string;
+  storeLabel: string;
+}) {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
-  const [holidays, setHolidays] = useState<Record<string, Holiday>>({});
+  const [holidays, setHolidays] = useState<Record<string, HolidayMapEntry>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
@@ -95,10 +110,13 @@ export default function HolidayManagerPage() {
 
   const todayKey = useMemo(() => formatDateKey(new Date()), []);
   const calendar = useMemo(() => buildCalendar(currentMonth), [currentMonth]);
-  const holidaySet = useMemo(
-    () => new Set(Object.keys(holidays)),
-    [holidays]
-  );
+  const holidaySet = useMemo(() => {
+    return new Set(
+      Object.entries(holidays)
+        .filter(([, value]) => value.isHoliday)
+        .map(([key]) => key)
+    );
+  }, [holidays]);
 
   const currentMonthParam = useMemo(
     () => formatMonthParam(currentMonth),
@@ -110,9 +128,12 @@ export default function HolidayManagerPage() {
       setLoading(true);
       setError(null);
       try {
-        const result = await fetchMonthlyHolidays(currentMonthParam);
-        const map = result.reduce<Record<string, Holiday>>((acc, holiday) => {
-          acc[holiday.date] = holiday;
+        const result = await fetchMonthlyHolidays(currentMonthParam, storeId);
+        const map = result.reduce<Record<string, HolidayMapEntry>>((acc, holiday) => {
+          acc[holiday.date] = {
+            isHoliday: holiday.isHoliday,
+            note: holiday.note,
+          } satisfies HolidayMapEntry;
           return acc;
         }, {});
         setHolidays(map);
@@ -124,14 +145,11 @@ export default function HolidayManagerPage() {
       }
     };
 
-    void fetchData();
-  }, [currentMonthParam]);
+    fetchData();
+  }, [currentMonthParam, storeId]);
 
   useEffect(() => {
-    const closeMenu = () => {
-      setContextMenu(null);
-    };
-
+    const closeMenu = () => setContextMenu(null);
     document.addEventListener("click", closeMenu);
     return () => {
       document.removeEventListener("click", closeMenu);
@@ -140,9 +158,12 @@ export default function HolidayManagerPage() {
 
   const refreshMonth = async () => {
     try {
-      const result = await fetchMonthlyHolidays(currentMonthParam);
-      const map = result.reduce<Record<string, Holiday>>((acc, holiday) => {
-        acc[holiday.date] = holiday;
+      const result = await fetchMonthlyHolidays(currentMonthParam, storeId);
+      const map = result.reduce<Record<string, HolidayMapEntry>>((acc, holiday) => {
+        acc[holiday.date] = {
+          isHoliday: holiday.isHoliday,
+          note: holiday.note,
+        } satisfies HolidayMapEntry;
         return acc;
       }, {});
       setHolidays(map);
@@ -181,13 +202,22 @@ export default function HolidayManagerPage() {
     setContextMenu({ date: cell.key, x, y });
   };
 
+  const persistWorkingDay = async (date: string) => {
+    const entry = holidays[date];
+    if (!entry || !entry.note) {
+      await deleteHoliday(date, storeId);
+      return;
+    }
+    await setHoliday(date, storeId, false, entry.note);
+  };
+
   const handleSetHoliday = async (date: string) => {
     setError(null);
     setActionBusy(true);
     setContextMenu(null);
     try {
       const note = holidays[date]?.note ?? "";
-      await setHoliday(date, note ?? "");
+      await setHoliday(date, storeId, true, note);
       await refreshMonth();
     } catch (setError) {
       console.error(setError);
@@ -202,7 +232,7 @@ export default function HolidayManagerPage() {
     setActionBusy(true);
     setContextMenu(null);
     try {
-      await deleteHoliday(date);
+      await persistWorkingDay(date);
       await refreshMonth();
     } catch (removeError) {
       console.error(removeError);
@@ -224,8 +254,10 @@ export default function HolidayManagerPage() {
 
     setError(null);
     setActionBusy(true);
+    const nextNote = noteEditor.note.trim();
     try {
-      await setHoliday(noteEditor.date, noteEditor.note.trim());
+      const isHoliday = holidays[noteEditor.date]?.isHoliday ?? false;
+      await setHoliday(noteEditor.date, storeId, isHoliday, nextNote);
       await refreshMonth();
       setNoteEditor(null);
     } catch (noteError) {
@@ -296,11 +328,12 @@ export default function HolidayManagerPage() {
     try {
       if (nextState) {
         for (const date of status.workingDays) {
-          await setHoliday(date, holidays[date]?.note ?? "");
+          const note = holidays[date]?.note ?? "";
+          await setHoliday(date, storeId, true, note);
         }
       } else {
         for (const date of status.holidays) {
-          await deleteHoliday(date);
+          await persistWorkingDay(date);
         }
       }
       await refreshMonth();
@@ -312,8 +345,198 @@ export default function HolidayManagerPage() {
     }
   };
 
-  const menuHoliday = contextMenu ? holidaySet.has(contextMenu.date) : false;
+  const menuHoliday = contextMenu
+    ? holidays[contextMenu.date]?.isHoliday ?? false
+    : false;
 
+  return (
+    <section className={styles.storeSection}>
+      <div className={styles.storeHeader}>
+        <h2 className={styles.storeTitle}>{storeLabel}</h2>
+        <p className={styles.storeLead}>店舗ごとの営業日と備考を管理します。</p>
+      </div>
+      {error && <div className={styles.errorMessage}>{error}</div>}
+      <section className={styles.calendarCard}>
+        <div className={styles.calendarHeader}>
+          <div className={styles.monthLabel}>{formatMonthLabel(currentMonth)}</div>
+          <div className={styles.monthControls}>
+            <button
+              type="button"
+              className={styles.monthButton}
+              onClick={() => handleMonthChange(-1)}
+              disabled={actionBusy || loading}
+            >
+              前月
+            </button>
+            <button
+              type="button"
+              className={styles.monthButton}
+              onClick={() => handleMonthChange(1)}
+              disabled={actionBusy || loading}
+            >
+              翌月
+            </button>
+          </div>
+        </div>
+        <div className={styles.calendarWrapper} ref={calendarWrapperRef}>
+          {loading ? (
+            <p className={styles.loadingMessage}>カレンダーを読み込み中です…</p>
+          ) : (
+            <table className={styles.calendarGrid}>
+              <thead>
+                <tr>
+                  {WEEKDAY_LABELS.map((label) => (
+                    <th key={label}>{label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {calendar.map((week, weekIndex) => (
+                  <tr key={weekIndex}>
+                    {week.map((cell) => {
+                      const entry = holidays[cell.key];
+                      const isHoliday = entry?.isHoliday ?? false;
+                      const note = entry?.note;
+                      return (
+                        <td
+                          key={cell.key}
+                          onClick={(event) => handleCellClick(cell, event)}
+                          className={`${styles.dayCell} ${
+                            cell.isCurrentMonth ? "" : styles.outsideMonth
+                          } ${isHoliday ? styles.holiday : ""} ${
+                            cell.key === todayKey ? styles.today : ""
+                          }`.trim()}
+                        >
+                          <div className={styles.dayNumber}>{cell.date.getDate()}</div>
+                          {note && <div className={styles.noteText}>{note}</div>}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {contextMenu && (
+            <div
+              className={styles.contextMenu}
+              style={{ left: contextMenu.x, top: contextMenu.y }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {menuHoliday ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveHoliday(contextMenu.date)}
+                    disabled={actionBusy}
+                  >
+                    休日を解除する
+                  </button>
+                  <div className={styles.contextMenuDivider} aria-hidden="true" />
+                  <button
+                    type="button"
+                    onClick={() => openNoteEditor(contextMenu.date)}
+                    disabled={actionBusy}
+                  >
+                    備考を編集する
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleSetHoliday(contextMenu.date)}
+                    disabled={actionBusy}
+                  >
+                    休日に設定する
+                  </button>
+                  <div className={styles.contextMenuDivider} aria-hidden="true" />
+                  <button
+                    type="button"
+                    onClick={() => openNoteEditor(contextMenu.date)}
+                    disabled={actionBusy}
+                  >
+                    備考を編集する
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+      <section className={styles.weekdayPanel}>
+        <h3 className={styles.calendarStatus}>曜日一括設定</h3>
+        <div className={styles.weekdayButtons}>
+          {WEEKDAY_TOGGLE_LABELS.map((label, index) => {
+            const weekday = (index + 1) % 7;
+            const status = weekdayHolidayStatus.get(weekday);
+            const isPressed = status?.allHoliday ?? false;
+            return (
+              <button
+                key={label}
+                type="button"
+                className={styles.weekdayButton}
+                aria-pressed={isPressed}
+                onClick={() => handleWeekdayToggle(weekday, !isPressed)}
+                disabled={actionBusy || loading || !status}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+      {noteEditor && (
+        <div
+          className={styles.noteModalOverlay}
+          onClick={() => {
+            if (!actionBusy) {
+              setNoteEditor(null);
+            }
+          }}
+        >
+          <div
+            className={styles.noteModal}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h4>{`${storeLabel} ${noteEditor.date} の備考`}</h4>
+            <textarea
+              value={noteEditor.note}
+              onChange={(event) =>
+                setNoteEditor((current) =>
+                  current ? { ...current, note: event.target.value } : current
+                )
+              }
+              placeholder="備考を入力してください（任意・100文字まで）"
+              maxLength={100}
+            />
+            <div className={styles.noteMeta}>※ 100文字以内で入力してください。</div>
+            <div className={styles.noteModalActions}>
+              <button
+                type="button"
+                className={styles.noteModalCancel}
+                onClick={() => setNoteEditor(null)}
+                disabled={actionBusy}
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                className={styles.noteModalSave}
+                onClick={handleSaveNote}
+                disabled={actionBusy}
+              >
+                保存する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export default function HolidayManagerPage() {
   return (
     <>
       <Head>
@@ -324,171 +547,14 @@ export default function HolidayManagerPage() {
         description="標準カレンダーUIで営業日と休日を切り替えて管理します。"
       >
         <main className={styles.managerRoot}>
-          {error && <div className={styles.errorMessage}>{error}</div>}
-          <section className={styles.calendarCard}>
-            <div className={styles.calendarHeader}>
-              <div className={styles.monthLabel}>{formatMonthLabel(currentMonth)}</div>
-              <div className={styles.monthControls}>
-                <button
-                  type="button"
-                  className={styles.monthButton}
-                  onClick={() => handleMonthChange(-1)}
-                  disabled={actionBusy || loading}
-                >
-                  前月
-                </button>
-                <button
-                  type="button"
-                  className={styles.monthButton}
-                  onClick={() => handleMonthChange(1)}
-                  disabled={actionBusy || loading}
-                >
-                  翌月
-                </button>
-              </div>
-            </div>
-            <div className={styles.calendarWrapper} ref={calendarWrapperRef}>
-              {loading ? (
-                <p className={styles.loadingMessage}>カレンダーを読み込み中です…</p>
-              ) : (
-                <table className={styles.calendarGrid}>
-                  <thead>
-                    <tr>
-                      {WEEKDAY_LABELS.map((label) => (
-                        <th key={label}>{label}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {calendar.map((week, weekIndex) => (
-                      <tr key={weekIndex}>
-                        {week.map((cell) => {
-                          const isHoliday = holidaySet.has(cell.key);
-                          const note = holidays[cell.key]?.note;
-                          return (
-                            <td
-                              key={cell.key}
-                              onClick={(event) => handleCellClick(cell, event)}
-                              className={`${styles.dayCell} ${
-                                cell.isCurrentMonth ? "" : styles.outsideMonth
-                              } ${isHoliday ? styles.holiday : ""} ${
-                                cell.key === todayKey ? styles.today : ""
-                              }`.trim()}
-                            >
-                              <div className={styles.dayNumber}>{cell.date.getDate()}</div>
-                              {note && <div className={styles.noteText}>{note}</div>}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              {contextMenu && (
-                <div
-                  className={styles.contextMenu}
-                  style={{ left: contextMenu.x, top: contextMenu.y }}
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  {menuHoliday ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveHoliday(contextMenu.date)}
-                        disabled={actionBusy}
-                      >
-                        休日を解除する
-                      </button>
-                      <div className={styles.contextMenuDivider} aria-hidden="true" />
-                      <button
-                        type="button"
-                        onClick={() => openNoteEditor(contextMenu.date)}
-                        disabled={actionBusy}
-                      >
-                        備考を編集する
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleSetHoliday(contextMenu.date)}
-                      disabled={actionBusy}
-                    >
-                      休日に設定する
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </section>
-          <section className={styles.weekdayPanel}>
-            <h2 className={styles.calendarStatus}>曜日一括設定</h2>
-            <div className={styles.weekdayButtons}>
-              {WEEKDAY_TOGGLE_LABELS.map((label, index) => {
-                const weekday = (index + 1) % 7;
-                const status = weekdayHolidayStatus.get(weekday);
-                const isPressed = status?.allHoliday ?? false;
-                return (
-                  <button
-                    key={label}
-                    type="button"
-                    className={styles.weekdayButton}
-                    aria-pressed={isPressed}
-                    onClick={() => handleWeekdayToggle(weekday, !isPressed)}
-                    disabled={actionBusy || loading || !status}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          {STORES.map((store) => (
+            <StoreHolidayManager
+              key={store.id}
+              storeId={store.id}
+              storeLabel={store.label}
+            />
+          ))}
         </main>
-        {noteEditor && (
-          <div
-            className={styles.noteModalOverlay}
-            onClick={() => {
-              if (!actionBusy) {
-                setNoteEditor(null);
-              }
-            }}
-          >
-            <div
-              className={styles.noteModal}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <h3>{`${noteEditor.date} の備考`}</h3>
-              <textarea
-                value={noteEditor.note}
-                onChange={(event) =>
-                  setNoteEditor((current) =>
-                    current ? { ...current, note: event.target.value } : current
-                  )
-                }
-                placeholder="備考を入力してください（任意）"
-              />
-              <div className={styles.noteModalActions}>
-                <button
-                  type="button"
-                  className={styles.noteModalCancel}
-                  onClick={() => setNoteEditor(null)}
-                  disabled={actionBusy}
-                >
-                  キャンセル
-                </button>
-                <button
-                  type="button"
-                  className={styles.noteModalSave}
-                  onClick={handleSaveNote}
-                  disabled={actionBusy}
-                >
-                  保存する
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </DashboardLayout>
     </>
   );

@@ -3,8 +3,12 @@ import path from "path";
 
 export type HolidayRecord = {
   date: string;
-  note: string;
+  store: string;
+  isHoliday: boolean;
+  note?: string;
 };
+
+export const DEFAULT_STORE_ID = "adachi-odai";
 
 const DATA_FILE_PATH = path.join(process.cwd(), "data", "holiday-calendar.json");
 
@@ -36,13 +40,22 @@ export async function readHolidayRecords(): Promise<HolidayRecord[]> {
         if (typeof item !== "object" || item === null) {
           return null;
         }
-        const { date, note } = item as { date?: unknown; note?: unknown };
+        const { date, note, store, isHoliday } = item as {
+          date?: unknown;
+          note?: unknown;
+          store?: unknown;
+          isHoliday?: unknown;
+        };
+
         if (typeof date !== "string") {
           return null;
         }
+
         return {
           date,
-          note: typeof note === "string" ? note : undefined,
+          store: typeof store === "string" ? store : DEFAULT_STORE_ID,
+          isHoliday: typeof isHoliday === "boolean" ? isHoliday : true,
+          note: typeof note === "string" && note.length > 0 ? note : undefined,
         } satisfies HolidayRecord;
       })
       .filter((item): item is HolidayRecord => item !== null);
@@ -64,7 +77,9 @@ export async function writeHolidayRecords(records: HolidayRecord[]): Promise<voi
 export async function upsertHolidayRecord(record: HolidayRecord): Promise<void> {
   const records = await readHolidayRecords();
   const nextRecords = [...records];
-  const index = nextRecords.findIndex((item) => item.date === record.date);
+  const index = nextRecords.findIndex(
+    (item) => item.date === record.date && item.store === record.store
+  );
 
   if (index >= 0) {
     nextRecords[index] = { ...record };
@@ -72,13 +87,21 @@ export async function upsertHolidayRecord(record: HolidayRecord): Promise<void> 
     nextRecords.push({ ...record });
   }
 
-  nextRecords.sort((a, b) => a.date.localeCompare(b.date));
+  nextRecords.sort((a, b) => {
+    const storeCompare = a.store.localeCompare(b.store);
+    if (storeCompare !== 0) {
+      return storeCompare;
+    }
+    return a.date.localeCompare(b.date);
+  });
 
   await writeHolidayRecords(nextRecords);
 }
 
-export async function removeHolidayRecord(date: string): Promise<void> {
+export async function removeHolidayRecord(date: string, store: string): Promise<void> {
   const records = await readHolidayRecords();
-  const nextRecords = records.filter((record) => record.date !== date);
+  const nextRecords = records.filter(
+    (record) => !(record.date === date && record.store === store)
+  );
   await writeHolidayRecords(nextRecords);
 }
