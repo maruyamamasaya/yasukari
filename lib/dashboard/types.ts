@@ -17,7 +17,11 @@ export type Accessory = {
   updated_at: string;
 };
 
-export type RentalAvailabilityStatus = "AVAILABLE" | "UNAVAILABLE" | "MAINTENANCE";
+export type RentalAvailabilityStatus =
+  | "AVAILABLE"
+  | "UNAVAILABLE"
+  | "MAINTENANCE"
+  | "RENTED";
 
 export type RentalAvailabilityDay = {
   status: RentalAvailabilityStatus;
