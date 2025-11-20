@@ -90,6 +90,34 @@ export default function NewsletterSettingsPage() {
     return formState.htmlContent;
   }, [formState.htmlContent]);
 
+  const previewDocument = useMemo(() => {
+    if (!previewHtml) {
+      return "";
+    }
+
+    return `<!doctype html><html lang="ja"><head><meta charset="UTF-8" /><title>${
+      formState.subject || "メルマガプレビュー"
+    }</title></head><body>${previewHtml}</body></html>`;
+  }, [formState.subject, previewHtml]);
+
+  const handleOpenPreview = () => {
+    if (!previewDocument) {
+      return;
+    }
+
+    const previewBlob = new Blob([previewDocument], { type: "text/html" });
+    const previewUrl = URL.createObjectURL(previewBlob);
+    const previewWindow = window.open(previewUrl, "_blank", "noopener");
+
+    if (previewWindow) {
+      previewWindow.focus();
+    }
+
+    window.setTimeout(() => {
+      URL.revokeObjectURL(previewUrl);
+    }, 1000);
+  };
+
   return (
     <>
       <Head>
@@ -191,19 +219,26 @@ export default function NewsletterSettingsPage() {
             </div>
 
             <div className={styles.previewGrid}>
-              {previewHtml ? (
-                <iframe
-                  title="Newsletter preview"
-                  className={styles.previewFrame}
-                  srcDoc={previewHtml}
-                  sandbox=""
-                />
-              ) : (
-                <div className={styles.emptyPreview}>HTML本文を入力するとプレビューが表示されます。</div>
-              )}
-              <p className={styles.previewHint}>
-                画像や外部リンクを利用する場合は、HTTPSでアクセスできるURLをご利用ください。メールクライアントによってはスタイルが簡略化されます。
-              </p>
+              <div className={styles.previewActions}>
+                <div className={styles.previewButtons}>
+                  <button
+                    type="button"
+                    className={formStyles.secondaryButton}
+                    onClick={handleOpenPreview}
+                    disabled={!previewDocument || loading}
+                  >
+                    別ページでプレビューを開く
+                  </button>
+                </div>
+                <div className={styles.previewDescription}>
+                  <p className={styles.previewHint}>
+                    画像や外部リンクを利用する場合は、HTTPSでアクセスできるURLをご利用ください。メールクライアントによってはスタイルが簡略化されます。
+                  </p>
+                  {!previewHtml && (
+                    <p className={styles.previewHint}>HTML本文を入力すると、別ページでプレビューを確認できます。</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </form>
