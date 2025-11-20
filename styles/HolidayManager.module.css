@@ -4,6 +4,55 @@
   gap: clamp(1.5rem, 3vw, 2.5rem);
 }
 
+.storeSelection {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 1.25rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+}
+
+.storeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.storeLinkCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(203, 213, 225, 0.75);
+  border-radius: 0.9rem;
+  background: #ffffff;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.storeLinkCard:hover,
+.storeLinkCard:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+  border-color: rgba(59, 130, 246, 0.6);
+  outline: none;
+}
+
+.storeLinkLabel {
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.95);
+}
+
+.storeLinkAction {
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
 .storeSection {
   display: flex;
   flex-direction: column;
