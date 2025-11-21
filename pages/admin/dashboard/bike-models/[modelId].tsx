@@ -170,6 +170,12 @@ export default function BikeModelDetailPage() {
       return;
     }
 
+    const classId = Number(detailForm.classId);
+    if (!bikeClasses.some((item) => item.classId === classId)) {
+      setDetailError("選択されたクラスが存在しません。");
+      return;
+    }
+
     if (isSavingDetail) return;
 
     let uploadedMainImageUrl: string | undefined;
@@ -192,32 +198,64 @@ export default function BikeModelDetailPage() {
       uploadedMainImageUrl ??
       (detailForm.mainImageUrl.trim() ? detailForm.mainImageUrl.trim() : undefined);
 
-    const updated: BikeModel = {
-      ...model,
-      classId: Number(detailForm.classId),
+    const updated: Record<string, unknown> = {
+      modelId: model.modelId,
+      classId,
       modelName: detailForm.modelName.trim(),
       publishStatus: detailForm.publishStatus,
-      displacementCc: toNumber(detailForm.displacementCc),
-      requiredLicense: detailForm.requiredLicense,
-      lengthMm: toNumber(detailForm.lengthMm),
-      widthMm: toNumber(detailForm.widthMm),
-      heightMm: toNumber(detailForm.heightMm),
-      seatHeightMm: toNumber(detailForm.seatHeightMm),
-      seatCapacity: toNumber(detailForm.seatCapacity),
-      vehicleWeightKg: toNumber(detailForm.vehicleWeightKg),
-      fuelTankCapacityL: toNumber(detailForm.fuelTankCapacityL),
-      fuelType: detailForm.fuelType,
-      maxPower: detailForm.maxPower,
-      maxTorque: detailForm.maxTorque,
-      mainImageUrl: normalizedMainImageUrl,
     };
+
+    const numberFields: Array<
+      keyof Pick<
+        ModelFormState,
+        | "displacementCc"
+        | "lengthMm"
+        | "widthMm"
+        | "heightMm"
+        | "seatHeightMm"
+        | "seatCapacity"
+        | "vehicleWeightKg"
+        | "fuelTankCapacityL"
+      >
+    > = [
+      "displacementCc",
+      "lengthMm",
+      "widthMm",
+      "heightMm",
+      "seatHeightMm",
+      "seatCapacity",
+      "vehicleWeightKg",
+      "fuelTankCapacityL",
+    ];
+
+    numberFields.forEach((field) => {
+      const value = toNumber(detailForm[field]);
+      if (value !== undefined) {
+        updated[field] = value;
+      }
+    });
+
+    const stringFields: Array<
+      keyof Pick<ModelFormState, "requiredLicense" | "fuelType" | "maxPower" | "maxTorque">
+    > = ["requiredLicense", "fuelType", "maxPower", "maxTorque"];
+
+    stringFields.forEach((field) => {
+      const value = detailForm[field].trim();
+      if (value) {
+        updated[field] = value;
+      }
+    });
+
+    if (normalizedMainImageUrl) {
+      updated.mainImageUrl = normalizedMainImageUrl;
+    }
 
     setIsSavingDetail(true);
     setDetailError(null);
     setDetailSuccess(null);
 
     try {
-      const response = await fetch(`/api/bike-models/${model.modelId}`, {
+      const response = await fetch("/api/bike-models", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated),
