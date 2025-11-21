@@ -102,6 +102,9 @@ const RegisterAuthPage: NextPage = () => {
         if (data.member?.username) {
           query.set('name', data.member.username);
         }
+        if (data.member?.id) {
+          query.set('user_id', data.member.id);
+        }
         const emailForRedirect = data.member?.email ?? normalizedEmail;
         if (emailForRedirect) {
           query.set('email', emailForRedirect);
@@ -153,6 +156,9 @@ const RegisterAuthPage: NextPage = () => {
       const query = new URLSearchParams();
       if (data.member?.username) {
         query.set('name', data.member.username);
+      }
+      if (data.member?.id) {
+        query.set('user_id', data.member.id);
       }
       const emailForRedirect = data.member?.email ?? normalizedEmail;
       if (emailForRedirect) {
