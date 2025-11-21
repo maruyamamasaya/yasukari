@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Buffer } from "buffer";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
@@ -30,6 +31,8 @@ export default function BikeModelDetailPage() {
   const [detailError, setDetailError] = useState<string | null>(null);
   const [detailSuccess, setDetailSuccess] = useState<string | null>(null);
   const [isSavingDetail, setIsSavingDetail] = useState(false);
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (modelId == null) {
@@ -117,6 +120,39 @@ export default function BikeModelDetailPage() {
     [bikeClasses]
   );
 
+  const uploadMainImage = async (file: File) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const base64Data = Buffer.from(arrayBuffer).toString("base64");
+
+    const response = await fetch("/api/bike-models/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fileName: file.name,
+        contentType: file.type || "application/octet-stream",
+        data: base64Data,
+      }),
+    });
+
+    const result = (await response.json().catch(() => null)) as
+      | { url?: string; message?: string }
+      | null;
+
+    if (!response.ok || !result?.url) {
+      throw new Error(result?.message ?? "メイン画像のアップロードに失敗しました。");
+    }
+
+    return result.url;
+  };
+
+  const handleClearMainImage = () => {
+    setMainImageFile(null);
+    setDetailForm((prev) => (prev ? { ...prev, mainImageUrl: "" } : prev));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleDetailSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -133,6 +169,28 @@ export default function BikeModelDetailPage() {
       setDetailError("クラスを選択してください。");
       return;
     }
+
+    if (isSavingDetail) return;
+
+    let uploadedMainImageUrl: string | undefined;
+
+    if (mainImageFile) {
+      try {
+        uploadedMainImageUrl = await uploadMainImage(mainImageFile);
+      } catch (uploadError) {
+        console.error("Failed to upload main image", uploadError);
+        setDetailError(
+          uploadError instanceof Error
+            ? uploadError.message
+            : "メイン画像のアップロードに失敗しました。"
+        );
+        return;
+      }
+    }
+
+    const normalizedMainImageUrl =
+      uploadedMainImageUrl ??
+      (detailForm.mainImageUrl.trim() ? detailForm.mainImageUrl.trim() : undefined);
 
     const updated: BikeModel = {
       ...model,
@@ -151,7 +209,7 @@ export default function BikeModelDetailPage() {
       fuelType: detailForm.fuelType,
       maxPower: detailForm.maxPower,
       maxTorque: detailForm.maxTorque,
-      mainImageUrl: detailForm.mainImageUrl,
+      mainImageUrl: normalizedMainImageUrl,
     };
 
     setIsSavingDetail(true);
@@ -166,13 +224,20 @@ export default function BikeModelDetailPage() {
       });
 
       if (!response.ok) {
-        setDetailError("車種の更新に失敗しました。");
+        const errorBody = (await response.json().catch(() => null)) as
+          | { message?: string }
+          | null;
+        setDetailError(errorBody?.message ?? "車種の更新に失敗しました。");
         return;
       }
 
       const updatedModel: BikeModel = await response.json();
       setModel(updatedModel);
       setDetailSuccess("車種情報を更新しました。");
+      setMainImageFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       setIsDetailEditing(false);
     } catch (saveError) {
       console.error("Failed to update bike model", saveError);
@@ -565,18 +630,48 @@ export default function BikeModelDetailPage() {
                 <dt>メイン画像URL</dt>
                 <dd>
                   {isDetailEditing ? (
-                    <div className={formStyles.field}>
-                      <input
-                        value={detailForm?.mainImageUrl ?? ""}
-                        onChange={(event) =>
-                          setDetailForm((prev) =>
-                            prev ? { ...prev, mainImageUrl: event.target.value } : prev
-                          )
-                        }
-                      />
-                    </div>
+                    <>
+                      <div className={formStyles.field}>
+                        <input
+                          value={detailForm?.mainImageUrl ?? ""}
+                          onChange={(event) =>
+                            setDetailForm((prev) =>
+                              prev ? { ...prev, mainImageUrl: event.target.value } : prev
+                            )
+                          }
+                        />
+                      </div>
+                      <div className={formStyles.inlineControls}>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0] ?? null;
+                            setMainImageFile(file);
+                            setDetailError(null);
+                          }}
+                        />
+                        {mainImageFile && (
+                          <span className={formStyles.hint}>選択中: {mainImageFile.name}</span>
+                        )}
+                        <button
+                          type="button"
+                          className={styles.tableToolbarButton}
+                          onClick={handleClearMainImage}
+                        >
+                          メイン画像をクリア
+                        </button>
+                      </div>
+                      <p className={formStyles.hint}>
+                        ファイルを選択すると保存時にアップロードされ、既存の画像URLを上書きできます。
+                        空欄のまま保存するとメイン画像を削除します。
+                      </p>
+                    </>
                   ) : model.mainImageUrl ? (
-                    model.mainImageUrl
+                    <a href={model.mainImageUrl} target="_blank" rel="noreferrer">
+                      {model.mainImageUrl}
+                    </a>
                   ) : (
                     "-"
                   )}
