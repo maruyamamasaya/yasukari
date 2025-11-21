@@ -170,6 +170,7 @@ const RegisterTestPage: NextPage = () => {
   const [formData, setFormData] = useState<RegisterFormData>(defaultFormData);
   const [licenseFileName, setLicenseFileName] = useState('');
   const [submitMessage, setSubmitMessage] = useState('');
+  const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | ''>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const autofillRef = useRef(false);
@@ -177,6 +178,8 @@ const RegisterTestPage: NextPage = () => {
   useEffect(() => {
     setFormData(defaultFormData);
     setLicenseFileName('');
+    setSubmitStatus('');
+    setSubmitMessage('');
     autofillRef.current = false;
   }, [defaultFormData]);
 
@@ -217,20 +220,66 @@ const RegisterTestPage: NextPage = () => {
     setLicenseFileName(file ? file.name : '');
   }, []);
 
+  const userIdFromQuery = useMemo(
+    () => decodeParam(router.query.user_id) || decodeParam(router.query.sub),
+    [router.query.sub, router.query.user_id],
+  );
+
+  const resolvedUserId = useMemo(
+    () => userIdFromQuery || (displayEmail === PREVIEW_EMAIL ? 'preview-test-user' : ''),
+    [displayEmail, userIdFromQuery],
+  );
+
   const handleSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
+    async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setSubmitMessage('');
+      setSubmitStatus('');
       if (submitTimeoutRef.current) {
         clearTimeout(submitTimeoutRef.current);
       }
+
+      if (!resolvedUserId) {
+        setSubmitStatus('error');
+        setSubmitMessage('ユーザーIDが取得できませんでした。Cognito の sub をクエリパラメータで指定してください。');
+        return;
+      }
+
       setIsSubmitting(true);
-      submitTimeoutRef.current = setTimeout(() => {
-        setIsSubmitting(false);
-        setSubmitMessage('テスト用の登録情報を送信しました。（ダミー処理）');
-      }, 600);
+
+      try {
+        const response = await fetch('/api/register/store-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: resolvedUserId,
+            email: displayEmail,
+            license_file_name: licenseFileName,
+            ...formData,
+          }),
+        });
+
+        const result = (await response.json()) as { message?: string };
+
+        if (!response.ok) {
+          throw new Error(result.message || '保存に失敗しました。');
+        }
+
+        setSubmitStatus('success');
+        setSubmitMessage(result.message || '登録情報を保存しました。');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '保存に失敗しました。';
+        setSubmitStatus('error');
+        setSubmitMessage(message);
+      } finally {
+        submitTimeoutRef.current = setTimeout(() => {
+          setIsSubmitting(false);
+        }, 400);
+      }
     },
-    [],
+    [displayEmail, formData, licenseFileName, resolvedUserId],
   );
 
   return (
@@ -297,7 +346,15 @@ const RegisterTestPage: NextPage = () => {
             </div>
 
             {submitMessage && (
-              <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{submitMessage}</div>
+              <div
+                className={`mt-6 rounded-lg px-4 py-3 text-sm ${
+                  submitStatus === 'error'
+                    ? 'border border-red-200 bg-red-50 text-red-700'
+                    : 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                }`}
+              >
+                {submitMessage}
+              </div>
             )}
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-12" noValidate>
