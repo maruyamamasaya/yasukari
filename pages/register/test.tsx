@@ -118,11 +118,12 @@ const decodeParam = (param: string | string[] | undefined, fallback = ''): strin
 
 const RegisterTestPage: NextPage = () => {
   const router = useRouter();
+  const [sessionUser, setSessionUser] = useState<{ id: string; email?: string } | null>(null);
 
   const displayEmail = useMemo(() => {
-    const decoded = decodeParam(router.query.email, PREVIEW_EMAIL).trim();
+    const decoded = decodeParam(router.query.email, sessionUser?.email || PREVIEW_EMAIL).trim();
     return decoded || PREVIEW_EMAIL;
-  }, [router.query.email]);
+  }, [router.query.email, sessionUser?.email]);
 
   const rawName = useMemo(() => decodeParam(router.query.name).trim(), [router.query.name]);
 
@@ -176,6 +177,31 @@ const RegisterTestPage: NextPage = () => {
   const autofillRef = useRef(false);
 
   useEffect(() => {
+    let canceled = false;
+
+    const fetchSessionUser = async () => {
+      try {
+        const response = await fetch('/api/me');
+        if (!response.ok) {
+          return;
+        }
+        const data = (await response.json()) as { user?: { id?: string; email?: string } };
+        if (!canceled && data.user?.id) {
+          setSessionUser({ id: data.user.id, email: data.user.email });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchSessionUser();
+
+    return () => {
+      canceled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     setFormData(defaultFormData);
     setLicenseFileName('');
     setSubmitStatus('');
@@ -226,8 +252,8 @@ const RegisterTestPage: NextPage = () => {
   );
 
   const resolvedUserId = useMemo(
-    () => userIdFromQuery || (displayEmail === PREVIEW_EMAIL ? 'preview-test-user' : ''),
-    [displayEmail, userIdFromQuery],
+    () => userIdFromQuery || sessionUser?.id || (displayEmail === PREVIEW_EMAIL ? 'preview-test-user' : ''),
+    [displayEmail, sessionUser?.id, userIdFromQuery],
   );
 
   const handleSubmit = useCallback(
