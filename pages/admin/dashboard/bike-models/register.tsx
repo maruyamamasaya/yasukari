@@ -74,20 +74,16 @@ export default function BikeModelRegisterPage() {
     void loadClasses();
   }, []);
 
-  const uploadMainImage = async () => {
-    if (!mainImageFile) {
-      throw new Error("メイン画像を選択してください。");
-    }
-
-    const arrayBuffer = await mainImageFile.arrayBuffer();
+  const uploadMainImage = async (file: File) => {
+    const arrayBuffer = await file.arrayBuffer();
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
 
     const response = await fetch("/api/bike-models/upload", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        fileName: mainImageFile.name,
-        contentType: mainImageFile.type || "application/octet-stream",
+        fileName: file.name,
+        contentType: file.type || "application/octet-stream",
         data: base64Data,
       }),
     });
@@ -103,6 +99,13 @@ export default function BikeModelRegisterPage() {
     return result.url;
   };
 
+  const handleClearMainImage = () => {
+    setMainImageFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSuccess(null);
@@ -116,10 +119,6 @@ export default function BikeModelRegisterPage() {
       setError("車種名を入力してください。");
       return;
     }
-    if (!mainImageFile) {
-      setError("メイン画像を選択してください。");
-      return;
-    }
 
     const classId = Number(form.classId);
     if (!bikeClasses.some((item) => item.classId === classId)) {
@@ -127,17 +126,22 @@ export default function BikeModelRegisterPage() {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const mainImageUrl = await uploadMainImage();
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+      const mainImageUrl = mainImageFile
+        ? await uploadMainImage(mainImageFile)
+        : undefined;
 
       const payload: Record<string, unknown> = {
         classId,
         modelName: form.modelName.trim(),
         publishStatus: form.publishStatus,
-        mainImageUrl,
       };
+
+      if (mainImageUrl) {
+        payload.mainImageUrl = mainImageUrl;
+      }
 
       const numberFields: Array<
         keyof Pick<
@@ -423,8 +427,22 @@ export default function BikeModelRegisterPage() {
                       setMainImageFile(file);
                     }}
                   />
+                  <div className={formStyles.inlineControls}>
+                    <button
+                      type="button"
+                      className={formStyles.secondaryButton}
+                      onClick={handleClearMainImage}
+                      disabled={!mainImageFile}
+                    >
+                      画像を削除
+                    </button>
+                    {mainImageFile && (
+                      <span className={formStyles.hint}>選択中: {mainImageFile.name}</span>
+                    )}
+                  </div>
                   <p className={formStyles.hint}>
-                    100px 四方以内で表示されるサムネイル用の画像をアップロードしてください。
+                    100px 四方以内で表示されるサムネイル用の画像をアップロードしてくださ
+                    い。（任意）
                   </p>
                 </div>
               </div>
