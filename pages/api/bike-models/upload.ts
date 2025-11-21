@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import https from "https";
 import path from "path";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -85,7 +86,7 @@ function encodeS3Key(key: string) {
     .join("/");
 }
 
-async function uploadToS3({
+function uploadToS3({
   key,
   body,
   contentType,
@@ -95,7 +96,6 @@ async function uploadToS3({
   contentType: string;
 }) {
   const host = `${bucketName}.s3.${bucketRegion}.amazonaws.com`;
-  const endpoint = `https://${host}/${encodeS3Key(key)}`;
   const { accessKeyId, secretAccessKey, sessionToken } = getAwsCredentials();
 
   const { amzDate, dateStamp } = getAmzDates(new Date());
@@ -143,9 +143,10 @@ async function uploadToS3({
   const authorization =
     `AWS4-HMAC-SHA256 Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
 
-  const headers: Record<string, string> = {
+  const headers: Record<string, string | number> = {
     Authorization: authorization,
     "Content-Type": contentType,
+    "Content-Length": body.length,
     "x-amz-content-sha256": payloadHash,
     "x-amz-date": amzDate,
   };
@@ -154,20 +155,39 @@ async function uploadToS3({
     headers["x-amz-security-token"] = sessionToken;
   }
 
-  const requestBody = Buffer.from(body);
+  return new Promise<string>((resolve, reject) => {
+    const request = https.request(
+      {
+        hostname: host,
+        path: `/${encodeS3Key(key)}`,
+        method: "PUT",
+        headers,
+      },
+      (response) => {
+        const chunks: Uint8Array[] = [];
+        response.on("data", (chunk) => chunks.push(chunk));
+        response.on("end", () => {
+          const responseBody = Buffer.concat(chunks).toString("utf8");
+          if (response.statusCode && response.statusCode >= 200 && response.statusCode < 300) {
+            resolve(`https://${host}/${encodeS3Key(key)}`);
+          } else {
+            reject(
+              new Error(
+                responseBody || `S3へのアップロードがステータス${response.statusCode ?? "unknown"}で失敗しました。`
+              )
+            );
+          }
+        });
+      }
+    );
 
-  const response = await fetch(endpoint, {
-    method: "PUT",
-    headers,
-    body: requestBody,
+    request.on("error", (error) => {
+      reject(error);
+    });
+
+    request.write(body);
+    request.end();
   });
-
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => "");
-    throw new Error(errorText || "S3へのアップロードに失敗しました。");
-  }
-
-  return endpoint;
 }
 
 export default async function handler(
