@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { getDocumentClient } from '../../../lib/dynamodb';
+import { AUTH_COOKIE_NAME, verifyAuthToken } from '../../../lib/authToken';
 
 const TABLE_NAME = 'yasukariUserMain';
 
@@ -65,10 +66,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
+  const authToken = req.cookies?.[AUTH_COOKIE_NAME];
+  const authPayload = verifyAuthToken(authToken);
+
+  if (!authPayload) {
+    return res.status(401).json({ message: 'Not authenticated' });
+  }
+
   const body = req.body ?? {};
 
   const payload: RegisterPayload = {
-    user_id: toTrimmedString(body.user_id),
+    user_id: authPayload.sub,
     email: toTrimmedString(body.email).toLowerCase(),
     password: toTrimmedString(body.password),
     name1: toTrimmedString(body.name1),
