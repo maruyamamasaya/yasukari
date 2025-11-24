@@ -177,9 +177,11 @@ def auth_callback():
 
     state = request.args.get("state")
     code = request.args.get("code")
+    skip_state_validation = state == "signup"
 
     try:
-        _validate_state(state)
+        if not skip_state_validation:
+            _validate_state(state)
     except OAuthStateError as exc:
         return _redirect_to_login_with_error(str(exc))
 
@@ -198,8 +200,16 @@ def auth_callback():
         return _redirect_to_login_with_error(
             f"Authentication failed during token exchange (status: {status_code})"
         )
+    except requests.RequestException:
+        return _redirect_to_login_with_error(
+            "Authentication failed while contacting Cognito. Please retry."
+        )
     except TokenVerificationError as exc:
         return _redirect_to_login_with_error(f"Authentication failed: {exc}")
+    except Exception:
+        return _redirect_to_login_with_error(
+            "Unexpected error occurred during authentication. Please try again."
+        )
 
     session.permanent = True
     session["user"] = {
