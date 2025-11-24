@@ -68,15 +68,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const authToken = req.cookies?.[AUTH_COOKIE_NAME];
   const authPayload = verifyAuthToken(authToken);
-
-  if (!authPayload) {
-    return res.status(401).json({ message: 'Not authenticated' });
-  }
-
   const body = req.body ?? {};
 
+  const userIdFromBody = toTrimmedString(body.user_id);
+  const userId = authPayload?.sub ?? userIdFromBody;
+
+  if (authPayload && userIdFromBody && authPayload.sub !== userIdFromBody) {
+    return res.status(400).json({ message: 'ユーザーIDが一致しません。' });
+  }
+
+  if (!userId) {
+    return res.status(400).json({ message: 'ユーザーIDが取得できませんでした。' });
+  }
+
   const payload: RegisterPayload = {
-    user_id: authPayload.sub,
+    user_id: userId,
     email: toTrimmedString(body.email).toLowerCase(),
     password: toTrimmedString(body.password),
     name1: toTrimmedString(body.name1),
