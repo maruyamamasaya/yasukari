@@ -2,31 +2,20 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { buildAuthorizeUrl, buildSignupUrl } from '../lib/cognitoHostedUi';
 
 export default function LoginPage() {
   const router = useRouter();
   const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState('');
   const [startingLogin, setStartingLogin] = useState(false);
-  const apiBase = (process.env.NEXT_PUBLIC_API_ORIGIN ?? '').replace(/\/$/, '');
-  const hostedUiDomain = (process.env.NEXT_PUBLIC_COGNITO_DOMAIN ??
-    'https://ap-northeast-17pdere9jo.auth.ap-northeast-1.amazoncognito.com').replace(/\/$/, '');
-  const hostedUiClientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? 'vicsspgv2q7mtn6m6os2n893j';
-  const hostedUiRedirectUri = process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI ?? 'https://yasukaribike.com/auth/callback';
-  const signupSearchParams = new URLSearchParams({
-    client_id: hostedUiClientId,
-    response_type: 'code',
-    scope: 'openid email phone',
-    redirect_uri: hostedUiRedirectUri,
-    state: 'signup',
-  });
-  const hostedUiSignupUrl = `${hostedUiDomain}/signup?${signupSearchParams.toString()}`;
+  const hostedUiSignupUrl = buildSignupUrl();
 
   useEffect(() => {
     const controller = new AbortController();
     const checkSession = async () => {
       try {
-        const response = await fetch(`${apiBase}/api/me`, {
+        const response = await fetch('/api/me', {
           credentials: 'include',
           signal: controller.signal,
         });
@@ -53,7 +42,7 @@ export default function LoginPage() {
 
     void checkSession();
     return () => controller.abort();
-  }, [apiBase, router]);
+  }, [router]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -70,26 +59,11 @@ export default function LoginPage() {
     setError('');
     setStartingLogin(true);
     try {
-      const response = await fetch(`${apiBase}/auth/login`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error(`unexpected status: ${response.status}`);
-      }
-
-      const data = (await response.json()) as { authorize_url?: string };
-
-      if (!data.authorize_url) {
-        throw new Error('authorize_url missing');
-      }
-
-      window.location.href = data.authorize_url;
+      const state = crypto.randomUUID();
+      window.location.href = buildAuthorizeUrl(state);
     } catch (err) {
       console.error(err);
       setError('ログイン処理を開始できませんでした。時間をおいて再度お試しください。');
-    } finally {
-      setStartingLogin(false);
     }
   };
 
@@ -120,7 +94,8 @@ export default function LoginPage() {
                 会員ならではの限定キャンペーンもこちらでお知らせしています。
               </p>
               <ul className="mt-4 space-y-3 text-sm text-gray-700">
-                {[{ text: '最新のレンタル状況と履歴をいつでもチェック' }, { text: 'オンラインで延長・オプション追加が完結' }, { text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
+                {[{ text: '最新のレンタル状況と履歴をいつでもチェック' }, { text: 'オンラインで延長・オプション追加が完結' }, {
+text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                   (item) => (
                     <li key={item.text} className="flex items-start gap-3">
                       <span className="mt-1 h-2.5 w-2.5 rounded-full bg-red-500" aria-hidden="true" />
@@ -170,7 +145,7 @@ export default function LoginPage() {
                   <li>「ログイン画面へ進む」ボタンを押して Cognito のログイン画面へ</li>
                   <li>認証後は {process.env.NEXT_PUBLIC_SITE_NAME ?? 'マイページ'} にリダイレクト</li>
                   <li>初回ログイン時は会員情報の入力（仮登録）を案内し、本登録ののち DynamoDB にユーザー情報を保存</li>
-                  <li>ログイン状態はサーバー側セッションで管理されます</li>
+                  <li>ログイン状態は Cognito のトークンを用いて検証します</li>
                 </ol>
               </div>
               <p className="mt-6 text-center text-xs text-gray-500">

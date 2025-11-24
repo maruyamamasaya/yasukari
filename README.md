@@ -74,9 +74,9 @@ yasukari公式ホームページリニューアル
 - 認証コード検証API `/api/register/verify` を実装し、成功時にライト会員を作成するよう変更
 
 ### v0.62
-- Amazon Cognito 連携の Flask バックエンドと連携するログインフローを整備
-- `/auth/login`・`/auth/callback`・`/auth/logout`・`/api/me` エンドポイントを追加
-- ヘッダーと `/login` `/mypage` の UI を Cognito セッションに対応させ、サインイン状態を表示
+- Cognito Hosted UI を用いたログインフローへ移行し、Flask への依存を排除
+- `/auth/callback` `/auth/logout` ページでトークンの保存/破棄を行い、`/api/me` は Cognito ID トークンを検証
+- DynamoDB への会員登録 API は従来通り維持し、Cognito で取得したユーザーIDを保存
 ## 主要ディレクトリ
 - `components/` - React コンポーネント群
 - `pages/` - Next.js ページ
