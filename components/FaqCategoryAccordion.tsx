@@ -13,9 +13,9 @@ export default function FaqCategoryAccordion({
 }: {
   categories: FaqCategory[];
 }) {
-  // start with all categories collapsed
+  // start with all categories expanded so questions are immediately visible
   const [openIndexes, setOpenIndexes] = useState<boolean[]>(
-    categories.map(() => false)
+    categories.map(() => true)
   );
 
   const toggle = (idx: number) => {
@@ -38,9 +38,7 @@ export default function FaqCategoryAccordion({
               aria-expanded={isOpen}
             >
               <div className="faq-category-trigger__text">
-                <span className="faq-category-trigger__badge">カテゴリ</span>
                 <span className="flex-1">{cat.title}</span>
-                <span className="faq-category-trigger__count">{cat.faqs.length} 件</span>
               </div>
               <FaChevronDown
                 className={`faq-category-trigger__icon ${isOpen ? 'rotate-180' : ''}`}
