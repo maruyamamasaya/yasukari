@@ -8,35 +8,36 @@ export default function HelpPage() {
   const faqs: FAQItem[] = categories.flatMap((c) => c.faqs);
 
   return (
-    <div className="help-page">
+    <div className="space-y-12">
       <Head>
         <title>ヘルプ - yasukari</title>
       </Head>
 
-      <section className="help-hero">
-        <div className="help-hero__orbit" aria-hidden />
-        <div className="help-hero__media">
+      <section className="grid gap-6 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm md:grid-cols-[1.05fr,1fr] md:p-8">
+        <div className="overflow-hidden rounded-xl ring-1 ring-slate-100">
           <img
             src="https://yasukari.com/static/images/faq/barner.jpg"
             alt="ヘルプバナー"
-            className="help-hero__image"
+            className="h-full w-full object-cover"
           />
         </div>
-        <div className="help-hero__content">
-          <p className="help-hero__eyebrow">Support Center</p>
-          <h1>ヘルプ</h1>
-          <p>
+        <div className="flex flex-col gap-3 self-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-rose-600">Support Center</p>
+          <h1 className="text-2xl font-bold text-slate-900">ヘルプ</h1>
+          <p className="text-sm leading-relaxed text-slate-700">
             よくある質問やお問い合わせ方法をまとめました。必要な情報を最速で見つけられるよう、
-            スムーズなアニメーションとシンプルな導線にアップデートしています。
+            シンプルで見やすいレイアウトにしています。
           </p>
         </div>
       </section>
 
-      <section className="help-section">
-        <div className="help-section__header">
-          <span className="help-section__eyebrow">FAQ</span>
-          <h2>よくある質問</h2>
-          <p>カテゴリ別に整理された質問をアコーディオンで確認できます。</p>
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm md:p-8">
+        <div className="text-center space-y-2">
+          <span className="inline-flex items-center justify-center rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-rose-700">
+            FAQ
+          </span>
+          <h2 className="text-xl font-bold text-slate-900">よくある質問</h2>
+          <p className="text-sm text-slate-600">カテゴリ別に整理された質問をアコーディオンで確認できます。</p>
         </div>
         <FaqCategoryAccordion categories={categories} />
         <script
@@ -55,24 +56,26 @@ export default function HelpPage() {
         />
       </section>
 
-      <section className="help-section help-contact">
-        <div className="help-section__header">
-          <span className="help-section__eyebrow">Contact</span>
-          <h2>お問い合わせ</h2>
-          <p>お急ぎの際はお電話で、その他はメールや来店でも承ります。</p>
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm md:p-8">
+        <div className="text-center space-y-2">
+          <span className="inline-flex items-center justify-center rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-rose-700">
+            Contact
+          </span>
+          <h2 className="text-xl font-bold text-slate-900">お問い合わせ</h2>
+          <p className="text-sm text-slate-600">お急ぎの際はお電話で、その他はメールや来店でも承ります。</p>
         </div>
-        <ul className="help-contact__list">
-          <li>
-            <span className="help-contact__label">電話</span>
-            <span className="help-contact__value">03-5856-8075</span>
+        <ul className="divide-y divide-slate-200 rounded-xl bg-rose-50/60 ring-1 ring-rose-100">
+          <li className="grid grid-cols-1 gap-1 px-4 py-3 text-sm font-medium text-slate-800 sm:grid-cols-[120px,1fr] sm:items-center sm:px-5 sm:py-4">
+            <span className="text-rose-700">電話</span>
+            <span className="font-semibold text-slate-900">03-5856-8075</span>
           </li>
-          <li>
-            <span className="help-contact__label">メール</span>
-            <span className="help-contact__value">info@yasukari.com</span>
+          <li className="grid grid-cols-1 gap-1 px-4 py-3 text-sm font-medium text-slate-800 sm:grid-cols-[120px,1fr] sm:items-center sm:px-5 sm:py-4">
+            <span className="text-rose-700">メール</span>
+            <span className="font-semibold text-slate-900">info@yasukari.com</span>
           </li>
-          <li>
-            <span className="help-contact__label">住所</span>
-            <span className="help-contact__value">東京都足立区小台2-9-7 1階</span>
+          <li className="grid grid-cols-1 gap-1 px-4 py-3 text-sm font-medium text-slate-800 sm:grid-cols-[120px,1fr] sm:items-center sm:px-5 sm:py-4">
+            <span className="text-rose-700">住所</span>
+            <span className="font-semibold text-slate-900">東京都足立区小台2-9-7 1階</span>
           </li>
         </ul>
       </section>
