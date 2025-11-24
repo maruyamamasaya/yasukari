@@ -27,6 +27,7 @@ export default function Header() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [startingLogin, setStartingLogin] = useState(false);
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
@@ -34,8 +35,33 @@ export default function Header() {
   const langHref = isEn ? '/' : '/en';
   const langLabel = isEn ? 'JP' : 'EN';
   const apiBase = (process.env.NEXT_PUBLIC_API_ORIGIN ?? '').replace(/\/$/, '');
-  const loginHref = `${apiBase}/auth/login`;
   const logoutHref = `${apiBase}/auth/logout`;
+
+  const startLogin = async () => {
+    setStartingLogin(true);
+    try {
+      const response = await fetch(`${apiBase}/auth/login`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`unexpected status: ${response.status}`);
+      }
+
+      const data = (await response.json()) as { authorize_url?: string };
+
+      if (!data.authorize_url) {
+        throw new Error('authorize_url missing');
+      }
+
+      window.location.href = data.authorize_url;
+    } catch (error) {
+      console.error('Failed to start login', error);
+      alert('ログイン処理を開始できませんでした。時間をおいて再度お試しください。');
+    } finally {
+      setStartingLogin(false);
+    }
+  };
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -167,9 +193,14 @@ export default function Header() {
                   </a>
                 </>
               ) : (
-                <a href={loginHref} className="hidden sm:inline-flex">
-                  <NavItem icon={<FaUser />} label="ログイン" />
-                </a>
+                <button
+                  type="button"
+                  onClick={startLogin}
+                  className="hidden sm:inline-flex"
+                  disabled={startingLogin}
+                >
+                  <NavItem icon={<FaUser />} label={startingLogin ? '接続中…' : 'ログイン'} />
+                </button>
               )}
               <Link href="/pricing">
                 <NavItem icon={<FaClipboardList />} label="車種・料金" />
@@ -248,9 +279,14 @@ export default function Header() {
                     </a>
                   </>
                 ) : (
-                  <a href={loginHref} className="inline-flex">
-                    <NavItem icon={<FaUser />} label="ログイン" />
-                  </a>
+                  <button
+                    type="button"
+                    onClick={startLogin}
+                    className="inline-flex"
+                    disabled={startingLogin}
+                  >
+                    <NavItem icon={<FaUser />} label={startingLogin ? '接続中…' : 'ログイン'} />
+                  </button>
                 )}
               </li>
               <li>
