@@ -222,80 +222,9 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
 
       <HeroSlider slides={heroSlides} />
 
-      <section className="section-surface section-padding">
-        <SectionHeading
-          eyebrow="Trending Now"
-          title="注目キーワード"
-          description="季節のおすすめや人気カテゴリから、気になるトピックをすぐにチェックできます。気軽な散策から本格ツーリングまで、あなたの目的に合うキーワードをピックアップ。"
-        />
-        <div className="flex flex-wrap justify-center gap-3">
-          {hotKeywords.map((k, idx) => (
-            <Link
-              key={idx}
-              href={k.href}
-              className="group inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_12px_28px_-18px_rgba(220,38,38,0.35)] transition hover:-translate-y-0.5 hover:border-red-200 hover:bg-white"
-            >
-              <FaHashtag className="text-base text-red-500 transition group-hover:text-red-600" />
-              <span>{k.label}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-surface section-padding">
-        <SectionHeading
-          eyebrow="Why yasukari"
-          title="選ばれる3つの理由"
-          description="スムーズな予約体験、整備士による徹底管理、そしてライダー目線のサポート。最新のオンライン体験で、旅の準備時間をぐっと短縮します。"
-        />
-        <div className="grid gap-6 md:grid-cols-3">
-          {featureHighlights.map((feature) => (
-            <FeatureHighlight key={feature.title} {...feature} />
-          ))}
-        </div>
-      </section>
-
-      <section className="section-surface section-padding">
-        <SectionHeading
-          eyebrow="News & Blog"
-          title="新着ブログ・お知らせ"
-          description="店舗からのお知らせや、レンタルのコツをスタッフが発信中。旅前の準備に役立つコンテンツを毎週更新しています。"
-        />
-        <div className="mt-8">
-          <Swiper
-            modules={[Autoplay, Navigation, Pagination]}
-            spaceBetween={16}
-            navigation
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 3200 }}
-            loop
-            breakpoints={{
-              0: { slidesPerView: 1 },
-              640: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-            }}
-          >
-            {blogSlides.map((card, index) => (
-              <SwiperSlide key={index}>
-                <Link href={card.href} className="block h-full">
-                  <div className="blog-slide h-full">
-                    <img src={card.img} alt={card.title} className="h-full w-full object-cover" />
-                    <div className="blog-slide-title">{card.title}</div>
-                  </div>
-                </Link>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-      </section>
-
       <RecentlyViewed />
 
       <BikeLineup bikes={bikeModelsAll} />
-
-      <BikeModelCarousel items={bikeModels} />
-
-      <GenreCarousel items={genreItems} />
 
       <section className="section-surface section-padding">
         <SectionHeading
@@ -332,6 +261,23 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
         </div>
       </section>
 
+      <BikeModelCarousel items={bikeModels} />
+
+      <GenreCarousel items={genreItems} />
+
+      <section className="section-surface section-padding">
+        <SectionHeading
+          eyebrow="Why yasukari"
+          title="選ばれる3つの理由"
+          description="スムーズな予約体験、整備士による徹底管理、そしてライダー目線のサポート。最新のオンライン体験で、旅の準備時間をぐっと短縮します。"
+        />
+        <div className="grid gap-6 md:grid-cols-3">
+          {featureHighlights.map((feature) => (
+            <FeatureHighlight key={feature.title} {...feature} />
+          ))}
+        </div>
+      </section>
+
       <HowToUse />
 
       <section className="section-surface section-padding">
@@ -363,6 +309,60 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
             }),
           }}
         />
+      </section>
+
+      <section className="section-surface section-padding">
+        <SectionHeading
+          eyebrow="News & Blog"
+          title="新着ブログ・お知らせ"
+          description="店舗からのお知らせや、レンタルのコツをスタッフが発信中。旅前の準備に役立つコンテンツを毎週更新しています。"
+        />
+        <div className="mt-8">
+          <Swiper
+            modules={[Autoplay, Navigation, Pagination]}
+            spaceBetween={16}
+            navigation
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 3200 }}
+            loop
+            breakpoints={{
+              0: { slidesPerView: 1 },
+              640: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+          >
+            {blogSlides.map((card, index) => (
+              <SwiperSlide key={index}>
+                <Link href={card.href} className="block h-full">
+                  <div className="blog-slide h-full">
+                    <img src={card.img} alt={card.title} className="h-full w-full object-cover" />
+                    <div className="blog-slide-title">{card.title}</div>
+                  </div>
+                </Link>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+      </section>
+
+      <section className="section-surface section-padding">
+        <SectionHeading
+          eyebrow="Trending Now"
+          title="注目キーワード"
+          description="季節のおすすめや人気カテゴリから、気になるトピックをすぐにチェックできます。気軽な散策から本格ツーリングまで、あなたの目的に合うキーワードをピックアップ。"
+        />
+        <div className="flex flex-wrap justify-center gap-3">
+          {hotKeywords.map((k, idx) => (
+            <Link
+              key={idx}
+              href={k.href}
+              className="group inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_12px_28px_-18px_rgba(220,38,38,0.35)] transition hover:-translate-y-0.5 hover:border-red-200 hover:bg-white"
+            >
+              <FaHashtag className="text-base text-red-500 transition group-hover:text-red-600" />
+              <span>{k.label}</span>
+            </Link>
+          ))}
+        </div>
       </section>
     </>
   );
