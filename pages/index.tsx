@@ -280,35 +280,37 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
 
       <HowToUse />
 
-      <section className="section-surface section-padding">
-        <SectionHeading
-          eyebrow="FAQ"
-          title="よくある質問"
-          description="料金や補償、予約変更に関する疑問をまとめました。困ったときはチャットからもすぐにご相談いただけます。"
-        />
-        <FaqAccordion faqs={faqs} />
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
-            はじめてガイドで利用の流れを詳しく知る
-          </Link>
-          <Link href="/help" className="btn-primary w-full justify-center sm:w-auto">
-            その他のよくあるご質問をもっと見る
-          </Link>
+      <section className="section-surface section-padding faq-section">
+        <div className="faq-section__inner">
+          <SectionHeading
+            eyebrow="FAQ"
+            title="よくある質問"
+            description="料金や補償、予約変更に関する疑問をまとめました。困ったときはチャットからもすぐにご相談いただけます。"
+          />
+          <FaqAccordion faqs={faqs} />
+          <div className="faq-section__actions mt-8">
+            <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
+              はじめてガイドで利用の流れを詳しく知る
+            </Link>
+            <Link href="/help" className="btn-primary w-full justify-center sm:w-auto">
+              その他のよくあるご質問をもっと見る
+            </Link>
+          </div>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: faqs.map((f) => ({
+                  "@type": "Question",
+                  name: f.q,
+                  acceptedAnswer: { "@type": "Answer", text: f.a },
+                })),
+              }),
+            }}
+          />
         </div>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: faqs.map((f) => ({
-                "@type": "Question",
-                name: f.q,
-                acceptedAnswer: { "@type": "Answer", text: f.a },
-              })),
-            }),
-          }}
-        />
       </section>
 
       <section className="section-surface section-padding">
