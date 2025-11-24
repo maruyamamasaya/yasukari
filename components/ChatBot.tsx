@@ -250,17 +250,19 @@ export default function ChatBot({
     window.removeEventListener("mouseup", handleResizeEnd);
   }
 
+  const containerWidth = fullScreen ? "w-full" : "w-[22rem] sm:w-[26rem]";
+
   return (
     <div
-      className={`relative ${fullScreen ? 'w-full' : 'w-72 sm:w-96'} flex flex-col ${fullScreen ? 'pt-10 p-3' : 'p-3 sm:p-4'} border rounded-2xl shadow-lg bg-white max-h-[150vh] overflow-hidden ${className}`}
-      style={fullScreen ? { height: '100vh' } : { height }}
+      className={`relative ${containerWidth} flex flex-col ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-5"} bg-gradient-to-b from-white via-red-50/60 to-white border border-red-100/60 rounded-3xl shadow-xl max-h-[150vh] overflow-hidden ${className}`}
+      style={fullScreen ? { height: "100vh" } : { height }}
     >
       {fullScreen && (
-        <div className="absolute top-2 left-2 flex items-center gap-2 z-20">
-          <button onClick={handleBackButton} className="bg-white rounded-full p-1 shadow">
+        <div className="absolute top-3 left-3 flex items-center gap-2 z-20">
+          <button onClick={handleBackButton} className="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition">
             <FaArrowLeft className="w-5 h-5" />
           </button>
-          <button onClick={onClose} className="bg-white rounded-full p-1 shadow">
+          <button onClick={onClose} className="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition">
             <FaTimes className="w-5 h-5" />
           </button>
         </div>
@@ -271,11 +273,25 @@ export default function ChatBot({
           className="absolute top-0 left-0 w-3 h-3 bg-gray-300 cursor-nwse-resize z-10 rounded-br"
         />
       )}
-      <div className="relative flex-1 overflow-y-auto space-y-1 mb-1 pr-3 sm:space-y-2 sm:mb-2 sm:pr-4" ref={scrollRef}>
+
+      <div className="pb-3 mb-3 border-b border-red-100/70 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-gray-900">チャットでご相談</p>
+          <p className="text-xs text-gray-500">LINEのような使い心地でスタッフがお手伝いします</p>
+        </div>
+        <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-semibold shadow-sm">
+          Online
+        </span>
+      </div>
+
+      <div
+        className="relative flex-1 overflow-y-auto space-y-3 sm:space-y-4 mb-2 sm:mb-3 pr-4 rounded-2xl bg-white/80 border border-gray-100 shadow-inner"
+        ref={scrollRef}
+      >
         {messages.map((m, idx) => (
           <div
             key={idx}
-            className={`flex items-end gap-2 ${m.from === "bot" ? "" : "flex-row-reverse"}`}
+            className={`flex items-end gap-2 px-2 ${m.from === "bot" ? "" : "flex-row-reverse"}`}
           >
             {m.from === "bot" ? (
               <FaRobot className="text-red-600 w-5 h-5" />
@@ -283,12 +299,14 @@ export default function ChatBot({
               <FaUser className="text-red-600 w-5 h-5" />
             )}
             <div
-              className={`max-w-[70%] p-1 sm:p-2 rounded-2xl animate-fade ${
-                m.from === "bot" ? "bg-gray-100" : "bg-red-500 text-white"
+              className={`max-w-[78%] px-3 py-2 rounded-3xl shadow-sm border animate-fade ${
+                m.from === "bot"
+                  ? "bg-gray-50 border-gray-200"
+                  : "bg-red-500 text-white border-red-400"
               }`}
             >
-              <p className="text-xs sm:text-sm">{m.text}</p>
-              <span className="block text-[9px] sm:text-[10px] text-right mt-1 opacity-70">
+              <p className="text-sm leading-relaxed whitespace-pre-line">{m.text}</p>
+              <span className={`block text-[10px] mt-1 opacity-70 ${m.from === "bot" ? "text-gray-600" : "text-white"}`}>
                 {m.time}
               </span>
             </div>
@@ -296,9 +314,9 @@ export default function ChatBot({
         ))}
         <button
           onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
-          className="absolute top-1 right-1 bg-white border rounded-full p-1 shadow"
+          className="absolute top-2 right-3 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:shadow-md"
         >
-          <FaArrowUp className="w-4 h-4" />
+          <FaArrowUp className="w-4 h-4 text-gray-500" />
         </button>
         <button
           onClick={() =>
@@ -307,9 +325,9 @@ export default function ChatBot({
               behavior: "smooth",
             })
           }
-          className="absolute bottom-1 right-1 bg-white border rounded-full p-1 shadow"
+          className="absolute bottom-2 right-3 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:shadow-md"
         >
-          <FaArrowDown className="w-4 h-4" />
+          <FaArrowDown className="w-4 h-4 text-gray-500" />
         </button>
       </div>
 
@@ -325,23 +343,23 @@ export default function ChatBot({
       )}
 
       {step === "survey" && !selectedCategory && (
-        <div className="space-y-2">
-          <p className="text-xs sm:text-sm">カテゴリを選択してください。</p>
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-gray-800">カテゴリを選択してください。</p>
           {faqLoading && (
-            <p className="text-xs text-gray-600">FAQを読み込み中です…</p>
+            <p className="text-sm text-gray-600">FAQを読み込み中です…</p>
           )}
           {faqError && !faqLoading && (
-            <p className="text-xs text-red-600">{faqError}</p>
+            <p className="text-sm text-red-600">{faqError}</p>
           )}
           {!faqLoading && !faqError && faqCategories.length === 0 && (
-            <p className="text-xs text-gray-600">表示できるカテゴリがありません。</p>
+            <p className="text-sm text-gray-600">表示できるカテゴリがありません。</p>
           )}
           {!faqLoading &&
             !faqError &&
             faqCategories.map((cat) => (
               <button
                 key={cat.id}
-                className="w-full text-left p-1 sm:p-2 border rounded hover:bg-gray-50"
+                className="w-full text-left p-2 sm:p-3 border border-gray-200 rounded-2xl hover:bg-red-50 transition shadow-sm"
                 onClick={() => handleCategory(cat)}
               >
                 {cat.title}
@@ -351,7 +369,7 @@ export default function ChatBot({
       )}
 
       {step === "survey" && selectedCategory && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <button
             onClick={handleBack}
             className="text-sm text-red-700 hover:underline"
@@ -361,7 +379,7 @@ export default function ChatBot({
           {selectedCategory.faqs.map((faq, idx) => (
             <button
               key={idx}
-              className="w-full text-left p-1 sm:p-2 border rounded hover:bg-gray-50"
+              className="w-full text-left p-2 sm:p-3 border border-gray-200 rounded-2xl hover:bg-red-50 transition shadow-sm"
               onClick={() => handleQuestion(faq)}
             >
               {faq.q}
@@ -369,7 +387,7 @@ export default function ChatBot({
           ))}
           {loopCount >= 2 && (
             <button
-              className="w-full text-left p-1 sm:p-2 border rounded bg-gray-200 hover:bg-gray-300"
+              className="w-full text-left p-2 sm:p-3 border rounded-2xl bg-gray-100 hover:bg-gray-200 transition"
               onClick={handleFreeStart}
             >
               その他の質問を入力する
@@ -379,23 +397,23 @@ export default function ChatBot({
       )}
 
       {step === "free" && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <button
             onClick={handleBack}
             className="text-sm text-red-700 hover:underline"
           >
             &larr; カテゴリ選択に戻る
           </button>
-          <form onSubmit={handleFreeSubmit} className="flex gap-2">
+          <form onSubmit={handleFreeSubmit} className="flex gap-2 items-center bg-white/90 border border-gray-200 rounded-full px-2 py-1 shadow-sm">
             <input
               type="text"
               name="free"
-              className="flex-1 border rounded-full p-1 px-2 sm:p-2 sm:px-3"
+              className="flex-1 rounded-full p-2 sm:p-3 px-3 sm:px-4 focus:outline-none text-sm"
               placeholder="質問を入力してください"
             />
             <button
               type="submit"
-              className="btn-primary rounded-full px-4"
+              className="btn-primary rounded-full px-4 py-2 text-sm shadow"
               disabled={isSubmitting}
             >
               送信
