@@ -65,7 +65,7 @@ export default function AnnouncementBar() {
         type="button"
         aria-label="Close announcement"
         onClick={() => setDismissed(true)}
-        className="absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/10 text-xs font-bold text-white shadow-sm transition hover:bg-white/20"
+        className="absolute left-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-white/5 text-[10px] font-bold text-white/80 shadow-sm transition hover:bg-white/15"
       >
         ×
       </button>
