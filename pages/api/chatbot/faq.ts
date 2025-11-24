@@ -92,7 +92,7 @@ export default async function handler(
   if (request.method === "POST") {
     const result = validatePayload(request.body);
 
-    if (!result.valid) {
+    if (result.valid === false) {
       response.status(400).json({ message: result.message });
       return;
     }
