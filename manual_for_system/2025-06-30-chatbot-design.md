@@ -10,7 +10,7 @@ Next.js と React を用いて実装しているチャットボット機能の�
 ## 基本構成
 - `ChatBot.tsx` でチャット本体を提供。状態管理には `useState` を利用し、会話履歴 `messages` と表示ステップ `step` を保持します。
 - ステップは FAQ 選択を行う `survey` と自由入力の `free` の2段階です。
-- FAQ データは `/data/faq.json` の `categories` 配列を参照し、カテゴリ・質問・回答をまとめています。
+- FAQ データは `/data/chatbot-faq.json` の `categories` 配列を参照し、カテゴリ・質問・回答をまとめています。
 
 ### messages
 `{ from: "bot" | "user", text: string, time: string }` の形で履歴を保存し、各発言のタイムスタンプも記録します。画面上では吹き出し形式でスクロール表示されます。
@@ -29,7 +29,7 @@ Next.js と React を用いて実装しているチャットボット機能の�
 - チャットボックスのサイズは `w-80 sm:w-96`、`h-96` で、`bg-white` と `shadow-lg` を使ったシンプルな見た目としています。
 
 ## データ構造
-- `/data/faq.json` ではカテゴリごとに `id`, `title`, `faqs` を保持し、`faqs` 内は質問 `q` と回答 `a` のペアです。
+- `/data/chatbot-faq.json` ではカテゴリごとに `id`, `title`, `faqs` を保持し、`faqs` 内は質問 `q` と回答 `a` のペアです。
 - サーバー API との連携は未実装で、Next.js の静的読み込みでデータを展開しています。将来的には管理画面から更新できるよう拡張予定です。
 
 ## 2025/07/01 更新内容

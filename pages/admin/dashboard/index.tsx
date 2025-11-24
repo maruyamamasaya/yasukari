@@ -133,8 +133,12 @@ const menuSections: MenuSection[] = [
   },
   {
     title: "サポート",
-    description: "チャットボットへの問い合わせ内容を確認できます。",
+    description: "チャットボットへの問い合わせ内容やQAカテゴリを管理できます。",
     links: [
+      {
+        label: "チャットボットQA管理",
+        href: `${ADMIN_DASHBOARD_ROOT}/chatbot/faq`,
+      },
       {
         label: "チャットボット問い合わせ一覧",
         href: `${ADMIN_DASHBOARD_ROOT}/chatbot/inquiries`,

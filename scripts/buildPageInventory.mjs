@@ -80,7 +80,7 @@ const overrides = {
     enName: 'Help',
     pageType: 'FAQ',
     apiIntegration: 'TRUE',
-    apiEndpoint: 'data/faq.json',
+    apiEndpoint: 'data/chatbot-faq.json',
   },
   '/insurance': {
     jaName: '保険と補償',

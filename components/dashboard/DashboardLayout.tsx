@@ -83,6 +83,10 @@ const NAV_ITEMS: NavItem[] = [
     href: `${ADMIN_DASHBOARD_ROOT}/chatbot/inquiries`,
     children: [
       {
+        label: "チャットボットQA管理",
+        href: `${ADMIN_DASHBOARD_ROOT}/chatbot/faq`,
+      },
+      {
         label: "チャットボット問い合わせ一覧",
         href: `${ADMIN_DASHBOARD_ROOT}/chatbot/inquiries`,
       },

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import faqData from "../data/faq.json";
+import { ChatbotFaqCategory } from "../types/chatbotFaq";
 import {
   FaUser,
   FaRobot,
@@ -16,13 +16,7 @@ interface Message {
   feedback?: boolean;
 }
 
-interface Category {
-  id: string;
-  title: string;
-  faqs: { q: string; a: string }[];
-}
-
-const categories: Category[] = (faqData as any).categories;
+type Category = ChatbotFaqCategory;
 
 export default function ChatBot({
   className = "",
@@ -47,6 +41,9 @@ export default function ChatBot({
   const [showFeedback, setShowFeedback] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [faqCategories, setFaqCategories] = useState<Category[]>([]);
+  const [faqLoading, setFaqLoading] = useState(true);
+  const [faqError, setFaqError] = useState<string | null>(null);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -84,6 +81,34 @@ export default function ChatBot({
       .catch(() => {
         setUserId(null);
       });
+  }, []);
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      setFaqLoading(true);
+      setFaqError(null);
+
+      try {
+        const response = await fetch("/api/chatbot/faq");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            typeof data?.message === "string" ? data.message : "FAQデータの取得に失敗しました。"
+          );
+        }
+
+        setFaqCategories(Array.isArray(data?.categories) ? data.categories : []);
+      } catch (faqError) {
+        console.error(faqError);
+        setFaqCategories([]);
+        setFaqError("FAQデータの取得に失敗しました。時間をおいて再度お試しください。");
+      } finally {
+        setFaqLoading(false);
+      }
+    };
+
+    void fetchFaqs();
   }, []);
 
   function addMessage(from: "bot" | "user", text: string) {
@@ -302,15 +327,26 @@ export default function ChatBot({
       {step === "survey" && !selectedCategory && (
         <div className="space-y-2">
           <p className="text-xs sm:text-sm">カテゴリを選択してください。</p>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              className="w-full text-left p-1 sm:p-2 border rounded hover:bg-gray-50"
-              onClick={() => handleCategory(cat)}
-            >
-              {cat.title}
-            </button>
-          ))}
+          {faqLoading && (
+            <p className="text-xs text-gray-600">FAQを読み込み中です…</p>
+          )}
+          {faqError && !faqLoading && (
+            <p className="text-xs text-red-600">{faqError}</p>
+          )}
+          {!faqLoading && !faqError && faqCategories.length === 0 && (
+            <p className="text-xs text-gray-600">表示できるカテゴリがありません。</p>
+          )}
+          {!faqLoading &&
+            !faqError &&
+            faqCategories.map((cat) => (
+              <button
+                key={cat.id}
+                className="w-full text-left p-1 sm:p-2 border rounded hover:bg-gray-50"
+                onClick={() => handleCategory(cat)}
+              >
+                {cat.title}
+              </button>
+            ))}
         </div>
       )}
 

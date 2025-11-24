@@ -11,7 +11,7 @@
 "PG010","英語トップ","Home (EN)","/en","ランディング","公開","PC/SP","Layout","yasukari - Motorcycle Rentals","未設定（要検討）","ブランドレッド (#dc2626)","Inter, Noto Sans JP","TRUE","TRUE","FALSE","-","FALSE","-","未設定","未設定","未割当","v1.0","英語版トップページ。"
 "PG011","情報の外部送信について","External Transmission","/external","ポリシー","公開","PC/SP","Layout","情報の外部送信について - yasukari","未設定","ブランドレッド (#dc2626)","Inter, Noto Sans JP","TRUE","TRUE","FALSE","-","FALSE","-","未設定","未設定","未割当","v1.0",""
 "PG012","ご利用案内","Usage Guide","/guide","ガイド","公開","PC/SP","Layout","ご利用案内 - yasukari","未設定","ブランドレッド (#dc2626)","Inter, Noto Sans JP","TRUE","TRUE","FALSE","-","FALSE","-","未設定","未設定","未割当","v1.0",""
-"PG013","ヘルプ","Help","/help","FAQ","公開","PC/SP","Layout","ヘルプ - yasukari","未設定","ブランドレッド (#dc2626)","Inter, Noto Sans JP","TRUE","TRUE","FALSE","-","TRUE","data/faq.json","未設定","未設定","未割当","v1.0",""
+"PG013","ヘルプ","Help","/help","FAQ","公開","PC/SP","Layout","ヘルプ - yasukari","未設定","ブランドレッド (#dc2626)","Inter, Noto Sans JP","TRUE","TRUE","FALSE","-","TRUE","data/chatbot-faq.json","未設定","未設定","未割当","v1.0",""
 "PG014","トップページ","Home","/","ランディング","公開","PC/SP","Layout","yasukari - バイクレンタルサイト","未設定（要検討）","ブランドレッド (#dc2626)","Inter, Noto Sans JP","TRUE","TRUE","FALSE","-","FALSE","-","未設定","未設定","未割当","v1.0","Heroスライダーや注目コンテンツを掲載。"
 "PG015","保険と補償","Insurance","/insurance","静的情報","公開","PC/SP","Layout","車両保険の内容について - yasukari","未設定","ブランドレッド (#dc2626)","Inter, Noto Sans JP","TRUE","TRUE","FALSE","-","FALSE","-","未設定","未設定","未割当","v1.0",""
 "PG016","ログイン","Login","/login","フォーム","公開","PC/SP","Layout","ログイン","未設定","ブルーグラデーション (#2563eb→#3b82f6)","Inter, Noto Sans JP","TRUE","TRUE","FALSE","login_submit","TRUE","/api/login","未設定","未設定","未割当","v1.0","メールアドレス/ソーシャル認証フォーム。"

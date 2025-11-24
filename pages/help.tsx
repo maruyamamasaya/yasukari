@@ -1,11 +1,22 @@
+import { GetStaticProps } from 'next';
 import Head from 'next/head';
+
 import { FAQItem } from '../components/FaqAccordion';
 import FaqCategoryAccordion, { FaqCategory } from '../components/FaqCategoryAccordion';
-import faqData from '../data/faq.json';
+import { readChatbotFaq } from '../lib/server/chatbotFaq';
+import { ChatbotFaqCategory } from '../types/chatbotFaq';
 
-export default function HelpPage() {
-  const categories: FaqCategory[] = (faqData as any).categories;
-  const faqs: FAQItem[] = categories.flatMap((c) => c.faqs);
+type Props = {
+  categories: ChatbotFaqCategory[];
+};
+
+export default function HelpPage({ categories }: Props) {
+  const faqCategories: FaqCategory[] = categories.map((category) => ({
+    id: category.id,
+    title: category.title,
+    faqs: category.faqs,
+  }));
+  const faqs: FAQItem[] = faqCategories.flatMap((c) => c.faqs);
 
   return (
     <div className="space-y-12">
@@ -82,3 +93,19 @@ export default function HelpPage() {
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  try {
+    const data = await readChatbotFaq();
+    return {
+      props: { categories: data.categories ?? [] },
+      revalidate: 60,
+    };
+  } catch (error) {
+    console.error("Failed to load chatbot FAQ data for help page", error);
+    return {
+      props: { categories: [] },
+      revalidate: 60,
+    };
+  }
+};
