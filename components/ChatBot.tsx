@@ -36,6 +36,8 @@ export default function ChatBot({
   const [userId, setUserId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(448);
+  const [isResizing, setIsResizing] = useState(false);
+  const [isResizeHover, setIsResizeHover] = useState(false);
   const startYRef = useRef(0);
   const startHeightRef = useRef(0);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -233,6 +235,7 @@ export default function ChatBot({
   }
 
   function handleResizeStart(e: React.MouseEvent) {
+    setIsResizing(true);
     startYRef.current = e.clientY;
     startHeightRef.current = height;
     window.addEventListener("mousemove", handleResizing);
@@ -246,15 +249,17 @@ export default function ChatBot({
   }
 
   function handleResizeEnd() {
+    setIsResizing(false);
     window.removeEventListener("mousemove", handleResizing);
     window.removeEventListener("mouseup", handleResizeEnd);
   }
 
-  const containerWidth = fullScreen ? "w-full" : "w-[22rem] sm:w-[26rem]";
+  const containerWidth = fullScreen ? "w-full" : "w-[25rem] sm:w-[32rem]";
+  const resizeCursorClass = isResizing || isResizeHover ? "cursor-ns-resize" : "";
 
   return (
     <div
-      className={`relative ${containerWidth} flex flex-col ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-5"} bg-gradient-to-b from-white via-red-50/60 to-white border border-red-100/60 rounded-3xl shadow-xl max-h-[150vh] overflow-hidden ${className}`}
+      className={`relative ${containerWidth} flex flex-col ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-5"} bg-gradient-to-b from-white via-red-50/60 to-white border border-red-100/60 rounded-3xl shadow-xl max-h-[150vh] overflow-hidden ${resizeCursorClass} ${className}`}
       style={fullScreen ? { height: "100vh" } : { height }}
     >
       {fullScreen && (
@@ -270,7 +275,9 @@ export default function ChatBot({
       {!fullScreen && (
         <div
           onMouseDown={handleResizeStart}
-          className="absolute top-0 left-0 w-3 h-3 bg-gray-300 cursor-nwse-resize z-10 rounded-br"
+          onMouseEnter={() => setIsResizeHover(true)}
+          onMouseLeave={() => setIsResizeHover(false)}
+          className="absolute inset-x-0 top-0 h-2 cursor-ns-resize z-20"
         />
       )}
 
@@ -299,7 +306,7 @@ export default function ChatBot({
               <FaUser className="text-red-600 w-5 h-5" />
             )}
             <div
-              className={`max-w-[78%] px-3 py-2 rounded-3xl shadow-sm border animate-fade ${
+              className={`max-w-[88%] px-3 py-2 rounded-3xl shadow-sm border animate-fade ${
                 m.from === "bot"
                   ? "bg-gray-50 border-gray-200"
                   : "bg-red-500 text-white border-red-400"

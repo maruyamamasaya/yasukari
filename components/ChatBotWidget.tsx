@@ -20,7 +20,7 @@ export default function ChatBotWidget() {
             >
               ×
             </button>
-            <ChatBot className="w-80 sm:w-96" onClose={() => setOpen(false)} />
+            <ChatBot className="w-[25rem] sm:w-[32rem]" onClose={() => setOpen(false)} />
           </div>
         </div>
       )}
