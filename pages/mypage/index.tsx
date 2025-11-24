@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 type SessionUser = {
-  sub: string;
+  id: string;
   email?: string;
   username?: string;
 };
@@ -14,14 +14,13 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
-  const apiBase = (process.env.NEXT_PUBLIC_API_ORIGIN ?? '').replace(/\/$/, '');
-  const logoutHref = `${apiBase}/auth/logout`;
+  const logoutHref = '/auth/logout';
 
   useEffect(() => {
     const controller = new AbortController();
     const fetchUser = async () => {
       try {
-        const response = await fetch(`${apiBase}/api/me`, {
+        const response = await fetch('/api/me', {
           credentials: 'include',
           signal: controller.signal,
         });
@@ -35,8 +34,14 @@ export default function MyPage() {
           throw new Error('failed to load profile');
         }
 
-        const data = (await response.json()) as SessionUser;
-        setUser(data);
+        const data = (await response.json()) as { user?: SessionUser };
+        if (data.user) {
+          setUser({
+            id: data.user.id,
+            email: data.user.email,
+            username: data.user.username,
+          });
+        }
       } catch (err) {
         if (!controller.signal.aborted) {
           console.error(err);
@@ -51,7 +56,7 @@ export default function MyPage() {
 
     void fetchUser();
     return () => controller.abort();
-  }, [apiBase, router]);
+  }, [router]);
 
   const displayName = user?.username ?? user?.email ?? 'ユーザー';
 
@@ -96,7 +101,7 @@ export default function MyPage() {
                   </div>
                   <div>
                     <dt className="font-medium text-gray-600">ユーザーID</dt>
-                    <dd className="mt-1 text-gray-800">{user.sub}</dd>
+                    <dd className="mt-1 text-gray-800">{user.id}</dd>
                   </div>
                   {user.username ? (
                     <div>

@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
 import AnnouncementBar from './AnnouncementBar';
+import { buildAuthorizeUrl } from '../lib/cognitoHostedUi';
 
 export default function Header() {
   const suggestItems = [
@@ -34,27 +35,12 @@ export default function Header() {
   const isEn = router.pathname.startsWith('/en');
   const langHref = isEn ? '/' : '/en';
   const langLabel = isEn ? 'JP' : 'EN';
-  const apiBase = (process.env.NEXT_PUBLIC_API_ORIGIN ?? '').replace(/\/$/, '');
-  const logoutHref = `${apiBase}/auth/logout`;
+  const logoutHref = '/auth/logout';
 
   const startLogin = async () => {
     setStartingLogin(true);
     try {
-      const response = await fetch(`${apiBase}/auth/login`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error(`unexpected status: ${response.status}`);
-      }
-
-      const data = (await response.json()) as { authorize_url?: string };
-
-      if (!data.authorize_url) {
-        throw new Error('authorize_url missing');
-      }
-
-      window.location.href = data.authorize_url;
+      window.location.href = buildAuthorizeUrl();
     } catch (error) {
       console.error('Failed to start login', error);
       alert('ログイン処理を開始できませんでした。時間をおいて再度お試しください。');
@@ -87,7 +73,7 @@ export default function Header() {
     const controller = new AbortController();
     const fetchSession = async () => {
       try {
-        const response = await fetch(`${apiBase}/api/me`, {
+        const response = await fetch(`/api/me`, {
           credentials: 'include',
           signal: controller.signal,
         });
@@ -98,8 +84,8 @@ export default function Header() {
         }
 
         if (response.ok) {
-          const data = (await response.json()) as { email?: string; username?: string };
-          setSessionUser(data);
+          const data = (await response.json()) as { user?: { email?: string; username?: string } };
+          setSessionUser(data.user ?? null);
         }
       } catch (error) {
         console.error('Failed to check session', error);
@@ -110,7 +96,7 @@ export default function Header() {
 
     void fetchSession();
     return () => controller.abort();
-  }, [apiBase]);
+  }, []);
 
   return (
     <div className="sticky top-0 z-50">
