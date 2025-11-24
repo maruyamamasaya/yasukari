@@ -15,13 +15,14 @@ Amazon Cognito の認可コードフローに対応した Flask バックエン�
 ```bash
 FLASK_SECRET_KEY=ランダムな長い文字列
 COGNITO_REGION=ap-northeast-1
-COGNITO_USER_POOL_ID=ap-northeast-1_XXXXXXX
-COGNITO_CLIENT_ID=クライアントID
-COGNITO_CLIENT_SECRET=クライアントシークレット
-COGNITO_DOMAIN=https://<prefix>.auth.ap-northeast-1.amazoncognito.com
+COGNITO_USER_POOL_ID=ap-northeast-1_7PderE9jo
+COGNITO_CLIENT_ID=vicsspgv2q7mtn6m6os2n893j
+COGNITO_CLIENT_SECRET=コンソールに表示されている値（環境変数でのみ設定）
+COGNITO_DOMAIN=https://ap-northeast-17pdere9jo.auth.ap-northeast-1.amazoncognito.com
 COGNITO_REDIRECT_URI=https://yasukaribike.com/auth/callback
 COGNITO_LOGOUT_REDIRECT_URI=https://yasukaribike.com/
 FRONTEND_MYPAGE_URL=https://yasukaribike.com/mypage
+FRONTEND_LOGIN_URL=https://yasukaribike.com/login
 ```
 
 ## バックエンドの起動

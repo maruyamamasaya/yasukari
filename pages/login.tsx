@@ -9,6 +9,18 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [startingLogin, setStartingLogin] = useState(false);
   const apiBase = (process.env.NEXT_PUBLIC_API_ORIGIN ?? '').replace(/\/$/, '');
+  const hostedUiDomain = (process.env.NEXT_PUBLIC_COGNITO_DOMAIN ??
+    'https://ap-northeast-17pdere9jo.auth.ap-northeast-1.amazoncognito.com').replace(/\/$/, '');
+  const hostedUiClientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? 'vicsspgv2q7mtn6m6os2n893j';
+  const hostedUiRedirectUri = process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI ?? 'https://yasukaribike.com/auth/callback';
+  const signupSearchParams = new URLSearchParams({
+    client_id: hostedUiClientId,
+    response_type: 'code',
+    scope: 'openid email phone',
+    redirect_uri: hostedUiRedirectUri,
+    state: 'signup',
+  });
+  const hostedUiSignupUrl = `${hostedUiDomain}/signup?${signupSearchParams.toString()}`;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -121,10 +133,13 @@ export default function LoginPage() {
                 <p className="font-semibold">はじめての方へ</p>
                 <p className="mt-1 leading-relaxed">
                   メールアドレスだけで仮登録が行えます。まだ会員でない方は
-                  <Link href="/signup" className="ml-1 font-semibold text-red-700 underline underline-offset-4">
-                    新規登録ページ
-                  </Link>
-                  をご確認ください。
+                  <a
+                    href={hostedUiSignupUrl}
+                    className="ml-1 font-semibold text-red-700 underline underline-offset-4"
+                  >
+                    Cognito の新規登録画面
+                  </a>
+                  へお進みください。
                 </p>
               </div>
             </section>
@@ -154,14 +169,18 @@ export default function LoginPage() {
                 <ol className="mt-2 list-decimal space-y-1 pl-4">
                   <li>「ログイン画面へ進む」ボタンを押して Cognito のログイン画面へ</li>
                   <li>認証後は {process.env.NEXT_PUBLIC_SITE_NAME ?? 'マイページ'} にリダイレクト</li>
+                  <li>初回ログイン時は会員情報の入力（仮登録）を案内し、本登録ののち DynamoDB にユーザー情報を保存</li>
                   <li>ログイン状態はサーバー側セッションで管理されます</li>
                 </ol>
               </div>
               <p className="mt-6 text-center text-xs text-gray-500">
                 アカウントをお持ちでない方は
-                <Link href="/signup" className="ml-1 font-semibold text-red-600 underline underline-offset-2">
+                <a
+                  href={hostedUiSignupUrl}
+                  className="ml-1 font-semibold text-red-600 underline underline-offset-2"
+                >
                   新規登録
-                </Link>
+                </a>
                 へ
               </p>
             </div>
