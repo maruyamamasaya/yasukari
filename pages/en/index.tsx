@@ -331,35 +331,37 @@ export default function HomeEn({ blogSlides, bikeModelsAll }: Props) {
 
       <HowToUseEn />
 
-      <section className="section-surface section-padding">
-        <SectionHeading
-          eyebrow="FAQ"
-          title="Frequently asked questions"
-          description="Find answers on pricing, insurance, and reservation changes. Our support team is only a chat away if you need more help."
-        />
-        <FaqAccordion faqs={faqs} />
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
-            Learn more in the beginner guide
-          </Link>
-          <Link href="/help" className="btn-primary w-full justify-center sm:w-auto">
-            See more FAQs
-          </Link>
+      <section className="section-surface section-padding faq-section">
+        <div className="faq-section__inner">
+          <SectionHeading
+            eyebrow="FAQ"
+            title="Frequently asked questions"
+            description="Find answers on pricing, insurance, and reservation changes. Our support team is only a chat away if you need more help."
+          />
+          <FaqAccordion faqs={faqs} />
+          <div className="faq-section__actions mt-8">
+            <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
+              Learn more in the beginner guide
+            </Link>
+            <Link href="/help" className="btn-primary w-full justify-center sm:w-auto">
+              See more FAQs
+            </Link>
+          </div>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: faqs.map((f) => ({
+                  "@type": "Question",
+                  name: f.q,
+                  acceptedAnswer: { "@type": "Answer", text: f.a },
+                })),
+              }),
+            }}
+          />
         </div>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: faqs.map((f) => ({
-                "@type": "Question",
-                name: f.q,
-                acceptedAnswer: { "@type": "Answer", text: f.a },
-              })),
-            }),
-          }}
-        />
       </section>
     </>
   );
