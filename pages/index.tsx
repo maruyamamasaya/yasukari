@@ -23,10 +23,11 @@ import BikeLineup from "../components/BikeLineup";
 import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
 import FaqAccordion, { FAQItem } from "../components/FaqAccordion";
-import faqData from "../data/faq.json";
 import HowToUse from "../components/HowToUse";
 import SectionHeading from "../components/SectionHeading";
 import { getBikeModels, BikeModel } from "../lib/bikes";
+import { readChatbotFaq } from "../lib/server/chatbotFaq";
+import { ChatbotFaqCategory } from "../types/chatbotFaq";
 
 type BlogSlide = {
   title: string;
@@ -37,16 +38,17 @@ type BlogSlide = {
 interface Props {
   blogSlides: BlogSlide[];
   bikeModelsAll: BikeModel[];
+  faqCategories: ChatbotFaqCategory[];
 }
 
-export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
+export default function HomePage({ blogSlides, bikeModelsAll, faqCategories }: Props) {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
   ];
 
   const faqs: FAQItem[] = useMemo(() => {
-    const all: FAQItem[] = (faqData as any).categories.flatMap((c: any) => c.faqs);
+    const all: FAQItem[] = faqCategories.flatMap((category) => category.faqs);
     for (let i = all.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [all[i], all[j]] = [all[j], all[i]];
@@ -423,6 +425,14 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     img: p.eyecatch || "",
   }));
   const bikeModelsAll = await getBikeModels();
+  let faqCategories: ChatbotFaqCategory[] = [];
 
-  return { props: { blogSlides, bikeModelsAll } };
+  try {
+    const faqData = await readChatbotFaq();
+    faqCategories = faqData.categories ?? [];
+  } catch (error) {
+    console.error("Failed to load chatbot FAQ data for home page", error);
+  }
+
+  return { props: { blogSlides, bikeModelsAll, faqCategories }, revalidate: 60 };
 };

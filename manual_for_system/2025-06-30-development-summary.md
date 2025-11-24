@@ -11,7 +11,7 @@ date: "2025-06-30"
 
 - Next.js + TypeScript によるアプリ基盤をセットアップ済み
 - トップページでは Hero セクション、ブログカルーセル、BikeModelCarousel など UI を強化
-- チャットボット (`ChatBot.tsx`) は FAQ データ `data/faq.json` を読み込み、カテゴリ選択〜自由入力モードを試験実装
+- チャットボット (`ChatBot.tsx`) は FAQ データ `data/chatbot-faq.json` を読み込み、カテゴリ選択〜自由入力モードを試験実装
 - ChatBotWidget を追加しページ右下から開閉可能に
 - Manual for System ディレクトリを読み込み、Markdown 記事を一覧表示する `/manual_for_system` ページを構築
 - CalendarWidget や DirectoryTree コンポーネントで開発日誌の参照性を向上
@@ -29,7 +29,7 @@ date: "2025-06-30"
 
 - 画像・アイコンは現状 `react-icons` とデモ用画像のみ。専用アセットは未整備
 - CSS は `styles/global.css` のみで、Tailwind などのユーティリティは未導入
-- データは `data/faq.json` のみで、外部 API 連携はこれから検討
+- データは `data/chatbot-faq.json` のみで、外部 API 連携はこれから検討
 
 ## 今後の予定
 
