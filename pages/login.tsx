@@ -60,6 +60,7 @@ export default function LoginPage() {
     setStartingLogin(true);
     try {
       const state = crypto.randomUUID();
+      sessionStorage.setItem('cognito_oauth_state', state);
       window.location.href = buildAuthorizeUrl(state);
     } catch (err) {
       console.error(err);

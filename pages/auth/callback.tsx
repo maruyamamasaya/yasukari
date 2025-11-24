@@ -22,6 +22,17 @@ export default function CognitoCallbackPage() {
       return;
     }
 
+    const returnedState = params.get('state');
+    const expectedState = sessionStorage.getItem('cognito_oauth_state');
+
+    if (!returnedState || !expectedState || returnedState !== expectedState) {
+      sessionStorage.removeItem('cognito_oauth_state');
+      setError('認証状態を確認できませんでした。もう一度ログインからお試しください。');
+      return;
+    }
+
+    sessionStorage.removeItem('cognito_oauth_state');
+
     const idToken = params.get('id_token');
     const accessToken = params.get('access_token');
     const expiresIn = Number(params.get('expires_in') ?? '3600');
