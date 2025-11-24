@@ -164,7 +164,7 @@ def login():
     session["oauth_state"] = state
     session["oauth_state_issued_at"] = time.time()
     authorize_url = build_authorize_url(state)
-    return redirect(authorize_url)
+    return jsonify({"authorize_url": authorize_url})
 
 
 @app.route("/auth/callback")

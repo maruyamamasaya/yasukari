@@ -7,8 +7,8 @@ export default function LoginPage() {
   const router = useRouter();
   const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState('');
+  const [startingLogin, setStartingLogin] = useState(false);
   const apiBase = (process.env.NEXT_PUBLIC_API_ORIGIN ?? '').replace(/\/$/, '');
-  const loginHref = `${apiBase}/auth/login`;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -54,9 +54,31 @@ export default function LoginPage() {
     }
   }, [router.isReady, router.query.error]);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError('');
-    window.location.href = loginHref;
+    setStartingLogin(true);
+    try {
+      const response = await fetch(`${apiBase}/auth/login`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`unexpected status: ${response.status}`);
+      }
+
+      const data = (await response.json()) as { authorize_url?: string };
+
+      if (!data.authorize_url) {
+        throw new Error('authorize_url missing');
+      }
+
+      window.location.href = data.authorize_url;
+    } catch (err) {
+      console.error(err);
+      setError('ログイン処理を開始できませんでした。時間をおいて再度お試しください。');
+    } finally {
+      setStartingLogin(false);
+    }
   };
 
   return (
@@ -119,9 +141,13 @@ export default function LoginPage() {
                 type="button"
                 onClick={handleLogin}
                 className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={checkingSession}
+                disabled={checkingSession || startingLogin}
               >
-                {checkingSession ? 'ログイン状態を確認中…' : 'ログイン画面へ進む'}
+                {checkingSession
+                  ? 'ログイン状態を確認中…'
+                  : startingLogin
+                    ? 'リダイレクトを準備中…'
+                    : 'ログイン画面へ進む'}
               </button>
               <div className="mt-6 rounded-xl bg-gray-50 p-4 text-left text-xs leading-relaxed text-gray-600">
                 <p className="font-semibold text-gray-900">ログインの流れ</p>
