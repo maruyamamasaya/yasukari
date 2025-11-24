@@ -43,7 +43,19 @@ export default function LoginPage() {
     return () => controller.abort();
   }, [apiBase, router]);
 
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const queryError = router.query.error;
+    if (typeof queryError === 'string') {
+      setError(queryError);
+    } else if (Array.isArray(queryError) && queryError[0]) {
+      setError(queryError[0]);
+    }
+  }, [router.isReady, router.query.error]);
+
   const handleLogin = () => {
+    setError('');
     window.location.href = loginHref;
   };
 

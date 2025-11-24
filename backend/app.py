@@ -40,6 +40,9 @@ COGNITO_LOGOUT_REDIRECT_URI = os.environ.get(
 FRONTEND_MYPAGE_URL = os.environ.get(
     "FRONTEND_MYPAGE_URL", "http://localhost:3000/mypage"
 )
+FRONTEND_LOGIN_URL = os.environ.get(
+    "FRONTEND_LOGIN_URL", "http://localhost:3000/login"
+)
 
 if not all(
     [COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, COGNITO_DOMAIN]
@@ -150,6 +153,11 @@ def _validate_state(state: str | None):
         raise OAuthStateError("State has expired")
 
 
+def _redirect_to_login_with_error(message: str):
+    params = {"error": message}
+    return redirect(f"{FRONTEND_LOGIN_URL}?{urlencode(params)}")
+
+
 @app.route("/auth/login")
 def login():
     state = secrets.token_urlsafe(24)
@@ -162,8 +170,10 @@ def login():
 @app.route("/auth/callback")
 def auth_callback():
     error = request.args.get("error")
+    error_description = request.args.get("error_description")
     if error:
-        return f"Login failed: {error}", 400
+        message = error_description or error
+        return _redirect_to_login_with_error(f"Login failed: {message}")
 
     state = request.args.get("state")
     code = request.args.get("code")
@@ -171,20 +181,25 @@ def auth_callback():
     try:
         _validate_state(state)
     except OAuthStateError as exc:
-        return str(exc), 400
+        return _redirect_to_login_with_error(str(exc))
 
     if not code:
-        return "Authorization code is missing", 400
+        return _redirect_to_login_with_error("Authorization code is missing")
 
     try:
         token_response = exchange_code_for_tokens(code)
         id_token = token_response.get("id_token")
         access_token = token_response.get("access_token")
         if not id_token:
-            return "ID token not returned by Cognito", 400
+            return _redirect_to_login_with_error("ID token not returned by Cognito")
         claims = verify_id_token(id_token)
-    except (requests.HTTPError, TokenVerificationError) as exc:
-        return f"Authentication failed: {exc}", 400
+    except requests.HTTPError as exc:
+        status_code = exc.response.status_code if exc.response else "unknown"
+        return _redirect_to_login_with_error(
+            f"Authentication failed during token exchange (status: {status_code})"
+        )
+    except TokenVerificationError as exc:
+        return _redirect_to_login_with_error(f"Authentication failed: {exc}")
 
     session.permanent = True
     session["user"] = {
