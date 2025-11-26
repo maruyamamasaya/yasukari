@@ -55,7 +55,7 @@ async function getJwks(): Promise<JwksKey[]> {
   return data.keys;
 }
 
-async function getVerificationKey(kid: string): Promise<CryptoKey> {
+async function getVerificationKey(kid: string): Promise<crypto.webcrypto.CryptoKey> {
   const keys = await getJwks();
   const jwk = keys.find((key) => key.kid === kid);
   if (!jwk) {
