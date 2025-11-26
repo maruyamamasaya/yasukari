@@ -7,6 +7,7 @@ import { buildAuthorizeUrl, buildSignupUrl } from '../lib/cognitoHostedUi';
 export default function LoginPage() {
   const router = useRouter();
   const [checkingSession, setCheckingSession] = useState(true);
+  const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [error, setError] = useState('');
   const [startingLogin, setStartingLogin] = useState(false);
   const hostedUiSignupUrl = buildSignupUrl();
@@ -21,9 +22,12 @@ export default function LoginPage() {
         });
 
         if (response.ok) {
-          await router.replace('/mypage');
+          const data = (await response.json()) as { user?: { email?: string; username?: string } };
+          setSessionUser(data.user ?? { email: 'ログイン中' });
           return;
         }
+
+        setSessionUser(null);
 
         if (response.status !== 401) {
           throw new Error('unexpected status');
@@ -128,18 +132,27 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
               {error ? (
                 <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
               ) : null}
-              <button
-                type="button"
-                onClick={handleLogin}
-                className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={checkingSession || startingLogin}
-              >
-                {checkingSession
-                  ? 'ログイン状態を確認中…'
-                  : startingLogin
-                    ? 'リダイレクトを準備中…'
-                    : 'ログイン画面へ進む'}
-              </button>
+              {sessionUser ? (
+                <a
+                  href="/auth/logout"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-gray-800 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-900"
+                >
+                  {`${sessionUser.username ?? sessionUser.email ?? 'ログイン中のアカウント'}でログアウトする`}
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleLogin}
+                  className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={checkingSession || startingLogin}
+                >
+                  {checkingSession
+                    ? 'ログイン状態を確認中…'
+                    : startingLogin
+                      ? 'リダイレクトを準備中…'
+                      : 'ログイン画面へ進む'}
+                </button>
+              )}
               <div className="mt-6 rounded-xl bg-gray-50 p-4 text-left text-xs leading-relaxed text-gray-600">
                 <p className="font-semibold text-gray-900">ログインの流れ</p>
                 <ol className="mt-2 list-decimal space-y-1 pl-4">
