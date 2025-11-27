@@ -111,7 +111,7 @@ def build_authorize_url(state: str) -> str:
     params = {
         "client_id": COGNITO_CLIENT_ID,
         "response_type": "code",
-        "scope": "openid email phone",
+        "scope": "openid email phone profile aws.cognito.signin.user.admin",
         "redirect_uri": COGNITO_REDIRECT_URI,
         "state": state,
     }
