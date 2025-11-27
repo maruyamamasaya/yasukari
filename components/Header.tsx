@@ -8,7 +8,6 @@ import {
   FaMotorcycle,
   FaClipboardList,
   FaBars,
-  FaGlobe,
 } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
 import AnnouncementBar from './AnnouncementBar';
@@ -32,9 +31,6 @@ export default function Header() {
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
-  const isEn = router.pathname.startsWith('/en');
-  const langHref = isEn ? '/' : '/en';
-  const langLabel = isEn ? 'JP' : 'EN';
 
   const startLogout = async () => {
     setStartingLogout(true);
@@ -216,9 +212,6 @@ export default function Header() {
               <Link href="/help">
                 <NavItem label="ヘルプ" />
               </Link>
-              <Link href={langHref}>
-                <NavItem icon={<FaGlobe />} label={langLabel} />
-              </Link>
             </nav>
           </div>
         </div>
@@ -316,11 +309,6 @@ export default function Header() {
               <li>
                 <Link href="/help">
                   <NavItem label="ヘルプ" />
-                </Link>
-              </li>
-              <li>
-                <Link href={langHref}>
-                  <NavItem icon={<FaGlobe />} label={langLabel} />
                 </Link>
               </li>
             </ul>
