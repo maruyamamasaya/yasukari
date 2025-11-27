@@ -40,7 +40,7 @@ export const buildAuthorizeUrl = (state: string) => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'token',
-    scope: 'openid email phone',
+    scope: 'openid email phone profile aws.cognito.signin.user.admin',
     redirect_uri: redirectUri,
     state,
   });
@@ -52,7 +52,7 @@ export const buildSignupUrl = (state = 'signup') => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'code',
-    scope: 'openid email phone',
+    scope: 'openid email phone profile aws.cognito.signin.user.admin',
     redirect_uri: redirectUri,
     state,
   });
