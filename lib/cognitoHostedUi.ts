@@ -24,10 +24,10 @@ const scopeList = (() => {
     return configured;
   }
 
-  // Keep the default scopes conservative to avoid invalid_scope errors when the
-  // Cognito app client is not configured for admin access or additional
-  // resource server scopes.
-  return ['openid', 'email', 'phone', 'profile'];
+  // Keep the default scopes aligned with the user self-service operations we
+  // perform (GetUser/UpdateUserAttributes). The admin scope is required for
+  // these endpoints when using Hosted UI access tokens.
+  return ['openid', 'email', 'phone', 'profile', 'aws.cognito.signin.user.admin'];
 })();
 
 export const COGNITO_ID_TOKEN_COOKIE = 'cognito_id_token';
