@@ -82,6 +82,7 @@ export default function LoginPage() {
       }
 
       await router.replace('/');
+      window.location.reload();
     } catch (err) {
       console.error(err);
       setStartingLogout(false);

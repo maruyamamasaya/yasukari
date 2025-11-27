@@ -78,7 +78,9 @@ export default function CognitoCallbackPage() {
     }
 
     // 6. 正常時はマイページへ
-    void router.replace('/mypage/profile-setup?fromLogin=1');
+    void router
+      .replace('/mypage/profile-setup?fromLogin=1')
+      .then(() => window.location.reload());
   }, [router]);
 
   return (
