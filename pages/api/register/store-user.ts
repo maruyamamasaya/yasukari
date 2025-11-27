@@ -12,7 +12,6 @@ const TABLE_NAME = 'yasukariUserMain';
 type RegisterPayload = {
   user_id: string;
   email: string;
-  password: string;
   name1: string;
   name2: string;
   kana1: string;
@@ -22,7 +21,7 @@ type RegisterPayload = {
   zip: string;
   address1: string;
   address2: string;
-  mobile: string;
+  mobile?: string;
   tel?: string;
   license?: string;
   license_file_name?: string;
@@ -42,7 +41,6 @@ type RegisterPayload = {
 const requiredFields: (keyof RegisterPayload)[] = [
   'user_id',
   'email',
-  'password',
   'name1',
   'name2',
   'kana1',
@@ -52,7 +50,6 @@ const requiredFields: (keyof RegisterPayload)[] = [
   'zip',
   'address1',
   'address2',
-  'mobile',
   'enquete_purpose',
   'enquete_want',
   'enquete_touring',
@@ -89,7 +86,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const payload: RegisterPayload = {
       user_id: userId,
       email: toTrimmedString(body.email || authPayload?.email).toLowerCase(),
-      password: toTrimmedString(body.password),
       name1: toTrimmedString(body.name1),
       name2: toTrimmedString(body.name2),
       kana1: toTrimmedString(body.kana1),
@@ -99,16 +95,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       zip: toTrimmedString(body.zip),
       address1: toTrimmedString(body.address1),
       address2: toTrimmedString(body.address2),
-      mobile: normalizePhone(body.mobile),
-      tel: normalizePhone(body.tel),
+      mobile: normalizePhone(body.mobile) || undefined,
+      tel: normalizePhone(body.tel) || undefined,
       license: toTrimmedString(body.license),
       license_file_name: toTrimmedString(body.license_file_name),
       work_place: toTrimmedString(body.work_place),
       work_address: toTrimmedString(body.work_address),
-      work_tel: normalizePhone(body.work_tel),
+      work_tel: normalizePhone(body.work_tel) || undefined,
       other_name: toTrimmedString(body.other_name),
       other_address: toTrimmedString(body.other_address),
-      other_tel: normalizePhone(body.other_tel),
+      other_tel: normalizePhone(body.other_tel) || undefined,
       enquete_purpose: toTrimmedString(body.enquete_purpose),
       enquete_want: toTrimmedString(body.enquete_want),
       enquete_touring: toTrimmedString(body.enquete_touring),
