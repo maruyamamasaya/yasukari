@@ -7,18 +7,34 @@ const logoutRedirectUri =
 
 export const COGNITO_ID_TOKEN_COOKIE = 'cognito_id_token';
 export const COGNITO_ACCESS_TOKEN_COOKIE = 'cognito_access_token';
+export const COGNITO_OAUTH_STATE_KEY = 'cognito_oauth_state';
 
-export const buildAuthorizeUrl = (state?: string) => {
+const generateOauthState = () => {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return Math.random().toString(36).slice(2);
+};
+
+export const createAndStoreOauthState = () => {
+  const state = generateOauthState();
+
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    window.sessionStorage.setItem(COGNITO_OAUTH_STATE_KEY, state);
+  }
+
+  return state;
+};
+
+export const buildAuthorizeUrl = (state: string) => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'token',
     scope: 'openid email phone',
     redirect_uri: redirectUri,
+    state,
   });
-
-  if (state) {
-    params.set('state', state);
-  }
 
   return `${hostedUiDomain}/oauth2/authorize?${params.toString()}`;
 };

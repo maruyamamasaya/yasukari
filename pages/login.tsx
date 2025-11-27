@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { buildAuthorizeUrl, buildSignupUrl } from '../lib/cognitoHostedUi';
+import {
+  buildAuthorizeUrl,
+  buildSignupUrl,
+  createAndStoreOauthState,
+} from '../lib/cognitoHostedUi';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -63,8 +67,7 @@ export default function LoginPage() {
     setError('');
     setStartingLogin(true);
     try {
-      const state = crypto.randomUUID();
-      sessionStorage.setItem('cognito_oauth_state', state);
+      const state = createAndStoreOauthState();
       window.location.href = buildAuthorizeUrl(state);
     } catch (err) {
       console.error(err);

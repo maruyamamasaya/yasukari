@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
 import AnnouncementBar from './AnnouncementBar';
-import { buildAuthorizeUrl } from '../lib/cognitoHostedUi';
+import { buildAuthorizeUrl, createAndStoreOauthState } from '../lib/cognitoHostedUi';
 
 export default function Header() {
   const suggestItems = [
@@ -40,7 +40,8 @@ export default function Header() {
   const startLogin = async () => {
     setStartingLogin(true);
     try {
-      window.location.href = buildAuthorizeUrl();
+      const state = createAndStoreOauthState();
+      window.location.href = buildAuthorizeUrl(state);
     } catch (error) {
       console.error('Failed to start login', error);
       alert('ログイン処理を開始できませんでした。時間をおいて再度お試しください。');
