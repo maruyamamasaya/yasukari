@@ -108,7 +108,6 @@ export default function MyPage() {
     return () => controller.abort();
   }, [loading, router]);
 
-  const displayName = user?.username ?? user?.email ?? 'ユーザー';
   const localeLabel = (value: string | undefined) => {
     if (!value) return '未設定';
     if (value.toLowerCase().startsWith('jp')) return '日本語圏';
@@ -135,7 +134,7 @@ export default function MyPage() {
             </ol>
           </nav>
           <h1 className="text-2xl font-semibold text-gray-900">マイページ</h1>
-          <p className="text-sm text-gray-500">ログイン中のアカウント情報を確認できます。</p>
+          <p className="text-sm text-gray-500">ログイン中のプロフィール情報を確認できます。</p>
         </header>
 
         {loading ? (
@@ -144,38 +143,11 @@ export default function MyPage() {
           </section>
         ) : (
           <>
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900">アカウント情報</h2>
-              {error ? (
-                <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-              ) : null}
-              {user ? (
-                <dl className="mt-4 space-y-3 text-sm text-gray-700">
-                  <div>
-                    <dt className="font-medium text-gray-600">表示名</dt>
-                    <dd className="mt-1 text-base font-semibold text-gray-900">{displayName}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-600">ユーザーID</dt>
-                    <dd className="mt-1 text-gray-800">{user.id}</dd>
-                  </div>
-                  {user.username ? (
-                    <div>
-                      <dt className="font-medium text-gray-600">ユーザー名</dt>
-                      <dd className="mt-1 text-gray-800">{user.username}</dd>
-                    </div>
-                  ) : null}
-                  {user.email ? (
-                    <div>
-                      <dt className="font-medium text-gray-600">メールアドレス</dt>
-                      <dd className="mt-1 text-gray-800">{user.email}</dd>
-                    </div>
-                  ) : null}
-                </dl>
-              ) : (
-                <p className="mt-3 text-sm text-gray-700">ログイン情報を取得できませんでした。</p>
-              )}
-            </section>
+            {error ? (
+              <section className="rounded-2xl border border-red-200 bg-red-50 p-6 shadow-sm">
+                <p className="text-sm text-red-700">{error}</p>
+              </section>
+            ) : null}
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
