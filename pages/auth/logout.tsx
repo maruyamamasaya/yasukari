@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import Head from 'next/head';
-import { buildLogoutUrl, COGNITO_ACCESS_TOKEN_COOKIE, COGNITO_ID_TOKEN_COOKIE } from '../../lib/cognitoHostedUi';
+import { useRouter } from 'next/router';
+import { COGNITO_ACCESS_TOKEN_COOKIE, COGNITO_ID_TOKEN_COOKIE } from '../../lib/cognitoHostedUi';
 
 function clearCookie(name: string) {
   const secure = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
@@ -8,11 +9,21 @@ function clearCookie(name: string) {
 }
 
 export default function LogoutPage() {
+  const router = useRouter();
+
   useEffect(() => {
     clearCookie(COGNITO_ID_TOKEN_COOKIE);
     clearCookie(COGNITO_ACCESS_TOKEN_COOKIE);
-    window.location.href = buildLogoutUrl();
-  }, []);
+    if (!router.isReady) return;
+
+    const nextPath = typeof router.query.next === 'string' ? router.query.next : '/login';
+
+    const timer = window.setTimeout(() => {
+      void router.replace(nextPath);
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [router]);
 
   return (
     <>
@@ -21,8 +32,8 @@ export default function LogoutPage() {
       </Head>
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
         <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow">
-          <h1 className="text-lg font-semibold text-gray-900">ログアウト処理中です</h1>
-          <p className="mt-3 text-sm text-gray-600">しばらくお待ちください。</p>
+          <h1 className="text-lg font-semibold text-gray-900">ログアウトしました</h1>
+          <p className="mt-3 text-sm text-gray-600">まもなくログイン画面へ移動します。</p>
         </div>
       </div>
     </>

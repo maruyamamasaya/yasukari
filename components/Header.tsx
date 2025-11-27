@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
 import AnnouncementBar from './AnnouncementBar';
-import { buildAuthorizeUrl, createAndStoreOauthState } from '../lib/cognitoHostedUi';
+import { buildAuthorizeUrl, buildLogoutUrl, createAndStoreOauthState } from '../lib/cognitoHostedUi';
 
 export default function Header() {
   const suggestItems = [
@@ -29,13 +29,13 @@ export default function Header() {
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [startingLogin, setStartingLogin] = useState(false);
+  const [startingLogout, setStartingLogout] = useState(false);
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
   const isEn = router.pathname.startsWith('/en');
   const langHref = isEn ? '/' : '/en';
   const langLabel = isEn ? 'JP' : 'EN';
-  const logoutHref = '/auth/logout';
 
   const startLogin = async () => {
     setStartingLogin(true);
@@ -47,6 +47,17 @@ export default function Header() {
       alert('ログイン処理を開始できませんでした。時間をおいて再度お試しください。');
     } finally {
       setStartingLogin(false);
+    }
+  };
+
+  const startLogout = () => {
+    setStartingLogout(true);
+    try {
+      window.location.href = buildLogoutUrl();
+    } catch (error) {
+      console.error('Failed to start logout', error);
+      alert('ログアウト処理を開始できませんでした。時間をおいて再度お試しください。');
+      setStartingLogout(false);
     }
   };
 
@@ -170,14 +181,16 @@ export default function Header() {
               {authChecked && sessionUser ? (
                 <>
                   <Link href="/mypage">
-                    <NavItem
-                      icon={<FaUser />}
-                      label={`${sessionUser.username ?? sessionUser.email ?? 'マイページ'}`}
-                    />
+                    <NavItem icon={<FaUser />} label="ログイン中" />
                   </Link>
-                  <a href={logoutHref} className="hidden sm:inline-flex">
-                    <NavItem label="ログアウト" />
-                  </a>
+                  <button
+                    type="button"
+                    className="hidden sm:inline-flex"
+                    onClick={startLogout}
+                    disabled={startingLogout}
+                  >
+                    <NavItem label={startingLogout ? '処理中…' : 'ログアウト'} />
+                  </button>
                 </>
               ) : (
                 <button
@@ -261,9 +274,14 @@ export default function Header() {
                     <Link href="/mypage">
                       <NavItem icon={<FaUser />} label="マイページ" />
                     </Link>
-                    <a href={logoutHref} className="mt-2 inline-flex">
-                      <NavItem label="ログアウト" />
-                    </a>
+                    <button
+                      type="button"
+                      className="mt-2 inline-flex"
+                      onClick={startLogout}
+                      disabled={startingLogout}
+                    >
+                      <NavItem label={startingLogout ? '処理中…' : 'ログアウト'} />
+                    </button>
                   </>
                 ) : (
                   <button
