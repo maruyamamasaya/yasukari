@@ -190,7 +190,14 @@ export default function Header() {
                   </button>
                 </>
               ) : authChecked && authError ? (
-                <NavItem icon={<FaUser />} label="ログインエラー" />
+                <button
+                  type="button"
+                  className="hidden sm:inline-flex"
+                  onClick={startLogout}
+                  disabled={startingLogout}
+                >
+                  <NavItem icon={<FaUser />} label="ログインエラー" />
+                </button>
               ) : (
                 <Link href="https://yasukaribike.com/login" className="hidden sm:inline-flex">
                   <NavItem icon={<FaUser />} label="ログイン" />
@@ -278,7 +285,14 @@ export default function Header() {
                     </button>
                   </>
                 ) : authChecked && authError ? (
-                  <NavItem icon={<FaUser />} label="ログインエラー" />
+                  <button
+                    type="button"
+                    className="inline-flex"
+                    onClick={startLogout}
+                    disabled={startingLogout}
+                  >
+                    <NavItem icon={<FaUser />} label="ログインエラー" />
+                  </button>
                 ) : (
                   <Link href="https://yasukaribike.com/login" className="inline-flex">
                     <NavItem icon={<FaUser />} label="ログイン" />
