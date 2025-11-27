@@ -36,8 +36,7 @@ export default function HelpPage({ categories }: Props) {
           <p className="text-xs font-semibold uppercase tracking-wider text-rose-600">Support Center</p>
           <h1 className="text-2xl font-bold text-slate-900">ヘルプ</h1>
           <p className="text-sm leading-relaxed text-slate-700">
-            よくある質問やお問い合わせ方法をまとめました。必要な情報を最速で見つけられるよう、
-            シンプルで見やすいレイアウトにしています。
+            よくある質問やお問い合わせ方法をまとめました。お困りのときは、まずこちらをご確認ください。
           </p>
         </div>
       </section>
