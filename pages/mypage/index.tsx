@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { buildLogoutUrl } from '../../lib/cognitoHostedUi';
 
 type SessionUser = {
   id: string;
@@ -25,7 +26,7 @@ export default function MyPage() {
   const [attributesError, setAttributesError] = useState('');
   const [loadingAttributes, setLoadingAttributes] = useState(true);
   const router = useRouter();
-  const logoutHref = '/auth/logout';
+  const logoutHref = buildLogoutUrl();
 
   useEffect(() => {
     const controller = new AbortController();
