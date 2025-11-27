@@ -42,7 +42,7 @@ export default function CognitoCallbackPage() {
     const expiresIn = Number(params.get('expires_in') ?? '3600');
 
     if (!idToken) {
-      setError('IDトークンを取得できませんでした。再度お試しください。');
+      setError('認証情報を取得できませんでした。お手数ですが、もう一度ログインからお試しください。');
       return;
     }
 
