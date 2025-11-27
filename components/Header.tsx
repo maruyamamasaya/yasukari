@@ -12,7 +12,6 @@ import {
 } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
 import AnnouncementBar from './AnnouncementBar';
-import { buildLogoutUrl } from '../lib/cognitoHostedUi';
 
 export default function Header() {
   const suggestItems = [
@@ -37,10 +36,15 @@ export default function Header() {
   const langHref = isEn ? '/' : '/en';
   const langLabel = isEn ? 'JP' : 'EN';
 
-  const startLogout = () => {
+  const startLogout = async () => {
     setStartingLogout(true);
     try {
-      window.location.href = buildLogoutUrl();
+      const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      if (!response.ok) {
+        throw new Error(`failed to logout: ${response.status}`);
+      }
+
+      await router.push('/login');
     } catch (error) {
       console.error('Failed to start logout', error);
       alert('ログアウト処理を開始できませんでした。時間をおいて再度お試しください。');
