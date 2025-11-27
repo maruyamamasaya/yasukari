@@ -1,11 +1,33 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkAccess } from './lib/rateLimit';
+import { COGNITO_ID_TOKEN_COOKIE } from './lib/cognitoHostedUi';
 
 const MANUAL_BASIC_USER = '0000';
 const MANUAL_BASIC_PASS = '0000';
 const ADMIN_BASIC_USER = 'yasukari';
 const ADMIN_BASIC_PASS = 'yasukari2022';
+
+const decodeLocaleFromToken = (token: string | undefined): string | null => {
+  if (!token) return null;
+
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+
+  try {
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as {
+      [key: string]: unknown;
+    };
+    const locale = payload['custom:locale'];
+    if (typeof locale !== 'string') return null;
+
+    const normalized = locale.trim().toLowerCase();
+    return normalized || null;
+  } catch (error) {
+    console.error('Failed to decode ID token payload', error);
+    return null;
+  }
+};
 
 const requireBasicAuth = (
   authHeader: string | null,
@@ -57,6 +79,20 @@ export function middleware(req: NextRequest) {
     if (authResult) {
       return authResult;
     }
+  }
+
+  const pathname = req.nextUrl.pathname;
+  if (pathname.startsWith('/_next') || pathname.startsWith('/auth')) {
+    return NextResponse.next();
+  }
+
+  const idToken = req.cookies.get(COGNITO_ID_TOKEN_COOKIE)?.value;
+  const userLocale = decodeLocaleFromToken(idToken);
+
+  if (userLocale === 'en' && !pathname.startsWith('/en')) {
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = `/en${pathname === '/' ? '' : pathname}`;
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();
