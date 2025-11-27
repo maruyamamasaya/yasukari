@@ -47,6 +47,12 @@ type RegisterResponse = {
   message?: string;
 };
 
+type AttributesResponse = {
+  attributes?: {
+    phone_number?: string;
+  };
+};
+
 const purposeOptions = [
   { value: '1', label: '旅行・レジャー' },
   { value: '2', label: '仕事' },
@@ -111,6 +117,8 @@ const RegistrationPage: NextPage = () => {
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [userError, setUserError] = useState('');
+  const [availablePhones, setAvailablePhones] = useState<string[]>([]);
+  const [selectedPhoneOption, setSelectedPhoneOption] = useState('');
 
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [licenseFileName, setLicenseFileName] = useState('');
@@ -154,6 +162,33 @@ const RegistrationPage: NextPage = () => {
   }, [router]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchAttributes = async () => {
+      try {
+        const response = await fetch('/api/user/attributes', { credentials: 'include', signal: controller.signal });
+        if (!response.ok) {
+          return;
+        }
+        const data = (await response.json()) as AttributesResponse;
+        const phone = data.attributes?.phone_number?.replace(/[^0-9]/g, '') ?? '';
+        if (phone) {
+          setAvailablePhones([phone]);
+          setFormData((prev) => ({ ...prev, mobile: prev.mobile || phone }));
+          setSelectedPhoneOption(phone);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+        }
+      }
+    };
+
+    void fetchAttributes();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (submitTimeoutRef.current) {
         clearTimeout(submitTimeoutRef.current);
@@ -163,11 +198,23 @@ const RegistrationPage: NextPage = () => {
 
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
+    if (name === 'mobile') {
+      setSelectedPhoneOption('');
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value as RegisterFormData[keyof RegisterFormData],
     }));
   }, []);
+
+  const handlePhoneSelect = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      const value = event.target.value;
+      setSelectedPhoneOption(value);
+      setFormData((prev) => ({ ...prev, mobile: value }));
+    },
+    [],
+  );
 
   const handleFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -449,18 +496,34 @@ const RegistrationPage: NextPage = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="mobile">
-                    携帯電話番号
+                    携帯電話番号（任意）
                   </label>
+                  {availablePhones.length > 0 ? (
+                    <select
+                      id="mobile-select"
+                      name="mobile-select"
+                      value={selectedPhoneOption}
+                      onChange={handlePhoneSelect}
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    >
+                      <option value="">手入力する</option>
+                      {availablePhones.map((phone) => (
+                        <option key={phone} value={phone}>
+                          {phone}
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
                   <input
                     id="mobile"
                     name="mobile"
                     type="tel"
                     value={formData.mobile}
                     onChange={handleChange}
-                    required
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                     placeholder="09012345678"
                   />
+                  <p className="mt-1 text-xs text-gray-500">Cognito に登録済みの番号を選ぶか、任意で入力できます。</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="tel">
