@@ -167,7 +167,6 @@ export default function MyPage() {
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">プロフィール情報</h2>
-                  <p className="text-sm text-gray-500">Cognito のユーザー属性から取得しています。</p>
                 </div>
                 <Link
                   href="/mypage/profile-setup"
