@@ -17,41 +17,55 @@ export default function CognitoCallbackPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const hash = window.location.hash.replace(/^#/, '');
-    const params = new URLSearchParams(hash);
+    const handleCallback = async () => {
+      const hash = window.location.hash.replace(/^#/, '');
+      const params = new URLSearchParams(hash);
 
-    const urlError = params.get('error');
-    if (urlError) {
-      setError(params.get('error_description') ?? urlError);
-      return;
-    }
+      const urlError = params.get('error');
+      if (urlError) {
+        try {
+          const sessionRes = await fetch('/api/me', { credentials: 'include' });
+          if (sessionRes.ok) {
+            await router.replace('/mypage');
+            return;
+          }
+        } catch (err) {
+          console.error(err);
+        }
 
-    const returnedState = params.get('state');
-    const expectedState = sessionStorage.getItem(COGNITO_OAUTH_STATE_KEY);
+        setError(params.get('error_description') ?? urlError);
+        return;
+      }
 
-    if (!returnedState || !expectedState || returnedState !== expectedState) {
+      const returnedState = params.get('state');
+      const expectedState = sessionStorage.getItem(COGNITO_OAUTH_STATE_KEY);
+
+      if (!returnedState || !expectedState || returnedState !== expectedState) {
+        sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
+        setError('認証状態を確認できませんでした。もう一度ログインからお試しください。');
+        return;
+      }
+
       sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
-      setError('認証状態を確認できませんでした。もう一度ログインからお試しください。');
-      return;
-    }
 
-    sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
+      const idToken = params.get('id_token');
+      const accessToken = params.get('access_token');
+      const expiresIn = Number(params.get('expires_in') ?? '3600');
 
-    const idToken = params.get('id_token');
-    const accessToken = params.get('access_token');
-    const expiresIn = Number(params.get('expires_in') ?? '3600');
+      if (!idToken) {
+        setError('IDトークンを取得できませんでした。再度お試しください。');
+        return;
+      }
 
-    if (!idToken) {
-      setError('IDトークンを取得できませんでした。再度お試しください。');
-      return;
-    }
+      setCookie(COGNITO_ID_TOKEN_COOKIE, idToken, expiresIn);
+      if (accessToken) {
+        setCookie(COGNITO_ACCESS_TOKEN_COOKIE, accessToken, expiresIn);
+      }
 
-    setCookie(COGNITO_ID_TOKEN_COOKIE, idToken, expiresIn);
-    if (accessToken) {
-      setCookie(COGNITO_ACCESS_TOKEN_COOKIE, accessToken, expiresIn);
-    }
+      void router.replace('/mypage/profile-setup?fromLogin=1');
+    };
 
-    void router.replace('/mypage/profile-setup?fromLogin=1');
+    void handleCallback();
   }, [router]);
 
   return (
