@@ -1,0 +1,727 @@
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+
+import type { NextPage } from 'next';
+
+type FormStatus = 'idle' | 'loading' | 'success' | 'error';
+
+type RegisterFormData = {
+  name1: string;
+  name2: string;
+  kana1: string;
+  kana2: string;
+  sex: '1' | '2';
+  birth: string;
+  zip: string;
+  address1: string;
+  address2: string;
+  mobile: string;
+  tel: string;
+  license: string;
+  work_place: string;
+  work_address: string;
+  work_tel: string;
+  other_name: string;
+  other_address: string;
+  other_tel: string;
+  enquete_purpose: string;
+  enquete_want: string;
+  enquete_touring: string;
+  enquete_magazine: string;
+  enquete_chance: string;
+};
+
+type SessionUser = {
+  id: string;
+  email?: string;
+  username?: string;
+};
+
+type SessionResponse = {
+  user?: SessionUser;
+};
+
+type RegisterResponse = {
+  message?: string;
+};
+
+const purposeOptions = [
+  { value: '1', label: '旅行・レジャー' },
+  { value: '2', label: '仕事' },
+  { value: '3', label: 'バイクの練習' },
+  { value: '4', label: 'バイクの修理中' },
+  { value: '5', label: 'その他' },
+];
+
+const wantOptions = [
+  { value: '1', label: '所有している' },
+  { value: '2', label: '購入している' },
+  { value: '3', label: '欲しい' },
+  { value: '4', label: '欲しくない' },
+];
+
+const touringOptions = [
+  { value: '1', label: 'ある' },
+  { value: '2', label: 'ない' },
+];
+
+const magazineOptions = [
+  { value: '1', label: 'はい' },
+  { value: '2', label: 'いいえ' },
+];
+
+const chanceOptions = [
+  { value: '1', label: '知人の紹介' },
+  { value: '2', label: 'ネットで検索' },
+  { value: '3', label: '通りすがり' },
+  { value: '4', label: 'リピーター' },
+  { value: '5', label: 'その他' },
+];
+
+const initialFormData: RegisterFormData = {
+  name1: '',
+  name2: '',
+  kana1: '',
+  kana2: '',
+  sex: '1',
+  birth: '',
+  zip: '',
+  address1: '',
+  address2: '',
+  mobile: '',
+  tel: '',
+  license: '',
+  work_place: '',
+  work_address: '',
+  work_tel: '',
+  other_name: '',
+  other_address: '',
+  other_tel: '',
+  enquete_purpose: '1',
+  enquete_want: '1',
+  enquete_touring: '1',
+  enquete_magazine: '1',
+  enquete_chance: '1',
+};
+
+const RegistrationPage: NextPage = () => {
+  const router = useRouter();
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [userError, setUserError] = useState('');
+
+  const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
+  const [licenseFileName, setLicenseFileName] = useState('');
+  const [submitStatus, setSubmitStatus] = useState<FormStatus>('idle');
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/me', { credentials: 'include', signal: controller.signal });
+        if (response.status === 401) {
+          await router.replace('/login');
+          return;
+        }
+        if (!response.ok) {
+          throw new Error('failed to load profile');
+        }
+
+        const data = (await response.json()) as SessionResponse;
+        if (data.user) {
+          setSessionUser(data.user);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+          setUserError('ログイン状態の確認に失敗しました。時間をおいて再度お試しください。');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingUser(false);
+        }
+      }
+    };
+
+    void fetchUser();
+    return () => controller.abort();
+  }, [router]);
+
+  useEffect(() => {
+    return () => {
+      if (submitTimeoutRef.current) {
+        clearTimeout(submitTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value as RegisterFormData[keyof RegisterFormData],
+    }));
+  }, []);
+
+  const handleFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    setLicenseFileName(file ? file.name : '');
+  }, []);
+
+  const userDisplayName = useMemo(() => sessionUser?.username || sessionUser?.email || 'ゲスト', [sessionUser]);
+
+  const handleSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setSubmitMessage('');
+      setSubmitStatus('idle');
+      if (submitTimeoutRef.current) {
+        clearTimeout(submitTimeoutRef.current);
+      }
+
+      if (!sessionUser?.id) {
+        setSubmitStatus('error');
+        setSubmitMessage('ユーザー情報の取得に失敗しました。ログインし直してから再度お試しください。');
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      try {
+        const response = await fetch('/api/register/store-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: sessionUser.id,
+            email: sessionUser.email,
+            license_file_name: licenseFileName,
+            ...formData,
+          }),
+        });
+
+        const result = (await response.json()) as RegisterResponse;
+
+        if (!response.ok) {
+          throw new Error(result.message || '保存に失敗しました。');
+        }
+
+        setSubmitStatus('success');
+        setSubmitMessage(result.message || '登録情報を保存しました。');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '保存に失敗しました。';
+        setSubmitStatus('error');
+        setSubmitMessage(message);
+      } finally {
+        submitTimeoutRef.current = setTimeout(() => {
+          setIsSubmitting(false);
+        }, 400);
+      }
+    },
+    [formData, licenseFileName, sessionUser],
+  );
+
+  return (
+    <>
+      <Head>
+        <title>本登録 | ヤスカリ</title>
+        <meta name="description" content="マイページから本登録用の基本情報を入力できます。" />
+      </Head>
+      <div className="min-h-screen bg-gray-50 text-gray-900">
+        <header className="border-b border-gray-100 bg-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
+            <Link href="/" className="flex items-center gap-3">
+              <img src="/static/images/logo/250x50.png" alt="ヤスカリ" width={200} height={40} className="hidden md:block" />
+              <div className="flex items-center gap-2 md:hidden">
+                <img src="/static/images/logo/300x300.jpg" alt="ヤスカリ" width={44} height={44} className="rounded-full" />
+                <span className="text-sm font-semibold text-gray-800">レンタルバイクのヤスカリ</span>
+              </div>
+            </Link>
+            <div className="flex items-center gap-3 text-sm text-gray-600">
+              <span className="hidden md:inline">{loadingUser ? '読み込み中…' : `${userDisplayName} としてログイン中`}</span>
+              <Link
+                href="/mypage"
+                className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-300"
+              >
+                マイページに戻る
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
+          <nav aria-label="breadcrumb" className="mb-6">
+            <ol className="flex items-center space-x-2 text-sm text-gray-500">
+              <li>
+                <Link href="/" className="text-red-600 hover:underline">
+                  ホーム
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link href="/mypage" className="text-red-600 hover:underline">
+                  マイページ
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="text-gray-600">本登録</li>
+            </ol>
+          </nav>
+
+          <section className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h1 className="text-2xl font-semibold text-gray-900">本登録フォーム</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              レンタルのご利用に必要な基本情報を入力してください。送信後、内容が DynamoDB の yasukariUserMain に保存されます。
+            </p>
+            {userError ? (
+              <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{userError}</p>
+            ) : null}
+          </section>
+
+          <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="email">
+                  メールアドレス
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={sessionUser?.email ?? ''}
+                  disabled
+                  className="mt-1 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                  placeholder="example@example.com"
+                />
+                <p className="mt-1 text-xs text-gray-500">Cognito のアカウントに登録されたメールアドレスが使用されます。</p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="name1">
+                    姓（漢字）
+                  </label>
+                  <input
+                    id="name1"
+                    name="name1"
+                    type="text"
+                    value={formData.name1}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="山田"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="name2">
+                    名（漢字）
+                  </label>
+                  <input
+                    id="name2"
+                    name="name2"
+                    type="text"
+                    value={formData.name2}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="太郎"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="kana1">
+                    セイ（カナ）
+                  </label>
+                  <input
+                    id="kana1"
+                    name="kana1"
+                    type="text"
+                    value={formData.kana1}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="ヤマダ"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="kana2">
+                    メイ（カナ）
+                  </label>
+                  <input
+                    id="kana2"
+                    name="kana2"
+                    type="text"
+                    value={formData.kana2}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="タロウ"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="sex">
+                    性別
+                  </label>
+                  <select
+                    id="sex"
+                    name="sex"
+                    value={formData.sex}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                  >
+                    <option value="1">男性</option>
+                    <option value="2">女性</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="birth">
+                    生年月日
+                  </label>
+                  <input
+                    id="birth"
+                    name="birth"
+                    type="date"
+                    value={formData.birth}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="zip">
+                    郵便番号
+                  </label>
+                  <input
+                    id="zip"
+                    name="zip"
+                    type="text"
+                    value={formData.zip}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="1234567"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="address1">
+                    住所1（都道府県・市区町村）
+                  </label>
+                  <input
+                    id="address1"
+                    name="address1"
+                    type="text"
+                    value={formData.address1}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="東京都足立区千住曙町"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="address2">
+                    住所2（番地・建物名など）
+                  </label>
+                  <input
+                    id="address2"
+                    name="address2"
+                    type="text"
+                    value={formData.address2}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="1-1 ヤスカリビル101"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="mobile">
+                    携帯電話番号
+                  </label>
+                  <input
+                    id="mobile"
+                    name="mobile"
+                    type="tel"
+                    value={formData.mobile}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="09012345678"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="tel">
+                    自宅電話番号（任意）
+                  </label>
+                  <input
+                    id="tel"
+                    name="tel"
+                    type="tel"
+                    value={formData.tel}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="0312345678"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="license">
+                    免許証番号
+                  </label>
+                  <input
+                    id="license"
+                    name="license"
+                    type="text"
+                    value={formData.license}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="123456789012"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="license_file_name">
+                    免許証画像ファイル名
+                  </label>
+                  <input
+                    id="license_file_name"
+                    name="license_file_name"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border file:border-red-600 file:bg-white file:px-4 file:py-2 file:text-sm file:font-semibold file:text-red-600 hover:file:bg-red-50"
+                  />
+                  {licenseFileName ? <p className="mt-1 text-xs text-gray-500">選択中: {licenseFileName}</p> : null}
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="work_place">
+                    勤務先名（任意）
+                  </label>
+                  <input
+                    id="work_place"
+                    name="work_place"
+                    type="text"
+                    value={formData.work_place}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="ヤスカリ株式会社"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="work_address">
+                    勤務先住所（任意）
+                  </label>
+                  <input
+                    id="work_address"
+                    name="work_address"
+                    type="text"
+                    value={formData.work_address}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="東京都足立区千住曙町"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="work_tel">
+                    勤務先電話番号（任意）
+                  </label>
+                  <input
+                    id="work_tel"
+                    name="work_tel"
+                    type="tel"
+                    value={formData.work_tel}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="0312345678"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="other_name">
+                    緊急連絡先氏名（任意）
+                  </label>
+                  <input
+                    id="other_name"
+                    name="other_name"
+                    type="text"
+                    value={formData.other_name}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="山田花子"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="other_address">
+                    緊急連絡先住所（任意）
+                  </label>
+                  <input
+                    id="other_address"
+                    name="other_address"
+                    type="text"
+                    value={formData.other_address}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="東京都足立区千住曙町"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="other_tel">
+                    緊急連絡先電話番号（任意）
+                  </label>
+                  <input
+                    id="other_tel"
+                    name="other_tel"
+                    type="tel"
+                    value={formData.other_tel}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    placeholder="0312345678"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-xl bg-red-50 p-4 text-sm text-gray-800">
+                <h2 className="text-base font-semibold text-gray-900">アンケート</h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="enquete_purpose">
+                      ご利用目的
+                    </label>
+                    <select
+                      id="enquete_purpose"
+                      name="enquete_purpose"
+                      value={formData.enquete_purpose}
+                      onChange={handleChange}
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    >
+                      {purposeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="enquete_want">
+                      バイクの購入意欲
+                    </label>
+                    <select
+                      id="enquete_want"
+                      name="enquete_want"
+                      value={formData.enquete_want}
+                      onChange={handleChange}
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    >
+                      {wantOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="enquete_touring">
+                      バイクツーリング経験
+                    </label>
+                    <select
+                      id="enquete_touring"
+                      name="enquete_touring"
+                      value={formData.enquete_touring}
+                      onChange={handleChange}
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    >
+                      {touringOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="enquete_magazine">
+                      バイク雑誌の購読
+                    </label>
+                    <select
+                      id="enquete_magazine"
+                      name="enquete_magazine"
+                      value={formData.enquete_magazine}
+                      onChange={handleChange}
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    >
+                      {magazineOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="enquete_chance">
+                      当サービスを知ったきっかけ
+                    </label>
+                    <select
+                      id="enquete_chance"
+                      name="enquete_chance"
+                      value={formData.enquete_chance}
+                      onChange={handleChange}
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                    >
+                      {chanceOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {submitMessage ? (
+                <div
+                  className={`rounded-lg border px-4 py-3 text-sm ${
+                    submitStatus === 'success' ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'
+                  }`}
+                >
+                  {submitMessage}
+                </div>
+              ) : null}
+
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-500">送信後、登録情報が DynamoDB の yasukariUserMain に保存されます。</p>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || loadingUser}
+                  className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+                >
+                  {isSubmitting ? '送信中…' : '本登録を完了する'}
+                </button>
+              </div>
+            </form>
+          </section>
+        </main>
+      </div>
+    </>
+  );
+};
+
+export default RegistrationPage;
