@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
   buildAuthorizeUrl,
+  buildLogoutUrl,
   buildSignupUrl,
   createAndStoreOauthState,
 } from '../lib/cognitoHostedUi';
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [error, setError] = useState('');
   const [startingLogin, setStartingLogin] = useState(false);
+  const [startingLogout, setStartingLogout] = useState(false);
   const hostedUiSignupUrl = buildSignupUrl();
 
   useEffect(() => {
@@ -72,6 +74,18 @@ export default function LoginPage() {
     } catch (err) {
       console.error(err);
       setError('ログイン処理を開始できませんでした。時間をおいて再度お試しください。');
+    }
+  };
+
+  const handleLogout = () => {
+    setError('');
+    setStartingLogout(true);
+    try {
+      window.location.href = buildLogoutUrl();
+    } catch (err) {
+      console.error(err);
+      setStartingLogout(false);
+      setError('ログアウト処理を開始できませんでした。時間をおいて再度お試しください。');
     }
   };
 
@@ -136,12 +150,16 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                 <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
               ) : null}
               {sessionUser ? (
-                <a
-                  href="/auth/logout"
-                  className="inline-flex w-full items-center justify-center rounded-full bg-gray-800 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-900"
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex w-full items-center justify-center rounded-full bg-gray-800 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={startingLogout}
                 >
-                  {`${sessionUser.username ?? sessionUser.email ?? 'ログイン中のアカウント'}でログアウトする`}
-                </a>
+                  {startingLogout
+                    ? 'ログアウトへリダイレクトしています…'
+                    : `${sessionUser.username ?? sessionUser.email ?? 'ログイン中のアカウント'}でログアウトする`}
+                </button>
               ) : (
                 <button
                   type="button"
