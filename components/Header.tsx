@@ -28,6 +28,7 @@ export default function Header() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [authError, setAuthError] = useState(false);
   const [startingLogout, setStartingLogout] = useState(false);
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -71,6 +72,7 @@ export default function Header() {
     const controller = new AbortController();
     const fetchSession = async () => {
       try {
+        setAuthError(false);
         const response = await fetch(`/api/me`, {
           credentials: 'include',
           signal: controller.signal,
@@ -84,9 +86,18 @@ export default function Header() {
         if (response.ok) {
           const data = (await response.json()) as { user?: { email?: string; username?: string } };
           setSessionUser(data.user ?? null);
+          return;
         }
+
+        setSessionUser(null);
+        setAuthError(true);
       } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
         console.error('Failed to check session', error);
+        setSessionUser(null);
+        setAuthError(true);
       } finally {
         setAuthChecked(true);
       }
@@ -178,6 +189,8 @@ export default function Header() {
                     <NavItem label={startingLogout ? '処理中…' : 'ログアウト'} />
                   </button>
                 </>
+              ) : authChecked && authError ? (
+                <NavItem icon={<FaUser />} label="ログインエラー" />
               ) : (
                 <Link href="https://yasukaribike.com/login" className="hidden sm:inline-flex">
                   <NavItem icon={<FaUser />} label="ログイン" />
@@ -264,6 +277,8 @@ export default function Header() {
                       <NavItem label={startingLogout ? '処理中…' : 'ログアウト'} />
                     </button>
                   </>
+                ) : authChecked && authError ? (
+                  <NavItem icon={<FaUser />} label="ログインエラー" />
                 ) : (
                   <Link href="https://yasukaribike.com/login" className="inline-flex">
                     <NavItem icon={<FaUser />} label="ログイン" />
