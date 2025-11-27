@@ -16,7 +16,7 @@ export default function ChatBotWidget() {
           <div className="hidden sm:block relative mb-2 shadow-xl">
             <button
               onClick={() => setOpen(false)}
-              className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+              className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-8 h-8 text-lg flex items-center justify-center shadow-md"
             >
               ×
             </button>

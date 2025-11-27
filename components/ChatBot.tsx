@@ -35,11 +35,6 @@ export default function ChatBot({
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(448);
-  const [isResizing, setIsResizing] = useState(false);
-  const [isResizeHover, setIsResizeHover] = useState(false);
-  const startYRef = useRef(0);
-  const startHeightRef = useRef(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -233,34 +228,20 @@ export default function ChatBot({
       onClose?.();
     }
   }
-
-  function handleResizeStart(e: React.MouseEvent) {
-    setIsResizing(true);
-    startYRef.current = e.clientY;
-    startHeightRef.current = height;
-    window.addEventListener("mousemove", handleResizing);
-    window.addEventListener("mouseup", handleResizeEnd);
-    e.preventDefault();
-  }
-
-  function handleResizing(e: MouseEvent) {
-    const newHeight = startHeightRef.current - (e.clientY - startYRef.current);
-    setHeight(Math.max(200, Math.min(newHeight, window.innerHeight * 1.5)));
-  }
-
-  function handleResizeEnd() {
-    setIsResizing(false);
-    window.removeEventListener("mousemove", handleResizing);
-    window.removeEventListener("mouseup", handleResizeEnd);
-  }
-
-  const containerWidth = fullScreen ? "w-full" : "w-[25rem] sm:w-[32rem]";
-  const resizeCursorClass = isResizing || isResizeHover ? "cursor-ns-resize" : "";
+  const baseSizeStyle = fullScreen
+    ? { height: "100vh", width: "100%" }
+    : { height: 600, width: 380 };
+  const avatarWrapperClasses =
+    "flex items-center justify-center w-10 h-10 rounded-[20px] border";
+  const bubbleBaseClasses =
+    "max-w-[88%] px-3 py-2 rounded-[18px] shadow-sm border animate-fade";
+  const optionContainerClasses =
+    "w-full max-w-[420px] min-w-[350px] text-left rounded-[18px] shadow-sm";
 
   return (
     <div
-      className={`relative ${containerWidth} flex flex-col ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-5"} bg-gradient-to-b from-white via-red-50/60 to-white border border-red-100/60 rounded-3xl shadow-xl max-h-[150vh] overflow-hidden ${resizeCursorClass} ${className}`}
-      style={fullScreen ? { height: "100vh" } : { height }}
+      className={`relative flex flex-col ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-5"} bg-gradient-to-b from-white via-red-50/60 to-white border border-red-100/60 rounded-[20px] shadow-xl overflow-hidden ${className}`}
+      style={baseSizeStyle}
     >
       {fullScreen && (
         <div className="absolute top-3 left-3 flex items-center gap-2 z-20">
@@ -271,14 +252,6 @@ export default function ChatBot({
             <FaTimes className="w-5 h-5" />
           </button>
         </div>
-      )}
-      {!fullScreen && (
-        <div
-          onMouseDown={handleResizeStart}
-          onMouseEnter={() => setIsResizeHover(true)}
-          onMouseLeave={() => setIsResizeHover(false)}
-          className="absolute inset-x-0 top-0 h-2 cursor-ns-resize z-20"
-        />
       )}
 
       <div className="pb-3 mb-3 border-b border-red-100/70 flex items-center justify-between">
@@ -300,19 +273,29 @@ export default function ChatBot({
             key={idx}
             className={`flex items-end gap-2 px-2 ${m.from === "bot" ? "" : "flex-row-reverse"}`}
           >
-            {m.from === "bot" ? (
-              <FaRobot className="text-red-600 w-5 h-5" />
-            ) : (
-              <FaUser className="text-red-600 w-5 h-5" />
-            )}
             <div
-              className={`max-w-[88%] px-3 py-2 rounded-3xl shadow-sm border animate-fade ${
+              className={`${avatarWrapperClasses} ${
+                m.from === "bot"
+                  ? "bg-red-50/80 border-red-100 text-red-600"
+                  : "bg-red-500/10 border-red-200 text-red-600"
+              }`}
+            >
+              {m.from === "bot" ? (
+                <FaRobot className="w-5 h-5" />
+              ) : (
+                <FaUser className="w-5 h-5" />
+              )}
+            </div>
+            <div
+              className={`${bubbleBaseClasses} ${
                 m.from === "bot"
                   ? "bg-gray-50 border-gray-200"
                   : "bg-red-500 text-white border-red-400"
               }`}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-line">{m.text}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-line break-words">
+                {m.text}
+              </p>
               <span className={`block text-[10px] mt-1 opacity-70 ${m.from === "bot" ? "text-gray-600" : "text-white"}`}>
                 {m.time}
               </span>
@@ -350,7 +333,7 @@ export default function ChatBot({
       )}
 
       {step === "survey" && !selectedCategory && (
-        <div className="space-y-3">
+        <div className="space-y-3 flex flex-col items-center">
           <p className="text-sm font-medium text-gray-800">カテゴリを選択してください。</p>
           {faqLoading && (
             <p className="text-sm text-gray-600">FAQを読み込み中です…</p>
@@ -366,17 +349,17 @@ export default function ChatBot({
             faqCategories.map((cat) => (
               <button
                 key={cat.id}
-                className="w-full text-left p-2 sm:p-3 border border-gray-200 rounded-2xl hover:bg-red-50 transition shadow-sm"
+                className={`${optionContainerClasses} p-3 sm:p-3.5 border border-gray-200 hover:bg-red-50 transition`}
                 onClick={() => handleCategory(cat)}
               >
-                {cat.title}
+                <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">{cat.title}</span>
               </button>
             ))}
         </div>
       )}
 
       {step === "survey" && selectedCategory && (
-        <div className="space-y-3">
+        <div className="space-y-3 flex flex-col items-center">
           <button
             onClick={handleBack}
             className="text-sm text-red-700 hover:underline"
@@ -386,32 +369,37 @@ export default function ChatBot({
           {selectedCategory.faqs.map((faq, idx) => (
             <button
               key={idx}
-              className="w-full text-left p-2 sm:p-3 border border-gray-200 rounded-2xl hover:bg-red-50 transition shadow-sm"
+              className={`${optionContainerClasses} p-3 sm:p-3.5 border border-gray-200 hover:bg-red-50 transition`}
               onClick={() => handleQuestion(faq)}
             >
-              {faq.q}
+              <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">{faq.q}</span>
             </button>
           ))}
           {loopCount >= 2 && (
             <button
-              className="w-full text-left p-2 sm:p-3 border rounded-2xl bg-gray-100 hover:bg-gray-200 transition"
+              className={`${optionContainerClasses} p-3 sm:p-3.5 border bg-gray-100 hover:bg-gray-200 transition`}
               onClick={handleFreeStart}
             >
-              その他の質問を入力する
+              <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                その他の質問を入力する
+              </span>
             </button>
           )}
         </div>
       )}
 
       {step === "free" && (
-        <div className="space-y-3">
+        <div className="space-y-3 flex flex-col items-center">
           <button
             onClick={handleBack}
             className="text-sm text-red-700 hover:underline"
           >
             &larr; カテゴリ選択に戻る
           </button>
-          <form onSubmit={handleFreeSubmit} className="flex gap-2 items-center bg-white/90 border border-gray-200 rounded-full px-2 py-1 shadow-sm">
+          <form
+            onSubmit={handleFreeSubmit}
+            className="flex gap-2 items-center bg-white/90 border border-gray-200 rounded-full px-2 py-1 shadow-sm w-full max-w-[420px] min-w-[350px]"
+          >
             <input
               type="text"
               name="free"
