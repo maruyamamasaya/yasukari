@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
 import AnnouncementBar from './AnnouncementBar';
-import { buildAuthorizeUrl, buildLogoutUrl, createAndStoreOauthState } from '../lib/cognitoHostedUi';
+import { buildLogoutUrl } from '../lib/cognitoHostedUi';
 
 export default function Header() {
   const suggestItems = [
@@ -28,7 +28,6 @@ export default function Header() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [startingLogin, setStartingLogin] = useState(false);
   const [startingLogout, setStartingLogout] = useState(false);
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -36,19 +35,6 @@ export default function Header() {
   const isEn = router.pathname.startsWith('/en');
   const langHref = isEn ? '/' : '/en';
   const langLabel = isEn ? 'JP' : 'EN';
-
-  const startLogin = async () => {
-    setStartingLogin(true);
-    try {
-      const state = createAndStoreOauthState();
-      window.location.href = buildAuthorizeUrl(state);
-    } catch (error) {
-      console.error('Failed to start login', error);
-      alert('ログイン処理を開始できませんでした。時間をおいて再度お試しください。');
-    } finally {
-      setStartingLogin(false);
-    }
-  };
 
   const startLogout = () => {
     setStartingLogout(true);
@@ -193,14 +179,9 @@ export default function Header() {
                   </button>
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={startLogin}
-                  className="hidden sm:inline-flex"
-                  disabled={startingLogin}
-                >
-                  <NavItem icon={<FaUser />} label={startingLogin ? '接続中…' : 'ログイン'} />
-                </button>
+                <Link href="https://yasukaribike.com/login" className="hidden sm:inline-flex">
+                  <NavItem icon={<FaUser />} label="ログイン" />
+                </Link>
               )}
               <Link href="/pricing">
                 <NavItem icon={<FaClipboardList />} label="車種・料金" />
@@ -284,14 +265,9 @@ export default function Header() {
                     </button>
                   </>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={startLogin}
-                    className="inline-flex"
-                    disabled={startingLogin}
-                  >
-                    <NavItem icon={<FaUser />} label={startingLogin ? '接続中…' : 'ログイン'} />
-                  </button>
+                  <Link href="https://yasukaribike.com/login" className="inline-flex">
+                    <NavItem icon={<FaUser />} label="ログイン" />
+                  </Link>
                 )}
               </li>
               <li>

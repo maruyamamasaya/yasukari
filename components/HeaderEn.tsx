@@ -120,7 +120,7 @@ export default function HeaderEn() {
               <Link href="/">
                 <NavItem label="Home" />
               </Link>
-              <Link href="/login">
+              <Link href="https://yasukaribike.com/login">
                 <NavItem icon={<FaUser />} label="Login" />
               </Link>
               <Link href="/pricing">
@@ -190,7 +190,7 @@ export default function HeaderEn() {
                 </Link>
               </li>
               <li>
-                <Link href="/login">
+                <Link href="https://yasukaribike.com/login">
                   <NavItem icon={<FaUser />} label="Login" />
                 </Link>
               </li>
