@@ -2,13 +2,13 @@ import os
 import secrets
 import time
 from functools import wraps
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 from urllib.parse import urlencode
 
+import jwt
 import requests
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template_string, request, session
-import jwt
 from jwt import PyJWKClient
 
 load_dotenv()
@@ -51,9 +51,95 @@ if not all(
 
 ISSUER = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/{COGNITO_USER_POOL_ID}"
 JWKS_URL = f"{ISSUER}/.well-known/jwks.json"
+CognitoAttribute = Dict[str, str]
+CognitoError = Dict[str, Any]
+
+COGNITO_API_ENDPOINT = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/"
 
 _jwks_client: PyJWKClient | None = None
 _jwks_cache_time: float | None = None
+
+
+def _normalize_phone_number(value: Any) -> str:
+    if not isinstance(value, str):
+        return ""
+    trimmed = value.strip()
+    if not trimmed:
+        return ""
+    if not trimmed.startswith("+"):
+        return "+" + "".join(ch for ch in trimmed if ch.isdigit())
+    return "".join(trimmed.split())
+
+
+def _normalize_text(value: Any) -> str:
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _map_attributes(attributes: List[CognitoAttribute] | None) -> Dict[str, str]:
+    mapped: Dict[str, str] = {}
+    for attribute in attributes or []:
+        name = attribute.get("Name")
+        if name:
+            mapped[name] = attribute.get("Value", "")
+    return mapped
+
+
+def _call_cognito(
+    target: str, access_token: str, body: Dict[str, Any]
+) -> Dict[str, Any]:
+    response = requests.post(
+        COGNITO_API_ENDPOINT,
+        headers={
+            "Content-Type": "application/x-amz-json-1.1",
+            "X-Amz-Target": target,
+        },
+        json={**body, "AccessToken": access_token},
+        timeout=10,
+    )
+
+    if response.ok:
+        return response.json()
+
+    message = f"Failed to call Cognito ({response.status_code})"
+    try:
+        data: CognitoError = response.json()
+        if isinstance(data, dict) and data.get("message"):
+            message = str(data.get("message"))
+    except Exception:
+        pass
+
+    raise RuntimeError(message)
+
+
+def _validate_update_payload(payload: Dict[str, Any]) -> Tuple[List[CognitoAttribute], str | None]:
+    attributes: List[CognitoAttribute] = []
+
+    phone = _normalize_phone_number(payload.get("phone_number"))
+    if phone:
+        if not phone.startswith("+") or not phone[1:].isdigit() or not (8 <= len(phone) <= 20):
+            return attributes, "電話番号の形式が正しくありません。国番号を含めて入力してください。"
+        attributes.append({"Name": "phone_number", "Value": phone})
+
+    name = _normalize_text(payload.get("name"))
+    if name:
+        attributes.append({"Name": "name", "Value": name})
+
+    handle = _normalize_text(payload.get("handle"))
+    if handle:
+        if len(handle) < 3 or len(handle) > 30:
+            return attributes, "ハンドルネームは3文字以上30文字以内で入力してください。"
+        attributes.append({"Name": "custom:handle", "Value": handle})
+
+    locale = _normalize_text(payload.get("locale"))
+    if locale:
+        if len(locale) < 2 or len(locale) > 5:
+            return attributes, "ロケールは2〜5文字で入力してください。"
+        attributes.append({"Name": "custom:locale", "Value": locale})
+
+    if payload.get("phone_number_verified"):
+        attributes.append({"Name": "phone_number_verified", "Value": "true"})
+
+    return attributes, None
 
 
 class OAuthStateError(Exception):
@@ -260,6 +346,45 @@ def api_me():
     return jsonify(
         {"sub": user.get("sub"), "email": user.get("email"), "username": user.get("username")}
     )
+
+
+@app.route("/api/user/attributes", methods=["GET", "POST"])
+@login_required
+def api_user_attributes():
+    tokens = session.get("tokens") or {}
+    access_token = tokens.get("access_token")
+    if not access_token:
+        return jsonify({"message": "Access token not found"}), 401
+
+    if request.method == "GET":
+        try:
+            data = _call_cognito(
+                "AWSCognitoIdentityProviderService.GetUser",
+                access_token,
+                {},
+            )
+            attributes = _map_attributes(data.get("UserAttributes"))
+            return jsonify({"username": data.get("Username"), "attributes": attributes})
+        except Exception as exc:  # noqa: BLE001
+            return jsonify({"message": str(exc)}), 500
+
+    payload = request.get_json(silent=True) or {}
+    attributes, error_message = _validate_update_payload(payload)
+
+    if error_message:
+        return jsonify({"message": error_message}), 400
+    if not attributes:
+        return jsonify({"message": "更新する属性がありません。"}), 400
+
+    try:
+        _call_cognito(
+            "AWSCognitoIdentityProviderService.UpdateUserAttributes",
+            access_token,
+            {"UserAttributes": attributes},
+        )
+        return jsonify({"message": "ユーザー情報を更新しました。"})
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"message": str(exc)}), 500
 
 
 @app.route("/auth/logout")
