@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [startingLogin, setStartingLogin] = useState(false);
   const [startingLogout, setStartingLogout] = useState(false);
-  const hostedUiSignupUrl = buildSignupUrl();
+  const [startingSignup, setStartingSignup] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -89,6 +89,19 @@ export default function LoginPage() {
     }
   };
 
+  const handleSignup = () => {
+    setError('');
+    setStartingSignup(true);
+    try {
+      const state = createAndStoreOauthState();
+      window.location.href = buildSignupUrl(state);
+    } catch (err) {
+      console.error(err);
+      setStartingSignup(false);
+      setError('新規登録画面へ遷移できませんでした。時間をおいて再度お試しください。');
+    }
+  };
+
   return (
     <>
       <Head>
@@ -130,12 +143,14 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                 <p className="font-semibold">はじめての方へ</p>
                 <p className="mt-1 leading-relaxed">
                   メールアドレスだけで仮登録が行えます。まだ会員でない方は
-                  <a
-                    href={hostedUiSignupUrl}
-                    className="ml-1 font-semibold text-red-700 underline underline-offset-4"
+                  <button
+                    type="button"
+                    onClick={handleSignup}
+                    disabled={startingSignup}
+                    className="ml-1 font-semibold text-red-700 underline underline-offset-4 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Cognito の新規登録画面
-                  </a>
+                  </button>
                   へお進みください。
                 </p>
               </div>
@@ -185,12 +200,14 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
               </div>
               <p className="mt-6 text-center text-xs text-gray-500">
                 アカウントをお持ちでない方は
-                <a
-                  href={hostedUiSignupUrl}
-                  className="ml-1 font-semibold text-red-600 underline underline-offset-2"
+                <button
+                  type="button"
+                  onClick={handleSignup}
+                  disabled={startingSignup}
+                  className="ml-1 font-semibold text-red-600 underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   新規登録
-                </a>
+                </button>
                 へ
               </p>
             </div>
