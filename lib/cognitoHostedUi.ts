@@ -26,7 +26,7 @@ export const buildAuthorizeUrl = (state?: string) => {
 export const buildSignupUrl = (state = 'signup') => {
   const params = new URLSearchParams({
     client_id: clientId,
-    response_type: 'token',
+    response_type: 'code',
     scope: 'openid email phone',
     redirect_uri: redirectUri,
     state,
