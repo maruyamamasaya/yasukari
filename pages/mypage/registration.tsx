@@ -8,7 +8,6 @@ import type { NextPage } from 'next';
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
 type RegisterFormData = {
-  password: string;
   name1: string;
   name2: string;
   kana1: string;
@@ -82,7 +81,6 @@ const chanceOptions = [
 ];
 
 const initialFormData: RegisterFormData = {
-  password: '',
   name1: '',
   name2: '',
   kana1: '',
@@ -289,37 +287,20 @@ const RegistrationPage: NextPage = () => {
 
           <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700" htmlFor="email">
-                    メールアドレス
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={sessionUser?.email ?? ''}
-                    disabled
-                    className="mt-1 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
-                    placeholder="example@example.com"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">Cognito のアカウントに登録されたメールアドレスが使用されます。</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700" htmlFor="password">
-                    パスワード
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
-                    placeholder="6文字以上の英数字"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="email">
+                  メールアドレス
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={sessionUser?.email ?? ''}
+                  disabled
+                  className="mt-1 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
+                  placeholder="example@example.com"
+                />
+                <p className="mt-1 text-xs text-gray-500">Cognito のアカウントに登録されたメールアドレスが使用されます。</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
