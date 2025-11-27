@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { COGNITO_ACCESS_TOKEN_COOKIE, COGNITO_ID_TOKEN_COOKIE } from '../../lib/cognitoHostedUi';
+import {
+  COGNITO_ACCESS_TOKEN_COOKIE,
+  COGNITO_ID_TOKEN_COOKIE,
+  COGNITO_OAUTH_STATE_KEY,
+} from '../../lib/cognitoHostedUi';
 
 function setCookie(name: string, value: string, maxAgeSeconds: number) {
   const secure = window.location.protocol === 'https:' ? '; Secure' : '';
@@ -23,15 +27,15 @@ export default function CognitoCallbackPage() {
     }
 
     const returnedState = params.get('state');
-    const expectedState = sessionStorage.getItem('cognito_oauth_state');
+    const expectedState = sessionStorage.getItem(COGNITO_OAUTH_STATE_KEY);
 
     if (!returnedState || !expectedState || returnedState !== expectedState) {
-      sessionStorage.removeItem('cognito_oauth_state');
+      sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
       setError('認証状態を確認できませんでした。もう一度ログインからお試しください。');
       return;
     }
 
-    sessionStorage.removeItem('cognito_oauth_state');
+    sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
 
     const idToken = params.get('id_token');
     const accessToken = params.get('access_token');

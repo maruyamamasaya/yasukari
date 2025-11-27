@@ -8,6 +8,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  const authorizeUrl = buildAuthorizeUrl();
+  const { state } = req.query;
+
+  if (typeof state !== 'string' || !state) {
+    return res.status(400).json({ error: 'state is required' });
+  }
+
+  const authorizeUrl = buildAuthorizeUrl(state);
   return res.status(200).json({ authorize_url: authorizeUrl });
 }
