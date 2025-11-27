@@ -4,13 +4,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
+import { COUNTRY_OPTIONS, findCountryByDialCodePrefix, formatInternationalPhoneNumber } from '../../lib/phoneNumber';
 
 type UserAttributes = {
   phone_number?: string;
   'custom:handle'?: string;
   'custom:locale'?: string;
   name?: string;
-  phone_number_verified?: string;
 };
 
 type AttributesResponse = { attributes?: UserAttributes; message?: string };
@@ -81,12 +81,21 @@ const ProfileSetupPage: NextPage = () => {
 
     const formData = new FormData(event.currentTarget);
 
+    const countryDialCode = formData.get('phone_country')?.toString() ?? COUNTRY_OPTIONS[0].dialCode;
+    const nationalNumber = formData.get('phone_national')?.toString() ?? '';
+    const phoneNumber = formatInternationalPhoneNumber(countryDialCode, nationalNumber);
+
+    if (!phoneNumber) {
+      setSaving(false);
+      setError('電話番号を正しく入力してください。');
+      return;
+    }
+
     const payload = {
-      phone_number: formData.get('phone_number')?.toString() ?? '',
+      phone_number: phoneNumber,
       name: formData.get('name')?.toString() ?? '',
       handle: formData.get('handle')?.toString() ?? '',
       locale: formData.get('locale')?.toString() ?? '',
-      phone_number_verified: formData.get('phone_number_verified') === 'on',
     };
 
     try {
@@ -110,7 +119,6 @@ const ProfileSetupPage: NextPage = () => {
         name: payload.name,
         'custom:handle': payload.handle,
         'custom:locale': payload.locale,
-        phone_number_verified: payload.phone_number_verified ? 'true' : attributes.phone_number_verified,
       };
 
       setAttributes(nextAttributes);
@@ -136,6 +144,19 @@ const ProfileSetupPage: NextPage = () => {
   };
 
   const missingKeys = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
+
+  const { phoneCountry, phoneNational } = useMemo(() => {
+    const digits = (attributes.phone_number ?? '').replace(/[^0-9]/g, '');
+    const matchedCountry = findCountryByDialCodePrefix(digits) ?? COUNTRY_OPTIONS[0];
+    const national = digits.startsWith(matchedCountry.dialCode)
+      ? digits.slice(matchedCountry.dialCode.length)
+      : '';
+
+    return {
+      phoneCountry: matchedCountry.dialCode,
+      phoneNational: national ? `0${national}` : '',
+    };
+  }, [attributes.phone_number]);
 
   return (
     <>
@@ -194,27 +215,32 @@ const ProfileSetupPage: NextPage = () => {
               <h2 className="text-lg font-semibold text-gray-900">基本情報</h2>
               <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-2">
-                  <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700">
-                    電話番号（+と国コードを含む）
+                  <label htmlFor="phone_country" className="block text-sm font-medium text-gray-700">
+                    電話番号
                   </label>
-                  <input
-                    id="phone_number"
-                    name="phone_number"
-                    type="tel"
-                    defaultValue={attributes.phone_number ?? ''}
-                    placeholder="例: +819012345678"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
-                    required
-                  />
-                  <label className="inline-flex items-center gap-2 text-xs text-gray-600">
+                  <div className="grid gap-2 sm:grid-cols-[auto,1fr]">
+                    <select
+                      id="phone_country"
+                      name="phone_country"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
+                      defaultValue={phoneCountry}
+                      required
+                    >
+                      {COUNTRY_OPTIONS.map((country) => (
+                        <option key={country.code} value={country.dialCode}>{`${country.name} (+${country.dialCode})`}</option>
+                      ))}
+                    </select>
                     <input
-                      type="checkbox"
-                      name="phone_number_verified"
-                      defaultChecked={attributes.phone_number_verified === 'true'}
-                      className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      id="phone_national"
+                      name="phone_national"
+                      type="tel"
+                      defaultValue={phoneNational}
+                      placeholder="例: 08012341234"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
+                      required
                     />
-                    <span>この電話番号を確認済みとしてマークする</span>
-                  </label>
+                  </div>
+                  <p className="text-xs text-gray-500">国番号と先頭の0を除いた番号で登録されます。</p>
                 </div>
 
                 <div className="space-y-2">
@@ -291,12 +317,6 @@ const ProfileSetupPage: NextPage = () => {
                 <div>
                   <dt className="font-medium text-gray-600">電話番号</dt>
                   <dd className="mt-1 text-gray-900">{attributes.phone_number ?? '未設定'}</dd>
-                </div>
-                <div>
-                  <dt className="font-medium text-gray-600">電話番号の確認</dt>
-                  <dd className="mt-1 text-gray-900">
-                    {attributes.phone_number_verified === 'true' ? '確認済み' : '未確認'}
-                  </dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-600">ハンドルネーム</dt>

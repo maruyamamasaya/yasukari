@@ -1,5 +1,6 @@
 import os
 import secrets
+import re
 import time
 from functools import wraps
 from typing import Any, Dict, List, Tuple
@@ -56,6 +57,39 @@ CognitoError = Dict[str, Any]
 
 COGNITO_API_ENDPOINT = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/"
 
+COUNTRY_DIAL_CODES: List[str] = [
+    "81",  # 日本
+    "1",  # 北米（米国・カナダ）
+    "44",  # イギリス
+    "33",  # フランス
+    "49",  # ドイツ
+    "39",  # イタリア
+    "34",  # スペイン
+    "31",  # オランダ
+    "41",  # スイス
+    "46",  # スウェーデン
+    "86",  # 中国
+    "82",  # 韓国
+    "886",  # 台湾
+    "852",  # 香港
+    "65",  # シンガポール
+    "66",  # タイ
+    "84",  # ベトナム
+    "63",  # フィリピン
+    "60",  # マレーシア
+    "62",  # インドネシア
+    "91",  # インド
+    "61",  # オーストラリア
+    "64",  # ニュージーランド
+    "52",  # メキシコ
+    "55",  # ブラジル
+    "54",  # アルゼンチン
+    "90",  # トルコ
+    "966",  # サウジアラビア
+    "971",  # アラブ首長国連邦
+    "7",  # ロシア
+]
+
 _jwks_client: PyJWKClient | None = None
 _jwks_cache_time: float | None = None
 
@@ -63,12 +97,31 @@ _jwks_cache_time: float | None = None
 def _normalize_phone_number(value: Any) -> str:
     if not isinstance(value, str):
         return ""
+
     trimmed = value.strip()
     if not trimmed:
         return ""
-    if not trimmed.startswith("+"):
-        return "+" + "".join(ch for ch in trimmed if ch.isdigit())
-    return "".join(trimmed.split())
+
+    digits = re.sub(r"[^0-9+]", "", trimmed)
+    without_plus = digits[1:] if digits.startswith("+") else digits
+    if not without_plus:
+        return ""
+
+    matched_country = None
+    for code in COUNTRY_DIAL_CODES:
+        if without_plus.startswith(code) and (
+            matched_country is None or len(code) > len(matched_country)
+        ):
+            matched_country = code
+
+    if matched_country:
+        national_number = re.sub(r"^0+", "", without_plus[len(matched_country) :])
+        if not national_number:
+            return ""
+        return f"+{matched_country}{national_number}"
+
+    subscriber_number = re.sub(r"^0+", "", without_plus)
+    return f"+{subscriber_number}" if subscriber_number else ""
 
 
 def _normalize_text(value: Any) -> str:
@@ -135,9 +188,6 @@ def _validate_update_payload(payload: Dict[str, Any]) -> Tuple[List[CognitoAttri
         if len(locale) < 2 or len(locale) > 5:
             return attributes, "ロケールは2〜5文字で入力してください。"
         attributes.append({"Name": "custom:locale", "Value": locale})
-
-    if payload.get("phone_number_verified"):
-        attributes.append({"Name": "phone_number_verified", "Value": "true"})
 
     return attributes, None
 

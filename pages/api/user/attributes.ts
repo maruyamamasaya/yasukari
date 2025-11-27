@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { COGNITO_ACCESS_TOKEN_COOKIE } from '../../../lib/cognitoServer';
+import { COUNTRY_OPTIONS, findCountryByDialCodePrefix } from '../../../lib/phoneNumber';
 
 const region = process.env.COGNITO_REGION ?? process.env.NEXT_PUBLIC_COGNITO_REGION ?? 'ap-northeast-1';
 const cognitoEndpoint = `https://cognito-idp.${region}.amazonaws.com/`;
@@ -16,17 +17,26 @@ type UpdatePayload = {
   name?: string;
   handle?: string;
   locale?: string;
-  phone_number_verified?: boolean;
 };
 
 const normalizePhoneNumber = (value: unknown): string => {
   if (typeof value !== 'string') return '';
   const trimmed = value.trim();
   if (!trimmed) return '';
-  if (!trimmed.startsWith('+')) {
-    return `+${trimmed.replace(/[^0-9]/g, '')}`;
+
+  const digits = trimmed.replace(/[^0-9+]/g, '');
+  const withoutPlus = digits.startsWith('+') ? digits.slice(1) : digits;
+  if (!withoutPlus) return '';
+
+  const matchedCountry = findCountryByDialCodePrefix(withoutPlus) ?? COUNTRY_OPTIONS[0];
+  if (withoutPlus.startsWith(matchedCountry.dialCode)) {
+    const nationalNumber = withoutPlus.slice(matchedCountry.dialCode.length).replace(/^0+/, '');
+    if (!nationalNumber) return '';
+    return `+${matchedCountry.dialCode}${nationalNumber}`;
   }
-  return trimmed.replace(/\s+/g, '');
+
+  const subscriberNumber = withoutPlus.replace(/^0+/, '');
+  return subscriberNumber ? `+${subscriberNumber}` : '';
 };
 
 const normalizeText = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
@@ -98,10 +108,6 @@ const validateUpdate = (payload: UpdatePayload): { attributes: CognitoAttribute[
       return { attributes, message: 'ロケールは2〜5文字で入力してください。' };
     }
     attributes.push({ Name: 'custom:locale', Value: locale });
-  }
-
-  if (payload.phone_number_verified) {
-    attributes.push({ Name: 'phone_number_verified', Value: 'true' });
   }
 
   return { attributes };
