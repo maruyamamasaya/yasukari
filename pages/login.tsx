@@ -2,12 +2,7 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import {
-  buildAuthorizeUrl,
-  buildLogoutUrl,
-  buildSignupUrl,
-  createAndStoreOauthState,
-} from '../lib/cognitoHostedUi';
+import { buildAuthorizeUrl, buildSignupUrl, createAndStoreOauthState } from '../lib/cognitoHostedUi';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -77,11 +72,16 @@ export default function LoginPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setError('');
     setStartingLogout(true);
     try {
-      window.location.href = buildLogoutUrl();
+      const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      if (!response.ok) {
+        throw new Error(`failed to logout: ${response.status}`);
+      }
+
+      await router.replace('/');
     } catch (err) {
       console.error(err);
       setStartingLogout(false);

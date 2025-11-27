@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { buildLogoutUrl } from '../../lib/cognitoHostedUi';
 
 type SessionUser = {
   id: string;
@@ -22,11 +21,11 @@ export default function MyPage() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [loggingOut, setLoggingOut] = useState(false);
   const [attributes, setAttributes] = useState<UserAttributes | null>(null);
   const [attributesError, setAttributesError] = useState('');
   const [loadingAttributes, setLoadingAttributes] = useState(true);
   const router = useRouter();
-  const logoutHref = buildLogoutUrl();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -113,6 +112,22 @@ export default function MyPage() {
     if (value.toLowerCase().startsWith('jp')) return '日本語圏';
     if (value.toLowerCase().startsWith('en')) return '英語圏';
     return value;
+  };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      if (!response.ok) {
+        throw new Error(`failed to logout: ${response.status}`);
+      }
+
+      await router.replace('/login');
+    } catch (err) {
+      console.error(err);
+      setError('ログアウト処理に失敗しました。時間をおいて再度お試しください。');
+      setLoggingOut(false);
+    }
   };
 
   return (
@@ -206,13 +221,11 @@ export default function MyPage() {
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  window.location.href = logoutHref;
-                }}
+                onClick={handleLogout}
                 className="mt-4 inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
-                disabled={!user}
+                disabled={!user || loggingOut}
               >
-                ログアウトする
+                {loggingOut ? '処理中…' : 'ログアウトする'}
               </button>
             </section>
           </>
