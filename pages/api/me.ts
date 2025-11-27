@@ -28,6 +28,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   } catch (error) {
     console.error('Failed to verify Cognito token', error);
-    return res.status(500).json({ message: 'Failed to verify authentication.' });
+    const status = error instanceof Error && error.message.includes('required') ? 400 : 401;
+    const message = status === 400 ? 'Invalid authentication configuration.' : 'Not authenticated';
+    return res.status(status).json({ message });
   }
 }
