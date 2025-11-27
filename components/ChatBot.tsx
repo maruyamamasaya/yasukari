@@ -228,9 +228,7 @@ export default function ChatBot({
       onClose?.();
     }
   }
-  const baseSizeStyle = fullScreen
-    ? { height: "100vh", width: "100%" }
-    : { height: 600, width: 380 };
+  const baseSizeClasses = fullScreen ? "h-screen w-full" : "h-[600px] w-[380px]";
   const avatarWrapperClasses =
     "flex items-center justify-center w-10 h-10 rounded-[20px] border";
   const bubbleBaseClasses =
@@ -240,8 +238,7 @@ export default function ChatBot({
 
   return (
     <div
-      className={`relative flex flex-col ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-5"} bg-gradient-to-b from-white via-red-50/60 to-white border border-red-100/60 rounded-[20px] shadow-xl overflow-hidden ${className}`}
-      style={baseSizeStyle}
+      className={`relative flex flex-col ${baseSizeClasses} ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-5"} bg-gradient-to-b from-white via-red-50/60 to-white border border-red-100/60 rounded-[20px] shadow-xl overflow-hidden ${className}`}
     >
       {fullScreen && (
         <div className="absolute top-3 left-3 flex items-center gap-2 z-20">
