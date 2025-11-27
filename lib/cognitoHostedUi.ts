@@ -14,6 +14,22 @@ const logoutRedirectUri =
   process.env.NEXT_PUBLIC_COGNITO_LOGOUT_REDIRECT_URI ??
   (redirectUriObject ? `${redirectUriObject.origin}/auth/logout` : 'https://yasukaribike.com/auth/logout');
 
+const scopeList = (() => {
+  const configured = (process.env.NEXT_PUBLIC_COGNITO_SCOPES ?? '')
+    .split(/[ ,]+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (configured.length > 0) {
+    return configured;
+  }
+
+  // Keep the default scopes conservative to avoid invalid_scope errors when the
+  // Cognito app client is not configured for admin access or additional
+  // resource server scopes.
+  return ['openid', 'email', 'phone', 'profile'];
+})();
+
 export const COGNITO_ID_TOKEN_COOKIE = 'cognito_id_token';
 export const COGNITO_ACCESS_TOKEN_COOKIE = 'cognito_access_token';
 export const COGNITO_OAUTH_STATE_KEY = 'cognito_oauth_state';
@@ -40,7 +56,7 @@ export const buildAuthorizeUrl = (state: string) => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'token',
-    scope: 'openid email phone profile aws.cognito.signin.user.admin',
+    scope: scopeList.join(' '),
     redirect_uri: redirectUri,
     state,
   });
@@ -52,7 +68,7 @@ export const buildSignupUrl = (state = 'signup') => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'code',
-    scope: 'openid email phone profile aws.cognito.signin.user.admin',
+    scope: scopeList.join(' '),
     redirect_uri: redirectUri,
     state,
   });
