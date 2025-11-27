@@ -14,7 +14,6 @@ type UserAttributes = {
   'custom:handle'?: string;
   'custom:locale'?: string;
   name?: string;
-  phone_number_verified?: string;
 };
 
 export default function MyPage() {
@@ -189,12 +188,6 @@ export default function MyPage() {
                   <div>
                     <dt className="font-medium text-gray-600">電話番号</dt>
                     <dd className="mt-1 text-gray-800">{attributes.phone_number ?? '未設定'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-600">電話番号の確認</dt>
-                    <dd className="mt-1 text-gray-800">
-                      {attributes.phone_number_verified === 'true' ? '確認済み' : '未確認'}
-                    </dd>
                   </div>
                   <div>
                     <dt className="font-medium text-gray-600">ハンドルネーム</dt>
