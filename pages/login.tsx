@@ -194,8 +194,8 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                 <ol className="mt-2 list-decimal space-y-1 pl-4">
                   <li>「ログイン画面へ進む」ボタンを押してログイン画面へ</li>
                   <li>認証後は {process.env.NEXT_PUBLIC_SITE_NAME ?? 'マイページ'} にリダイレクト</li>
-                  <li>初回ログイン時は会員情報の入力（仮登録）を案内し、本登録ののち DynamoDB にユーザー情報を保存</li>
-                  <li>ログイン状態は取得したトークンを用いて検証します</li>
+                  <li>初回ログイン時は会員情報の入力（仮登録）を案内します</li>
+                  <li>予約時に必要な情報を登録するため、本登録まで完了させてください</li>
                 </ol>
               </div>
               <p className="mt-6 text-center text-xs text-gray-500">
