@@ -149,7 +149,7 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                     disabled={startingSignup}
                     className="ml-1 font-semibold text-red-700 underline underline-offset-4 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Cognito の新規登録画面
+                    ログイン・登録画面
                   </button>
                   へお進みください。
                 </p>
@@ -158,8 +158,8 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
 
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="mb-6 space-y-2 text-center">
-                <h2 className="text-xl font-semibold text-gray-900">Cognito でログイン</h2>
-                <p className="text-xs text-gray-500">Amazon Cognito Hosted UI にリダイレクトします。</p>
+                <h2 className="text-xl font-semibold text-gray-900">ログイン / 新規登録</h2>
+                <p className="text-xs text-gray-500">認証ページへリダイレクトします。</p>
               </div>
               {error ? (
                 <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
@@ -192,10 +192,10 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
               <div className="mt-6 rounded-xl bg-gray-50 p-4 text-left text-xs leading-relaxed text-gray-600">
                 <p className="font-semibold text-gray-900">ログインの流れ</p>
                 <ol className="mt-2 list-decimal space-y-1 pl-4">
-                  <li>「ログイン画面へ進む」ボタンを押して Cognito のログイン画面へ</li>
+                  <li>「ログイン画面へ進む」ボタンを押してログイン画面へ</li>
                   <li>認証後は {process.env.NEXT_PUBLIC_SITE_NAME ?? 'マイページ'} にリダイレクト</li>
                   <li>初回ログイン時は会員情報の入力（仮登録）を案内し、本登録ののち DynamoDB にユーザー情報を保存</li>
-                  <li>ログイン状態は Cognito のトークンを用いて検証します</li>
+                  <li>ログイン状態は取得したトークンを用いて検証します</li>
                 </ol>
               </div>
               <p className="mt-6 text-center text-xs text-gray-500">
