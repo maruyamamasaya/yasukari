@@ -19,7 +19,7 @@ export default function LogoutPage() {
     const nextPath = typeof router.query.next === 'string' ? router.query.next : '/login';
 
     const timer = window.setTimeout(() => {
-      void router.replace(nextPath);
+      void router.replace(nextPath).then(() => window.location.reload());
     }, 1000);
 
     return () => window.clearTimeout(timer);

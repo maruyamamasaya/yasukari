@@ -41,6 +41,7 @@ export default function Header() {
       }
 
       await router.push('/login');
+      window.location.reload();
     } catch (error) {
       console.error('Failed to start logout', error);
       alert('ログアウト処理を開始できませんでした。時間をおいて再度お試しください。');

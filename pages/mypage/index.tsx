@@ -122,6 +122,7 @@ export default function MyPage() {
       }
 
       await router.replace('/login');
+      window.location.reload();
     } catch (err) {
       console.error(err);
       setError('ログアウト処理に失敗しました。時間をおいて再度お試しください。');
