@@ -41,6 +41,7 @@ export default function ChatBot({
   const [faqCategories, setFaqCategories] = useState<Category[]>([]);
   const [faqLoading, setFaqLoading] = useState(true);
   const [faqError, setFaqError] = useState<string | null>(null);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -228,13 +229,18 @@ export default function ChatBot({
       onClose?.();
     }
   }
-  const baseSizeClasses = fullScreen ? "h-screen w-full" : "h-[600px] w-[380px]";
+  const baseSizeClasses = fullScreen
+    ? "h-screen w-full"
+    : "h-screen w-full sm:h-[1200px] sm:w-[300px] md:w-[360px]";
   const avatarWrapperClasses =
     "flex items-center justify-center w-10 h-10 rounded-[20px] border";
   const bubbleBaseClasses =
     "max-w-[88%] px-3 py-2 rounded-[18px] shadow-sm border animate-fade";
   const optionContainerClasses =
-    "w-full max-w-[420px] min-w-[350px] text-left rounded-[18px] shadow-sm";
+    "w-full max-w-[420px] min-w-[240px] sm:min-w-[280px] md:min-w-[320px] text-left rounded-[18px] shadow-sm";
+  const visibleCategories = showAllCategories
+    ? faqCategories
+    : faqCategories.slice(0, 3);
 
   return (
     <div
@@ -343,7 +349,7 @@ export default function ChatBot({
           )}
           {!faqLoading &&
             !faqError &&
-            faqCategories.map((cat) => (
+            visibleCategories.map((cat) => (
               <button
                 key={cat.id}
                 className={`${optionContainerClasses} p-3 sm:p-3.5 border border-gray-200 hover:bg-red-50 transition`}
@@ -352,6 +358,16 @@ export default function ChatBot({
                 <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">{cat.title}</span>
               </button>
             ))}
+          {!faqLoading &&
+            !faqError &&
+            faqCategories.length > 3 && (
+              <button
+                className="text-sm text-red-700 hover:underline"
+                onClick={() => setShowAllCategories((prev) => !prev)}
+              >
+                {showAllCategories ? "カテゴリを閉じる" : "さらに表示"}
+              </button>
+            )}
         </div>
       )}
 
@@ -393,10 +409,10 @@ export default function ChatBot({
           >
             &larr; カテゴリ選択に戻る
           </button>
-          <form
-            onSubmit={handleFreeSubmit}
-            className="flex gap-2 items-center bg-white/90 border border-gray-200 rounded-full px-2 py-1 shadow-sm w-full max-w-[420px] min-w-[350px]"
-          >
+            <form
+              onSubmit={handleFreeSubmit}
+              className="flex gap-2 items-center bg-white/90 border border-gray-200 rounded-full px-2 py-1 shadow-sm w-full max-w-[420px] min-w-[240px] sm:min-w-[280px] md:min-w-[320px]"
+            >
             <input
               type="text"
               name="free"
