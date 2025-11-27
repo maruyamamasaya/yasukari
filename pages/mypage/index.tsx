@@ -9,10 +9,21 @@ type SessionUser = {
   username?: string;
 };
 
+type UserAttributes = {
+  phone_number?: string;
+  'custom:handle'?: string;
+  'custom:locale'?: string;
+  name?: string;
+  phone_number_verified?: string;
+};
+
 export default function MyPage() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [attributes, setAttributes] = useState<UserAttributes | null>(null);
+  const [attributesError, setAttributesError] = useState('');
+  const [loadingAttributes, setLoadingAttributes] = useState(true);
   const router = useRouter();
   const logoutHref = '/auth/logout';
 
@@ -58,7 +69,51 @@ export default function MyPage() {
     return () => controller.abort();
   }, [router]);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const controller = new AbortController();
+    const fetchAttributes = async () => {
+      try {
+        const response = await fetch('/api/user/attributes', {
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (response.status === 401) {
+          await router.replace('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('failed to load attributes');
+        }
+
+        const data = (await response.json()) as { attributes?: UserAttributes };
+        setAttributes(data.attributes ?? {});
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          console.error(err);
+          setAttributesError('ユーザー属性の取得に失敗しました。時間をおいて再度お試しください。');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingAttributes(false);
+        }
+      }
+    };
+
+    void fetchAttributes();
+    return () => controller.abort();
+  }, [loading, router]);
+
   const displayName = user?.username ?? user?.email ?? 'ユーザー';
+  const localeLabel = (value: string | undefined) => {
+    if (!value) return '未設定';
+    if (value.toLowerCase().startsWith('jp')) return '日本語圏';
+    if (value.toLowerCase().startsWith('en')) return '英語圏';
+    return value;
+  };
 
   return (
     <>
@@ -118,6 +173,56 @@ export default function MyPage() {
                 </dl>
               ) : (
                 <p className="mt-3 text-sm text-gray-700">ログイン情報を取得できませんでした。</p>
+              )}
+            </section>
+
+            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">プロフィール情報</h2>
+                  <p className="text-sm text-gray-500">Cognito のユーザー属性から取得しています。</p>
+                </div>
+                <Link
+                  href="/mypage/profile-setup"
+                  className="inline-flex items-center rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:text-red-800"
+                >
+                  基本情報を編集
+                </Link>
+              </div>
+
+              {attributesError ? (
+                <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{attributesError}</p>
+              ) : null}
+
+              {loadingAttributes ? (
+                <p className="mt-3 text-sm text-gray-700">属性を取得しています…</p>
+              ) : attributes ? (
+                <dl className="mt-4 grid gap-4 text-sm text-gray-700 md:grid-cols-2">
+                  <div>
+                    <dt className="font-medium text-gray-600">電話番号</dt>
+                    <dd className="mt-1 text-gray-800">{attributes.phone_number ?? '未設定'}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-600">電話番号の確認</dt>
+                    <dd className="mt-1 text-gray-800">
+                      {attributes.phone_number_verified === 'true' ? '確認済み' : '未確認'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-600">ハンドルネーム</dt>
+                    <dd className="mt-1 text-gray-800">{attributes['custom:handle'] ?? '未設定'}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-600">ロケーション / 言語</dt>
+                    <dd className="mt-1 text-gray-800">{localeLabel(attributes['custom:locale'])}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-600">名前</dt>
+                    <dd className="mt-1 text-gray-800">{attributes.name ?? '未設定'}</dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="mt-3 text-sm text-gray-700">プロフィール情報を取得できませんでした。</p>
               )}
             </section>
 

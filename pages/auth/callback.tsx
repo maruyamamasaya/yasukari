@@ -51,7 +51,7 @@ export default function CognitoCallbackPage() {
       setCookie(COGNITO_ACCESS_TOKEN_COOKIE, accessToken, expiresIn);
     }
 
-    void router.replace('/mypage');
+    void router.replace('/mypage/profile-setup?fromLogin=1');
   }, [router]);
 
   return (
