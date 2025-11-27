@@ -167,7 +167,7 @@ export default function Header() {
               {authChecked && sessionUser ? (
                 <>
                   <Link href="/mypage">
-                    <NavItem icon={<FaUser />} label="ログイン中" />
+                    <NavItem icon={<FaUser />} label="マイページ" />
                   </Link>
                   <button
                     type="button"
