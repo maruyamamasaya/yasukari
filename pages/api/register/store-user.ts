@@ -1,62 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { getDocumentClient } from '../../../lib/dynamodb';
-import {
-  COGNITO_ID_TOKEN_COOKIE,
-  verifyCognitoIdToken,
-} from '../../../lib/cognitoServer';
+import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from '../../../lib/cognitoServer';
+import { RegistrationData, REQUIRED_REGISTRATION_FIELDS } from '../../../types/registration';
 
 const TABLE_NAME = 'yasukariUserMain';
 
 // ...（型定義やユーティリティは従来通り）
-type RegisterPayload = {
-  user_id: string;
-  email: string;
-  name1: string;
-  name2: string;
-  kana1: string;
-  kana2: string;
-  sex: string;
-  birth: string;
-  zip: string;
-  address1: string;
-  address2: string;
-  mobile?: string;
-  tel?: string;
-  license?: string;
-  license_file_name?: string;
-  work_place?: string;
-  work_address?: string;
-  work_tel?: string;
-  other_name?: string;
-  other_address?: string;
-  other_tel?: string;
-  enquete_purpose: string;
-  enquete_want: string;
-  enquete_touring: string;
-  enquete_magazine: string;
-  enquete_chance: string;
-};
-
-const requiredFields: (keyof RegisterPayload)[] = [
-  'user_id',
-  'email',
-  'name1',
-  'name2',
-  'kana1',
-  'kana2',
-  'sex',
-  'birth',
-  'zip',
-  'address1',
-  'address2',
-  'enquete_purpose',
-  'enquete_want',
-  'enquete_touring',
-  'enquete_magazine',
-  'enquete_chance',
-];
-
 const toTrimmedString = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
 
 const normalizePhone = (value: unknown): string => toTrimmedString(value).replace(/\D/g, '');
@@ -83,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'ユーザーIDが取得できませんでした。' });
     }
 
-    const payload: RegisterPayload = {
+    const payload: RegistrationData = {
       user_id: userId,
       email: toTrimmedString(body.email || authPayload?.email).toLowerCase(),
       name1: toTrimmedString(body.name1),
@@ -112,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       enquete_chance: toTrimmedString(body.enquete_chance),
     };
 
-    const missing = requiredFields.filter((field) => !payload[field]);
+    const missing = REQUIRED_REGISTRATION_FIELDS.filter((field) => !payload[field]);
 
     if (missing.length > 0) {
       return res.status(400).json({ message: `${missing.join(', ')} is required.` });

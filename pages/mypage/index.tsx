@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+
+import type { RegistrationData } from '../../types/registration';
+import { REQUIRED_REGISTRATION_FIELDS } from '../../types/registration';
 
 type SessionUser = {
   id: string;
@@ -24,6 +27,9 @@ export default function MyPage() {
   const [attributes, setAttributes] = useState<UserAttributes | null>(null);
   const [attributesError, setAttributesError] = useState('');
   const [loadingAttributes, setLoadingAttributes] = useState(true);
+  const [registration, setRegistration] = useState<RegistrationData | null>(null);
+  const [registrationError, setRegistrationError] = useState('');
+  const [loadingRegistration, setLoadingRegistration] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -106,12 +112,66 @@ export default function MyPage() {
     return () => controller.abort();
   }, [loading, router]);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const controller = new AbortController();
+    const fetchRegistration = async () => {
+      try {
+        const response = await fetch('/api/register/user', {
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (response.status === 401) {
+          await router.replace('/login');
+          return;
+        }
+
+        if (response.status === 404) {
+          setRegistration(null);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('failed to load registration');
+        }
+
+        const data = (await response.json()) as { registration?: RegistrationData | null };
+        setRegistration(data.registration ?? null);
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          console.error(err);
+          setRegistrationError('本登録情報の取得に失敗しました。時間をおいて再度お試しください。');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingRegistration(false);
+        }
+      }
+    };
+
+    void fetchRegistration();
+    return () => controller.abort();
+  }, [loading, router]);
+
   const localeLabel = (value: string | undefined) => {
     if (!value) return '未設定';
     if (value.toLowerCase().startsWith('jp')) return '日本語圏';
     if (value.toLowerCase().startsWith('en')) return '英語圏';
     return value;
   };
+
+  const sexLabel = (value: string | undefined) => {
+    if (value === '1') return '男性';
+    if (value === '2') return '女性';
+    return '未設定';
+  };
+
+  const isRegistrationComplete = useMemo(() => {
+    if (!registration) return false;
+    return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(registration[field]));
+  }, [registration]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -212,6 +272,21 @@ export default function MyPage() {
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">本登録</h2>
                   <p className="mt-1 text-sm text-gray-600">レンタルに必要な基本情報を入力するフォームです。</p>
+                  {loadingRegistration ? null : registration ? (
+                    isRegistrationComplete ? (
+                      <p className="mt-2 inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-200">
+                        本登録済み
+                      </p>
+                    ) : (
+                      <p className="mt-2 inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
+                        本登録が未完了です
+                      </p>
+                    )
+                  ) : (
+                    <p className="mt-2 inline-flex items-center rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-200">
+                      本登録がまだ保存されていません
+                    </p>
+                  )}
                 </div>
                 <Link
                   href="/mypage/registration"
@@ -219,6 +294,53 @@ export default function MyPage() {
                 >
                   本登録フォームへ進む
                 </Link>
+              </div>
+              <div className="mt-4 space-y-3 text-sm text-gray-700">
+                {registrationError ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">{registrationError}</p>
+                ) : null}
+
+                {loadingRegistration ? (
+                  <p>本登録情報を読み込み中です…</p>
+                ) : registration ? (
+                  <div className="space-y-3">
+                    {!isRegistrationComplete ? (
+                      <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800">
+                        未入力の必須項目があります。内容を確認して本登録を完了してください。
+                      </p>
+                    ) : null}
+                    <dl className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <dt className="text-xs font-semibold text-gray-500">氏名</dt>
+                        <dd className="mt-1 text-gray-900">{`${registration.name1} ${registration.name2}`}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs font-semibold text-gray-500">フリガナ</dt>
+                        <dd className="mt-1 text-gray-900">{`${registration.kana1} ${registration.kana2}`}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs font-semibold text-gray-500">性別</dt>
+                        <dd className="mt-1 text-gray-900">{sexLabel(registration.sex)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs font-semibold text-gray-500">住所</dt>
+                        <dd className="mt-1 text-gray-900">{`〒${registration.zip} ${registration.address1} ${registration.address2}`}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs font-semibold text-gray-500">誕生日</dt>
+                        <dd className="mt-1 text-gray-900">{registration.birth}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs font-semibold text-gray-500">免許証番号</dt>
+                        <dd className="mt-1 text-gray-900">{registration.license ? '登録済み（番号は非表示）' : '未登録'}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                ) : (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">
+                    本登録情報がまだありません。フォームから登録を進めてください。
+                  </p>
+                )}
               </div>
             </section>
 
