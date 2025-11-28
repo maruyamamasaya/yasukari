@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -221,8 +221,6 @@ const RegistrationPage: NextPage = () => {
     setLicenseFileName(file ? file.name : '');
   }, []);
 
-  const userDisplayName = useMemo(() => sessionUser?.username || sessionUser?.email || 'ゲスト', [sessionUser]);
-
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -262,6 +260,9 @@ const RegistrationPage: NextPage = () => {
 
         setSubmitStatus('success');
         setSubmitMessage(result.message || '登録情報を保存しました。');
+        setTimeout(() => {
+          void router.push('/mypage');
+        }, 600);
       } catch (error) {
         const message = error instanceof Error ? error.message : '保存に失敗しました。';
         setSubmitStatus('error');
@@ -272,7 +273,7 @@ const RegistrationPage: NextPage = () => {
         }, 400);
       }
     },
-    [formData, licenseFileName, sessionUser],
+    [formData, licenseFileName, router, sessionUser],
   );
 
   return (
@@ -291,15 +292,6 @@ const RegistrationPage: NextPage = () => {
                 <span className="text-sm font-semibold text-gray-800">レンタルバイクのヤスカリ</span>
               </div>
             </Link>
-            <div className="flex items-center gap-3 text-sm text-gray-600">
-              <span className="hidden md:inline">{loadingUser ? '読み込み中…' : `${userDisplayName} としてログイン中`}</span>
-              <Link
-                href="/mypage"
-                className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-300"
-              >
-                マイページに戻る
-              </Link>
-            </div>
           </div>
         </header>
 
@@ -778,6 +770,14 @@ const RegistrationPage: NextPage = () => {
                 >
                   {isSubmitting ? '送信中…' : '本登録を完了する'}
                 </button>
+              </div>
+              <div className="flex justify-center">
+                <Link
+                  href="/mypage"
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition hover:border-gray-300"
+                >
+                  マイページに戻る
+                </Link>
               </div>
             </form>
           </section>
