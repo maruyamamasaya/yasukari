@@ -103,6 +103,32 @@ export default function LoginPage() {
     }
   };
 
+  const handleLoginEnglish = async () => {
+    setError('');
+    setStartingLogin(true);
+    try {
+      const state = createAndStoreOauthState();
+      window.location.href = buildAuthorizeUrl(state, { lang: null });
+    } catch (err) {
+      console.error(err);
+      setStartingLogin(false);
+      setError('Unable to start login. Please try again later.');
+    }
+  };
+
+  const handleSignupEnglish = () => {
+    setError('');
+    setStartingSignup(true);
+    try {
+      const state = createAndStoreOauthState();
+      window.location.href = buildSignupUrl(state, { lang: null });
+    } catch (err) {
+      console.error(err);
+      setStartingSignup(false);
+      setError('Unable to open the sign up page. Please try again later.');
+    }
+  };
+
   return (
     <>
       <Head>
@@ -190,6 +216,27 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                       : 'ログイン画面へ進む'}
                 </button>
               )}
+              <div className="mt-3 text-center text-xs text-gray-500">
+                <p className="font-semibold text-gray-700">English users</p>
+                <div className="mt-2 flex flex-wrap justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleLoginEnglish}
+                    className="rounded-full border border-gray-300 px-4 py-2 font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={checkingSession || startingLogin}
+                  >
+                    Login (English)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSignupEnglish}
+                    className="rounded-full border border-gray-300 px-4 py-2 font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={startingSignup}
+                  >
+                    Sign up (English)
+                  </button>
+                </div>
+              </div>
               <div className="mt-6 rounded-xl bg-gray-50 p-4 text-left text-xs leading-relaxed text-gray-600">
                 <p className="font-semibold text-gray-900">ログインの流れ</p>
                 <ol className="mt-2 list-decimal space-y-1 pl-4">
