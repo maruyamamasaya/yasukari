@@ -217,8 +217,7 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                 </button>
               )}
               <div className="mt-3 text-center text-xs text-gray-500">
-                <p className="font-semibold text-gray-700">English users</p>
-                <div className="mt-2 flex flex-wrap justify-center gap-3">
+                <div className="flex flex-wrap justify-center gap-3">
                   <button
                     type="button"
                     onClick={handleLoginEnglish}
