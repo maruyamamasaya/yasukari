@@ -52,7 +52,7 @@ export const createAndStoreOauthState = () => {
   return state;
 };
 
-export const buildAuthorizeUrl = (state: string) => {
+export const buildAuthorizeUrl = (state: string, options?: { lang?: string | null }) => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'token',
@@ -61,10 +61,15 @@ export const buildAuthorizeUrl = (state: string) => {
     state,
   });
 
+  const lang = options?.lang ?? 'ja';
+  if (lang) {
+    params.set('lang', lang);
+  }
+
   return `${hostedUiDomain}/oauth2/authorize?${params.toString()}`;
 };
 
-export const buildSignupUrl = (state = 'signup') => {
+export const buildSignupUrl = (state = 'signup', options?: { lang?: string | null }) => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'code',
@@ -72,6 +77,11 @@ export const buildSignupUrl = (state = 'signup') => {
     redirect_uri: redirectUri,
     state,
   });
+
+  const lang = options?.lang ?? 'ja';
+  if (lang) {
+    params.set('lang', lang);
+  }
 
   return `${hostedUiDomain}/signup?${params.toString()}`;
 };
