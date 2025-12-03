@@ -114,9 +114,6 @@ export default function HeaderEn() {
               <Link href="/">
                 <NavItem label="Home" />
               </Link>
-              <Link href="https://yasukaribike.com/login">
-                <NavItem icon={<FaUser />} label="Login" />
-              </Link>
               <Link href="/pricing">
                 <NavItem icon={<FaClipboardList />} label="Bikes & Pricing" />
               </Link>
@@ -127,6 +124,22 @@ export default function HeaderEn() {
                 <NavItem label="Help" />
               </Link>
             </nav>
+            <div className="hidden sm:flex items-center gap-3 text-sm font-medium">
+              <Link
+                href="https://yasukaribike.com/login"
+                className="inline-flex items-center gap-2 rounded-full border border-red-600 px-4 py-2 text-red-600 transition-colors hover:bg-red-50"
+              >
+                <FaUser />
+                <span>Log in</span>
+              </Link>
+              <Link
+                href="https://yasukaribike.com/signup"
+                className="inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+              >
+                <FaUser />
+                <span>Sign in</span>
+              </Link>
+            </div>
           </div>
         </div>
         {mobileSearchOpen && (
@@ -181,11 +194,6 @@ export default function HeaderEn() {
                 </Link>
               </li>
               <li>
-                <Link href="https://yasukaribike.com/login">
-                  <NavItem icon={<FaUser />} label="Login" />
-                </Link>
-              </li>
-              <li>
                 <Link href="/pricing">
                   <NavItem icon={<FaClipboardList />} label="Bikes & Pricing" />
                 </Link>
@@ -198,6 +206,22 @@ export default function HeaderEn() {
               <li>
                 <Link href="/help">
                   <NavItem label="Help" />
+                </Link>
+              </li>
+              <li className="flex flex-col gap-2">
+                <Link
+                  href="https://yasukaribike.com/login"
+                  className="inline-flex items-center gap-2 rounded-full border border-red-600 px-4 py-2 text-red-600 transition-colors hover:bg-red-50"
+                >
+                  <FaUser />
+                  <span>Log in</span>
+                </Link>
+                <Link
+                  href="https://yasukaribike.com/signup"
+                  className="inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+                >
+                  <FaUser />
+                  <span>Sign in</span>
                 </Link>
               </li>
             </ul>
