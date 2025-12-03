@@ -7,6 +7,8 @@ import {
   FaArrowUp,
   FaArrowLeft,
   FaTimes,
+  FaDownload,
+  FaTrash,
 } from "react-icons/fa";
 
 interface Message {
@@ -42,6 +44,7 @@ export default function ChatBot({
   const [faqLoading, setFaqLoading] = useState(true);
   const [faqError, setFaqError] = useState<string | null>(null);
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const storageKey = "chatbot_saved_messages";
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -66,7 +69,28 @@ export default function ChatBot({
     if (storedSessionId) {
       setSessionId(storedSessionId);
     }
+
+    const storedMessages = localStorage.getItem(storageKey);
+    if (storedMessages) {
+      try {
+        const parsed = JSON.parse(storedMessages);
+        if (Array.isArray(parsed)) {
+          setMessages(parsed);
+        }
+      } catch (error) {
+        console.error("Failed to parse stored chat messages", error);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(messages));
+    } catch (error) {
+      console.error("Failed to persist chat messages", error);
+    }
+  }, [messages]);
 
   useEffect(() => {
     fetch("/api/me")
@@ -226,51 +250,123 @@ export default function ChatBot({
     if (selectedCategory || step === "free") {
       handleBack();
     } else {
-      onClose?.();
+      handleCloseButton();
     }
+  }
+
+  function handleCloseButton() {
+    if (onClose) {
+      onClose();
+    } else {
+      handleClearHistory();
+    }
+  }
+
+  function handleClearHistory() {
+    setMessages([]);
+    setSelectedCategory(null);
+    setStep("survey");
+    setLoopCount(0);
+    setShowAllCategories(false);
+    setShowFeedback(false);
+    setSessionId(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem("chatbot_session_id");
+    }
+  }
+
+  function handleDownloadHistory() {
+    if (messages.length === 0) return;
+    const header = "【yasukari チャット履歴】";
+    const lines = messages.map(
+      (m) => `[${m.time}] ${m.from === "bot" ? "スタッフ" : "あなた"}: ${m.text}`
+    );
+    const blob = new Blob([`${header}\n${lines.join("\n")}`], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-history-${sessionId ?? "local"}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
   const baseSizeClasses = fullScreen
     ? "h-screen w-full"
-    : "h-screen w-full sm:h-[1200px] sm:w-[300px] md:w-[360px]";
+    : "h-full w-full sm:w-[420px]";
   const avatarWrapperClasses =
-    "flex items-center justify-center w-10 h-10 rounded-[20px] border";
+    "flex items-center justify-center w-9 h-9 rounded-2xl border";
   const bubbleBaseClasses =
-    "max-w-[88%] px-3 py-2 rounded-[18px] shadow-sm border animate-fade";
+    "max-w-[88%] px-3.5 py-2.5 rounded-2xl shadow-sm border bg-white/90";
   const optionContainerClasses =
-    "w-full max-w-[420px] min-w-[240px] sm:min-w-[280px] md:min-w-[320px] text-left rounded-[18px] shadow-sm";
+    "w-full max-w-[520px] text-left rounded-2xl shadow-sm border border-gray-200 bg-white/80 hover:-translate-y-[1px] transition-transform";
   const visibleCategories = showAllCategories
     ? faqCategories
     : faqCategories.slice(0, 3);
 
   return (
     <div
-      className={`relative flex flex-col ${baseSizeClasses} ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-5"} bg-gradient-to-b from-white via-red-50/60 to-white border border-red-100/60 rounded-[20px] shadow-xl overflow-hidden ${className}`}
+      className={`relative flex flex-col ${baseSizeClasses} ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-6"} bg-gradient-to-b from-white via-red-50/50 to-white border border-red-100/70 rounded-3xl shadow-xl overflow-hidden ${className}`}
     >
-      {fullScreen && (
-        <div className="absolute top-3 left-3 flex items-center gap-2 z-20">
-          <button onClick={handleBackButton} className="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition">
-            <FaArrowLeft className="w-5 h-5" />
-          </button>
-          <button onClick={onClose} className="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition">
-            <FaTimes className="w-5 h-5" />
-          </button>
+      <div className="sticky top-0 z-10 pb-4 mb-4 bg-gradient-to-b from-white via-white/95 to-transparent border-b border-red-100/70">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            {(selectedCategory || step === "free") && (
+              <button
+                onClick={handleBackButton}
+                className="rounded-full border border-gray-200 bg-white p-2 shadow-sm hover:shadow transition"
+                aria-label="前の画面に戻る"
+              >
+                <FaArrowLeft className="w-4 h-4" />
+              </button>
+            )}
+            <div>
+              <p className="text-base font-semibold text-gray-900">チャットでご相談</p>
+              <p className="text-xs text-gray-500">シンプルな画面でスタッフにすぐ相談できます</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-semibold shadow-sm">
+              Online
+            </span>
+            <button
+              onClick={handleCloseButton}
+              className="rounded-full border border-gray-200 bg-white p-2 shadow-sm hover:shadow transition"
+              aria-label="チャットを閉じる"
+            >
+              <FaTimes className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      )}
 
-      <div className="pb-3 mb-3 border-b border-red-100/70 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold text-gray-900">チャットでご相談</p>
-          <p className="text-xs text-gray-500">LINEのような使い心地でスタッフがお手伝いします</p>
+        <div className="flex flex-wrap items-center gap-2 mt-3">
+          <button
+            onClick={handleDownloadHistory}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:shadow"
+          >
+            <FaDownload className="w-3.5 h-3.5" />
+            履歴を保存
+          </button>
+          <button
+            onClick={handleClearHistory}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:shadow"
+          >
+            <FaTrash className="w-3.5 h-3.5" />
+            履歴をクリア
+          </button>
         </div>
-        <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-semibold shadow-sm">
-          Online
-        </span>
       </div>
 
       <div
-        className="relative flex-1 overflow-y-auto space-y-3 sm:space-y-4 mb-2 sm:mb-3 pr-4 rounded-2xl bg-white/80 border border-gray-100 shadow-inner"
+        className="relative flex-1 overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-white/70 border border-gray-100 shadow-inner"
         ref={scrollRef}
       >
+        {messages.length === 0 && (
+          <div className="flex h-full items-center justify-center px-4 text-sm text-gray-500 text-center">
+            ここに会話が表示されます。カテゴリを選ぶか質問を入力してください。
+          </div>
+        )}
         {messages.map((m, idx) => (
           <div
             key={idx}
@@ -292,8 +388,8 @@ export default function ChatBot({
             <div
               className={`${bubbleBaseClasses} ${
                 m.from === "bot"
-                  ? "bg-gray-50 border-gray-200"
-                  : "bg-red-500 text-white border-red-400"
+                  ? "border-gray-200 text-gray-900"
+                  : "bg-red-500/90 text-white border-red-400"
               }`}
             >
               <p className="text-sm leading-relaxed whitespace-pre-line break-words">
@@ -307,7 +403,8 @@ export default function ChatBot({
         ))}
         <button
           onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
-          className="absolute top-2 right-3 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:shadow-md"
+          className="absolute top-3 right-3 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm hover:shadow-md"
+          aria-label="一番上に移動"
         >
           <FaArrowUp className="w-4 h-4 text-gray-500" />
         </button>
@@ -318,7 +415,8 @@ export default function ChatBot({
               behavior: "smooth",
             })
           }
-          className="absolute bottom-2 right-3 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:shadow-md"
+          className="absolute bottom-3 right-3 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm hover:shadow-md"
+          aria-label="最新メッセージへ移動"
         >
           <FaArrowDown className="w-4 h-4 text-gray-500" />
         </button>
@@ -336,7 +434,7 @@ export default function ChatBot({
       )}
 
       {step === "survey" && !selectedCategory && (
-        <div className="space-y-3 flex flex-col items-center">
+        <div className="space-y-3 flex flex-col items-center text-center">
           <p className="text-sm font-medium text-gray-800">カテゴリを選択してください。</p>
           {faqLoading && (
             <p className="text-sm text-gray-600">FAQを読み込み中です…</p>
@@ -352,7 +450,7 @@ export default function ChatBot({
             visibleCategories.map((cat) => (
               <button
                 key={cat.id}
-                className={`${optionContainerClasses} p-3 sm:p-3.5 border border-gray-200 hover:bg-red-50 transition`}
+                className={`${optionContainerClasses} p-3.5 sm:p-4 hover:bg-red-50`}
                 onClick={() => handleCategory(cat)}
               >
                 <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">{cat.title}</span>
@@ -382,7 +480,7 @@ export default function ChatBot({
           {selectedCategory.faqs.map((faq, idx) => (
             <button
               key={idx}
-              className={`${optionContainerClasses} p-3 sm:p-3.5 border border-gray-200 hover:bg-red-50 transition`}
+              className={`${optionContainerClasses} p-3.5 sm:p-4 hover:bg-red-50`}
               onClick={() => handleQuestion(faq)}
             >
               <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">{faq.q}</span>
@@ -409,10 +507,10 @@ export default function ChatBot({
           >
             &larr; カテゴリ選択に戻る
           </button>
-            <form
-              onSubmit={handleFreeSubmit}
-              className="flex gap-2 items-center bg-white/90 border border-gray-200 rounded-full px-2 py-1 shadow-sm w-full max-w-[420px] min-w-[240px] sm:min-w-[280px] md:min-w-[320px]"
-            >
+          <form
+            onSubmit={handleFreeSubmit}
+            className="flex gap-2 items-center bg-white/90 border border-gray-200 rounded-full px-2 py-1.5 shadow-sm w-full max-w-[520px]"
+          >
             <input
               type="text"
               name="free"
@@ -421,7 +519,7 @@ export default function ChatBot({
             />
             <button
               type="submit"
-              className="btn-primary rounded-full px-4 py-2 text-sm shadow"
+              className="btn-primary rounded-full px-4 py-2 text-sm shadow disabled:opacity-70"
               disabled={isSubmitting}
             >
               送信
