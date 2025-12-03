@@ -340,13 +340,23 @@ export default function ChatBot({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mt-3">
+        <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-gray-700">
+          <span className="inline-flex items-center gap-2 rounded-full border border-green-100 bg-green-50 px-3 py-1 font-medium text-green-700 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-green-500 shadow" aria-hidden />
+            自動保存中
+          </span>
+          <span className="text-[13px] text-gray-600">
+            チャット履歴は自動で保存されます。
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 mt-2">
           <button
             onClick={handleDownloadHistory}
             className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:shadow"
           >
             <FaDownload className="w-3.5 h-3.5" />
-            履歴を保存
+            履歴をダウンロード
           </button>
           <button
             onClick={handleClearHistory}
