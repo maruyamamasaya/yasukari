@@ -61,7 +61,7 @@ export const buildAuthorizeUrl = (state: string, options?: { lang?: string | nul
     state,
   });
 
-  const lang = options?.lang ?? 'ja';
+  const lang = options?.lang === undefined ? 'ja' : options.lang;
   if (lang) {
     params.set('lang', lang);
   }
@@ -78,7 +78,7 @@ export const buildSignupUrl = (state = 'signup', options?: { lang?: string | nul
     state,
   });
 
-  const lang = options?.lang ?? 'ja';
+  const lang = options?.lang === undefined ? 'ja' : options.lang;
   if (lang) {
     params.set('lang', lang);
   }
