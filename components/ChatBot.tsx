@@ -369,7 +369,7 @@ export default function ChatBot({
       </div>
 
       <div
-        className="relative flex-1 overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-white/70 border border-gray-100 shadow-inner"
+        className="relative flex-1 w-full max-w-[800px] mx-auto overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-white/70 border border-gray-100 shadow-inner"
         ref={scrollRef}
       >
         {messages.length === 0 && (
