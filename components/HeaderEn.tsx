@@ -53,7 +53,7 @@ export default function HeaderEn() {
       <header className="bg-white shadow-md border-b-2 border-red-600 relative">
         <div className="mx-auto flex items-center justify-between px-4 py-3 w-full max-w-screen-xl">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/en" className="flex items-center">
             <img
               src="https://yasukari.com/static/images/logo/250x50.png"
               alt="yasukari logo"
@@ -111,19 +111,19 @@ export default function HeaderEn() {
 
             {/* Navigation buttons */}
             <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
-              <Link href="/">
+              <Link href="/en">
                 <NavItem label="Home" />
               </Link>
               <Link href="https://yasukaribike.com/login">
                 <NavItem icon={<FaUser />} label="Login" />
               </Link>
-              <Link href="/pricing">
+              <Link href="/en/pricing">
                 <NavItem icon={<FaClipboardList />} label="Bikes & Pricing" />
               </Link>
-              <Link href="/beginner">
+              <Link href="/en/beginner">
                 <NavItem icon={<FaQuestionCircle />} label="Beginner Guide" />
               </Link>
-              <Link href="/help">
+              <Link href="/en/help">
                 <NavItem label="Help" />
               </Link>
             </nav>
@@ -176,7 +176,7 @@ export default function HeaderEn() {
           >
             <ul className="flex flex-col p-4 gap-4 text-sm font-medium">
               <li>
-                <Link href="/">
+                <Link href="/en">
                   <NavItem label="Home" />
                 </Link>
               </li>
@@ -186,17 +186,17 @@ export default function HeaderEn() {
                 </Link>
               </li>
               <li>
-                <Link href="/pricing">
+                <Link href="/en/pricing">
                   <NavItem icon={<FaClipboardList />} label="Bikes & Pricing" />
                 </Link>
               </li>
               <li>
-                <Link href="/beginner">
+                <Link href="/en/beginner">
                   <NavItem icon={<FaQuestionCircle />} label="Beginner Guide" />
                 </Link>
               </li>
               <li>
-                <Link href="/help">
+                <Link href="/en/help">
                   <NavItem label="Help" />
                 </Link>
               </li>
