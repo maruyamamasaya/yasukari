@@ -137,11 +137,11 @@ export default function ReserveModelPage({ bike }: Props) {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-900" htmlFor="pickup">
-                    出発日時
+                    出発日
                   </label>
                   <input
                     id="pickup"
-                    type="datetime-local"
+                    type="date"
                     value={pickup}
                     onChange={(e) => setPickup(e.target.value)}
                     className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none"
@@ -149,11 +149,11 @@ export default function ReserveModelPage({ bike }: Props) {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-900" htmlFor="return">
-                    返却予定日時
+                    返却予定日
                   </label>
                   <input
                     id="return"
-                    type="datetime-local"
+                    type="date"
                     value={returnDate}
                     onChange={(e) => setReturnDate(e.target.value)}
                     className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none"
