@@ -25,14 +25,14 @@ export default function BeginnerGuidePageEn() {
           <li>Payment method: Credit card only</li>
           <li>
             To modify your reservation dates or details, please contact us via
-            <Link href="/contact" className="text-red-600 underline ml-1">
+            <Link href="/en/contact" className="text-red-600 underline ml-1">
               the inquiry form
             </Link>
             , then place a new reservation.
           </li>
           <li>
             For cancellations, please reach out through
-            <Link href="/contact" className="text-red-600 underline ml-1">
+            <Link href="/en/contact" className="text-red-600 underline ml-1">
               the inquiry form
             </Link>
             . Cancellations are free up to 4 days in advance; from 3 days before to the rental day, a 50% fee applies.
