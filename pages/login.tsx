@@ -186,7 +186,6 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="mb-6 space-y-2 text-center">
                 <h2 className="text-xl font-semibold text-gray-900">ログイン / 新規登録</h2>
-                <p className="text-xs text-gray-500">認証ページへリダイレクトします。</p>
               </div>
               {error ? (
                 <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
@@ -203,18 +202,28 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                     : `${sessionUser.username ?? sessionUser.email ?? 'ログイン中のアカウント'}でログアウトする`}
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleLogin}
-                  className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={checkingSession || startingLogin}
-                >
-                  {checkingSession
-                    ? 'ログイン状態を確認中…'
-                    : startingLogin
-                      ? 'リダイレクトを準備中…'
-                      : 'ログイン画面へ進む'}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={handleLogin}
+                    className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={checkingSession || startingLogin}
+                  >
+                    {checkingSession
+                      ? 'ログイン状態を確認中…'
+                      : startingLogin
+                        ? 'リダイレクトを準備中…'
+                        : 'ログイン画面へ進む'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSignup}
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-red-600 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={startingSignup}
+                  >
+                    新規登録へ進む
+                  </button>
+                </>
               )}
               <div className="mt-3 text-center text-xs text-gray-500">
                 <div className="flex flex-wrap justify-center gap-3">
