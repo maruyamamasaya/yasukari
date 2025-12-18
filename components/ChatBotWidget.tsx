@@ -2,10 +2,18 @@ import React, { useState } from "react";
 import { FaComments } from "react-icons/fa";
 import ChatBot from "./ChatBot";
 
-export default function ChatBotWidget() {
+type ChatBotWidgetProps = {
+  visible?: boolean;
+};
+
+export default function ChatBotWidget({ visible = true }: ChatBotWidgetProps) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
+    <div
+      className="fixed bottom-4 right-4 z-50 flex flex-col items-end"
+      hidden={!visible}
+      aria-hidden={!visible}
+    >
       {open && (
         <div>
           {/* Mobile full-screen overlay */}
