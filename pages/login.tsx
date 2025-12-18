@@ -199,7 +199,7 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                 >
                   {startingLogout
                     ? 'ログアウトへリダイレクトしています…'
-                    : `${sessionUser.username ?? sessionUser.email ?? 'ログイン中のアカウント'}でログアウトする`}
+                    : 'ここを普通にログアウトする'}
                 </button>
               ) : (
                 <>
