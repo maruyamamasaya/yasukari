@@ -27,6 +27,26 @@ const ProfileSetupPage: NextPage = () => {
   const [showForm, setShowForm] = useState(false);
   const fromLogin = useMemo(() => router.query.fromLogin === '1', [router.query.fromLogin]);
 
+  const normalizedLocale = (attributes['custom:locale'] ?? '').trim().toLowerCase();
+
+  const applyLocaleToPath = (path: string) => {
+    if (!path.startsWith('/')) return path;
+
+    const hasEnPrefix = path === '/en' || path.startsWith('/en/');
+
+    if (normalizedLocale.startsWith('en')) {
+      if (hasEnPrefix) return path;
+      return path === '/' ? '/en' : `/en${path}`;
+    }
+
+    if (hasEnPrefix) {
+      const stripped = path.replace(/^\/en/, '') || '/';
+      return stripped.startsWith('/') ? stripped : `/${stripped}`;
+    }
+
+    return path;
+  };
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -38,7 +58,7 @@ const ProfileSetupPage: NextPage = () => {
         ]);
 
         if (sessionRes.status === 401 || attrRes.status === 401) {
-          await router.replace('/login');
+          await router.replace(applyLocaleToPath('/login'));
           return;
         }
 
@@ -69,7 +89,7 @@ const ProfileSetupPage: NextPage = () => {
     if (fromLogin && !loading) {
       const missing = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
       if (missing.length === 0) {
-        void router.replace('/mypage');
+        void router.replace(applyLocaleToPath('/mypage'));
       }
     }
   }, [attributes, fromLogin, loading, router]);
@@ -133,7 +153,7 @@ const ProfileSetupPage: NextPage = () => {
 
       const missing = REQUIRED_KEYS.filter((key) => !(nextAttributes[key] ?? '').trim());
       if (missing.length === 0) {
-        await router.replace('/mypage');
+        await router.replace(applyLocaleToPath('/mypage'));
       }
     } catch (err) {
       console.error(err);
@@ -176,13 +196,13 @@ const ProfileSetupPage: NextPage = () => {
           <nav aria-label="breadcrumb">
             <ol className="flex items-center gap-2">
               <li>
-                <Link href="/" className="text-red-600 hover:underline">
+                <Link href={applyLocaleToPath('/')} className="text-red-600 hover:underline">
                   ホーム
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
               <li>
-                <Link href="/mypage" className="text-red-600 hover:underline">
+                <Link href={applyLocaleToPath('/mypage')} className="text-red-600 hover:underline">
                   マイページ
                 </Link>
               </li>
@@ -323,7 +343,7 @@ const ProfileSetupPage: NextPage = () => {
                       {saving ? '保存中…' : '保存してマイページへ'}
                     </button>
                     <Link
-                      href="/mypage"
+                      href={applyLocaleToPath('/mypage')}
                       className="text-sm font-semibold text-gray-700 underline underline-offset-4 hover:text-gray-900"
                     >
                       キャンセルして戻る
