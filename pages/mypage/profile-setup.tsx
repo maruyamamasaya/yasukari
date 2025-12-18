@@ -166,6 +166,24 @@ const ProfileSetupPage: NextPage = () => {
     };
   }, [attributes.phone_number]);
 
+  const formatDisplayPhoneNumber = (value?: string) => {
+    if (!value) return '未設定';
+
+    const digits = value.replace(/[^0-9]/g, '');
+    if (!digits) return '未設定';
+
+    const matchedCountry = findCountryByDialCodePrefix(digits);
+    if (!matchedCountry) return `+${digits}`;
+
+    const national = digits.startsWith(matchedCountry.dialCode)
+      ? digits.slice(matchedCountry.dialCode.length)
+      : '';
+    const nationalWithZero = national ? `0${national}` : '';
+
+    const prefix = `${matchedCountry.name} (+${matchedCountry.dialCode})`;
+    return nationalWithZero ? `${matchedCountry.name} ${nationalWithZero}` : prefix;
+  };
+
   return (
     <>
       <Head>
@@ -338,7 +356,7 @@ const ProfileSetupPage: NextPage = () => {
               <dl className="mt-4 grid gap-4 text-sm text-gray-700 md:grid-cols-2">
                 <div>
                   <dt className="font-medium text-gray-600">電話番号</dt>
-                  <dd className="mt-1 text-gray-900">{attributes.phone_number ?? '未設定'}</dd>
+                  <dd className="mt-1 text-gray-900">{formatDisplayPhoneNumber(attributes.phone_number)}</dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-600">ハンドルネーム</dt>
