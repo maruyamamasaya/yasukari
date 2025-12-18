@@ -565,6 +565,32 @@ const RegistrationPage: NextPage = () => {
                 </div>
               </div>
 
+              <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-gray-800">
+                <h3 className="text-base font-semibold text-gray-900">International Driving Permit check</h3>
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <p className="font-medium">Q1. Do you have an International Driving Permit (IDP) under the 1949 Geneva Convention format?</p>
+                    <p className="ml-2 mt-1">⭕ Yes → proceed to Q2</p>
+                    <p className="ml-2">❌ No → You cannot drive in Japan</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">Q2. Is your IDP issued by a country that actually issues the 1949 Geneva Convention format?</p>
+                    <p className="ml-2 mt-1">(Examples: United States, Canada, United Kingdom, Italy, Spain, South Korea, Thailand, etc.)</p>
+                    <p className="ml-2 mt-1">⭕ Yes → You can drive in Japan</p>
+                    <p className="ml-2">❌ No → proceed to Q3</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">Q3. Does your country fall under the special exception list?</p>
+                    <p className="ml-2 mt-1">(France, Belgium, Monaco, etc. – do not issue IDP but have exceptions)</p>
+                    <p className="ml-2 mt-1">⭕ Yes → Your domestic license + Japanese translation (JAF, etc.) + passport → You can drive in Japan</p>
+                    <p className="ml-2">❌ No → You cannot drive in Japan</p>
+                  </div>
+                </div>
+                <p className="mt-3 text-xs text-gray-700">
+                  Notes: You can drive for up to one year from your entry date into Japan. Vienna Convention IDPs are not valid in Japan. The issuing country and permit format are critical.
+                </p>
+              </div>
+
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="work_place">
