@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -22,12 +22,9 @@ import GenreCarousel, { GenreItem } from "../components/GenreCarousel";
 import BikeLineup from "../components/BikeLineup";
 import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
-import FaqAccordion, { FAQItem } from "../components/FaqAccordion";
 import HowToUse from "../components/HowToUse";
 import SectionHeading from "../components/SectionHeading";
 import { getBikeModels, BikeModel } from "../lib/bikes";
-import { readChatbotFaq } from "../lib/server/chatbotFaq";
-import { ChatbotFaqCategory } from "../types/chatbotFaq";
 
 type BlogSlide = {
   title: string;
@@ -38,23 +35,13 @@ type BlogSlide = {
 interface Props {
   blogSlides: BlogSlide[];
   bikeModelsAll: BikeModel[];
-  faqCategories: ChatbotFaqCategory[];
 }
 
-export default function HomePage({ blogSlides, bikeModelsAll, faqCategories }: Props) {
+export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
   ];
-
-  const faqs: FAQItem[] = useMemo(() => {
-    const all: FAQItem[] = faqCategories.flatMap((category) => category.faqs);
-    for (let i = all.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [all[i], all[j]] = [all[j], all[i]];
-    }
-    return all.slice(0, 10);
-  }, []);
 
   const hotKeywords = [
     { label: "夏のツーリング", href: "/t/scene/summer?click_from=top_keywords" },
@@ -283,14 +270,9 @@ export default function HomePage({ blogSlides, bikeModelsAll, faqCategories }: P
       <HowToUse />
 
       <section className="section-surface section-padding faq-section">
-        <div className="faq-section__inner">
-          <SectionHeading
-            eyebrow="FAQ"
-            title="よくある質問"
-            description="料金や補償、予約変更に関する疑問をまとめました。困ったときはチャットからもすぐにご相談いただけます。"
-          />
-          <FaqAccordion faqs={faqs} />
-          <div className="faq-section__actions mt-8">
+        <div className="faq-section__inner flex flex-col items-center gap-6">
+          <h2 className="sr-only">サポートページへのリンク</h2>
+          <div className="faq-section__actions flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
             <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
               はじめてガイドで利用の流れを詳しく知る
             </Link>
@@ -298,20 +280,6 @@ export default function HomePage({ blogSlides, bikeModelsAll, faqCategories }: P
               その他のよくあるご質問をもっと見る
             </Link>
           </div>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                mainEntity: faqs.map((f) => ({
-                  "@type": "Question",
-                  name: f.q,
-                  acceptedAnswer: { "@type": "Answer", text: f.a },
-                })),
-              }),
-            }}
-          />
         </div>
       </section>
 
@@ -425,14 +393,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     img: p.eyecatch || "",
   }));
   const bikeModelsAll = await getBikeModels();
-  let faqCategories: ChatbotFaqCategory[] = [];
 
-  try {
-    const faqData = await readChatbotFaq();
-    faqCategories = faqData.categories ?? [];
-  } catch (error) {
-    console.error("Failed to load chatbot FAQ data for home page", error);
-  }
-
-  return { props: { blogSlides, bikeModelsAll, faqCategories }, revalidate: 60 };
+  return { props: { blogSlides, bikeModelsAll }, revalidate: 60 };
 };
