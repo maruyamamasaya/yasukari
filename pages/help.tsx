@@ -47,7 +47,6 @@ export default function HelpPage({ categories }: Props) {
             FAQ
           </span>
           <h2 className="text-xl font-bold text-slate-900">よくある質問</h2>
-          <p className="text-sm text-slate-600">カテゴリ別に整理された質問をアコーディオンで確認できます。</p>
         </div>
         <FaqCategoryAccordion categories={categories} />
         <script
