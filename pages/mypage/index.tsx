@@ -210,6 +210,14 @@ export default function MyPage() {
           </nav>
           <h1 className="text-2xl font-semibold text-gray-900">マイページ</h1>
           <p className="text-sm text-gray-500">ログイン中のプロフィール情報を確認できます。</p>
+          <div className="mt-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-xs text-yellow-900">
+            <p className="font-semibold">万が一の故障時のご案内</p>
+            <p className="mt-2">
+              万が一、ご利用中のバイクが故障した場合は貸し出し店舗より 180キロ圏内でしたら無料で24時間ロードサービスが使えます。
+              弊社営業時間内であれば一度店へお電話いただき、営業時間外でしたらそのままロードサービスをご手配ください。
+            </p>
+            <p className="mt-2 font-semibold">ロードサービス連絡先：0120-024-024</p>
+          </div>
         </header>
 
         {loading ? (
