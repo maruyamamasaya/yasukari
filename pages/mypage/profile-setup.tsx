@@ -300,7 +300,7 @@ const ProfileSetupPage: NextPage = () => {
 
                   <div className="space-y-2">
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                      名前
+                      ニックネーム
                     </label>
                     <input
                       id="name"
@@ -367,7 +367,7 @@ const ProfileSetupPage: NextPage = () => {
                   <dd className="mt-1 text-gray-900">{localeLabel(attributes['custom:locale'])}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-gray-600">名前</dt>
+                  <dt className="font-medium text-gray-600">ニックネーム</dt>
                   <dd className="mt-1 text-gray-900">{attributes.name ?? '未設定'}</dd>
                 </div>
               </dl>
