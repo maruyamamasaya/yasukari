@@ -9,21 +9,10 @@ import {
   FaClipboardList,
   FaBars,
 } from 'react-icons/fa';
-import { IoMdSearch } from 'react-icons/io';
 import AnnouncementBar from './AnnouncementBar';
 
 export default function Header() {
-  const suggestItems = [
-    'ホンダ CB400',
-    'カワサキ Ninja',
-    '人気モデルランキング',
-    'ブログ:メンテナンス入門',
-  ];
-
-  const [query, setQuery] = useState('');
-  const [showSuggest, setShowSuggest] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState(false);
@@ -65,10 +54,6 @@ export default function Header() {
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, [menuOpen]);
-  const filteredSuggest = suggestItems.filter((s) =>
-    s.toLowerCase().includes(query.toLowerCase())
-  );
-
   useEffect(() => {
     const controller = new AbortController();
     const fetchSession = async () => {
@@ -125,51 +110,11 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <button
               className="sm:hidden text-gray-700"
-              onClick={() => setMobileSearchOpen((o) => !o)}
-            >
-              <IoMdSearch size={20} />
-            </button>
-            <button
-              className="sm:hidden text-gray-700"
               onClick={() => setMenuOpen((o) => !o)}
               ref={menuButtonRef}
             >
               <FaBars size={20} />
             </button>
-            {/* 検索 */}
-            <div className="relative hidden sm:block">
-              <input
-                type="text"
-                placeholder="バイク名・キーワード"
-                className="border rounded-full px-4 py-2 pl-10 w-40 sm:w-64"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setShowSuggest(true);
-                }}
-                onFocus={() => setShowSuggest(true)}
-                onBlur={() => setTimeout(() => setShowSuggest(false), 100)}
-              />
-              <IoMdSearch className="absolute left-3 top-2.5 text-gray-500 text-lg" />
-              {showSuggest && (
-                <ul className="absolute left-0 mt-1 w-40 sm:w-64 bg-white border rounded shadow z-10">
-                  {filteredSuggest.map((s) => (
-                    <li key={s}>
-                      <button
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          setQuery(s);
-                          setShowSuggest(false);
-                        }}
-                      >
-                        {s}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
 
             {/* ナビゲーションボタン */}
             <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
@@ -216,46 +161,6 @@ export default function Header() {
             </nav>
           </div>
         </div>
-        {mobileSearchOpen && (
-          <div className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md p-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="バイク名・キーワード"
-                className="border rounded-full px-4 py-2 pl-10 w-full"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setShowSuggest(true);
-                }}
-                onFocus={() => setShowSuggest(true)}
-                onBlur={() => {
-                  setTimeout(() => setShowSuggest(false), 100);
-                }}
-              />
-              <IoMdSearch className="absolute left-3 top-2.5 text-gray-500 text-lg" />
-              {showSuggest && (
-                <ul className="absolute left-0 mt-1 w-full bg-white border rounded shadow z-10">
-                  {filteredSuggest.map((s) => (
-                    <li key={s}>
-                      <button
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          setQuery(s);
-                          setShowSuggest(false);
-                          setMobileSearchOpen(false);
-                        }}
-                      >
-                        {s}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        )}
         {menuOpen && (
           <nav
             ref={menuRef}
