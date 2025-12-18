@@ -24,6 +24,7 @@ const ProfileSetupPage: NextPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [attributes, setAttributes] = useState<UserAttributes>({});
+  const [showForm, setShowForm] = useState(false);
   const fromLogin = useMemo(() => router.query.fromLogin === '1', [router.query.fromLogin]);
 
   useEffect(() => {
@@ -72,6 +73,13 @@ const ProfileSetupPage: NextPage = () => {
       }
     }
   }, [attributes, fromLogin, loading, router]);
+
+  useEffect(() => {
+    if (!loading) {
+      const missing = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
+      setShowForm(missing.length > 0);
+    }
+  }, [attributes, loading]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -211,105 +219,119 @@ const ProfileSetupPage: NextPage = () => {
               <p className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{success}</p>
             ) : null}
 
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900">基本情報</h2>
-              <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
-                <div className="space-y-2">
-                  <label htmlFor="phone_country" className="block text-sm font-medium text-gray-700">
-                    電話番号
-                  </label>
-                  <div className="grid gap-2 sm:grid-cols-[auto,1fr]">
-                    <select
-                      id="phone_country"
-                      name="phone_country"
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
-                      defaultValue={phoneCountry}
-                      required
-                    >
-                      {COUNTRY_OPTIONS.map((country) => (
-                        <option key={country.code} value={country.dialCode}>{`${country.name} (+${country.dialCode})`}</option>
-                      ))}
-                    </select>
+            {missingKeys.length === 0 && !showForm ? (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                  onClick={() => setShowForm(true)}
+                >
+                  基本情報を編集する
+                </button>
+              </div>
+            ) : null}
+
+            {showForm ? (
+              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-gray-900">基本情報</h2>
+                <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
+                  <div className="space-y-2">
+                    <label htmlFor="phone_country" className="block text-sm font-medium text-gray-700">
+                      電話番号
+                    </label>
+                    <div className="grid gap-2 sm:grid-cols-[auto,1fr]">
+                      <select
+                        id="phone_country"
+                        name="phone_country"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
+                        defaultValue={phoneCountry}
+                        required
+                      >
+                        {COUNTRY_OPTIONS.map((country) => (
+                          <option key={country.code} value={country.dialCode}>{`${country.name} (+${country.dialCode})`}</option>
+                        ))}
+                      </select>
+                      <input
+                        id="phone_national"
+                        name="phone_national"
+                        type="tel"
+                        defaultValue={phoneNational}
+                        placeholder="例: 08012341234"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">国番号と先頭の0を除いた番号で登録されます。</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="handle" className="block text-sm font-medium text-gray-700">
+                      ハンドルネーム（ユーザーID）
+                    </label>
                     <input
-                      id="phone_national"
-                      name="phone_national"
-                      type="tel"
-                      defaultValue={phoneNational}
-                      placeholder="例: 08012341234"
+                      id="handle"
+                      name="handle"
+                      type="text"
+                      defaultValue={attributes['custom:handle'] ?? ''}
+                      placeholder="3〜30文字"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
+                      required
+                    />
+                    <p className="text-xs text-gray-500">サイト内での識別に使用されます。</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                      名前
+                    </label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      defaultValue={attributes.name ?? ''}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
                       required
                     />
                   </div>
-                  <p className="text-xs text-gray-500">国番号と先頭の0を除いた番号で登録されます。</p>
-                </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="handle" className="block text-sm font-medium text-gray-700">
-                    ハンドルネーム（ユーザーID）
-                  </label>
-                  <input
-                    id="handle"
-                    name="handle"
-                    type="text"
-                    defaultValue={attributes['custom:handle'] ?? ''}
-                    placeholder="3〜30文字"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
-                    required
-                  />
-                  <p className="text-xs text-gray-500">サイト内での識別に使用されます。</p>
-                </div>
+                  <div className="space-y-2">
+                    <label htmlFor="locale" className="block text-sm font-medium text-gray-700">
+                      ロケーション / 言語
+                    </label>
+                    <select
+                      id="locale"
+                      name="locale"
+                      defaultValue={attributes['custom:locale'] ?? ''}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
+                      required
+                    >
+                      <option value="" disabled>
+                        選択してください
+                      </option>
+                      <option value="jp">日本語圏</option>
+                      <option value="en">英語圏</option>
+                    </select>
+                    <p className="text-xs text-gray-500">選択したロケーションに応じてサイト表示を調整します。</p>
+                  </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    名前
-                  </label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    defaultValue={attributes.name ?? ''}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="locale" className="block text-sm font-medium text-gray-700">
-                    ロケーション / 言語
-                  </label>
-                  <select
-                    id="locale"
-                    name="locale"
-                    defaultValue={attributes['custom:locale'] ?? ''}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
-                    required
-                  >
-                    <option value="" disabled>
-                      選択してください
-                    </option>
-                    <option value="jp">日本語圏</option>
-                    <option value="en">英語圏</option>
-                  </select>
-                  <p className="text-xs text-gray-500">選択したロケーションに応じてサイト表示を調整します。</p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {saving ? '保存中…' : '保存してマイページへ'}
-                  </button>
-                  <Link
-                    href="/mypage"
-                    className="text-sm font-semibold text-gray-700 underline underline-offset-4 hover:text-gray-900"
-                  >
-                    キャンセルして戻る
-                  </Link>
-                </div>
-              </form>
-            </section>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {saving ? '保存中…' : '保存してマイページへ'}
+                    </button>
+                    <Link
+                      href="/mypage"
+                      className="text-sm font-semibold text-gray-700 underline underline-offset-4 hover:text-gray-900"
+                    >
+                      キャンセルして戻る
+                    </Link>
+                  </div>
+                </form>
+              </section>
+            ) : null}
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900">現在の登録状況</h2>
