@@ -339,13 +339,16 @@ a:hover {
 .faq-section__actions {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 0.75rem;
+  align-items: stretch;
 }
 
 @media (min-width: 640px) {
   .faq-section__actions {
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: center;
+    align-items: center;
   }
 }
 
