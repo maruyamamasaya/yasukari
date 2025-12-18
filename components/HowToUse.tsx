@@ -1,5 +1,4 @@
 import React from "react";
-import { FaCaretRight } from "react-icons/fa";
 import SectionHeading from "./SectionHeading";
 
 type Step = {
@@ -48,27 +47,39 @@ export default function HowToUse() {
         title="yasukariの利用方法"
         description="初めてでも迷わずにステップを完了できるよう、予約から返却までの流れをシンプルにまとめました。"
       />
-      <div className="flex flex-col items-stretch justify-center gap-6 md:flex-row md:items-start md:gap-4">
-        {steps.map((step, idx) => (
-          <React.Fragment key={idx}>
-            {idx > 0 && (
-              <FaCaretRight className="hidden text-2xl text-red-300 md:block" />
-            )}
-            <div className="flex flex-1 flex-col items-center gap-4 rounded-2xl border border-white/60 bg-white/80 p-6 text-center shadow-[0_20px_42px_-28px_rgba(15,23,42,0.45)]">
-              <div className="mx-auto w-44 overflow-hidden rounded-xl bg-white">
-                <img
-                  className="h-full w-full object-contain"
-                  alt={step.alt}
-                  loading="lazy"
-                  decoding="async"
-                  src={step.img}
-                />
+      <div className="relative mt-6">
+        <div className="absolute inset-x-6 top-10 hidden h-px bg-gradient-to-r from-transparent via-red-200/70 to-transparent md:block" />
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {steps.map((step, idx) => (
+            <article
+              key={idx}
+              className="relative flex h-full flex-col gap-5 overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-6 text-left shadow-[0_18px_40px_-25px_rgba(15,23,42,0.5)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_50px_-25px_rgba(220,38,38,0.35)]"
+            >
+              <div className="absolute -top-5 left-6 flex items-center gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-red-500 via-orange-400 to-amber-300 text-lg font-bold text-white shadow-lg">
+                  {idx + 1}
+                </span>
+                <span className="rounded-full bg-slate-900/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+                  Step
+                </span>
               </div>
-              <p className="text-base font-semibold text-slate-800">{step.title}</p>
-              <p className="text-sm leading-relaxed text-slate-600">{step.desc}</p>
-            </div>
-          </React.Fragment>
-        ))}
+              <div className="flex items-center gap-4 pt-5">
+                <div className="relative aspect-square w-24 overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 to-white shadow-inner">
+                  <img
+                    className="h-full w-full object-contain"
+                    alt={step.alt}
+                    loading="lazy"
+                    decoding="async"
+                    src={step.img}
+                  />
+                </div>
+                <p className="text-base font-semibold text-slate-900 md:text-lg">{step.title}</p>
+              </div>
+              <p className="text-sm leading-relaxed text-slate-600 md:text-base">{step.desc}</p>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-red-50/70 via-white/0 to-transparent" />
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
