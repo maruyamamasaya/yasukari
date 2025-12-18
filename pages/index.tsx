@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -24,6 +24,8 @@ import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
 import HowToUse from "../components/HowToUse";
 import SectionHeading from "../components/SectionHeading";
+import FaqAccordion, { FAQItem } from "../components/FaqAccordion";
+import faqData from "../data/faq.json";
 import { getBikeModels, BikeModel } from "../lib/bikes";
 
 type BlogSlide = {
@@ -42,6 +44,15 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
   ];
+
+  const faqs: FAQItem[] = useMemo(() => {
+    const all: FAQItem[] = (faqData as any).categories.flatMap((c: any) => c.faqs);
+    for (let i = all.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [all[i], all[j]] = [all[j], all[i]];
+    }
+    return all.slice(0, 10);
+  }, []);
 
   const hotKeywords = [
     { label: "夏のツーリング", href: "/t/scene/summer?click_from=top_keywords" },
@@ -270,9 +281,14 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
       <HowToUse />
 
       <section className="section-surface section-padding faq-section">
-        <div className="faq-section__inner flex flex-col items-center gap-6">
-          <h2 className="sr-only">サポートページへのリンク</h2>
-          <div className="faq-section__actions flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
+        <div className="faq-section__inner">
+          <SectionHeading
+            eyebrow="FAQ"
+            title="よくある質問"
+            description="料金・保険・予約変更など、よくいただく質問をまとめました。もっと詳しく知りたいときは、ヘルプページもご覧ください。"
+          />
+          <FaqAccordion faqs={faqs} />
+          <div className="faq-section__actions mt-8">
             <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
               はじめてガイドで利用の流れを詳しく知る
             </Link>
@@ -280,6 +296,20 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
               その他のよくあるご質問をもっと見る
             </Link>
           </div>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: faqs.map((f) => ({
+                  "@type": "Question",
+                  name: f.q,
+                  acceptedAnswer: { "@type": "Answer", text: f.a },
+                })),
+              }),
+            }}
+          />
         </div>
       </section>
 
