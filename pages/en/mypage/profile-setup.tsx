@@ -275,6 +275,18 @@ const ProfileSetupPageEn: NextPage = () => {
                   </p>
                 )}
               </div>
+
+              {missingKeys.length === 0 && !showForm ? (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                    onClick={() => setShowForm(true)}
+                  >
+                    Edit basic information
+                  </button>
+                </div>
+              ) : null}
             </section>
 
             {showForm ? (
