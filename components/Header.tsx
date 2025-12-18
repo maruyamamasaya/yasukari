@@ -99,14 +99,22 @@ export default function Header() {
       <AnnouncementBar />
       <header className="bg-white shadow-md border-b-2 border-red-600 relative">
         <div className="mx-auto flex items-center justify-between px-4 py-3 w-full max-w-screen-xl">
-          {/* ロゴ */}
-          <Link href="/" className="flex items-center">
-            <img
-              src="https://yasukari.com/static/images/logo/250x50.png"
-              alt="yasukari logo"
-              className="h-8 w-auto"
-            />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/en"
+              className="rounded border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:border-red-600 hover:text-red-600"
+            >
+              EN/
+            </Link>
+            {/* ロゴ */}
+            <Link href="/" className="flex items-center">
+              <img
+                src="https://yasukari.com/static/images/logo/250x50.png"
+                alt="yasukari logo"
+                className="h-8 w-auto"
+              />
+            </Link>
+          </div>
           <div className="flex items-center gap-4">
             <button
               className="sm:hidden text-gray-700"
