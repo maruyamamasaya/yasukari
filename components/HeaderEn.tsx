@@ -1,13 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import {
-  FaUser,
-  FaQuestionCircle,
-  FaShoppingCart,
-  FaMotorcycle,
-  FaClipboardList,
-  FaBars,
-} from 'react-icons/fa';
+import { FaUser, FaQuestionCircle, FaClipboardList, FaBars } from 'react-icons/fa';
 import AnnouncementBar from './AnnouncementBar';
 
 export default function HeaderEn() {
@@ -59,8 +52,11 @@ export default function HeaderEn() {
               <Link href="/en">
                 <NavItem label="Home" />
               </Link>
-              <Link href="https://yasukaribike.com/login">
+              <Link href="/en/login">
                 <NavItem icon={<FaUser />} label="Login" />
+              </Link>
+              <Link href="/en/mypage">
+                <NavItem icon={<FaUser />} label="My Page" />
               </Link>
               <Link href="/en/pricing">
                 <NavItem icon={<FaClipboardList />} label="Bikes & Pricing" />
@@ -86,8 +82,13 @@ export default function HeaderEn() {
                 </Link>
               </li>
               <li>
-                <Link href="https://yasukaribike.com/login">
+                <Link href="/en/login">
                   <NavItem icon={<FaUser />} label="Login" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/en/mypage">
+                  <NavItem icon={<FaUser />} label="My Page" />
                 </Link>
               </li>
               <li>
