@@ -26,7 +26,7 @@ import HowToUse from "../components/HowToUse";
 import SectionHeading from "../components/SectionHeading";
 import FaqAccordion, { FAQItem } from "../components/FaqAccordion";
 import faqData from "../data/faq.json";
-import { getBikeModels, BikeModel } from "../lib/bikes";
+import { getBikeClasses, getBikeModels, BikeClass, BikeModel } from "../lib/bikes";
 
 type BlogSlide = {
   title: string;
@@ -37,9 +37,10 @@ type BlogSlide = {
 interface Props {
   blogSlides: BlogSlide[];
   bikeModelsAll: BikeModel[];
+  bikeClasses: BikeClass[];
 }
 
-export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
+export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Props) {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
@@ -224,7 +225,7 @@ export default function HomePage({ blogSlides, bikeModelsAll }: Props) {
 
       <RecentlyViewed />
 
-      <BikeLineup bikes={bikeModelsAll} />
+      <BikeLineup bikes={bikeModelsAll} classes={bikeClasses} />
 
       <section className="section-surface section-padding">
         <SectionHeading
@@ -422,7 +423,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     href: `/blog_for_custmor/${p.slug}`,
     img: p.eyecatch || "",
   }));
-  const bikeModelsAll = await getBikeModels();
+  const [bikeModelsAll, bikeClasses] = await Promise.all([
+    getBikeModels(),
+    getBikeClasses(),
+  ]);
 
-  return { props: { blogSlides, bikeModelsAll }, revalidate: 60 };
+  return { props: { blogSlides, bikeModelsAll, bikeClasses }, revalidate: 60 };
 };
