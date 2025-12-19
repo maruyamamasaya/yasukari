@@ -21,6 +21,13 @@ type DynamoBikeModel = {
   mainImageUrl?: string;
 };
 
+type DynamoVehicle = {
+  managementNumber: string;
+  modelId: number;
+  publishStatus?: "ON" | "OFF";
+  storeId?: string;
+};
+
 export interface BikeClass {
   classId: number;
   className: string;
@@ -54,6 +61,13 @@ export interface BikeModel {
   stores?: string[];
   classId?: number;
   modelId?: number;
+}
+
+export interface BikeVehicle {
+  managementNumber: string;
+  modelId: number;
+  publishStatus?: "ON" | "OFF";
+  storeId?: string;
 }
 
 /**
@@ -105,6 +119,29 @@ export async function getBikeModels(): Promise<BikeModel[]> {
   } catch (error) {
     console.error("Failed to fetch bike models from DynamoDB, falling back to static data", error);
     return bikesData.bikes as BikeModel[];
+  }
+}
+
+export async function getVehiclesByModel(modelId: number): Promise<BikeVehicle[]> {
+  const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+
+  try {
+    const vehicles = await scanAllItems<DynamoVehicle>({
+      TableName: VEHICLES_TABLE,
+      FilterExpression: "#modelId = :modelId",
+      ExpressionAttributeNames: { "#modelId": "modelId" },
+      ExpressionAttributeValues: { ":modelId": modelId },
+    });
+
+    return vehicles
+      .filter((vehicle) => (vehicle.publishStatus ?? "ON") === "ON")
+      .sort((a, b) => a.managementNumber.localeCompare(b.managementNumber));
+  } catch (error) {
+    console.error(
+      `Failed to fetch vehicles for modelId=${modelId} from DynamoDB`,
+      error
+    );
+    return [];
   }
 }
 
