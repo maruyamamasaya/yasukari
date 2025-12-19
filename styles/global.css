@@ -312,11 +312,12 @@ a:hover {
   opacity: 1;
 }
 
-.faq-accordion {
-  padding: 0 1.1rem 1.1rem;
-  display: grid;
-  gap: 0.65rem;
-}
+  .faq-accordion {
+    padding: 0 1.1rem 1.1rem;
+    display: grid;
+    gap: 0.65rem;
+    text-align: left;
+  }
 
 .faq-section__inner {
   max-width: 960px;
@@ -326,11 +327,11 @@ a:hover {
   gap: 1.25rem;
 }
 
-.faq-section .section-heading {
-  text-align: left;
-  align-items: flex-start;
-  margin: 0;
-}
+  .faq-section .section-heading {
+    text-align: center;
+    align-items: center;
+    margin: 0 auto;
+  }
 
 .faq-section .section-heading__description {
   margin: 0;
