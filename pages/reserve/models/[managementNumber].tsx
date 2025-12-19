@@ -6,6 +6,7 @@ import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { getDocumentClient } from "../../../lib/dynamodb";
 import { BikeModel as LegacyBikeModel, getBikeModels } from "../../../lib/bikes";
 import { getStoreLabel } from "../../../lib/dashboard/storeOptions";
+import { useRouter } from "next/router";
 
 interface VehicleRecord {
   managementNumber: string;
@@ -40,6 +41,7 @@ export default function ReserveModelPage({
   fallbackBike,
   managementNumber,
 }: Props) {
+  const router = useRouter();
   const resolvedModelName = model?.modelName ?? fallbackBike?.modelName ?? "車種";
   const resolvedImage = model?.mainImageUrl ?? fallbackBike?.img;
   const resolvedModelCode = fallbackBike?.modelCode;
@@ -81,6 +83,41 @@ export default function ReserveModelPage({
   const returnDateValue = returnDate ? new Date(returnDate) : null;
 
   const storeNotice = store === "三ノ輪店";
+
+  const canProceed = store && pickup && returnDate;
+
+  const [checkingSession, setCheckingSession] = useState(false);
+
+  const handleReviewReservation = async () => {
+    if (!canProceed || checkingSession) return;
+
+    setCheckingSession(true);
+    try {
+      const response = await fetch("/api/me", { credentials: "include" });
+      if (response.status === 401) {
+        await router.push("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("failed to verify session");
+      }
+
+      const params = new URLSearchParams({
+        store,
+        pickupDate: pickup,
+        returnDate,
+        modelName: resolvedModelName,
+        managementNumber,
+      });
+
+      await router.push(`/reserve/flow/step1?${params.toString()}`);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setCheckingSession(false);
+    }
+  };
 
   return (
     <>
@@ -278,9 +315,11 @@ export default function ReserveModelPage({
               </p>
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-lg bg-red-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                onClick={handleReviewReservation}
+                disabled={!canProceed || checkingSession}
+                className="inline-flex items-center justify-center rounded-lg bg-red-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-red-300"
               >
-                予約内容を確認する
+                {checkingSession ? "確認中..." : "予約内容を確認する"}
               </button>
             </div>
           </section>
