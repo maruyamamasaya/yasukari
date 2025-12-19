@@ -49,6 +49,7 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
   );
 
   const hasStock = vehicleOptions.length > 0;
+  const showPrice = Boolean(bike.price24h);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -107,8 +108,8 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
           </nav>
 
           <section className="bg-white shadow-md rounded-2xl overflow-hidden ring-1 ring-gray-100">
-            <div className="lg:grid lg:grid-cols-2">
-              <div className="relative h-72 sm:h-96 lg:h-full">
+            <div className="lg:grid lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="relative h-72 sm:h-96 lg:aspect-[4/3] lg:h-auto">
                 <img
                   src={bike.img}
                   alt={bike.modelName}
@@ -154,12 +155,14 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-red-50 to-white p-4 shadow-sm">
-                    <p className="text-3xl font-bold text-gray-900">
-                      {bike.price24h || "ー"}
-                    </p>
-                  </div>
+                <div
+                  className={`grid grid-cols-1 gap-4 ${showPrice ? "sm:grid-cols-2" : ""}`}
+                >
+                  {showPrice ? (
+                    <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-red-50 to-white p-4 shadow-sm">
+                      <p className="text-3xl font-bold text-gray-900">{bike.price24h}</p>
+                    </div>
+                  ) : null}
                   <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold text-gray-900">在庫の選択</p>
@@ -271,7 +274,7 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                     {[
-                      { label: "24時間", value: bike.price24h || "-" },
+                      { label: "24時間", value: bike.price24h || "お問い合わせ" },
                       { label: "2日間", value: "お問い合わせ" },
                       { label: "1週間", value: "お問い合わせ" },
                       { label: "2週間", value: "お問い合わせ" },
