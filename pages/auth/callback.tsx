@@ -1,86 +1,92 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import {
-  COGNITO_ACCESS_TOKEN_COOKIE,
-  COGNITO_ID_TOKEN_COOKIE,
-  COGNITO_OAUTH_STATE_KEY,
-} from '../../lib/cognitoHostedUi';
-
-function setCookie(name: string, value: string, maxAgeSeconds: number) {
-  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `${name}=${value}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax${secure}`;
-}
+import { COGNITO_OAUTH_STATE_KEY } from '../../lib/cognitoHostedUi';
 
 export default function CognitoCallbackPage() {
   const router = useRouter();
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // 1. ハッシュを取得
-    const rawHash = window.location.hash.replace(/^#/, '');
+    const processCallback = async () => {
+      // 1. ハッシュを取得
+      const rawHash = window.location.hash.replace(/^#/, '');
 
-    // 🔸ハッシュが空 = Hosted UI から戻ってきたわけではなく、
-    //   ユーザーが直接 /auth/callback を開いた or リロードした可能性が高い
-    if (!rawHash) {
-      void router.replace('/login');
-      return;
-    }
+      // 🔸ハッシュが空 = Hosted UI から戻ってきたわけではなく、
+      //   ユーザーが直接 /auth/callback を開いた or リロードした可能性が高い
+      if (!rawHash) {
+        await router.replace('/login');
+        return;
+      }
 
-    const params = new URLSearchParams(rawHash);
+      const params = new URLSearchParams(rawHash);
 
-    // 認証に関係するパラメータが1つも無い場合も、素直に /login に戻す
-    const hasAnyAuthParam =
-      params.has('id_token') ||
-      params.has('access_token') ||
-      params.has('error') ||
-      params.has('state');
+      // 認証に関係するパラメータが1つも無い場合も、素直に /login に戻す
+      const hasAnyAuthParam =
+        params.has('id_token') ||
+        params.has('access_token') ||
+        params.has('error') ||
+        params.has('state');
 
-    if (!hasAnyAuthParam) {
-      void router.replace('/login');
-      return;
-    }
+      if (!hasAnyAuthParam) {
+        await router.replace('/login');
+        return;
+      }
 
-    // 2. Cognito からの error があればそれを表示して終了
-    const urlError = params.get('error');
-    if (urlError) {
-      setError(params.get('error_description') ?? urlError);
-      return;
-    }
+      // 2. Cognito からの error があればそれを表示して終了
+      const urlError = params.get('error');
+      if (urlError) {
+        setError(params.get('error_description') ?? urlError);
+        return;
+      }
 
-    // 3. state チェック
-    const returnedState = params.get('state');
-    const expectedState = sessionStorage.getItem(COGNITO_OAUTH_STATE_KEY);
+      // 3. state チェック
+      const returnedState = params.get('state');
+      const expectedState = sessionStorage.getItem(COGNITO_OAUTH_STATE_KEY);
 
-    if (!returnedState || !expectedState || returnedState !== expectedState) {
+      if (!returnedState || !expectedState || returnedState !== expectedState) {
+        sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
+        setError('認証状態を確認できませんでした。もう一度ログインからお試しください。');
+        return;
+      }
+
+      // state が一致したので、もう不要なため削除
       sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
-      setError('認証状態を確認できませんでした。もう一度ログインからお試しください。');
-      return;
-    }
 
-    // state が一致したので、もう不要なため削除
-    sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
+      // 4. トークン取得
+      const idToken = params.get('id_token');
+      const accessToken = params.get('access_token');
+      const expiresIn = Number(params.get('expires_in') ?? '3600');
 
-    // 4. トークン取得
-    const idToken = params.get('id_token');
-    const accessToken = params.get('access_token');
-    const expiresIn = Number(params.get('expires_in') ?? '3600');
+      if (!idToken) {
+        setError('認証情報を取得できませんでした。お手数ですが、もう一度ログインからお試しください。');
+        return;
+      }
 
-    if (!idToken) {
-      setError('認証情報を取得できませんでした。お手数ですが、もう一度ログインからお試しください。');
-      return;
-    }
+      // 5. クッキー保存（HttpOnly かつサーバー側設定でデプロイ後も保持）
+      try {
+        const response = await fetch('/api/auth/store-tokens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ idToken, accessToken, expiresIn }),
+        });
 
-    // 5. クッキー保存
-    setCookie(COGNITO_ID_TOKEN_COOKIE, idToken, expiresIn);
-    if (accessToken) {
-      setCookie(COGNITO_ACCESS_TOKEN_COOKIE, accessToken, expiresIn);
-    }
+        if (!response.ok) {
+          throw new Error(`Failed to persist tokens: ${response.status}`);
+        }
+      } catch (err) {
+        console.error(err);
+        setError('ログイン情報を保持できませんでした。時間をおいて再度お試しください。');
+        return;
+      }
 
-    // 6. 正常時はマイページへ
-    void router
-      .replace('/mypage/profile-setup?fromLogin=1')
-      .then(() => window.location.reload());
+      // 6. 正常時はマイページへ
+      await router.replace('/mypage/profile-setup?fromLogin=1');
+      window.location.reload();
+    };
+
+    void processCallback();
   }, [router]);
 
   return (
