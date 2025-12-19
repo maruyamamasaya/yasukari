@@ -128,36 +128,14 @@ export default function Header() {
       <AnnouncementBar />
       <header className="bg-white shadow-md border-b-2 border-red-600 relative">
         <div className="mx-auto flex items-center justify-between px-4 py-3 w-full max-w-screen-xl">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-full border border-red-500 bg-red-50/70 shadow-sm text-xs font-semibold text-gray-800">
-              <button
-                type="button"
-                className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
-                aria-current="page"
-                onClick={() => handleLanguageClick('ja')}
-                disabled={updatingLocale}
-              >
-                日本語
-              </button>
-              <span className="h-5 w-px bg-red-200" aria-hidden />
-              <button
-                type="button"
-                className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
-                onClick={() => handleLanguageClick('en')}
-                disabled={updatingLocale}
-              >
-                English
-              </button>
-            </div>
-            {/* ロゴ */}
-            <Link href="/" className="flex items-center">
-              <img
-                src="https://yasukari.com/static/images/logo/250x50.png"
-                alt="yasukari logo"
-                className="h-8 w-auto"
-              />
-            </Link>
-          </div>
+          {/* ロゴ */}
+          <Link href="/" className="flex items-center">
+            <img
+              src="https://yasukari.com/static/images/logo/250x50.png"
+              alt="yasukari logo"
+              className="h-8 w-auto"
+            />
+          </Link>
           <div className="flex items-center gap-4">
             <button
               className="sm:hidden text-gray-700"
@@ -209,6 +187,26 @@ export default function Header() {
               <Link href="/help">
                 <NavItem label="ヘルプ" />
               </Link>
+              <div className="flex items-center rounded-full border border-red-500 bg-red-50/70 shadow-sm text-xs font-semibold text-gray-800">
+                <button
+                  type="button"
+                  className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
+                  aria-current="page"
+                  onClick={() => handleLanguageClick('ja')}
+                  disabled={updatingLocale}
+                >
+                  日本語
+                </button>
+                <span className="h-5 w-px bg-red-200" aria-hidden />
+                <button
+                  type="button"
+                  className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
+                  onClick={() => handleLanguageClick('en')}
+                  disabled={updatingLocale}
+                >
+                  English
+                </button>
+              </div>
             </nav>
           </div>
         </div>
@@ -267,6 +265,28 @@ export default function Header() {
                 <Link href="/help">
                   <NavItem label="ヘルプ" />
                 </Link>
+              </li>
+              <li className="pt-2 border-t border-gray-100">
+                <div className="flex items-center rounded-full border border-red-500 bg-red-50/70 shadow-sm text-xs font-semibold text-gray-800 w-fit">
+                  <button
+                    type="button"
+                    className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
+                    aria-current="page"
+                    onClick={() => handleLanguageClick('ja')}
+                    disabled={updatingLocale}
+                  >
+                    日本語
+                  </button>
+                  <span className="h-5 w-px bg-red-200" aria-hidden />
+                  <button
+                    type="button"
+                    className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
+                    onClick={() => handleLanguageClick('en')}
+                    disabled={updatingLocale}
+                  >
+                    English
+                  </button>
+                </div>
               </li>
             </ul>
           </nav>
