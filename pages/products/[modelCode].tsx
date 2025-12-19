@@ -156,29 +156,9 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-red-50 to-white p-4 shadow-sm">
-                    <p className="text-sm text-gray-500">24時間の基本料金</p>
-                    <p className="mt-2 text-2xl font-bold text-gray-900">
-                      {bike.price24h || "料金はお問い合わせください"}
+                    <p className="text-3xl font-bold text-gray-900">
+                      {bike.price24h || "ー"}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      料金は店舗・シーズンにより異なる場合があります。
-                    </p>
-                    {hasStock ? (
-                      <Link
-                        href={`/reserve/models/${bike.modelCode}`}
-                        className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
-                      >
-                        この車種をレンタル予約する
-                      </Link>
-                    ) : (
-                      <button
-                        className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-500 shadow cursor-not-allowed"
-                        disabled
-                        aria-disabled="true"
-                      >
-                        在庫がありません
-                      </button>
-                    )}
                   </div>
                   <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
                     <div className="flex items-center justify-between">
@@ -216,6 +196,22 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                         紐づく店舗ID: <span className="font-semibold">{selectedVehicleStore}</span>
                       </p>
                     ) : null}
+                    {hasStock ? (
+                      <Link
+                        href={`/reserve/models/${bike.modelCode}`}
+                        className="inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                      >
+                        この車種をレンタル予約する
+                      </Link>
+                    ) : (
+                      <button
+                        className="inline-flex w-full items-center justify-center rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-500 shadow cursor-not-allowed"
+                        disabled
+                        aria-disabled="true"
+                      >
+                        在庫がありません
+                      </button>
+                    )}
                     <div className="flex gap-2 flex-wrap">
                       <Link
                         href="/pricing"
