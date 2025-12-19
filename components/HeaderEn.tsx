@@ -1,12 +1,50 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { FaUser, FaQuestionCircle, FaClipboardList, FaBars } from 'react-icons/fa';
 import AnnouncementBar from './AnnouncementBar';
 
 export default function HeaderEn() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [updatingLocale, setUpdatingLocale] = useState(false);
+  const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchSession = async () => {
+      try {
+        const response = await fetch(`/api/me`, {
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (response.status === 401) {
+          setSessionUser(null);
+          return;
+        }
+
+        if (response.ok) {
+          const data = (await response.json()) as { user?: { email?: string; username?: string } };
+          setSessionUser(data.user ?? null);
+          return;
+        }
+
+        setSessionUser(null);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+        console.error('Failed to check session', error);
+        setSessionUser(null);
+      }
+    };
+
+    void fetchSession();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -24,6 +62,33 @@ export default function HeaderEn() {
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, [menuOpen]);
+
+  const handleLanguageClick = async (target: 'ja' | 'en') => {
+    if (updatingLocale) return;
+
+    if (sessionUser) {
+      setUpdatingLocale(true);
+      try {
+        await fetch('/api/user/attributes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ locale: target === 'en' ? 'en-US' : 'ja-JP' }),
+        });
+      } catch (error) {
+        console.error('Failed to update locale', error);
+      } finally {
+        setUpdatingLocale(false);
+      }
+    }
+
+    if (target === 'en') {
+      await router.push('/en');
+      return;
+    }
+
+    await router.push('/');
+  };
   return (
     <div className="sticky top-0 z-50">
       {/* Top bar */}
@@ -31,12 +96,26 @@ export default function HeaderEn() {
       <header className="bg-white shadow-md border-b-2 border-red-600 relative">
         <div className="mx-auto flex items-center justify-between px-4 py-3 w-full max-w-screen-xl">
           <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="rounded border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:border-red-600 hover:text-red-600"
-            >
-              日本語
-            </Link>
+            <div className="flex items-center rounded-full border border-red-500 bg-red-50/70 shadow-sm text-xs font-semibold text-gray-800">
+              <button
+                type="button"
+                className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
+                onClick={() => handleLanguageClick('en')}
+                disabled={updatingLocale}
+                aria-current="page"
+              >
+                English
+              </button>
+              <span className="h-5 w-px bg-red-200" aria-hidden />
+              <button
+                type="button"
+                className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
+                onClick={() => handleLanguageClick('ja')}
+                disabled={updatingLocale}
+              >
+                日本語
+              </button>
+            </div>
             {/* Logo */}
             <Link href="/en" className="flex items-center">
               <img
