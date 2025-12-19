@@ -48,6 +48,8 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
     [vehicles]
   );
 
+  const hasStock = vehicleOptions.length > 0;
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -161,12 +163,22 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                     <p className="mt-1 text-xs text-gray-500">
                       料金は店舗・シーズンにより異なる場合があります。
                     </p>
-                    <Link
-                      href={`/reserve/models/${bike.modelCode}`}
-                      className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
-                    >
-                      この車種をレンタル予約する
-                    </Link>
+                    {hasStock ? (
+                      <Link
+                        href={`/reserve/models/${bike.modelCode}`}
+                        className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                      >
+                        この車種をレンタル予約する
+                      </Link>
+                    ) : (
+                      <button
+                        className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-500 shadow cursor-not-allowed"
+                        disabled
+                        aria-disabled="true"
+                      >
+                        在庫がありません
+                      </button>
+                    )}
                   </div>
                   <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
                     <div className="flex items-center justify-between">
@@ -184,7 +196,7 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                     >
                       {vehicleOptions.length === 0 ? (
                         <option value="" disabled>
-                          在庫を準備中です
+                          在庫がありません
                         </option>
                       ) : (
                         <>
