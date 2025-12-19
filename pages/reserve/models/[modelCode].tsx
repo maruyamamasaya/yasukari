@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { GetStaticPaths, GetStaticProps } from "next";
@@ -8,12 +8,38 @@ interface Props {
   bike: BikeModel;
 }
 
+type SelectionType = "pickup" | "return";
+
+interface CalendarDay {
+  date: Date;
+  inCurrentMonth: boolean;
+}
+
 export default function ReserveModelPage({ bike }: Props) {
   const [store, setStore] = useState("");
   const [pickup, setPickup] = useState("");
   const [returnDate, setReturnDate] = useState("");
+  const [activeSelection, setActiveSelection] = useState<SelectionType>("pickup");
+  const [visibleMonth, setVisibleMonth] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  });
 
   const storeOptions = bike.stores ?? [];
+
+  const minDate = useMemo(() => {
+    const base = new Date();
+    base.setDate(base.getDate() + 1);
+    base.setHours(0, 0, 0, 0);
+    return base;
+  }, []);
+
+  const minDateString = useMemo(() => formatInputDate(minDate), [minDate]);
+
+  const pickupDate = pickup ? new Date(pickup) : null;
+  const returnDateValue = returnDate ? new Date(returnDate) : null;
 
   return (
     <>
@@ -143,8 +169,15 @@ export default function ReserveModelPage({ bike }: Props) {
                     id="pickup"
                     type="date"
                     value={pickup}
-                    onChange={(e) => setPickup(e.target.value)}
+                    min={minDateString}
+                    onChange={(e) => {
+                      setPickup(e.target.value);
+                      if (returnDateValue && new Date(e.target.value) > returnDateValue) {
+                        setReturnDate("");
+                      }
+                    }}
                     className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none"
+                    onFocus={() => setActiveSelection("pickup")}
                   />
                 </div>
                 <div className="space-y-2">
@@ -155,8 +188,74 @@ export default function ReserveModelPage({ bike }: Props) {
                     id="return"
                     type="date"
                     value={returnDate}
+                    min={pickup ? pickup : minDateString}
                     onChange={(e) => setReturnDate(e.target.value)}
                     className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none"
+                    onFocus={() => setActiveSelection("return")}
+                  />
+                </div>
+
+                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 shadow-sm">
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <p className="text-sm font-semibold text-gray-900">カレンダーから選択</p>
+                    <div className="flex gap-2 text-xs">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-red-700">
+                        <span className="h-2 w-2 rounded-full bg-red-500" />出発日
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-blue-700">
+                        <span className="h-2 w-2 rounded-full bg-blue-500" />返却予定日
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-green-700">
+                        <span className="h-2 w-2 rounded-full bg-green-500" />レンタル期間
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex gap-2 text-sm">
+                      <button
+                        type="button"
+                        className={`rounded-full px-3 py-1 font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeSelection === "pickup" ? "bg-red-500 text-white focus:ring-red-500" : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-100 focus:ring-gray-300"}`}
+                        onClick={() => setActiveSelection("pickup")}
+                      >
+                        出発日を選択
+                      </button>
+                      <button
+                        type="button"
+                        className={`rounded-full px-3 py-1 font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeSelection === "return" ? "bg-blue-500 text-white focus:ring-blue-500" : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-100 focus:ring-gray-300"}`}
+                        onClick={() => setActiveSelection("return")}
+                        disabled={!pickup}
+                      >
+                        返却予定日を選択
+                      </button>
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {activeSelection === "pickup"
+                        ? "明日以降の日付から出発日を選択してください"
+                        : "出発日以降の日付から返却予定日を選択してください"}
+                    </div>
+                  </div>
+
+                  <Calendar
+                    month={visibleMonth}
+                    onMonthChange={setVisibleMonth}
+                    activeSelection={activeSelection}
+                    minDate={minDate}
+                    pickupDate={pickupDate}
+                    returnDate={returnDateValue}
+                    onSelectDate={(date) => {
+                      const formatted = formatInputDate(date);
+
+                      if (activeSelection === "pickup") {
+                        setPickup(formatted);
+                        if (returnDateValue && date > returnDateValue) {
+                          setReturnDate("");
+                        }
+                        setActiveSelection("return");
+                      } else {
+                        setReturnDate(formatted);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -193,3 +292,135 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const bike = bikes.find((b) => b.modelCode === params?.modelCode) as BikeModel;
   return { props: { bike } };
 };
+
+interface CalendarProps {
+  month: Date;
+  onMonthChange: (date: Date) => void;
+  onSelectDate: (date: Date) => void;
+  activeSelection: SelectionType;
+  minDate: Date;
+  pickupDate: Date | null;
+  returnDate: Date | null;
+}
+
+function Calendar({
+  month,
+  onMonthChange,
+  onSelectDate,
+  activeSelection,
+  minDate,
+  pickupDate,
+  returnDate,
+}: CalendarProps) {
+  const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+  const startDay = monthStart.getDay();
+  const gridStart = new Date(monthStart);
+  gridStart.setDate(monthStart.getDate() - startDay);
+
+  const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+  const endDay = monthEnd.getDay();
+  const gridEnd = new Date(monthEnd);
+  gridEnd.setDate(monthEnd.getDate() + (6 - endDay));
+
+  const days: CalendarDay[] = [];
+  const cursor = new Date(gridStart);
+  while (cursor <= gridEnd) {
+    days.push({ date: new Date(cursor), inCurrentMonth: cursor.getMonth() === month.getMonth() });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
+
+  const moveMonth = (offset: number) => {
+    const next = new Date(month);
+    next.setMonth(month.getMonth() + offset);
+    next.setDate(1);
+    onMonthChange(next);
+  };
+
+  const isDateDisabled = (date: Date) => {
+    const isBeforeMin = date < minDate;
+    const isBeforePickup = activeSelection === "return" && pickupDate ? date < pickupDate : false;
+    return isBeforeMin || isBeforePickup;
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-semibold text-gray-900">
+          {month.getFullYear()}年 {month.getMonth() + 1}月
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => moveMonth(-1)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            onClick={() => moveMonth(1)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            →
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500">
+        {weekDays.map((day) => (
+          <div key={day} className="py-1">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-2">
+        {days.map(({ date, inCurrentMonth }) => {
+          const disabled = isDateDisabled(date) || !inCurrentMonth;
+          const isPickup = pickupDate ? isSameDay(date, pickupDate) : false;
+          const isReturn = returnDate ? isSameDay(date, returnDate) : false;
+          const isInRange =
+            pickupDate && returnDate
+              ? date > pickupDate && date < returnDate
+              : false;
+
+          const baseClasses = "flex h-12 w-full items-center justify-center rounded-lg text-sm font-semibold transition";
+
+          const stateClass = (() => {
+            if (isPickup) return "bg-red-500 text-white shadow";
+            if (isReturn) return "bg-blue-500 text-white shadow";
+            if (isInRange) return "bg-green-100 text-green-900";
+            if (disabled) return "text-gray-300 bg-gray-100";
+            if (!inCurrentMonth) return "text-gray-300";
+            return "bg-white text-gray-900 ring-1 ring-gray-200 hover:bg-gray-50";
+          })();
+
+          return (
+            <button
+              key={date.toISOString()}
+              type="button"
+              disabled={disabled}
+              onClick={() => onSelectDate(date)}
+              className={`${baseClasses} ${stateClass}`}
+            >
+              {date.getDate()}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function formatInputDate(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function isSameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
