@@ -45,7 +45,7 @@ export function checkAccess(ip: string): boolean {
     info.count += 1;
   }
 
-  if (info.count > 100) {
+  if (info.count > 150) {
     info.blockedUntil = now + 60_000;
     info.count = 0;
     return true;
