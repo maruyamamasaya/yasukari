@@ -1,10 +1,10 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
-import { Reservation, reservations } from "../../../../lib/reservations";
+import { Reservation } from "../../../../lib/reservations";
 import styles from "../../../../styles/Dashboard.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
 
@@ -27,14 +27,57 @@ const statusClassName = (status: Reservation["status"]): string => {
 export default function ReservationDetailPage() {
   const router = useRouter();
   const { reservationId } = router.query;
+  const [reservation, setReservation] = useState<Reservation | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const reservation = useMemo(
-    () => reservations.find((item) => item.id === reservationId),
-    [reservationId]
-  );
+  useEffect(() => {
+    if (!router.isReady || typeof reservationId !== "string") return;
 
-  const formatDatetime = (value: string) =>
-    new Date(value).toLocaleString("ja-JP", {
+    const controller = new AbortController();
+
+    const fetchReservation = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/reservations/${reservationId}`, {
+          signal: controller.signal,
+        });
+
+        if (response.status === 404) {
+          setReservation(null);
+          setError("指定された予約が見つかりませんでした。");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reservation: ${response.status}`);
+        }
+
+        const data = (await response.json()) as { reservation?: Reservation };
+        setReservation(data.reservation ?? null);
+        setError(null);
+      } catch (fetchError) {
+        if (!controller.signal.aborted) {
+          const message =
+            fetchError instanceof Error ? fetchError.message : "不明なエラーが発生しました";
+          setError(message);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void fetchReservation();
+    return () => controller.abort();
+  }, [reservationId, router.isReady]);
+
+  const formatDatetime = (value: string) => {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "-";
+
+    return parsed.toLocaleString("ja-JP", {
       timeZone: "Asia/Tokyo",
       year: "numeric",
       month: "long",
@@ -43,6 +86,7 @@ export default function ReservationDetailPage() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
 
   return (
     <>
@@ -73,7 +117,18 @@ export default function ReservationDetailPage() {
             </div>
           </div>
 
-          {!reservation ? (
+          {isLoading ? (
+            <div className={styles.placeholderCard}>
+              <p>予約情報を読み込み中です…</p>
+            </div>
+          ) : error ? (
+            <div className={styles.placeholderCard}>
+              <p>{error}</p>
+              <Link className={styles.link} href="/admin/dashboard/reservations">
+                予約一覧に戻る
+              </Link>
+            </div>
+          ) : !reservation ? (
             <div className={styles.placeholderCard}>
               <p>指定された予約が見つかりませんでした。</p>
               <Link className={styles.link} href="/admin/dashboard/reservations">
