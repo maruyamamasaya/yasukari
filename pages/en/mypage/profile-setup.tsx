@@ -26,6 +26,29 @@ const ProfileSetupPageEn: NextPage = () => {
   const [attributes, setAttributes] = useState<UserAttributes>({});
   const [showForm, setShowForm] = useState(false);
   const fromLogin = useMemo(() => router.query.fromLogin === '1', [router.query.fromLogin]);
+  const normalizedLocale = useMemo(
+    () => (attributes['custom:locale'] ?? '').trim().toLowerCase(),
+    [attributes['custom:locale']],
+  );
+
+  const applyLocaleToPath = (path: string, localeOverride?: string) => {
+    if (!path.startsWith('/')) return path;
+
+    const locale = (localeOverride ?? normalizedLocale).trim().toLowerCase();
+    const hasEnPrefix = path === '/en' || path.startsWith('/en/');
+
+    if (locale.startsWith('en')) {
+      if (hasEnPrefix) return path;
+      return path === '/' ? '/en' : `/en${path}`;
+    }
+
+    if (hasEnPrefix) {
+      const stripped = path.replace(/^\/en/, '') || '/';
+      return stripped.startsWith('/') ? stripped : `/${stripped}`;
+    }
+
+    return path;
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -38,7 +61,7 @@ const ProfileSetupPageEn: NextPage = () => {
         ]);
 
         if (sessionRes.status === 401 || attrRes.status === 401) {
-          await router.replace('/login');
+          await router.replace(applyLocaleToPath('/login'));
           return;
         }
 
@@ -69,7 +92,7 @@ const ProfileSetupPageEn: NextPage = () => {
     if (fromLogin && !loading) {
       const missing = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
       if (missing.length === 0) {
-        void router.replace('/en/mypage');
+        void router.replace(applyLocaleToPath('/mypage'));
       }
     }
   }, [attributes, fromLogin, loading, router]);
@@ -133,7 +156,9 @@ const ProfileSetupPageEn: NextPage = () => {
 
       const missing = REQUIRED_KEYS.filter((key) => !(nextAttributes[key] ?? '').trim());
       if (missing.length === 0) {
-        await router.replace('/en/mypage');
+        const targetPath = applyLocaleToPath('/mypage', payload.locale);
+        await router.replace(targetPath);
+        window.location.reload();
       }
     } catch (err) {
       console.error(err);
@@ -146,7 +171,7 @@ const ProfileSetupPageEn: NextPage = () => {
 
   const localeLabel = (value: string | undefined) => {
     if (!value) return 'Not set';
-    if (value.toLowerCase().startsWith('jp')) return 'Japan region';
+    if (value.toLowerCase().startsWith('jp')) return 'Japanese region';
     if (value.toLowerCase().startsWith('en')) return 'English-speaking region';
     return value;
   };
@@ -194,13 +219,13 @@ const ProfileSetupPageEn: NextPage = () => {
           <nav aria-label="breadcrumb">
             <ol className="flex items-center gap-2">
               <li>
-                <Link href="/en" className="text-red-600 hover:underline">
+                <Link href={applyLocaleToPath('/')} className="text-red-600 hover:underline">
                   Home
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
               <li>
-                <Link href="/en/mypage" className="text-red-600 hover:underline">
+                <Link href={applyLocaleToPath('/mypage')} className="text-red-600 hover:underline">
                   My Page
                 </Link>
               </li>
@@ -239,7 +264,7 @@ const ProfileSetupPageEn: NextPage = () => {
                   <p className="mt-1 text-sm text-gray-600">Please review your saved details below.</p>
                 </div>
                 <Link
-                  href="/en/mypage"
+                  href={applyLocaleToPath('/mypage')}
                   className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:text-gray-800"
                 >
                   Back to My Page
@@ -373,8 +398,8 @@ const ProfileSetupPageEn: NextPage = () => {
                         className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                       >
                         <option value="">Select</option>
-                        <option value="JP">Japan (Japanese)</option>
-                        <option value="EN">English-speaking</option>
+                        <option value="jp">Japanese region</option>
+                        <option value="en">English-speaking region</option>
                       </select>
                       <p className="mt-1 text-xs text-gray-500">We use this to offer tailored support.</p>
                     </div>

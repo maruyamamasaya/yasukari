@@ -157,7 +157,7 @@ export default function MyPageEn() {
 
   const localeLabel = (value: string | undefined) => {
     if (!value) return 'Not set';
-    if (value.toLowerCase().startsWith('jp')) return 'Japan region';
+    if (value.toLowerCase().startsWith('jp')) return 'Japanese region';
     if (value.toLowerCase().startsWith('en')) return 'English-speaking region';
     return value;
   };
