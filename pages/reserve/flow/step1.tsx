@@ -3,6 +3,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import type { RegistrationData } from "../../../types/registration";
+import { REQUIRED_REGISTRATION_FIELDS } from "../../../types/registration";
+
 const timeOptions = [
   "08:00",
   "09:00",
@@ -37,12 +40,15 @@ export default function ReserveFlowStep1() {
   const [store, setStore] = useState("足立小台店");
   const [modelName, setModelName] = useState("車両");
   const [managementNumber, setManagementNumber] = useState("");
-  const [customerName, setCustomerName] = useState("山田 太郎");
-  const [email, setEmail] = useState("sample@example.com");
+  const [customerName, setCustomerName] = useState("");
+  const [email, setEmail] = useState("");
   const [pickupDate, setPickupDate] = useState("2025-12-26");
   const [returnDate, setReturnDate] = useState("2025-12-27");
   const [pickupTime, setPickupTime] = useState("");
   const [returnTime, setReturnTime] = useState("");
+  const [registration, setRegistration] = useState<RegistrationData | null>(null);
+  const [registrationChecked, setRegistrationChecked] = useState(false);
+  const [registrationError, setRegistrationError] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -89,6 +95,57 @@ export default function ReserveFlowStep1() {
     if (typeof params.email === "string" && params.email) setEmail(params.email);
   }, [router.isReady, router.query]);
 
+  useEffect(() => {
+    if (!authChecked || authError) return;
+
+    const controller = new AbortController();
+
+    const fetchRegistration = async () => {
+      try {
+        const response = await fetch("/api/register/user", {
+          credentials: "include",
+          signal: controller.signal,
+        });
+
+        if (response.status === 401) {
+          await router.replace("/login");
+          return;
+        }
+
+        if (response.status === 404) {
+          setRegistration(null);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Failed to load registration");
+        }
+
+        const data = (await response.json()) as { registration?: RegistrationData | null };
+        const registrationData = data.registration ?? null;
+        setRegistration(registrationData);
+
+        if (registrationData) {
+          const fullName = `${registrationData.name1} ${registrationData.name2}`.trim();
+          setCustomerName(fullName);
+          setEmail(registrationData.email || "");
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+          setRegistrationError("本登録情報の取得に失敗しました。時間をおいて再度お試しください。");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setRegistrationChecked(true);
+        }
+      }
+    };
+
+    void fetchRegistration();
+    return () => controller.abort();
+  }, [authChecked, authError, router]);
+
   const pickupLabel = useMemo(
     () => `${formatDateLabel(pickupDate, "2025年12月26日")}`,
     [pickupDate]
@@ -98,10 +155,15 @@ export default function ReserveFlowStep1() {
     [returnDate]
   );
 
+  const isRegistrationComplete = useMemo(() => {
+    if (!registration) return false;
+    return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(registration[field]));
+  }, [registration]);
+
   const canProceed = pickupTime && returnTime;
 
   const handleNext = () => {
-    if (!canProceed) return;
+    if (!canProceed || !isRegistrationComplete || !registrationChecked) return;
 
     const params = new URLSearchParams({
       store,
@@ -117,6 +179,17 @@ export default function ReserveFlowStep1() {
 
     void router.push(`/reserve/flow/step2?${params.toString()}`);
   };
+
+  const membershipStatus = useMemo(() => {
+    if (registrationError) return "本登録情報の取得に失敗しました";
+    if (!registrationChecked) return "本登録情報を確認中...";
+    if (isRegistrationComplete) return "本登録済み";
+    return "本登録が未完了です";
+  }, [isRegistrationComplete, registrationChecked, registrationError]);
+
+  const nameDisplay =
+    customerName || (!registrationChecked ? "読み込み中..." : "本登録情報がありません");
+  const emailDisplay = email || (!registrationChecked ? "読み込み中..." : "本登録情報がありません");
 
   return (
     <>
@@ -166,28 +239,57 @@ export default function ReserveFlowStep1() {
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">会員情報</p>
                     <h2 className="text-lg font-bold text-gray-900">ご本人さま</h2>
                   </div>
-                  <span className="text-xs text-gray-500">ログイン中の会員さま限定</span>
+                  <span className="text-xs text-gray-500">{membershipStatus}</span>
                 </div>
+                {registrationError ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{registrationError}</p>
+                ) : null}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="space-y-2 text-sm">
                     <span className="text-gray-700">お名前</span>
                     <input
                       type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-3 text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
+                      value={nameDisplay}
+                      readOnly
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
                     />
                   </label>
                   <label className="space-y-2 text-sm">
                     <span className="text-gray-700">メールアドレス</span>
                     <input
                       type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-3 text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
+                      value={emailDisplay}
+                      readOnly
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
                     />
                   </label>
                 </div>
+                {registrationChecked && !isRegistrationComplete && !registrationError ? (
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 space-y-2">
+                    <p className="font-semibold">本登録が完了していません</p>
+                    <p className="leading-relaxed">
+                      予約を進めるには本登録を完了する必要があります。新しいページで本登録を行ってください。
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <Link
+                        href="/mypage/registration"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center rounded-full bg-red-500 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-red-600 transition"
+                      >
+                        本登録ページを開く
+                      </Link>
+                      <Link
+                        href="/mypage"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center rounded-full border border-red-200 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 transition"
+                      >
+                        マイページで確認
+                      </Link>
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-6">
@@ -270,12 +372,17 @@ export default function ReserveFlowStep1() {
                 </dl>
                 <button
                   type="button"
-                  disabled={!canProceed || !authChecked}
+                  disabled={!canProceed || !authChecked || !registrationChecked || !isRegistrationComplete}
                   onClick={handleNext}
                   className="mt-2 inline-flex w-full items-center justify-center rounded-full bg-red-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-red-200"
                 >
                   オプション選択へ
                 </button>
+                {registrationChecked && !isRegistrationComplete ? (
+                  <p className="mt-2 text-xs text-red-600">
+                    本登録が完了すると次のステップに進めます。上部のリンクから本登録を行ってください。
+                  </p>
+                ) : null}
               </div>
               <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-800">
                 <p className="font-semibold">ログイン中の会員さま専用</p>
