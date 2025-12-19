@@ -160,10 +160,20 @@ export default function ReserveFlowStep1() {
     return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(registration[field]));
   }, [registration]);
 
-  const canProceed = pickupTime && returnTime;
+  const canProceed = Boolean(pickupTime && returnTime);
 
   const handleNext = () => {
-    if (!canProceed || !isRegistrationComplete || !registrationChecked) return;
+    if (!registrationChecked) return;
+
+    if (!isRegistrationComplete) {
+      window.alert("本登録を完了してください");
+      return;
+    }
+
+    if (!canProceed) {
+      window.alert("日時を指定してください");
+      return;
+    }
 
     const params = new URLSearchParams({
       store,
@@ -372,7 +382,7 @@ export default function ReserveFlowStep1() {
                 </dl>
                 <button
                   type="button"
-                  disabled={!canProceed || !authChecked || !registrationChecked || !isRegistrationComplete}
+                  disabled={!authChecked || !registrationChecked}
                   onClick={handleNext}
                   className="mt-2 inline-flex w-full items-center justify-center rounded-full bg-red-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-red-200"
                 >
