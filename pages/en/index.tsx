@@ -26,7 +26,7 @@ import FaqAccordion, { FAQItem } from "../../components/FaqAccordion";
 import faqData from "../../data/faq_en.json";
 import HowToUseEn from "../../components/HowToUseEn";
 import SectionHeading from "../../components/SectionHeading";
-import { getBikeModels, BikeModel } from "../../lib/bikes";
+import { getBikeClasses, getBikeModels, BikeClass, BikeModel } from "../../lib/bikes";
 
 type BlogSlide = {
   title: string;
@@ -37,9 +37,10 @@ type BlogSlide = {
 interface Props {
   blogSlides: BlogSlide[];
   bikeModelsAll: BikeModel[];
+  bikeClasses: BikeClass[];
 }
 
-export default function HomeEn({ blogSlides, bikeModelsAll }: Props) {
+export default function HomeEn({ blogSlides, bikeModelsAll, bikeClasses }: Props) {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
@@ -221,7 +222,7 @@ export default function HomeEn({ blogSlides, bikeModelsAll }: Props) {
 
       <RecentlyViewedEn />
 
-      <BikeLineupEn bikes={bikeModelsAll} />
+      <BikeLineupEn bikes={bikeModelsAll} classes={bikeClasses} />
 
       <section className="section-surface section-padding">
         <SectionHeading
@@ -419,7 +420,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     href: `/blog_for_custmor/${p.slug}`,
     img: p.eyecatch || "",
   }));
-  const bikeModelsAll = await getBikeModels();
+  const [bikeModelsAll, bikeClasses] = await Promise.all([
+    getBikeModels(),
+    getBikeClasses(),
+  ]);
 
-  return { props: { blogSlides, bikeModelsAll } };
+  return { props: { blogSlides, bikeModelsAll, bikeClasses } };
 };

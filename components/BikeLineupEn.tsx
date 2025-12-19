@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { BikeModel } from "../lib/bikes";
+import { BikeClass, BikeModel } from "../lib/bikes";
 import SectionHeading from "./SectionHeading";
 
-const categories = [
+const fallbackCategories = [
   { label: "Over 401cc", value: 0 },
   { label: "251-400cc", value: 1 },
   { label: "126-250cc", value: 2 },
@@ -27,12 +27,35 @@ function getCategory(cc: number | null): number {
   return 0;
 }
 
-export default function BikeLineupEn({ bikes }: { bikes: BikeModel[] }) {
-  const [filter, setFilter] = useState<number>(2);
+type Props = {
+  bikes: BikeModel[];
+  classes?: BikeClass[];
+};
+
+export default function BikeLineupEn({ bikes, classes }: Props) {
+  const categories = useMemo(
+    () =>
+      classes?.length
+        ? classes.map((cls) => ({ label: cls.className, value: cls.classId }))
+        : fallbackCategories,
+    [classes]
+  );
+
+  const [filter, setFilter] = useState<number>(categories[2]?.value ?? categories[0]?.value ?? 0);
+
+  useEffect(() => {
+    setFilter(categories[2]?.value ?? categories[0]?.value ?? 0);
+  }, [categories]);
 
   const filtered = useMemo(
-    () => bikes.filter((b) => getCategory(parseDisplacement(b)) === filter),
-    [bikes, filter]
+    () =>
+      bikes.filter((b) => {
+        if (b.classId != null && categories.some((c) => c.value === b.classId)) {
+          return b.classId === filter;
+        }
+        return getCategory(parseDisplacement(b)) === filter;
+      }),
+    [bikes, categories, filter]
   );
 
   const displayList = filtered.slice(0, 6);
