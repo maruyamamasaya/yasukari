@@ -86,6 +86,22 @@ const chanceOptions = [
   { value: '5', label: 'その他' },
 ];
 
+const formatPhoneDisplay = (phone: string) => {
+  const normalized = phone.replace(/^\+/, '');
+  if (normalized.startsWith('81') && normalized.length > 2) {
+    return `0${normalized.slice(2)}`;
+  }
+  return phone;
+};
+
+const normalizeMobileInput = (phone: string) => {
+  const digitsOnly = phone.replace(/\D/g, '');
+  if (digitsOnly.startsWith('0')) {
+    return `81${digitsOnly.slice(1)}`;
+  }
+  return digitsOnly;
+};
+
 const initialFormData: RegisterFormData = {
   name1: '',
   name2: '',
@@ -200,6 +216,12 @@ const RegistrationPage: NextPage = () => {
     const { name, value } = event.target;
     if (name === 'mobile') {
       setSelectedPhoneOption('');
+      const normalizedMobile = normalizeMobileInput(value);
+      setFormData((prev) => ({
+        ...prev,
+        mobile: normalizedMobile,
+      }));
+      return;
     }
     setFormData((prev) => ({
       ...prev,
@@ -499,23 +521,27 @@ const RegistrationPage: NextPage = () => {
                       className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                     >
                       <option value="">手入力する</option>
-                      {availablePhones.map((phone) => (
-                        <option key={phone} value={phone}>
-                          {phone}
-                        </option>
-                      ))}
+                      {availablePhones.map((phone) => {
+                        const normalized = phone.replace(/^\+/, '');
+                        const countryCode = normalized.startsWith('81') ? '+81' : '';
+                        return (
+                          <option key={phone} value={phone}>
+                            {countryCode ? `${countryCode} ` : ''}
+                            {formatPhoneDisplay(phone)}
+                          </option>
+                        );
+                      })}
                     </select>
                   ) : null}
                   <input
                     id="mobile"
                     name="mobile"
                     type="tel"
-                    value={formData.mobile}
+                    value={formatPhoneDisplay(formData.mobile)}
                     onChange={handleChange}
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                     placeholder="09012345678"
                   />
-                  <p className="mt-1 text-xs text-gray-500">Cognito に登録済みの番号を選ぶか、任意で入力できます。</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="tel">
