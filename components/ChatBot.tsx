@@ -7,8 +7,6 @@ import {
   FaArrowUp,
   FaArrowLeft,
   FaTimes,
-  FaDownload,
-  FaTrash,
 } from "react-icons/fa";
 
 interface Message {
@@ -300,7 +298,7 @@ export default function ChatBot({
   const bubbleBaseClasses =
     "max-w-[88%] px-3.5 py-2.5 rounded-2xl shadow-sm border bg-white/90";
   const optionContainerClasses =
-    "w-full max-w-[520px] text-left rounded-2xl shadow-sm border border-gray-200 bg-white/80 hover:-translate-y-[1px] transition-transform";
+    "w-full text-left rounded-2xl shadow-sm border border-gray-200 bg-white/80 hover:-translate-y-[1px] transition-transform";
   const visibleCategories = showAllCategories
     ? faqCategories
     : faqCategories.slice(0, 3);
@@ -323,13 +321,9 @@ export default function ChatBot({
             )}
             <div>
               <p className="text-base font-semibold text-gray-900">チャットでご相談</p>
-              <p className="text-xs text-gray-500">シンプルな画面でスタッフにすぐ相談できます</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-semibold shadow-sm">
-              Online
-            </span>
             <button
               onClick={handleCloseButton}
               className="rounded-full border border-gray-200 bg-white p-2 shadow-sm hover:shadow transition"
@@ -339,37 +333,10 @@ export default function ChatBot({
             </button>
           </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-gray-700">
-          <span className="inline-flex items-center gap-2 rounded-full border border-green-100 bg-green-50 px-3 py-1 font-medium text-green-700 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-green-500 shadow" aria-hidden />
-            自動保存中
-          </span>
-          <span className="text-[13px] text-gray-600">
-            チャット履歴は自動で保存されます。
-          </span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 mt-2">
-          <button
-            onClick={handleDownloadHistory}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:shadow"
-          >
-            <FaDownload className="w-3.5 h-3.5" />
-            履歴をダウンロード
-          </button>
-          <button
-            onClick={handleClearHistory}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:shadow"
-          >
-            <FaTrash className="w-3.5 h-3.5" />
-            履歴をクリア
-          </button>
-        </div>
       </div>
 
       <div
-        className="relative flex-1 min-h-[800px] w-full max-w-[800px] mx-auto overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-white/70 border border-gray-100 shadow-inner"
+        className="relative flex-1 min-h-[900px] w-full max-w-[800px] mx-auto overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-white/70 border border-gray-100 shadow-inner"
         ref={scrollRef}
       >
         {messages.length === 0 && (
@@ -444,7 +411,7 @@ export default function ChatBot({
       )}
 
       {step === "survey" && !selectedCategory && (
-        <div className="space-y-3 flex flex-col items-center text-center">
+        <div className="space-y-3 flex flex-col items-center text-center w-full">
           <p className="text-sm font-medium text-gray-800">カテゴリを選択してください。</p>
           {faqLoading && (
             <p className="text-sm text-gray-600">FAQを読み込み中です…</p>
@@ -455,17 +422,19 @@ export default function ChatBot({
           {!faqLoading && !faqError && faqCategories.length === 0 && (
             <p className="text-sm text-gray-600">表示できるカテゴリがありません。</p>
           )}
-          {!faqLoading &&
-            !faqError &&
-            visibleCategories.map((cat) => (
-              <button
-                key={cat.id}
-                className={`${optionContainerClasses} p-3.5 sm:p-4 hover:bg-red-50`}
-                onClick={() => handleCategory(cat)}
-              >
-                <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">{cat.title}</span>
-              </button>
-            ))}
+          {!faqLoading && !faqError && (
+            <div className="grid w-full max-w-[960px] grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {visibleCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  className={`${optionContainerClasses} p-3 sm:p-3.5 hover:bg-red-50`}
+                  onClick={() => handleCategory(cat)}
+                >
+                  <span className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">{cat.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
           {!faqLoading &&
             !faqError &&
             faqCategories.length > 3 && (
