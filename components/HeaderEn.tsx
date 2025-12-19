@@ -120,9 +120,11 @@ export default function HeaderEn() {
               <Link href="/en/login">
                 <NavItem icon={<FaUser />} label="Login" />
               </Link>
-              <Link href="/en/mypage">
-                <NavItem icon={<FaUser />} label="My Page" />
-              </Link>
+              {sessionUser && (
+                <Link href="/en/mypage">
+                  <NavItem icon={<FaUser />} label="My Page" />
+                </Link>
+              )}
               <Link href="/en/pricing">
                 <NavItem icon={<FaClipboardList />} label="Bikes & Pricing" />
               </Link>
@@ -171,11 +173,13 @@ export default function HeaderEn() {
                   <NavItem icon={<FaUser />} label="Login" />
                 </Link>
               </li>
-              <li>
-                <Link href="/en/mypage">
-                  <NavItem icon={<FaUser />} label="My Page" />
-                </Link>
-              </li>
+              {sessionUser && (
+                <li>
+                  <Link href="/en/mypage">
+                    <NavItem icon={<FaUser />} label="My Page" />
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href="/en/pricing">
                   <NavItem icon={<FaClipboardList />} label="Bikes & Pricing" />
