@@ -105,11 +105,12 @@ export default function HeaderEn() {
           </Link>
           <div className="flex items-center gap-4">
             <button
-              className="sm:hidden text-gray-700"
+              className="sm:hidden text-gray-700 p-2 rounded-md border border-gray-200 active:scale-95 transition"
               onClick={() => setMenuOpen((o) => !o)}
               ref={menuButtonRef}
+              aria-label="Toggle menu"
             >
-              <FaBars size={20} />
+              <FaBars size={24} />
             </button>
 
             {/* Navigation buttons */}
@@ -160,9 +161,9 @@ export default function HeaderEn() {
         {menuOpen && (
           <nav
             ref={menuRef}
-            className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md"
+            className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md min-h-[calc(100vh-4rem)] overflow-y-auto"
           >
-            <ul className="flex flex-col p-4 gap-4 text-sm font-medium">
+            <ul className="flex flex-col p-5 gap-5 text-base font-semibold">
               <li>
                 <Link href="/en">
                   <NavItem label="Home" />
