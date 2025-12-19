@@ -16,28 +16,10 @@ export default function Header() {
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState(false);
-  const [startingLogout, setStartingLogout] = useState(false);
   const [updatingLocale, setUpdatingLocale] = useState(false);
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
-
-  const startLogout = async () => {
-    setStartingLogout(true);
-    try {
-      const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-      if (!response.ok) {
-        throw new Error(`failed to logout: ${response.status}`);
-      }
-
-      await router.push('/login');
-      window.location.reload();
-    } catch (error) {
-      console.error('Failed to start logout', error);
-      alert('ログアウト処理を開始できませんでした。時間をおいて再度お試しください。');
-      setStartingLogout(false);
-    }
-  };
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -155,24 +137,11 @@ export default function Header() {
                   <Link href="/mypage">
                     <NavItem icon={<FaUser />} label="マイページ" />
                   </Link>
-                  <button
-                    type="button"
-                    className="hidden sm:inline-flex"
-                    onClick={startLogout}
-                    disabled={startingLogout}
-                  >
-                    <NavItem label={startingLogout ? '処理中…' : 'ログアウト'} />
-                  </button>
                 </>
               ) : authChecked && authError ? (
-                <button
-                  type="button"
-                  className="hidden sm:inline-flex"
-                  onClick={startLogout}
-                  disabled={startingLogout}
-                >
+                <div className="hidden sm:inline-flex">
                   <NavItem icon={<FaUser />} label="ログインエラー" />
-                </button>
+                </div>
               ) : (
                 <Link href="https://yasukaribike.com/login" className="hidden sm:inline-flex">
                   <NavItem icon={<FaUser />} label="ログイン" />
@@ -227,24 +196,11 @@ export default function Header() {
                     <Link href="/mypage">
                       <NavItem icon={<FaUser />} label="マイページ" />
                     </Link>
-                    <button
-                      type="button"
-                      className="mt-2 inline-flex"
-                      onClick={startLogout}
-                      disabled={startingLogout}
-                    >
-                      <NavItem label={startingLogout ? '処理中…' : 'ログアウト'} />
-                    </button>
                   </>
                 ) : authChecked && authError ? (
-                  <button
-                    type="button"
-                    className="inline-flex"
-                    onClick={startLogout}
-                    disabled={startingLogout}
-                  >
+                  <div className="inline-flex">
                     <NavItem icon={<FaUser />} label="ログインエラー" />
-                  </button>
+                  </div>
                 ) : (
                   <Link href="https://yasukaribike.com/login" className="inline-flex">
                     <NavItem icon={<FaUser />} label="ログイン" />
