@@ -155,81 +155,82 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                   </div>
                 )}
 
-                <div
-                  className={`grid grid-cols-1 gap-4 ${showPrice ? "sm:grid-cols-2" : ""}`}
-                >
-                  {showPrice ? (
-                    <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-red-50 to-white p-4 shadow-sm">
-                      <p className="text-3xl font-bold text-gray-900">{bike.price24h}</p>
-                    </div>
-                  ) : null}
-                  <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-gray-900">在庫の選択</p>
-                      <span className="text-xs text-gray-500">{vehicles.length}件</span>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      Vehiclesテーブルに登録された管理番号を選択できます。表示名はパーティションキーを使用しています。
-                    </p>
-                    <select
-                      value={selectedVehicle}
-                      onChange={(e) => setSelectedVehicle(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
-                      disabled={vehicleOptions.length === 0}
-                    >
-                      {vehicleOptions.length === 0 ? (
-                        <option value="" disabled>
-                          在庫がありません
-                        </option>
-                      ) : (
-                        <>
-                          <option value="" disabled>
-                            管理番号を選択してください
-                          </option>
-                          {vehicleOptions.map((vehicle) => (
-                            <option key={vehicle.value} value={vehicle.value}>
-                              {vehicle.label}
-                            </option>
-                          ))}
-                        </>
-                      )}
-                    </select>
-                    {selectedVehicleStore ? (
-                      <p className="text-xs text-gray-600">
-                        紐づく店舗ID: <span className="font-semibold">{selectedVehicleStore}</span>
-                      </p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+                  <div className="space-y-4">
+                    {showPrice ? (
+                      <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-red-50 to-white p-4 shadow-sm">
+                        <p className="text-3xl font-bold text-gray-900">{bike.price24h}</p>
+                      </div>
                     ) : null}
-                    {hasStock ? (
-                      <Link
-                        href={`/reserve/models/${bike.modelCode}`}
-                        className="inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-gray-900">在庫の選択</p>
+                        <span className="text-xs text-gray-500">{vehicles.length}件</span>
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        Vehiclesテーブルに登録された管理番号を選択できます。表示名はパーティションキーを使用しています。
+                      </p>
+                      <select
+                        value={selectedVehicle}
+                        onChange={(e) => setSelectedVehicle(e.target.value)}
+                        className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
+                        disabled={vehicleOptions.length === 0}
                       >
-                        この車種をレンタル予約する
-                      </Link>
-                    ) : (
-                      <button
-                        className="inline-flex w-full items-center justify-center rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-500 shadow cursor-not-allowed"
-                        disabled
-                        aria-disabled="true"
-                      >
-                        在庫がありません
-                      </button>
-                    )}
-                    <div className="flex gap-2 flex-wrap">
-                      <Link
-                        href="/pricing"
-                        className="inline-flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
-                      >
-                        料金プランを見る
-                      </Link>
-                      <Link
-                        href="/contact"
-                        className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-300 transition"
-                      >
-                        お問い合わせ
-                      </Link>
+                        {vehicleOptions.length === 0 ? (
+                          <option value="" disabled>
+                            在庫がありません
+                          </option>
+                        ) : (
+                          <>
+                            <option value="" disabled>
+                              管理番号を選択してください
+                            </option>
+                            {vehicleOptions.map((vehicle) => (
+                              <option key={vehicle.value} value={vehicle.value}>
+                                {vehicle.label}
+                              </option>
+                            ))}
+                          </>
+                        )}
+                      </select>
+                      {selectedVehicleStore ? (
+                        <p className="text-xs text-gray-600">
+                          紐づく店舗ID: <span className="font-semibold">{selectedVehicleStore}</span>
+                        </p>
+                      ) : null}
+                      {hasStock ? (
+                        <Link
+                          href={`/reserve/models/${bike.modelCode}`}
+                          className="inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                        >
+                          この車種をレンタル予約する
+                        </Link>
+                      ) : (
+                        <button
+                          className="inline-flex w-full items-center justify-center rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-500 shadow cursor-not-allowed"
+                          disabled
+                          aria-disabled="true"
+                        >
+                          在庫がありません
+                        </button>
+                      )}
+                      <div className="flex gap-2 flex-wrap">
+                        <Link
+                          href="/pricing"
+                          className="inline-flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                        >
+                          料金プランを見る
+                        </Link>
+                        <Link
+                          href="/contact"
+                          className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-300 transition"
+                        >
+                          お問い合わせ
+                        </Link>
+                      </div>
                     </div>
                   </div>
+                  <div className="hidden lg:block" aria-hidden="true" />
                 </div>
               </div>
             </div>
