@@ -230,14 +230,51 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                       </div>
                     </div>
                   </div>
-                  <div className="hidden lg:block" aria-hidden="true" />
+                  <div className="space-y-4 w-full">
+                    <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 p-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-900">取扱店舗</h3>
+                        <span className="text-xs font-medium text-gray-500">Stores</span>
+                      </div>
+                      {bike.stores && bike.stores.length > 0 ? (
+                        <ul className="space-y-2 text-sm text-gray-800">
+                          {bike.stores.map((store) => (
+                            <li
+                              key={store}
+                              className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2"
+                            >
+                              <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden />
+                              <span>{store}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          店舗在庫は変動します。最寄りの店舗までお問い合わせください。
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="rounded-2xl bg-gradient-to-br from-red-500 to-red-600 p-6 text-white shadow-md">
+                      <h3 className="text-lg font-semibold">安心のサポート</h3>
+                      <p className="mt-2 text-sm text-red-50 leading-relaxed">
+                        ヘルメットや装備のレンタル、万が一のトラブル対応など、お客様の快適なツーリングをサポートします。
+                      </p>
+                      <Link
+                        href="/help"
+                        className="mt-4 inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow hover:bg-red-50 transition"
+                      >
+                        サポート内容を確認
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <section className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-4">
+          <section className="space-y-6">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">スペック</h2>
                 <span className="text-xs font-medium text-gray-500">Spec</span>
@@ -263,80 +300,41 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                   </p>
                 )}
               </div>
+            </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">料金の目安</h2>
-                  <span className="text-xs font-medium text-gray-500">Price Guide</span>
-                </div>
-                <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 p-6 space-y-3">
-                  <p className="text-sm text-gray-700">
-                    24時間料金を基準に、長期レンタルほどお得になる料金プランをご用意しています。詳しい料金は店舗までお問い合わせください。
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-                    {[
-                      { label: "24時間", value: bike.price24h || "お問い合わせ" },
-                      { label: "2日間", value: "お問い合わせ" },
-                      { label: "1週間", value: "お問い合わせ" },
-                      { label: "2週間", value: "お問い合わせ" },
-                      { label: "1ヶ月", value: "お問い合わせ" },
-                      { label: "補償プラン", value: "加入可能" },
-                    ].map((item) => (
-                      <div
-                        key={item.label}
-                        className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-3 text-center"
-                      >
-                        <div className="text-xs font-semibold text-gray-500">
-                          {item.label}
-                        </div>
-                        <div className="mt-1 text-base font-bold text-gray-900">
-                          {item.value}
-                        </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">料金の目安</h2>
+                <span className="text-xs font-medium text-gray-500">Price Guide</span>
+              </div>
+              <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 p-6 space-y-3">
+                <p className="text-sm text-gray-700">
+                  24時間料金を基準に、長期レンタルほどお得になる料金プランをご用意しています。詳しい料金は店舗までお問い合わせください。
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                  {[
+                    { label: "24時間", value: bike.price24h || "お問い合わせ" },
+                    { label: "2日間", value: "お問い合わせ" },
+                    { label: "1週間", value: "お問い合わせ" },
+                    { label: "2週間", value: "お問い合わせ" },
+                    { label: "1ヶ月", value: "お問い合わせ" },
+                    { label: "補償プラン", value: "加入可能" },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-3 text-center"
+                    >
+                      <div className="text-xs font-semibold text-gray-500">
+                        {item.label}
                       </div>
-                    ))}
-                  </div>
+                      <div className="mt-1 text-base font-bold text-gray-900">
+                        {item.value}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-
-            <aside className="space-y-4">
-              <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">取扱店舗</h3>
-                  <span className="text-xs font-medium text-gray-500">Stores</span>
-                </div>
-                {bike.stores && bike.stores.length > 0 ? (
-                  <ul className="space-y-2 text-sm text-gray-800">
-                    {bike.stores.map((store) => (
-                      <li
-                        key={store}
-                        className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2"
-                      >
-                        <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden />
-                        <span>{store}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-gray-600">
-                    店舗在庫は変動します。最寄りの店舗までお問い合わせください。
-                  </p>
-                )}
-              </div>
-
-              <div className="rounded-2xl bg-gradient-to-br from-red-500 to-red-600 p-6 text-white shadow-md">
-                <h3 className="text-lg font-semibold">安心のサポート</h3>
-                <p className="mt-2 text-sm text-red-50 leading-relaxed">
-                  ヘルメットや装備のレンタル、万が一のトラブル対応など、お客様の快適なツーリングをサポートします。
-                </p>
-                <Link
-                  href="/help"
-                  className="mt-4 inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow hover:bg-red-50 transition"
-                >
-                  サポート内容を確認
-                </Link>
-              </div>
-            </aside>
           </section>
 
           <RecentlyViewed />
