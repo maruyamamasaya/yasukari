@@ -1,11 +1,30 @@
 import { useMemo, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { GetStaticPaths, GetStaticProps } from "next";
-import { BikeModel, getBikeModels } from "../../../lib/bikes";
+import { GetServerSideProps } from "next";
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { getDocumentClient } from "../../../lib/dynamodb";
+import { BikeModel as LegacyBikeModel, getBikeModels } from "../../../lib/bikes";
+import { getStoreLabel } from "../../../lib/dashboard/storeOptions";
+
+interface VehicleRecord {
+  managementNumber: string;
+  modelId: number;
+  storeId: string;
+}
+
+interface BikeModelRecord {
+  modelId: number;
+  modelName: string;
+  publishStatus: "ON" | "OFF";
+  mainImageUrl?: string;
+}
 
 interface Props {
-  bike: BikeModel;
+  vehicle: VehicleRecord | null;
+  model: BikeModelRecord | null;
+  fallbackBike: LegacyBikeModel | null;
+  managementNumber: string;
 }
 
 type SelectionType = "pickup" | "return";
@@ -15,8 +34,30 @@ interface CalendarDay {
   inCurrentMonth: boolean;
 }
 
-export default function ReserveModelPage({ bike }: Props) {
-  const [store, setStore] = useState("");
+export default function ReserveModelPage({
+  vehicle,
+  model,
+  fallbackBike,
+  managementNumber,
+}: Props) {
+  const resolvedModelName = model?.modelName ?? fallbackBike?.modelName ?? "車種";
+  const resolvedImage = model?.mainImageUrl ?? fallbackBike?.img;
+  const resolvedModelCode = fallbackBike?.modelCode;
+
+  const storeOptions = useMemo(() => {
+    if (vehicle?.storeId) {
+      const label = getStoreLabel(vehicle.storeId);
+      return label ? [label] : [];
+    }
+    return fallbackBike?.stores ?? [];
+  }, [vehicle?.storeId, fallbackBike?.stores]);
+
+  const [store, setStore] = useState(() => {
+    if (vehicle?.storeId) {
+      return getStoreLabel(vehicle.storeId);
+    }
+    return (fallbackBike?.stores ?? [])[0] ?? "";
+  });
   const [pickup, setPickup] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [activeSelection, setActiveSelection] = useState<SelectionType>("pickup");
@@ -26,8 +67,6 @@ export default function ReserveModelPage({ bike }: Props) {
     tomorrow.setHours(0, 0, 0, 0);
     return tomorrow;
   });
-
-  const storeOptions = bike.stores ?? [];
 
   const minDate = useMemo(() => {
     const base = new Date();
@@ -41,10 +80,12 @@ export default function ReserveModelPage({ bike }: Props) {
   const pickupDate = pickup ? new Date(pickup) : null;
   const returnDateValue = returnDate ? new Date(returnDate) : null;
 
+  const storeNotice = store === "三ノ輪店";
+
   return (
     <>
       <Head>
-        <title>{bike.modelName}の予約 - yasukari</title>
+        <title>{resolvedModelName}の予約 - yasukari</title>
       </Head>
       <main className="min-h-screen bg-gray-50 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -61,15 +102,19 @@ export default function ReserveModelPage({ bike }: Props) {
                   車種・料金
                 </Link>
               </li>
-              <li className="text-gray-300">/</li>
-              <li>
-                <Link
-                  href={`/products/${bike.modelCode}`}
-                  className="hover:text-red-500 font-medium"
-                >
-                  {bike.modelName}
-                </Link>
-              </li>
+              {resolvedModelCode ? (
+                <>
+                  <li className="text-gray-300">/</li>
+                  <li>
+                    <Link
+                      href={`/products/${resolvedModelCode}`}
+                      className="hover:text-red-500 font-medium"
+                    >
+                      {resolvedModelName}
+                    </Link>
+                  </li>
+                </>
+              ) : null}
               <li className="text-gray-300">/</li>
               <li className="text-gray-900 font-semibold" aria-current="page">
                 店舗・日時の選択
@@ -83,7 +128,7 @@ export default function ReserveModelPage({ bike }: Props) {
             </p>
             <h1 className="mt-2 text-2xl font-bold text-gray-900">店舗・日時の選択</h1>
             <p className="mt-2 text-gray-700">
-              {bike.modelName} の予約リクエストです。店舗と日時を選択してお進みください。
+              {resolvedModelName} の予約リクエストです。店舗と日時を選択してお進みください。
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
@@ -93,7 +138,7 @@ export default function ReserveModelPage({ bike }: Props) {
                 車種の空き状況を見る
               </Link>
               <Link
-                href={`/products/${bike.modelCode}`}
+                href={resolvedModelCode ? `/products/${resolvedModelCode}` : "/products"}
                 className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-300 transition"
               >
                 車種ページに戻る
@@ -104,17 +149,17 @@ export default function ReserveModelPage({ bike }: Props) {
           <section className="bg-white shadow-sm ring-1 ring-gray-100 rounded-2xl p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Model
-                </p>
-                <p className="text-lg font-bold text-gray-900">{bike.modelName}</p>
-                <p className="text-sm text-gray-600">モデルコード：{bike.modelCode}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Model</p>
+                <p className="text-lg font-bold text-gray-900">{resolvedModelName}</p>
+                <p className="text-sm text-gray-600">管理番号：{managementNumber}</p>
               </div>
-              <img
-                src={bike.img}
-                alt={bike.modelName}
-                className="h-20 w-32 object-cover rounded-lg ring-1 ring-gray-100"
-              />
+              {resolvedImage ? (
+                <img
+                  src={resolvedImage}
+                  alt={resolvedModelName}
+                  className="h-20 w-32 object-cover rounded-lg ring-1 ring-gray-100"
+                />
+              ) : null}
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
@@ -147,17 +192,19 @@ export default function ReserveModelPage({ bike }: Props) {
                     </>
                   )}
                 </select>
-                <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-700 leading-relaxed">
-                  三ノ輪店は無人店の為、詳しい操作の説明ができません。
-                  <br />
-                  バイクの操作に不安のある方、日本語での説明に不安がある方は、
-                  <Link
-                    href="/stores#adachi"
-                    className="ml-1 font-semibold text-red-600 hover:underline"
-                  >
-                    足立小台本店の利用をお願いします。
-                  </Link>
-                </div>
+                {storeNotice ? (
+                  <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-700 leading-relaxed">
+                    三ノ輪店は無人店の為、詳しい操作の説明ができません。
+                    <br />
+                    バイクの操作に不安のある方、日本語での説明に不安がある方は、
+                    <Link
+                      href="/stores#adachi"
+                      className="ml-1 font-semibold text-red-600 hover:underline"
+                    >
+                      足立小台本店の利用をお願いします。
+                    </Link>
+                  </div>
+                ) : null}
               </div>
 
               <div className="space-y-4">
@@ -279,18 +326,68 @@ export default function ReserveModelPage({ bike }: Props) {
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const bikes = await getBikeModels();
-  return {
-    paths: bikes.map((b) => ({ params: { modelCode: b.modelCode } })),
-    fallback: false,
-  };
-};
+export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
+  const managementNumberParam = params?.managementNumber;
+  if (typeof managementNumberParam !== "string") {
+    return { notFound: true };
+  }
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+  const MODELS_TABLE = process.env.BIKE_MODELS_TABLE ?? "BikeModels";
+
+  let vehicle: VehicleRecord | null = null;
+  let model: BikeModelRecord | null = null;
+
+  try {
+    const client = getDocumentClient();
+    const vehicleResult = await client.send(
+      new GetCommand({
+        TableName: VEHICLES_TABLE,
+        Key: { managementNumber: managementNumberParam },
+      })
+    );
+    vehicle = (vehicleResult.Item as VehicleRecord | undefined) ?? null;
+
+    if (vehicle?.modelId !== undefined) {
+      const modelResult = await client.send(
+        new GetCommand({
+          TableName: MODELS_TABLE,
+          Key: { modelId: vehicle.modelId },
+        })
+      );
+      model = (modelResult.Item as BikeModelRecord | undefined) ?? null;
+    }
+  } catch (error) {
+    console.error("Failed to load vehicle/model data", error);
+  }
+
+  if (vehicle) {
+    return {
+      props: {
+        vehicle,
+        model,
+        fallbackBike: null,
+        managementNumber: managementNumberParam,
+      },
+    };
+  }
+
   const bikes = await getBikeModels();
-  const bike = bikes.find((b) => b.modelCode === params?.modelCode) as BikeModel;
-  return { props: { bike } };
+  const fallbackBike =
+    bikes.find((b) => b.modelCode === managementNumberParam) ?? null;
+
+  if (!fallbackBike) {
+    return { notFound: true };
+  }
+
+  return {
+    props: {
+      vehicle: null,
+      model: null,
+      fallbackBike,
+      managementNumber: managementNumberParam,
+    },
+  };
 };
 
 interface CalendarProps {
