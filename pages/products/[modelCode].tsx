@@ -1,12 +1,21 @@
-import { GetStaticProps, GetStaticPaths } from "next";
+import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect } from "react";
-import { getBikeModels, BikeModel, BikeSpec } from "../../lib/bikes";
+import { useEffect, useMemo, useState } from "react";
+import {
+  getBikeModels,
+  BikeModel,
+  BikeSpec,
+  getBikeClasses,
+  getVehiclesByModel,
+  BikeVehicle,
+} from "../../lib/bikes";
 import RecentlyViewed from "../../components/RecentlyViewed";
 
 interface Props {
   bike: BikeModel;
+  className?: string;
+  vehicles: BikeVehicle[];
 }
 
 const specLabels: Record<keyof BikeSpec, string> = {
@@ -24,7 +33,21 @@ const specLabels: Record<keyof BikeSpec, string> = {
   torque: "最大トルク",
 };
 
-export default function ProductDetailPage({ bike }: Props) {
+export default function ProductDetailPage({ bike, className, vehicles }: Props) {
+  const [selectedVehicle, setSelectedVehicle] = useState<string>(
+    vehicles[0]?.managementNumber ?? ""
+  );
+
+  const vehicleOptions = useMemo(
+    () =>
+      vehicles.map((vehicle) => ({
+        value: vehicle.managementNumber,
+        label: vehicle.managementNumber,
+        storeId: vehicle.storeId,
+      })),
+    [vehicles]
+  );
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -45,6 +68,11 @@ export default function ProductDetailPage({ bike }: Props) {
   );
 
   const tagItems = [...(bike.tags ?? []), bike.badge].filter(Boolean) as string[];
+
+  const selectedVehicleStore = useMemo(
+    () => vehicleOptions.find((option) => option.value === selectedVehicle)?.storeId,
+    [selectedVehicle, vehicleOptions]
+  );
 
   return (
     <>
@@ -96,9 +124,16 @@ export default function ProductDetailPage({ bike }: Props) {
                   <p className="text-xs font-semibold uppercase tracking-wide text-red-500">
                     model detail
                   </p>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {bike.modelName}
-                  </h1>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                      {bike.modelName}
+                    </h1>
+                    {className ? (
+                      <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+                        {className}
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="text-gray-700 leading-relaxed">
                     {bike.description || "ヤスカリで人気のモデルです。スペックや料金の詳細は以下をご覧ください。"}
                   </p>
@@ -133,11 +168,42 @@ export default function ProductDetailPage({ bike }: Props) {
                       この車種をレンタル予約する
                     </Link>
                   </div>
-                  <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-2">
-                    <p className="text-sm font-semibold text-gray-900">予約・お問い合わせ</p>
+                  <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-gray-900">在庫の選択</p>
+                      <span className="text-xs text-gray-500">{vehicles.length}件</span>
+                    </div>
                     <p className="text-xs text-gray-600">
-                      料金プランや空き状況はお気軽にお問い合わせください。
+                      Vehiclesテーブルに登録された管理番号を選択できます。表示名はパーティションキーを使用しています。
                     </p>
+                    <select
+                      value={selectedVehicle}
+                      onChange={(e) => setSelectedVehicle(e.target.value)}
+                      className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
+                      disabled={vehicleOptions.length === 0}
+                    >
+                      {vehicleOptions.length === 0 ? (
+                        <option value="" disabled>
+                          在庫を準備中です
+                        </option>
+                      ) : (
+                        <>
+                          <option value="" disabled>
+                            管理番号を選択してください
+                          </option>
+                          {vehicleOptions.map((vehicle) => (
+                            <option key={vehicle.value} value={vehicle.value}>
+                              {vehicle.label}
+                            </option>
+                          ))}
+                        </>
+                      )}
+                    </select>
+                    {selectedVehicleStore ? (
+                      <p className="text-xs text-gray-600">
+                        紐づく店舗ID: <span className="font-semibold">{selectedVehicleStore}</span>
+                      </p>
+                    ) : null}
                     <div className="flex gap-2 flex-wrap">
                       <Link
                         href="/pricing"
@@ -268,16 +334,27 @@ export default function ProductDetailPage({ bike }: Props) {
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const bikes = await getBikeModels();
-  return {
-    paths: bikes.map((b) => ({ params: { modelCode: b.modelCode } })),
-    fallback: false,
-  };
-};
+export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
+  const modelCode = params?.modelCode as string | undefined;
+  if (!modelCode) return { notFound: true };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const bikes = await getBikeModels();
-  const bike = bikes.find((b) => b.modelCode === params?.modelCode) as BikeModel;
-  return { props: { bike } };
+  const [bikes, classes] = await Promise.all([getBikeModels(), getBikeClasses()]);
+  const bike = bikes.find((b) => b.modelCode === modelCode);
+
+  if (!bike) {
+    return { notFound: true };
+  }
+
+  const [className, vehicles] = await Promise.all([
+    Promise.resolve(classes.find((cls) => cls.classId === bike.classId)?.className),
+    bike.modelId != null ? getVehiclesByModel(bike.modelId) : Promise.resolve([]),
+  ]);
+
+  return {
+    props: {
+      bike,
+      className: className ?? undefined,
+      vehicles,
+    },
+  };
 };
