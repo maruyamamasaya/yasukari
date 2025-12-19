@@ -255,9 +255,9 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                       )}
                     </div>
 
-                    <div className="rounded-2xl bg-gradient-to-br from-red-500 to-red-600 p-6 text-white shadow-md">
+                    <div className="rounded-2xl bg-gradient-to-br from-red-50 via-red-100 to-red-200 p-6 text-red-900 shadow-md">
                       <h3 className="text-lg font-semibold">安心のサポート</h3>
-                      <p className="mt-2 text-sm text-red-50 leading-relaxed">
+                      <p className="mt-2 text-sm leading-relaxed text-red-900/80">
                         ヘルメットや装備のレンタル、万が一のトラブル対応など、お客様の快適なツーリングをサポートします。
                       </p>
                       <Link
