@@ -78,7 +78,7 @@ export default function BikeLineupEn({ bikes, classes }: Props) {
               onClick={() => setFilter(c.value)}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 active
-                  ? "bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-lg shadow-red-200/60"
+                  ? "bg-red-500 text-white shadow-lg shadow-red-200/60"
                   : "bg-white/70 text-slate-600 hover:bg-white/90 border border-white/60"
               }`}
             >
