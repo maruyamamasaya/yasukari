@@ -1,5 +1,6 @@
 import bikesData from "../data/bikes.json";
 import { scanAllItems } from "./dynamodb";
+import { getRequiredLicenseLabel } from "./dashboard/licenseOptions";
 
 type DynamoBikeModel = {
   modelId: number;
@@ -7,7 +8,7 @@ type DynamoBikeModel = {
   modelName: string;
   publishStatus?: "ON" | "OFF";
   displacementCc?: number;
-  requiredLicense?: string;
+  requiredLicense?: number;
   lengthMm?: number;
   widthMm?: number;
   heightMm?: number;
@@ -87,7 +88,7 @@ export async function getBikeModels(): Promise<BikeModel[]> {
 
     return published.map((model) => {
       const spec: BikeSpec = {
-        license: model.requiredLicense,
+        license: getRequiredLicenseLabel(model.requiredLicense),
         capacity: model.seatCapacity != null ? `${model.seatCapacity}名` : undefined,
         length: model.lengthMm != null ? `${model.lengthMm}mm` : undefined,
         width: model.widthMm != null ? `${model.widthMm}mm` : undefined,

@@ -6,7 +6,10 @@ import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
 import { BikeClass, BikeModel, PublishStatus } from "../../../../lib/dashboard/types";
-import { REQUIRED_LICENSE_OPTIONS } from "../../../../lib/dashboard/licenseOptions";
+import {
+  REQUIRED_LICENSE_OPTIONS,
+  getRequiredLicenseLabel,
+} from "../../../../lib/dashboard/licenseOptions";
 import { toNumber } from "../../../../lib/dashboard/utils";
 
 export default function BikeModelDetailPage() {
@@ -93,7 +96,7 @@ export default function BikeModelDetailPage() {
       modelName: model.modelName ?? "",
       publishStatus: model.publishStatus ?? "ON",
       displacementCc: model.displacementCc?.toString() ?? "",
-      requiredLicense: model.requiredLicense ?? "",
+      requiredLicense: model.requiredLicense?.toString() ?? "",
       lengthMm: model.lengthMm?.toString() ?? "",
       widthMm: model.widthMm?.toString() ?? "",
       heightMm: model.heightMm?.toString() ?? "",
@@ -236,8 +239,8 @@ export default function BikeModelDetailPage() {
     });
 
     const stringFields: Array<
-      keyof Pick<ModelFormState, "requiredLicense" | "fuelType" | "maxPower" | "maxTorque">
-    > = ["requiredLicense", "fuelType", "maxPower", "maxTorque"];
+      keyof Pick<ModelFormState, "fuelType" | "maxPower" | "maxTorque">
+    > = ["fuelType", "maxPower", "maxTorque"];
 
     stringFields.forEach((field) => {
       const value = detailForm[field].trim();
@@ -245,6 +248,11 @@ export default function BikeModelDetailPage() {
         updated[field] = value;
       }
     });
+
+    const requiredLicenseValue = toNumber(detailForm.requiredLicense);
+    if (requiredLicenseValue !== undefined) {
+      updated.requiredLicense = requiredLicenseValue;
+    }
 
     if (normalizedMainImageUrl) {
       updated.mainImageUrl = normalizedMainImageUrl;
@@ -431,27 +439,28 @@ export default function BikeModelDetailPage() {
                 <dd>
                   {isDetailEditing ? (
                     <div className={formStyles.field}>
-                      <select
-                        value={detailForm?.requiredLicense ?? ""}
-                        onChange={(event) =>
-                          setDetailForm((prev) =>
-                            prev ? { ...prev, requiredLicense: event.target.value } : prev
-                          )
-                        }
-                      >
-                        <option value="">免許を選択</option>
-                        {REQUIRED_LICENSE_OPTIONS.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : model.requiredLicense ? (
-                    model.requiredLicense
-                  ) : (
-                    "-"
-                  )}
+                        <select
+                          value={detailForm?.requiredLicense ?? ""}
+                          onChange={(event) =>
+                            setDetailForm((prev) =>
+                              prev ? { ...prev, requiredLicense: event.target.value } : prev
+                            )
+                          }
+                        >
+                          <option value="">免許を選択</option>
+                          {REQUIRED_LICENSE_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : model.requiredLicense ? (
+                      getRequiredLicenseLabel(model.requiredLicense) ??
+                      model.requiredLicense.toString()
+                    ) : (
+                      "-"
+                    )}
                 </dd>
               </div>
               <div className={styles.detailItem}>
@@ -740,7 +749,7 @@ export default function BikeModelDetailPage() {
                       modelName: model.modelName ?? "",
                       publishStatus: model.publishStatus ?? "ON",
                       displacementCc: model.displacementCc?.toString() ?? "",
-                      requiredLicense: model.requiredLicense ?? "",
+                      requiredLicense: model.requiredLicense?.toString() ?? "",
                       lengthMm: model.lengthMm?.toString() ?? "",
                       widthMm: model.widthMm?.toString() ?? "",
                       heightMm: model.heightMm?.toString() ?? "",

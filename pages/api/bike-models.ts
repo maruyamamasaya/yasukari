@@ -6,6 +6,7 @@ import {
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { generateNextNumericId, getDocumentClient } from "../../lib/dynamodb";
+import { REQUIRED_LICENSE_OPTIONS } from "../../lib/dashboard/licenseOptions";
 
 type BikeModel = {
   modelId: number;
@@ -13,7 +14,7 @@ type BikeModel = {
   modelName: string;
   publishStatus: "ON" | "OFF";
   displacementCc?: number;
-  requiredLicense?: string;
+  requiredLicense?: number;
   lengthMm?: number;
   widthMm?: number;
   heightMm?: number;
@@ -31,6 +32,22 @@ type BikeModel = {
 
 const MODELS_TABLE = process.env.BIKE_MODELS_TABLE ?? "BikeModels";
 const CLASSES_TABLE = process.env.BIKE_CLASSES_TABLE ?? "BikeClasses";
+const REQUIRED_LICENSE_VALUES = new Set(
+  REQUIRED_LICENSE_OPTIONS.map((option) => option.value)
+);
+
+const isValidRequiredLicense = (
+  value: unknown
+): value is number => typeof value === "number" && REQUIRED_LICENSE_VALUES.has(value);
+
+const normalizeRequiredLicense = (value: unknown) => {
+  if (isValidRequiredLicense(value)) {
+    return value;
+  }
+
+  const parsed = Number(value);
+  return isValidRequiredLicense(parsed) ? parsed : undefined;
+};
 
 async function handleGet(response: NextApiResponse<BikeModel[] | { message: string }>) {
   try {
@@ -83,6 +100,15 @@ async function handlePost(
     return;
   }
 
+  if (
+    requiredLicense !== undefined &&
+    requiredLicense !== null &&
+    normalizeRequiredLicense(requiredLicense) === undefined
+  ) {
+    response.status(400).json({ message: "必要免許を正しく選択してください。" });
+    return;
+  }
+
   try {
     const client = getDocumentClient();
     const classResult = await client.send(
@@ -105,9 +131,7 @@ async function handlePost(
       modelName: modelName.trim(),
       publishStatus,
       displacementCc: typeof displacementCc === "number" ? displacementCc : undefined,
-      requiredLicense: typeof requiredLicense === "string" && requiredLicense.trim()
-        ? requiredLicense.trim()
-        : undefined,
+      requiredLicense: normalizeRequiredLicense(requiredLicense),
       lengthMm: typeof lengthMm === "number" ? lengthMm : undefined,
       widthMm: typeof widthMm === "number" ? widthMm : undefined,
       heightMm: typeof heightMm === "number" ? heightMm : undefined,
@@ -224,8 +248,8 @@ async function handlePut(
       ...(typeof displacementCc === "number"
         ? { displacementCc }
         : {}),
-      ...(typeof requiredLicense === "string" && requiredLicense.trim()
-        ? { requiredLicense: requiredLicense.trim() }
+      ...(normalizeRequiredLicense(requiredLicense) !== undefined
+        ? { requiredLicense: normalizeRequiredLicense(requiredLicense) }
         : {}),
       ...(typeof lengthMm === "number" ? { lengthMm } : {}),
       ...(typeof widthMm === "number" ? { widthMm } : {}),
