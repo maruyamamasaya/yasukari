@@ -1,6 +1,13 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
@@ -35,6 +42,50 @@ type ModelFormState = {
   mainImageUrl: string;
 };
 
+type ModelImportRow = {
+  modelName: string;
+  classId: number;
+  publishStatus: PublishStatus;
+  displacementCc?: number;
+  requiredLicense?: number;
+  lengthMm?: number;
+  widthMm?: number;
+  heightMm?: number;
+  seatHeightMm?: number;
+  seatCapacity?: number;
+  vehicleWeightKg?: number;
+  fuelTankCapacityL?: number;
+  fuelType?: string;
+  maxPower?: string;
+  maxTorque?: string;
+  mainImageUrl?: string;
+};
+
+const CSV_FIELDS: Array<
+  {
+    key: keyof ModelImportRow;
+    label: string;
+    required?: boolean;
+  }
+> = [
+  { key: "modelName", label: "車種名", required: true },
+  { key: "classId", label: "クラスID", required: true },
+  { key: "publishStatus", label: "掲載状態", required: true },
+  { key: "displacementCc", label: "排気量(cc)" },
+  { key: "requiredLicense", label: "必要免許" },
+  { key: "lengthMm", label: "全長(mm)" },
+  { key: "widthMm", label: "全幅(mm)" },
+  { key: "heightMm", label: "全高(mm)" },
+  { key: "seatHeightMm", label: "シート高(mm)" },
+  { key: "seatCapacity", label: "乗車定員" },
+  { key: "vehicleWeightKg", label: "車両重量(kg)" },
+  { key: "fuelTankCapacityL", label: "燃料タンク容量(L)" },
+  { key: "fuelType", label: "燃料種別" },
+  { key: "maxPower", label: "最高出力" },
+  { key: "maxTorque", label: "最大トルク" },
+  { key: "mainImageUrl", label: "メイン画像URL" },
+];
+
 export default function BikeModelListPage() {
   const router = useRouter();
   const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
@@ -59,6 +110,10 @@ export default function BikeModelListPage() {
   const [detailError, setDetailError] = useState<string | null>(null);
   const [detailSuccess, setDetailSuccess] = useState<string | null>(null);
   const [isSavingDetail, setIsSavingDetail] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const csvFileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -108,6 +163,15 @@ export default function BikeModelListPage() {
         ? null
         : bikeModels.find((model) => model.modelId === selectedModelId) ?? null,
     [bikeModels, selectedModelId]
+  );
+
+  const classNameToIdMap = useMemo(
+    () =>
+      bikeClasses.reduce<Record<string, number>>((acc, item) => {
+        acc[item.className.trim()] = item.classId;
+        return acc;
+      }, {}),
+    [bikeClasses]
   );
 
   useEffect(() => {
@@ -432,13 +496,27 @@ export default function BikeModelListPage() {
   };
 
   const handleDownloadCsv = () => {
-    const headers = ["車種ID", "車種名", "クラス", "掲載状態"];
-    const rows = filteredModels.map((model) => [
-      model.modelId,
-      model.modelName ?? "",
-      classNameMap[model.classId] ?? "",
-      model.publishStatus ?? "",
-    ]);
+    const headers = CSV_FIELDS.map((field) => field.label);
+    const rows = filteredModels.map((model) =>
+      CSV_FIELDS.map((field) => {
+        const value = model[field.key as keyof BikeModel];
+        if (field.key === "publishStatus") {
+          if (value === "ON") return "掲載中";
+          if (value === "OFF") return "非掲載";
+          return "";
+        }
+
+        if (field.key === "requiredLicense") {
+          return getRequiredLicenseLabel(model.requiredLicense ?? "") ?? "";
+        }
+
+        if (field.key === "classId") {
+          return model.classId ?? "";
+        }
+
+        return value ?? "";
+      })
+    );
 
     const csvContent = [headers, ...rows]
       .map((row) => row.map(createCsvCell).join(","))
@@ -453,6 +531,285 @@ export default function BikeModelListPage() {
     link.download = "bike-models.csv";
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadCsvTemplate = () => {
+    const headers = CSV_FIELDS.map((field) => field.label);
+    const sampleRow = CSV_FIELDS.map((field) => {
+      switch (field.key) {
+        case "modelName":
+          return "サンプル車種";
+        case "classId":
+          return bikeClasses[0]?.classId ?? "1";
+        case "publishStatus":
+          return "掲載中";
+        case "requiredLicense":
+          return REQUIRED_LICENSE_OPTIONS[0]?.label ?? "";
+        default:
+          return "";
+      }
+    });
+
+    const csvContent = [headers, sampleRow]
+      .map((row) => row.map(createCsvCell).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "bike-models-template.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const parseCsv = (content: string) => {
+    const rows: string[][] = [];
+    let currentValue = "";
+    let currentRow: string[] = [];
+    let inQuotes = false;
+
+    const pushCell = () => {
+      currentRow.push(currentValue);
+      currentValue = "";
+    };
+
+    const pushRow = () => {
+      pushCell();
+      rows.push(currentRow);
+      currentRow = [];
+    };
+
+    for (let index = 0; index < content.length; index += 1) {
+      const char = content[index];
+      const nextChar = content[index + 1];
+
+      if (char === "\"") {
+        if (inQuotes && nextChar === "\"") {
+          currentValue += "\"";
+          index += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        continue;
+      }
+
+      if (!inQuotes && (char === "," || char === "\n" || char === "\r")) {
+        pushCell();
+        if (char === "\n") {
+          rows.push(currentRow);
+          currentRow = [];
+        }
+        if (char === "\r" && nextChar === "\n") {
+          index += 1;
+        }
+        continue;
+      }
+
+      currentValue += char;
+    }
+
+    pushRow();
+    return rows.filter((row) => row.some((cell) => cell.trim() !== ""));
+  };
+
+  const normalizePublishStatus = (value: string | undefined) => {
+    if (!value) return null;
+    const normalized = value.trim();
+    if (normalized === "ON" || normalized === "OFF") {
+      return normalized;
+    }
+    if (normalized === "掲載中") return "ON";
+    if (normalized === "非掲載") return "OFF";
+    return null;
+  };
+
+  const normalizeRequiredLicenseFromInput = (value: string | undefined) => {
+    if (!value) return undefined;
+    const trimmed = value.trim();
+    const numeric = Number(trimmed);
+    const matchedByValue = REQUIRED_LICENSE_OPTIONS.find(
+      (option) => option.value === numeric
+    );
+    if (matchedByValue) {
+      return matchedByValue.value;
+    }
+
+    const matchedByLabel = REQUIRED_LICENSE_OPTIONS.find(
+      (option) => option.label === trimmed
+    );
+    return matchedByLabel?.value;
+  };
+
+  const normalizeClassIdFromInput = (value: string | undefined) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    const numeric = Number(trimmed);
+    if (Number.isFinite(numeric)) {
+      return numeric;
+    }
+
+    return classNameToIdMap[trimmed] ?? null;
+  };
+
+  const parseNumberFromCell = (value: string | undefined) => {
+    if (!value?.trim()) return undefined;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+
+  const handleUploadCsv = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setImportError(null);
+    setImportSuccess(null);
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+
+      if (rows.length === 0) {
+        setImportError("CSVにデータが含まれていません。");
+        return;
+      }
+
+      const headers = rows[0];
+      const missingHeaders = CSV_FIELDS.filter(
+        (field) => !headers.includes(field.label)
+      );
+
+      if (missingHeaders.length > 0) {
+        setImportError(
+          `${missingHeaders.map((item) => item.label).join("、")} の列が見つかりません。`
+        );
+        return;
+      }
+
+      const headerIndexMap = CSV_FIELDS.reduce<Record<string, number>>(
+        (acc, field) => {
+          acc[field.key] = headers.indexOf(field.label);
+          return acc;
+        },
+        {}
+      );
+
+      const payloads: ModelImportRow[] = [];
+
+      for (let rowIndex = 1; rowIndex < rows.length; rowIndex += 1) {
+        const row = rows[rowIndex];
+        if (row.every((cell) => cell.trim() === "")) {
+          continue;
+        }
+
+        const publishStatus = normalizePublishStatus(
+          row[headerIndexMap.publishStatus]
+        );
+        const classId = normalizeClassIdFromInput(row[headerIndexMap.classId]);
+        const modelName = row[headerIndexMap.modelName]?.trim();
+
+        if (!modelName) {
+          setImportError(`${rowIndex + 1}行目: 車種名を入力してください。`);
+          return;
+        }
+
+        if (classId == null || !bikeClasses.some((item) => item.classId === classId)) {
+          setImportError(`${rowIndex + 1}行目: クラスIDを確認してください。`);
+          return;
+        }
+
+        if (!publishStatus) {
+          setImportError(`${rowIndex + 1}行目: 掲載状態を正しく入力してください。`);
+          return;
+        }
+
+        const requiredLicense = normalizeRequiredLicenseFromInput(
+          row[headerIndexMap.requiredLicense]
+        );
+
+        if (
+          row[headerIndexMap.requiredLicense]?.trim() &&
+          requiredLicense === undefined
+        ) {
+          setImportError(`${rowIndex + 1}行目: 必要免許を正しく入力してください。`);
+          return;
+        }
+
+        const payload: ModelImportRow = {
+          modelName,
+          classId,
+          publishStatus,
+          displacementCc: parseNumberFromCell(row[headerIndexMap.displacementCc]),
+          requiredLicense,
+          lengthMm: parseNumberFromCell(row[headerIndexMap.lengthMm]),
+          widthMm: parseNumberFromCell(row[headerIndexMap.widthMm]),
+          heightMm: parseNumberFromCell(row[headerIndexMap.heightMm]),
+          seatHeightMm: parseNumberFromCell(row[headerIndexMap.seatHeightMm]),
+          seatCapacity: parseNumberFromCell(row[headerIndexMap.seatCapacity]),
+          vehicleWeightKg: parseNumberFromCell(row[headerIndexMap.vehicleWeightKg]),
+          fuelTankCapacityL: parseNumberFromCell(
+            row[headerIndexMap.fuelTankCapacityL]
+          ),
+          fuelType: row[headerIndexMap.fuelType]?.trim() || undefined,
+          maxPower: row[headerIndexMap.maxPower]?.trim() || undefined,
+          maxTorque: row[headerIndexMap.maxTorque]?.trim() || undefined,
+          mainImageUrl: row[headerIndexMap.mainImageUrl]?.trim() || undefined,
+        };
+
+        payloads.push(payload);
+      }
+
+      if (payloads.length === 0) {
+        setImportError("登録対象の行がありません。空行を削除してください。");
+        return;
+      }
+
+      setIsImporting(true);
+      const createdModels: BikeModel[] = [];
+
+      for (let index = 0; index < payloads.length; index += 1) {
+        const response = await fetch("/api/bike-models", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payloads[index]),
+        });
+
+        if (!response.ok) {
+          const errorBody = (await response.json().catch(() => null)) as
+            | { message?: string }
+            | null;
+          throw new Error(
+            `${index + 2}行目: ${
+              errorBody?.message ?? "車種の登録に失敗しました。"
+            }`
+          );
+        }
+
+        const created = (await response.json()) as BikeModel;
+        createdModels.push(created);
+      }
+
+      if (createdModels.length > 0) {
+        setBikeModels((current) =>
+          [...current, ...createdModels].sort((a, b) => a.modelId - b.modelId)
+        );
+      }
+
+      setImportSuccess(`${createdModels.length}件の車種を登録しました。`);
+    } catch (error) {
+      console.error("Failed to upload bike model CSV", error);
+      setImportError(
+        error instanceof Error ? error.message : "CSVの登録に失敗しました。"
+      );
+    } finally {
+      setIsImporting(false);
+      if (csvFileInputRef.current) {
+        csvFileInputRef.current.value = "";
+      }
+    }
   };
 
   return (
@@ -473,6 +830,8 @@ export default function BikeModelListPage() {
           {classError && <p className={formStyles.error}>{classError}</p>}
           {modelError && <p className={formStyles.error}>{modelError}</p>}
           {deleteError && <p className={formStyles.error}>{deleteError}</p>}
+          {importError && <p className={formStyles.error}>{importError}</p>}
+          {importSuccess && <p className={formStyles.success}>{importSuccess}</p>}
           <div className={formStyles.card}>
             <div className={styles.detailHeader}>
               <h2 className={styles.detailTitle}>車種一覧</h2>
@@ -554,6 +913,28 @@ export default function BikeModelListPage() {
                 className={styles.tableToolbarGroup}
                 style={{ marginLeft: "auto" }}
               >
+                <button
+                  type="button"
+                  className={styles.tableToolbarButton}
+                  onClick={handleDownloadCsvTemplate}
+                >
+                  CSVテンプレート
+                </button>
+                <input
+                  ref={csvFileInputRef}
+                  type="file"
+                  accept="text/csv,.csv"
+                  className={tableStyles.visuallyHidden}
+                  onChange={handleUploadCsv}
+                />
+                <button
+                  type="button"
+                  className={styles.tableToolbarButton}
+                  onClick={() => csvFileInputRef.current?.click()}
+                  disabled={isImporting}
+                >
+                  CSVアップロード
+                </button>
                 <button
                   type="button"
                   className={styles.tableToolbarButton}
