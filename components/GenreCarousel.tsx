@@ -20,16 +20,16 @@ interface Props {
 export default function GenreCarousel({
   items,
   title = "RECOMMENDED GENRES",
-  subtitle = "すぐに借りれる！おすすめのジャンル",
+  subtitle = "Ready-to-rent recommendations",
 }: Props) {
   return (
     <section className="section-surface section-padding">
       <SectionHeading
         eyebrow={title}
-        title="利用シーンから探す"
+        title="Browse by use case"
         description={`${
-          subtitle ?? "おすすめのジャンル"
-        }。イメージしやすいカテゴリから最適な一台をセレクトしましょう。`}
+          subtitle ?? "Recommended genres"
+        }. Explore easy-to-imagine categories to find the perfect ride for your needs.`}
       />
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {items.slice(0, 9).map((item, index) => (
@@ -67,10 +67,11 @@ export default function GenreCarousel({
               </div>
             </div>
             <p className="mt-4 text-sm text-slate-500">
-              受け取りやすさ、積載量、快適性などの観点から、スタッフが人気の理由を解説。シーンに合う選択肢を見つけましょう。
+              Our staff highlights why these options are popular based on pickup ease, cargo
+              capacity, and comfort so you can find the right fit for your situation.
             </p>
             <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-red-500">
-              詳細を見る
+              View details
               <span aria-hidden>→</span>
             </span>
           </Link>

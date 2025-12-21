@@ -19,16 +19,16 @@ type Props = {
 export default function BikeModelCarousel({
   items,
   title = "POPULAR MODELS",
-  subtitle = "人気の型番",
+  subtitle = "Popular models",
 }: Props) {
   const description = `${
-    subtitle ?? "人気の型番"
-  }。乗り心地、スタイル、コストのバランスが整った人気車種をピックアップ。初めてのレンタルにも安心しておすすめできるモデルたちです。`;
+    subtitle ?? "Popular models"
+  }. A curated lineup balancing comfort, style, and cost—ideal picks even for first-time renters.`;
   return (
     <section className="section-surface section-padding">
       <SectionHeading
         eyebrow={title}
-        title="ライダーに選ばれる定番モデル"
+        title="Classic models chosen by riders"
         description={description}
       />
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -56,9 +56,9 @@ export default function BikeModelCarousel({
               <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
                 <h3 className="text-base font-semibold text-slate-800">{item.modelName}</h3>
                 {item.price24h ? (
-                  <p className="text-sm font-semibold text-red-500">24時間 {item.price24h}</p>
+                  <p className="text-sm font-semibold text-red-500">24 hours {item.price24h}</p>
                 ) : null}
-                <span className="text-sm font-semibold text-red-500">詳細を見る →</span>
+                <span className="text-sm font-semibold text-red-500">View details →</span>
               </div>
             </Link>
           </article>
