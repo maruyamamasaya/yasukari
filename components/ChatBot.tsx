@@ -292,7 +292,7 @@ export default function ChatBot({
   }
   const baseSizeClasses = fullScreen
     ? "h-screen w-full"
-    : "w-full sm:w-[420px] min-h-[1500px]";
+    : "w-full sm:w-[420px] h-[90vh] max-h-[900px]";
   const avatarWrapperClasses =
     "flex items-center justify-center w-9 h-9 rounded-2xl border";
   const bubbleBaseClasses =
@@ -336,7 +336,7 @@ export default function ChatBot({
       </div>
 
       <div
-        className="relative flex-1 min-h-[900px] w-full max-w-[800px] mx-auto overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-white/70 border border-gray-100 shadow-inner"
+        className="relative flex-1 min-h-0 w-full max-w-[800px] mx-auto overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-white/70 border border-gray-100 shadow-inner"
         ref={scrollRef}
       >
         {messages.length === 0 && (
