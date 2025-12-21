@@ -17,6 +17,8 @@ interface Props {
   subtitle?: string;
   headingTitle?: string;
   headingDescription?: string;
+  cardDescription?: string;
+  detailLabel?: string;
 }
 
 export default function GenreCarousel({
@@ -25,6 +27,9 @@ export default function GenreCarousel({
   subtitle = "Ready-to-rent recommendations",
   headingTitle,
   headingDescription,
+  cardDescription =
+    "Our staff highlights why these options are popular based on pickup ease, cargo capacity, and comfort so you can find the right fit for your situation.",
+  detailLabel = "View details",
 }: Props) {
   return (
     <section className="section-surface section-padding">
@@ -74,11 +79,10 @@ export default function GenreCarousel({
               </div>
             </div>
             <p className="mt-4 text-sm text-slate-500">
-              Our staff highlights why these options are popular based on pickup ease, cargo
-              capacity, and comfort so you can find the right fit for your situation.
+              {cardDescription}
             </p>
             <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-red-500">
-              View details
+              {detailLabel}
               <span aria-hidden>→</span>
             </span>
           </Link>

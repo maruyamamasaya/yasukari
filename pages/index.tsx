@@ -276,6 +276,8 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
         subtitle="利用シーンから探す"
         headingTitle="利用シーンから探す"
         headingDescription="利用シーンがイメージしやすいカテゴリから、ぴったりのバイクを見つけましょう。"
+        cardDescription="受け取りやすさ、積載性、快適性などの観点からスタッフがおすすめポイントをご紹介。あなたに合う一台がきっと見つかります。"
+        detailLabel="詳細を見る"
       />
 
       <section className="section-surface section-padding">
