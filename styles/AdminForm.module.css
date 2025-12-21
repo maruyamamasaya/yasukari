@@ -113,6 +113,84 @@
   justify-content: flex-end;
 }
 
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.fieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 0.95rem;
+  background: linear-gradient(180deg, #fff, #f8fafc);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.fieldRow:hover,
+.fieldRow:focus-within {
+  border-color: rgba(248, 113, 113, 0.6);
+  box-shadow: 0 12px 30px rgba(248, 113, 113, 0.12);
+  transform: translateY(-1px);
+}
+
+.label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: rgba(15, 23, 42, 0.9);
+  letter-spacing: 0.01em;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: stretch;
+  gap: 0.65rem;
+}
+
+.input {
+  flex: 1;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: #fff;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: rgba(248, 113, 113, 0.85);
+  background: #fff7f7;
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.1);
+}
+
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.input[type="number"] {
+  appearance: textfield;
+}
+
+.inlineAddon {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(248, 250, 252, 0.85);
+  color: rgba(15, 23, 42, 0.8);
+  font-weight: 700;
+}
+
 .primaryButton {
   display: inline-flex;
   align-items: center;
