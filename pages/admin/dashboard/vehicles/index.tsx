@@ -566,7 +566,9 @@ export default function VehicleListPage() {
     return rows.filter((row) => row.some((cell) => cell.trim() !== ""));
   };
 
-  const normalizePublishStatus = (value: string | undefined | null) => {
+  const normalizePublishStatus = (
+    value: string | undefined | null
+  ): PublishStatus | null => {
     if (!value) return null;
     const normalized = value.trim();
     if (normalized === "ON" || normalized === "OFF") {
