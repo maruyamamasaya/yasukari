@@ -3,10 +3,12 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import type { Accessory, AccessoryPriceKey } from "../../../lib/dashboard/types";
+
 type AddOn = {
   key: string;
   label: string;
-  price: number;
+  price?: number;
 };
 
 const vehicleProtectionOptions: AddOn[] = [
@@ -14,11 +16,11 @@ const vehicleProtectionOptions: AddOn[] = [
   { key: "theft", label: "盗難補償", price: 1100 },
 ];
 
-const accessoryOptions: AddOn[] = [
-  { key: "halfCap", label: "半キャップ", price: 220 },
-  { key: "jetHelmet", label: "ジェットヘル", price: 330 },
-  { key: "brandHelmet", label: "ブランド・ヘルメット", price: 990 },
-  { key: "glove", label: "グローブ", price: 220 },
+const ACCESSORY_DISPLAY_ORDER: Array<{ key: string; label: string }> = [
+  { key: "halfCap", label: "半キャップ" },
+  { key: "jetHelmet", label: "ジェットヘル" },
+  { key: "brandHelmet", label: "ブランド・ヘルメット" },
+  { key: "glove", label: "グローブ" },
 ];
 
 const defaultFees = {
@@ -27,10 +29,16 @@ const defaultFees = {
   couponDiscount: 0,
 };
 
+const formatAccessoryPrice = (price?: number) =>
+  typeof price === "number" ? `${price.toLocaleString()}円` : "料金未設定";
+
 export default function ReserveFlowStep2() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState("");
+
+  const [accessories, setAccessories] = useState<Accessory[]>([]);
+  const [accessoryError, setAccessoryError] = useState<string | null>(null);
 
   const [store, setStore] = useState("足立小台店");
   const [modelName, setModelName] = useState("車両");
@@ -49,7 +57,7 @@ export default function ReserveFlowStep2() {
   );
 
   const [accessorySelection, setAccessorySelection] = useState(() =>
-    accessoryOptions.reduce<Record<string, boolean>>((acc, option) => {
+    ACCESSORY_DISPLAY_ORDER.reduce<Record<string, boolean>>((acc, option) => {
       acc[option.key] = false;
       return acc;
     }, {})
@@ -100,6 +108,51 @@ export default function ReserveFlowStep2() {
     if (typeof params.returnTime === "string" && params.returnTime) setReturnTime(params.returnTime);
   }, [router.isReady, router.query]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadAccessories = async () => {
+      try {
+        const response = await fetch("/api/accessories", { signal: controller.signal });
+
+        if (!response.ok) {
+          throw new Error("用品オプションの取得に失敗しました。");
+        }
+
+        const data: Accessory[] = await response.json();
+        setAccessories(data);
+        setAccessoryError(null);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error("Failed to load accessories", error);
+        setAccessoryError("用品オプションの取得に失敗しました。");
+      }
+    };
+
+    void loadAccessories();
+
+    return () => controller.abort();
+  }, []);
+
+  const rentalPriceKey = useMemo<AccessoryPriceKey>(() => {
+    const pickup = pickupTime ? `${pickupTime}:00` : "00:00:00";
+    const returnAt = returnTime ? `${returnTime}:00` : "00:00:00";
+
+    const pickupDateTime = new Date(`${pickupDate}T${pickup}`);
+    const returnDateTime = new Date(`${returnDate}T${returnAt}`);
+
+    const diffMs = returnDateTime.getTime() - pickupDateTime.getTime();
+    if (Number.isNaN(diffMs) || diffMs <= 0) {
+      return "24h";
+    }
+
+    const hours = diffMs / (1000 * 60 * 60);
+    if (hours <= 24) return "24h";
+    if (hours <= 48) return "2d";
+    if (hours <= 96) return "4d";
+    return "1w";
+  }, [pickupDate, pickupTime, returnDate, returnTime]);
+
   const selectedProtectionFee = useMemo(
     () =>
       vehicleProtectionOptions.reduce((total, option) => {
@@ -108,12 +161,26 @@ export default function ReserveFlowStep2() {
     [protectionSelection]
   );
 
+  const accessoryOptions = useMemo<AddOn[]>(() => {
+    const accessoryMap = new Map(accessories.map((accessory) => [accessory.name, accessory]));
+
+    return ACCESSORY_DISPLAY_ORDER.map((option) => {
+      const accessory = accessoryMap.get(option.label);
+      const price = accessory?.prices?.[rentalPriceKey];
+
+      return {
+        ...option,
+        price,
+      };
+    });
+  }, [accessories, rentalPriceKey]);
+
   const selectedAccessoryFee = useMemo(
     () =>
       accessoryOptions.reduce((total, option) => {
-        return accessorySelection[option.key] ? total + option.price : total;
+        return accessorySelection[option.key] ? total + (option.price ?? 0) : total;
       }, 0),
-    [accessorySelection]
+    [accessoryOptions, accessorySelection]
   );
 
   const rentalFee = defaultFees.rental;
@@ -265,6 +332,9 @@ export default function ReserveFlowStep2() {
                   <h3 className="text-sm font-semibold text-gray-900">用品オプションの選択</h3>
                   <span className="text-xs text-gray-500">必要なものを選択</span>
                 </div>
+                {accessoryError ? (
+                  <p className="text-xs text-red-600">{accessoryError}</p>
+                ) : null}
                 <div className="grid gap-3 sm:grid-cols-2">
                   {accessoryOptions.map((option) => (
                     <label
@@ -276,7 +346,7 @@ export default function ReserveFlowStep2() {
                         <p className="text-xs text-gray-600">あり / なし を切り替えできます</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-gray-900">{option.price.toLocaleString()}円</span>
+                        <span className="text-sm font-semibold text-gray-900">{formatAccessoryPrice(option.price)}</span>
                         <input
                           type="checkbox"
                           checked={accessorySelection[option.key]}
