@@ -259,7 +259,11 @@ export default function HomeEn({ blogSlides, bikeModelsAll, bikeClasses }: Props
         </div>
       </section>
 
-      <BikeModelCarousel items={bikeModels} />
+      <BikeModelCarousel
+        items={bikeModels}
+        detailLabel="View details"
+        pricePrefix="24 hours"
+      />
 
       <GenreCarousel items={genreItems} />
 

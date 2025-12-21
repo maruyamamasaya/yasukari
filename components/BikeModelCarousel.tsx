@@ -16,6 +16,8 @@ type Props = {
   subtitle?: string;
   headingTitle?: string;
   headingDescription?: string;
+  detailLabel?: string;
+  pricePrefix?: string;
 };
 
 export default function BikeModelCarousel({
@@ -24,6 +26,8 @@ export default function BikeModelCarousel({
   subtitle = "Popular models",
   headingTitle,
   headingDescription,
+  detailLabel = "詳細を見る",
+  pricePrefix = "24時間",
 }: Props) {
   const description =
     headingDescription ??
@@ -43,11 +47,11 @@ export default function BikeModelCarousel({
             key={item.modelCode}
             className="group overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_54px_-30px_rgba(220,38,38,0.45)]"
           >
-            <Link
-              href={`/products/${item.modelCode}?click_from=top_modelcarousel`}
-              className="flex h-full flex-col"
-            >
-              <div className="relative h-48 overflow-hidden">
+          <Link
+            href={`/products/${item.modelCode}?click_from=top_modelcarousel`}
+            className="flex h-full flex-col"
+          >
+            <div className="relative h-48 overflow-hidden">
                 <img
                   src={item.img}
                   alt={item.modelName}
@@ -62,9 +66,9 @@ export default function BikeModelCarousel({
               <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
                 <h3 className="text-base font-semibold text-slate-800">{item.modelName}</h3>
                 {item.price24h ? (
-                  <p className="text-sm font-semibold text-red-500">24 hours {item.price24h}</p>
+                  <p className="text-sm font-semibold text-red-500">{pricePrefix} {item.price24h}</p>
                 ) : null}
-                <span className="text-sm font-semibold text-red-500">View details →</span>
+                <span className="text-sm font-semibold text-red-500">{detailLabel} →</span>
               </div>
             </Link>
           </article>
