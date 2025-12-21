@@ -313,7 +313,10 @@ export default function BikeModelDetailPage() {
       </Head>
       <DashboardLayout
         title="車種詳細"
-        actions={[{ label: "車種一覧へ戻る", href: "/admin/dashboard/bike-models" }]}
+        actions={[
+          { label: "日毎料金設定", href: `/admin/dashboard/bike-models/${modelId}/rental-pricing` },
+          { label: "車種一覧へ戻る", href: "/admin/dashboard/bike-models" },
+        ]}
       >
         <div className={styles.detailHeader}>
           <h1 className={styles.detailTitle}>車種詳細</h1>
