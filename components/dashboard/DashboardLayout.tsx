@@ -56,6 +56,10 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: "クラス一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-classes` },
       { label: "車種一覧", href: `${ADMIN_DASHBOARD_ROOT}/bike-models` },
+      {
+        label: "料金設定",
+        href: `${ADMIN_DASHBOARD_ROOT}/bike-models/rental-pricing`,
+      },
       { label: "車両一覧", href: `${ADMIN_DASHBOARD_ROOT}/vehicles` },
       { label: "バイクスケジュール管理", href: `${ADMIN_DASHBOARD_ROOT}/bike-schedules` },
     ],
