@@ -610,7 +610,7 @@ export default function VehicleListPage() {
           case "tags":
             return vehicle.tags?.join(",") ?? "";
           default:
-            return (vehicle as Record<string, string | number | undefined>)[
+            return (vehicle as unknown as Record<string, string | number | undefined>)[
               field.key
             ];
         }
