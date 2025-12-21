@@ -516,7 +516,7 @@ export default function BikeModelListPage() {
         }
 
         if (field.key === "requiredLicense") {
-          return getRequiredLicenseLabel(model.requiredLicense ?? "") ?? "";
+          return getRequiredLicenseLabel(model.requiredLicense) ?? "";
         }
 
         if (field.key === "classId") {
