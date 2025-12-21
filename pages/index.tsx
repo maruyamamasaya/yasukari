@@ -262,9 +262,21 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
         </div>
       </section>
 
-      <BikeModelCarousel items={bikeModels} />
+      <BikeModelCarousel
+        items={bikeModels}
+        title="人気モデル"
+        subtitle="ライダーに選ばれる定番モデル"
+        headingTitle="ライダーに選ばれる定番モデル"
+        headingDescription="快適さとデザイン、価格のバランスに優れ、初めてのレンタルにもおすすめのラインアップです。"
+      />
 
-      <GenreCarousel items={genreItems} />
+      <GenreCarousel
+        items={genreItems}
+        title="おすすめジャンル"
+        subtitle="利用シーンから探す"
+        headingTitle="利用シーンから探す"
+        headingDescription="利用シーンがイメージしやすいカテゴリから、ぴったりのバイクを見つけましょう。"
+      />
 
       <section className="section-surface section-padding">
         <SectionHeading
