@@ -15,21 +15,28 @@ interface Props {
   items: GenreItem[];
   title?: string;
   subtitle?: string;
+  headingTitle?: string;
+  headingDescription?: string;
 }
 
 export default function GenreCarousel({
   items,
   title = "RECOMMENDED GENRES",
   subtitle = "Ready-to-rent recommendations",
+  headingTitle,
+  headingDescription,
 }: Props) {
   return (
     <section className="section-surface section-padding">
       <SectionHeading
         eyebrow={title}
-        title="Browse by use case"
-        description={`${
-          subtitle ?? "Recommended genres"
-        }. Explore easy-to-imagine categories to find the perfect ride for your needs.`}
+        title={headingTitle ?? "Browse by use case"}
+        description={
+          headingDescription ??
+          `${
+            subtitle ?? "Recommended genres"
+          }. Explore easy-to-imagine categories to find the perfect ride for your needs.`
+        }
       />
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {items.slice(0, 9).map((item, index) => (

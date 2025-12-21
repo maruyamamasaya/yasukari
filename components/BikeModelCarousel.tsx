@@ -14,21 +14,27 @@ type Props = {
   items: BikeItem[];
   title?: string;
   subtitle?: string;
+  headingTitle?: string;
+  headingDescription?: string;
 };
 
 export default function BikeModelCarousel({
   items,
   title = "POPULAR MODELS",
   subtitle = "Popular models",
+  headingTitle,
+  headingDescription,
 }: Props) {
-  const description = `${
-    subtitle ?? "Popular models"
-  }. A curated lineup balancing comfort, style, and cost—ideal picks even for first-time renters.`;
+  const description =
+    headingDescription ??
+    `${
+      subtitle ?? "Popular models"
+    }. A curated lineup balancing comfort, style, and cost—ideal picks even for first-time renters.`;
   return (
     <section className="section-surface section-padding">
       <SectionHeading
         eyebrow={title}
-        title="Classic models chosen by riders"
+        title={headingTitle ?? "Classic models chosen by riders"}
         description={description}
       />
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
