@@ -261,10 +261,16 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                         ヘルメットや装備のレンタル、万が一のトラブル対応など、お客様の快適なツーリングをサポートします。
                       </p>
                       <Link
-                        href="/help"
-                        className="mt-4 inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow hover:bg-red-50 transition"
+                        href="/insurance"
+                        className="group mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-red-700 shadow-md ring-1 ring-red-200 transition duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
                       >
                         サポート内容を確認
+                        <span
+                          aria-hidden
+                          className="translate-x-0 text-base transition duration-200 group-hover:translate-x-0.5"
+                        >
+                          →
+                        </span>
                       </Link>
                     </div>
                   </div>
