@@ -108,7 +108,7 @@ export default function FooterEn() {
               </li>
               <li>
 
-                <Link href="/insurance" className="hover:underline">
+                <Link href="/en/insurance" className="hover:underline">
                   Vehicle insurance
                 </Link>
               </li>
