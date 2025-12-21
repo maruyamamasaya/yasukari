@@ -61,13 +61,20 @@ type ModelImportRow = {
   mainImageUrl?: string;
 };
 
+type ModelCsvRow = ModelImportRow & {
+  modelId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 const CSV_FIELDS: Array<
   {
-    key: keyof ModelImportRow;
+    key: keyof ModelCsvRow;
     label: string;
     required?: boolean;
   }
 > = [
+  { key: "modelId", label: "車種ID" },
   { key: "modelName", label: "車種名", required: true },
   { key: "classId", label: "クラスID", required: true },
   { key: "publishStatus", label: "掲載状態", required: true },
@@ -84,6 +91,8 @@ const CSV_FIELDS: Array<
   { key: "maxPower", label: "最高出力" },
   { key: "maxTorque", label: "最大トルク" },
   { key: "mainImageUrl", label: "メイン画像URL" },
+  { key: "createdAt", label: "作成日時" },
+  { key: "updatedAt", label: "更新日時" },
 ];
 
 export default function BikeModelListPage() {
@@ -537,6 +546,8 @@ export default function BikeModelListPage() {
     const headers = CSV_FIELDS.map((field) => field.label);
     const sampleRow = CSV_FIELDS.map((field) => {
       switch (field.key) {
+        case "modelId":
+          return "自動採番";
         case "modelName":
           return "サンプル車種";
         case "classId":
@@ -545,6 +556,9 @@ export default function BikeModelListPage() {
           return "掲載中";
         case "requiredLicense":
           return REQUIRED_LICENSE_OPTIONS[0]?.label ?? "";
+        case "createdAt":
+        case "updatedAt":
+          return "自動入力";
         default:
           return "";
       }
