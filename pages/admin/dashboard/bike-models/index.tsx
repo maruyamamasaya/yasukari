@@ -10,7 +10,10 @@ import {
   BikeModel,
   PublishStatus,
 } from "../../../../lib/dashboard/types";
-import { REQUIRED_LICENSE_OPTIONS } from "../../../../lib/dashboard/licenseOptions";
+import {
+  REQUIRED_LICENSE_OPTIONS,
+  getRequiredLicenseLabel,
+} from "../../../../lib/dashboard/licenseOptions";
 import { toNumber } from "../../../../lib/dashboard/utils";
 
 type ModelFormState = {
@@ -121,7 +124,7 @@ export default function BikeModelListPage() {
       modelName: selectedModel.modelName ?? "",
       publishStatus: selectedModel.publishStatus ?? "ON",
       displacementCc: selectedModel.displacementCc?.toString() ?? "",
-      requiredLicense: selectedModel.requiredLicense ?? "",
+      requiredLicense: selectedModel.requiredLicense?.toString() ?? "",
       lengthMm: selectedModel.lengthMm?.toString() ?? "",
       widthMm: selectedModel.widthMm?.toString() ?? "",
       heightMm: selectedModel.heightMm?.toString() ?? "",
@@ -283,9 +286,9 @@ export default function BikeModelListPage() {
     const stringFields: Array<
       keyof Pick<
         ModelFormState,
-        "requiredLicense" | "fuelType" | "maxPower" | "maxTorque" | "mainImageUrl"
+        "fuelType" | "maxPower" | "maxTorque" | "mainImageUrl"
       >
-    > = ["requiredLicense", "fuelType", "maxPower", "maxTorque", "mainImageUrl"];
+    > = ["fuelType", "maxPower", "maxTorque", "mainImageUrl"];
 
     stringFields.forEach((field) => {
       const value = detailForm[field].trim();
@@ -293,6 +296,11 @@ export default function BikeModelListPage() {
         payload[field] = value;
       }
     });
+
+    const requiredLicenseValue = toNumber(detailForm.requiredLicense);
+    if (requiredLicenseValue !== undefined) {
+      payload.requiredLicense = requiredLicenseValue;
+    }
 
     setIsSavingDetail(true);
     try {
@@ -913,14 +921,15 @@ export default function BikeModelListPage() {
                           >
                             <option value="">選択してください</option>
                             {REQUIRED_LICENSE_OPTIONS.map((option) => (
-                              <option key={option} value={option}>
-                                {option}
+                              <option key={option.value} value={option.value}>
+                                {option.label}
                               </option>
                             ))}
                           </select>
                         </div>
                       ) : selectedModel.requiredLicense ? (
-                        selectedModel.requiredLicense
+                        getRequiredLicenseLabel(selectedModel.requiredLicense) ??
+                        selectedModel.requiredLicense.toString()
                       ) : (
                         "-"
                       )}
@@ -1201,7 +1210,8 @@ export default function BikeModelListPage() {
                           modelName: selectedModel.modelName ?? "",
                           publishStatus: selectedModel.publishStatus ?? "ON",
                           displacementCc: selectedModel.displacementCc?.toString() ?? "",
-                          requiredLicense: selectedModel.requiredLicense ?? "",
+                          requiredLicense:
+                            selectedModel.requiredLicense?.toString() ?? "",
                           lengthMm: selectedModel.lengthMm?.toString() ?? "",
                           widthMm: selectedModel.widthMm?.toString() ?? "",
                           heightMm: selectedModel.heightMm?.toString() ?? "",

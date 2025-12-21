@@ -174,8 +174,8 @@ export default function BikeModelRegisterPage() {
       });
 
       const stringFields: Array<
-        keyof Pick<ModelFormState, "requiredLicense" | "fuelType" | "maxPower" | "maxTorque">
-      > = ["requiredLicense", "fuelType", "maxPower", "maxTorque"];
+        keyof Pick<ModelFormState, "fuelType" | "maxPower" | "maxTorque">
+      > = ["fuelType", "maxPower", "maxTorque"];
 
       stringFields.forEach((field) => {
         const value = form[field].trim();
@@ -183,6 +183,11 @@ export default function BikeModelRegisterPage() {
           payload[field] = value;
         }
       });
+
+      const requiredLicenseValue = toNumber(form.requiredLicense);
+      if (requiredLicenseValue !== undefined) {
+        payload.requiredLicense = requiredLicenseValue;
+      }
 
       const response = await fetch("/api/bike-models", {
         method: "POST",
@@ -297,18 +302,18 @@ export default function BikeModelRegisterPage() {
                   <select
                     id="requiredLicense"
                     value={form.requiredLicense}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, requiredLicense: event.target.value }))
-                    }
-                  >
-                    <option value="">選択してください</option>
-                    {REQUIRED_LICENSE_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, requiredLicense: event.target.value }))
+                  }
+                >
+                  <option value="">選択してください</option>
+                  {REQUIRED_LICENSE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
                 <div className={formStyles.field}>
                   <label htmlFor="length">全長 (mm)</label>
                   <input

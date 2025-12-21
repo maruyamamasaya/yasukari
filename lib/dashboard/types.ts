@@ -60,7 +60,7 @@ export type BikeModel = {
   modelName: string;
   publishStatus: PublishStatus;
   displacementCc?: number;
-  requiredLicense?: string;
+  requiredLicense?: number;
   lengthMm?: number;
   widthMm?: number;
   heightMm?: number;
