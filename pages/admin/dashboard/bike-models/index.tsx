@@ -711,13 +711,19 @@ export default function BikeModelListPage() {
         {}
       );
 
+      const dataRows = rows
+        .slice(1)
+        .filter((row) => row.some((cell) => cell.trim() !== ""));
+
+      if (dataRows.length === 0) {
+        setImportError("登録対象の行がありません。空行を削除してください。");
+        return;
+      }
+
       const payloads: ModelImportRow[] = [];
 
-      for (let rowIndex = 1; rowIndex < rows.length; rowIndex += 1) {
-        const row = rows[rowIndex];
-        if (row.every((cell) => cell.trim() === "")) {
-          continue;
-        }
+      for (let rowIndex = 0; rowIndex < dataRows.length; rowIndex += 1) {
+        const row = dataRows[rowIndex];
 
         const publishStatus = normalizePublishStatus(
           row[headerIndexMap.publishStatus]
@@ -726,17 +732,17 @@ export default function BikeModelListPage() {
         const modelName = row[headerIndexMap.modelName]?.trim();
 
         if (!modelName) {
-          setImportError(`${rowIndex + 1}行目: 車種名を入力してください。`);
+          setImportError(`${rowIndex + 2}行目: 車種名を入力してください。`);
           return;
         }
 
         if (classId == null || !bikeClasses.some((item) => item.classId === classId)) {
-          setImportError(`${rowIndex + 1}行目: クラスIDを確認してください。`);
+          setImportError(`${rowIndex + 2}行目: クラスIDを確認してください。`);
           return;
         }
 
         if (!publishStatus) {
-          setImportError(`${rowIndex + 1}行目: 掲載状態を正しく入力してください。`);
+          setImportError(`${rowIndex + 2}行目: 掲載状態を正しく入力してください。`);
           return;
         }
 
@@ -748,7 +754,7 @@ export default function BikeModelListPage() {
           row[headerIndexMap.requiredLicense]?.trim() &&
           requiredLicense === undefined
         ) {
-          setImportError(`${rowIndex + 1}行目: 必要免許を正しく入力してください。`);
+          setImportError(`${rowIndex + 2}行目: 必要免許を正しく入力してください。`);
           return;
         }
 
