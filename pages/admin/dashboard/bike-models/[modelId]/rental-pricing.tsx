@@ -250,22 +250,6 @@ export default function BikeModelRentalPricingPage() {
     });
   }, [prices]);
 
-  useEffect(() => {
-    if (classBaseOptions.length === 0) {
-      return;
-    }
-
-    setBaseInputs((prev) => {
-      const next = { ...prev };
-      classBaseOptions.forEach((option) => {
-        if (!prev[option.days]) {
-          next[option.days] = String(option.price);
-        }
-      });
-      return next;
-    });
-  }, [classBaseOptions]);
-
   const baseOptions = useMemo(() => {
     const options: RateOption[] = [];
     BASE_RATES.forEach(({ days, label }) => {
@@ -286,6 +270,22 @@ export default function BikeModelRentalPricingPage() {
     () => buildRateOptionsFromClass(bikeClass),
     [bikeClass]
   );
+
+  useEffect(() => {
+    if (classBaseOptions.length === 0) {
+      return;
+    }
+
+    setBaseInputs((prev) => {
+      const next = { ...prev };
+      classBaseOptions.forEach((option) => {
+        if (!prev[option.days]) {
+          next[option.days] = String(option.price);
+        }
+      });
+      return next;
+    });
+  }, [classBaseOptions]);
 
   const autoPlans = useMemo(() => buildPlans(baseOptions, MAX_DAYS), [baseOptions]);
 
