@@ -14,28 +14,27 @@ const TABLE_NAME =
   "vehicle_rental_prices";
 
 type VehicleRentalPrice = {
-  vehicle_type_id: string;
+  vehicle_type_id: number;
   days: number;
   price: number;
   createdAt?: string;
   updatedAt?: string;
 };
 
-const parseVehicleTypeId = (value: unknown): string | null => {
-  if (Array.isArray(value)) {
-    return parseVehicleTypeId(value[0]);
+const parseVehicleTypeId = (value: unknown): number | null => {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const parsed =
+    typeof raw === "number"
+      ? raw
+      : typeof raw === "string"
+        ? Number(raw.trim())
+        : Number(String(raw));
+
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    return null;
   }
 
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : null;
-  }
-
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return String(value);
-  }
-
-  return null;
+  return parsed;
 };
 
 const parsePositiveInteger = (value: unknown): number | null => {
