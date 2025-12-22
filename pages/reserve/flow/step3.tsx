@@ -3,6 +3,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import type { RegistrationData } from "../../../types/registration";
+import type { Reservation } from "../../../lib/reservations";
+
 const formatDateLabel = (dateString: string, fallback: string) => {
   const parsed = new Date(dateString);
   if (Number.isNaN(parsed.getTime())) return fallback;
@@ -19,17 +22,28 @@ export default function ReserveFlowStep3() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [sessionUser, setSessionUser] = useState<{ id: string; email?: string; username?: string } | null>(null);
+  const [registration, setRegistration] = useState<RegistrationData | null>(null);
+  const [registrationError, setRegistrationError] = useState("");
+
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+  const [isSavingReservation, setIsSavingReservation] = useState(false);
+  const [reservationPreview, setReservationPreview] = useState<Reservation | null>(null);
 
   const [store, setStore] = useState("足立小台店");
+  const [modelName, setModelName] = useState("車両");
+  const [managementNumber, setManagementNumber] = useState("未設定");
   const [pickupDate, setPickupDate] = useState("2025-12-26");
   const [returnDate, setReturnDate] = useState("2025-12-27");
   const [pickupTime, setPickupTime] = useState("10:00");
   const [returnTime, setReturnTime] = useState("10:00");
   const [totalAmount, setTotalAmount] = useState(7830);
+  const [couponCode, setCouponCode] = useState("");
+  const [protectionTotal, setProtectionTotal] = useState(0);
+  const [accessoryTotal, setAccessoryTotal] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -47,6 +61,11 @@ export default function ReserveFlowStep3() {
 
         if (!response.ok) {
           throw new Error("Failed to verify session");
+        }
+
+        const data = (await response.json()) as { user?: { id: string; email?: string; username?: string } };
+        if (data.user) {
+          setSessionUser({ id: data.user.id, email: data.user.email, username: data.user.username });
         }
 
         setAuthChecked(true);
@@ -68,6 +87,9 @@ export default function ReserveFlowStep3() {
 
     const params = router.query;
     if (typeof params.store === "string" && params.store) setStore(params.store);
+    if (typeof params.modelName === "string" && params.modelName) setModelName(params.modelName);
+    if (typeof params.managementNumber === "string" && params.managementNumber)
+      setManagementNumber(params.managementNumber);
     if (typeof params.pickupDate === "string" && params.pickupDate) setPickupDate(params.pickupDate);
     if (typeof params.returnDate === "string" && params.returnDate) setReturnDate(params.returnDate);
     if (typeof params.pickupTime === "string" && params.pickupTime) setPickupTime(params.pickupTime);
@@ -76,10 +98,55 @@ export default function ReserveFlowStep3() {
       const parsed = Number(params.totalAmount);
       if (!Number.isNaN(parsed)) setTotalAmount(parsed);
     }
+    if (typeof params.couponCode === "string") setCouponCode(params.couponCode);
+    if (typeof params.accessoryTotal === "string") setAccessoryTotal(Number(params.accessoryTotal));
+    if (typeof params.protectionTotal === "string") setProtectionTotal(Number(params.protectionTotal));
   }, [router.isReady, router.query]);
+
+  useEffect(() => {
+    if (!authChecked) return;
+
+    const controller = new AbortController();
+    const fetchRegistration = async () => {
+      try {
+        const response = await fetch("/api/register/user", {
+          credentials: "include",
+          signal: controller.signal,
+        });
+
+        if (response.status === 404) {
+          setRegistration(null);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("failed to load registration");
+        }
+
+        const data = (await response.json()) as { registration?: RegistrationData | null };
+        setRegistration(data.registration ?? null);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+          setRegistrationError("本登録情報の取得に失敗しました。時間をおいて再度お試しください。");
+        }
+      }
+    };
+
+    void fetchRegistration();
+    return () => controller.abort();
+  }, [authChecked]);
 
   const pickupLabel = useMemo(() => formatDateLabel(pickupDate, "2025年12月26日"), [pickupDate]);
   const returnLabel = useMemo(() => formatDateLabel(returnDate, "2025年12月27日"), [returnDate]);
+
+  const rentalDurationHours = useMemo(() => {
+    const pickup = new Date(`${pickupDate}T${pickupTime}:00`);
+    const returned = new Date(`${returnDate}T${returnTime}:00`);
+    const diff = returned.getTime() - pickup.getTime();
+    if (Number.isNaN(diff) || diff <= 0) return null;
+    return Math.round((diff / (1000 * 60 * 60)) * 10) / 10;
+  }, [pickupDate, pickupTime, returnDate, returnTime]);
 
   const payJpPublicKey = process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY ?? "pk_test_sample";
 
@@ -93,13 +160,79 @@ export default function ReserveFlowStep3() {
     setStatusMessage("決済フローのサンプルです。Pay.JPのトークン生成後にAPIへ送信してください。");
   };
 
+  const handleTestPayment = async () => {
+    if (!sessionUser) {
+      setStatusMessage("ログイン情報を確認できませんでした。再度お試しください。");
+      return;
+    }
+
+    setIsSavingReservation(true);
+    setStatusMessage("決済データを保存しています…");
+
+    const paymentId = `test-payment-${Date.now()}`;
+    const pickupAt = new Date(`${pickupDate}T${pickupTime}:00`).toISOString();
+    const returnAt = new Date(`${returnDate}T${returnTime}:00`).toISOString();
+
+    try {
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          storeName: store,
+          vehicleModel: modelName,
+          vehicleCode: managementNumber,
+          vehiclePlate: managementNumber,
+          pickupAt,
+          returnAt,
+          paymentAmount: totalAmount,
+          paymentId,
+          paymentDate: new Date().toISOString(),
+          rentalDurationHours,
+          rentalCompletedAt: "",
+          reservationCompletedFlag: false,
+          memberName: registration ? `${registration.name1} ${registration.name2}` : sessionUser.username ?? "",
+          memberEmail: registration?.email ?? sessionUser.email ?? "",
+          memberPhone: registration?.mobile ?? registration?.tel ?? "",
+          couponCode,
+          couponDiscount: accessoryTotal + protectionTotal,
+          notes: "テスト決済経由で保存",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const data = (await response.json()) as { reservations?: Reservation[] };
+      const reservation = data.reservations?.[0];
+      setReservationPreview(reservation ?? null);
+      setStatusMessage(
+        reservation
+          ? `テスト決済として予約ID ${reservation.id} を保存しました。マイページの予約状況に反映されます。`
+          : "テスト決済を保存しました。しばらくしてから予約一覧を確認してください。"
+      );
+    } catch (error) {
+      console.error("Failed to save test payment", error);
+      setStatusMessage("テスト決済の保存に失敗しました。時間をおいて再度お試しください。");
+    } finally {
+      setIsSavingReservation(false);
+    }
+  };
+
   const handleBack = () => {
     const params = new URLSearchParams({
       store,
+      modelName,
+      managementNumber,
       pickupDate,
       returnDate,
       pickupTime,
       returnTime,
+      couponCode,
+      accessoryTotal: accessoryTotal.toString(),
+      protectionTotal: protectionTotal.toString(),
       totalAmount: totalAmount.toString(),
     });
 
@@ -140,13 +273,38 @@ export default function ReserveFlowStep3() {
                     {pickupLabel} {pickupTime} → {returnLabel} {returnTime}
                   </h2>
                 </div>
-                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{store}</span>
+                <div className="flex flex-col items-end gap-1 text-right">
+                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{store}</span>
+                  <span className="text-xs text-gray-500">{modelName} / {managementNumber}</span>
+                </div>
               </div>
               <div className="rounded-xl bg-gray-50 p-4">
                 <div className="flex items-center justify-between text-lg font-bold text-gray-900">
                   <span>レンタル料金 合計（税込）</span>
                   <span>{totalAmount.toLocaleString()}円</span>
                 </div>
+                <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
+                  <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
+                    <dt>用品・補償の内訳</dt>
+                    <dd className="font-semibold text-gray-900">
+                      {(accessoryTotal + protectionTotal).toLocaleString()}円
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
+                    <dt>クーポン</dt>
+                    <dd className="font-semibold text-gray-900">{couponCode || "未使用"}</dd>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
+                    <dt>想定レンタル時間</dt>
+                    <dd className="font-semibold text-gray-900">
+                      {rentalDurationHours ? `${rentalDurationHours} 時間` : "算出不可"}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
+                    <dt>完了フラグ</dt>
+                    <dd className="font-semibold text-gray-900">未完了</dd>
+                  </div>
+                </dl>
               </div>
             </div>
 
@@ -216,9 +374,45 @@ export default function ReserveFlowStep3() {
                 >
                   決済する
                 </button>
+                <button
+                  type="button"
+                  onClick={handleTestPayment}
+                  disabled={!authChecked || isSavingReservation}
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-emerald-600 transition disabled:cursor-not-allowed disabled:bg-emerald-200"
+                >
+                  {isSavingReservation ? "保存中…" : "テスト決済を保存"}
+                </button>
               </div>
               {statusMessage ? (
                 <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">{statusMessage}</p>
+              ) : null}
+              {registrationError ? (
+                <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{registrationError}</p>
+              ) : null}
+              {reservationPreview ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                  <p className="font-semibold">保存された予約情報（プレビュー）</p>
+                  <dl className="mt-2 grid gap-2 sm:grid-cols-2">
+                    <div>
+                      <dt className="text-xs text-emerald-800">予約ID</dt>
+                      <dd className="font-mono">{reservationPreview.id}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-emerald-800">利用ステータス</dt>
+                      <dd>{reservationPreview.status}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-emerald-800">貸出〜返却</dt>
+                      <dd>
+                        {formatDateLabel(reservationPreview.pickupAt, pickupLabel)} → {formatDateLabel(reservationPreview.returnAt, returnLabel)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-emerald-800">決済金額</dt>
+                      <dd>{reservationPreview.paymentAmount} 円</dd>
+                    </div>
+                  </dl>
+                </div>
               ) : null}
             </div>
           </section>
