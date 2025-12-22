@@ -8,6 +8,8 @@ export default function HeaderEn() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [updatingLocale, setUpdatingLocale] = useState(false);
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authError, setAuthError] = useState(false);
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function HeaderEn() {
     const controller = new AbortController();
     const fetchSession = async () => {
       try {
+        setAuthError(false);
         const response = await fetch(`/api/me`, {
           credentials: 'include',
           signal: controller.signal,
@@ -33,12 +36,16 @@ export default function HeaderEn() {
         }
 
         setSessionUser(null);
+        setAuthError(true);
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') {
           return;
         }
         console.error('Failed to check session', error);
         setSessionUser(null);
+        setAuthError(true);
+      } finally {
+        setAuthChecked(true);
       }
     };
 
@@ -118,12 +125,17 @@ export default function HeaderEn() {
               <Link href="/en">
                 <NavItem label="Home" />
               </Link>
-              <Link href="/en/login">
-                <NavItem icon={<FaUser />} label="Login" />
-              </Link>
-              {sessionUser && (
+              {authChecked && sessionUser ? (
                 <Link href="/en/mypage">
                   <NavItem icon={<FaUser />} label="My Page" />
+                </Link>
+              ) : authChecked && authError ? (
+                <div className="hidden sm:inline-flex">
+                  <NavItem icon={<FaUser />} label="Login error" />
+                </div>
+              ) : (
+                <Link href="/en/login">
+                  <NavItem icon={<FaUser />} label="Login" />
                 </Link>
               )}
               <Link href="/en/pricing">
@@ -170,17 +182,22 @@ export default function HeaderEn() {
                 </Link>
               </li>
               <li>
-                <Link href="/en/login">
-                  <NavItem icon={<FaUser />} label="Login" />
-                </Link>
-              </li>
-              {sessionUser && (
-                <li>
-                  <Link href="/en/mypage">
-                    <NavItem icon={<FaUser />} label="My Page" />
+                {authChecked && sessionUser ? (
+                  <>
+                    <Link href="/en/mypage">
+                      <NavItem icon={<FaUser />} label="My Page" />
+                    </Link>
+                  </>
+                ) : authChecked && authError ? (
+                  <div className="inline-flex">
+                    <NavItem icon={<FaUser />} label="Login error" />
+                  </div>
+                ) : (
+                  <Link href="/en/login" className="inline-flex">
+                    <NavItem icon={<FaUser />} label="Login" />
                   </Link>
-                </li>
-              )}
+                )}
+              </li>
               <li>
                 <Link href="/en/pricing">
                   <NavItem icon={<FaClipboardList />} label="Bikes & Pricing" />
