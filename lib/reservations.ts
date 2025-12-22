@@ -14,6 +14,8 @@ export type Reservation = {
   vehicleModel: string;
   vehicleCode: string;
   vehiclePlate: string;
+  vehicleChangedAt?: string;
+  vehicleChangeNotified?: boolean;
   pickupAt: string;
   returnAt: string;
   status: ReservationStatus;
@@ -27,6 +29,7 @@ export type Reservation = {
   memberName: string;
   memberEmail: string;
   memberPhone: string;
+  memberCountryCode?: string;
   couponCode: string;
   couponDiscount: string;
   options: {
@@ -34,6 +37,7 @@ export type Reservation = {
     theftCoverage: string;
   };
   notes: string;
+  refundNote?: string;
 };
 
 type ReservationRecord = {
@@ -47,6 +51,10 @@ type ReservationRecord = {
   vehicleCode?: string;
   vehicle_plate?: string;
   vehiclePlate?: string;
+  vehicle_changed_at?: string | number;
+  vehicleChangedAt?: string | number;
+  vehicle_change_notified?: boolean;
+  vehicleChangeNotified?: boolean;
   pickup_at?: string | number;
   pickupAt?: string | number;
   return_at?: string | number;
@@ -72,6 +80,8 @@ type ReservationRecord = {
   memberEmail?: string;
   member_phone?: string;
   memberPhone?: string;
+  member_country_code?: string;
+  memberCountryCode?: string;
   coupon_code?: string;
   couponCode?: string;
   coupon_discount?: string | number;
@@ -81,6 +91,8 @@ type ReservationRecord = {
   options_theft_coverage?: string;
   theftCoverage?: string;
   notes?: string;
+  refund_note?: string;
+  refundNote?: string;
   [key: string]: unknown;
 };
 
@@ -138,6 +150,12 @@ const normalizeReservation = (record: ReservationRecord): Reservation => {
     vehicleModel: stringFrom(record, ["vehicle_model", "vehicleModel"], "-"),
     vehicleCode: stringFrom(record, ["vehicle_code", "vehicleCode"], "-"),
     vehiclePlate: stringFrom(record, ["vehicle_plate", "vehiclePlate"], "-"),
+    vehicleChangedAt: datetimeFrom(record, ["vehicle_changed_at", "vehicleChangedAt"]),
+    vehicleChangeNotified: booleanFrom(
+      record,
+      ["vehicle_change_notified", "vehicleChangeNotified"],
+      false
+    ),
     pickupAt: datetimeFrom(record, ["pickup_at", "pickupAt", "pickup_datetime"]),
     returnAt: datetimeFrom(record, ["return_at", "returnAt", "return_datetime"]),
     status: stringFrom(record, ["status"], "ステータス未設定"),
@@ -155,6 +173,7 @@ const normalizeReservation = (record: ReservationRecord): Reservation => {
     memberName: stringFrom(record, ["member_name", "memberName"], "-"),
     memberEmail: stringFrom(record, ["member_email", "memberEmail"], "-"),
     memberPhone: stringFrom(record, ["member_phone", "memberPhone"], ""),
+    memberCountryCode: stringFrom(record, ["member_country_code", "memberCountryCode"], ""),
     couponCode: stringFrom(record, ["coupon_code", "couponCode"], ""),
     couponDiscount: stringFrom(record, ["coupon_discount", "couponDiscount"], ""),
     options: {
@@ -166,6 +185,7 @@ const normalizeReservation = (record: ReservationRecord): Reservation => {
       theftCoverage: stringFrom(record, ["options_theft_coverage", "theftCoverage"], "-"),
     },
     notes: stringFrom(record, ["notes"], ""),
+    refundNote: stringFrom(record, ["refund_note", "refundNote"], ""),
   };
 };
 
@@ -220,6 +240,7 @@ type CreateReservationInput = {
   memberName: string;
   memberEmail: string;
   memberPhone?: string;
+  memberCountryCode?: string;
   couponCode?: string;
   couponDiscount?: number;
   options?: {
@@ -227,6 +248,9 @@ type CreateReservationInput = {
     theftCoverage?: string;
   };
   notes?: string;
+  vehicleChangedAt?: string;
+  vehicleChangeNotified?: boolean;
+  refundNote?: string;
 };
 
 const toIsoStringIfPossible = (value: string | number | undefined): string | undefined => {
@@ -235,6 +259,39 @@ const toIsoStringIfPossible = (value: string | number | undefined): string | und
 
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
+};
+
+const reservationToRecord = (reservation: Reservation): ReservationRecord => {
+  return {
+    reservation_id: reservation.id,
+    store_name: reservation.storeName,
+    vehicle_model: reservation.vehicleModel,
+    vehicle_code: reservation.vehicleCode,
+    vehicle_plate: reservation.vehiclePlate,
+    vehicle_changed_at:
+      toIsoStringIfPossible(reservation.vehicleChangedAt) ?? reservation.vehicleChangedAt,
+    vehicle_change_notified: reservation.vehicleChangeNotified ?? false,
+    pickup_at: toIsoStringIfPossible(reservation.pickupAt) ?? reservation.pickupAt,
+    return_at: toIsoStringIfPossible(reservation.returnAt) ?? reservation.returnAt,
+    status: reservation.status,
+    payment_amount: reservation.paymentAmount,
+    payment_id: reservation.paymentId,
+    payment_date: toIsoStringIfPossible(reservation.paymentDate) ?? reservation.paymentDate,
+    rental_duration_hours: reservation.rentalDurationHours ?? null,
+    rental_completed_at: toIsoStringIfPossible(reservation.rentalCompletedAt),
+    reservation_completed_flag: reservation.reservationCompletedFlag ?? false,
+    member_id: reservation.memberId,
+    member_name: reservation.memberName,
+    member_email: reservation.memberEmail,
+    member_phone: reservation.memberPhone ?? "",
+    member_country_code: reservation.memberCountryCode ?? "",
+    coupon_code: reservation.couponCode ?? "",
+    coupon_discount: reservation.couponDiscount ?? 0,
+    options_vehicle_coverage: reservation.options?.vehicleCoverage ?? "",
+    options_theft_coverage: reservation.options?.theftCoverage ?? "",
+    notes: reservation.notes ?? "",
+    refund_note: reservation.refundNote ?? "",
+  };
 };
 
 export async function createReservation(
@@ -250,6 +307,8 @@ export async function createReservation(
     vehicle_model: input.vehicleModel,
     vehicle_code: input.vehicleCode,
     vehicle_plate: input.vehiclePlate,
+    vehicle_changed_at: toIsoStringIfPossible(input.vehicleChangedAt),
+    vehicle_change_notified: input.vehicleChangeNotified ?? false,
     pickup_at: toIsoStringIfPossible(input.pickupAt) ?? input.pickupAt,
     return_at: toIsoStringIfPossible(input.returnAt) ?? input.returnAt,
     status: input.status ?? "予約受付完了",
@@ -263,11 +322,13 @@ export async function createReservation(
     member_name: input.memberName,
     member_email: input.memberEmail,
     member_phone: input.memberPhone ?? "",
+    member_country_code: input.memberCountryCode ?? "",
     coupon_code: input.couponCode ?? "",
     coupon_discount: input.couponDiscount ?? 0,
     options_vehicle_coverage: input.options?.vehicleCoverage ?? "",
     options_theft_coverage: input.options?.theftCoverage ?? "",
     notes: input.notes ?? "",
+    refund_note: input.refundNote ?? "",
   };
 
   await client.send(
@@ -278,6 +339,35 @@ export async function createReservation(
   );
 
   return normalizeReservation(reservationRecord);
+}
+
+export async function updateReservation(
+  reservationId: string,
+  updates: Partial<Reservation>
+): Promise<Reservation> {
+  const client = getDocumentClient();
+  const current = await fetchReservationById(reservationId);
+
+  if (!current) {
+    throw new Error(`Reservation ${reservationId} not found`);
+  }
+
+  const merged: Reservation = {
+    ...current,
+    ...updates,
+    id: reservationId,
+  };
+
+  const record = reservationToRecord(merged);
+
+  await client.send(
+    new PutCommand({
+      TableName: RESERVATIONS_TABLE,
+      Item: record,
+    })
+  );
+
+  return normalizeReservation(record);
 }
 
 export type { ReservationRecord };

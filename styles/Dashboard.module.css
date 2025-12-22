@@ -1144,6 +1144,18 @@
   border-color: transparent;
 }
 
+.iconButtonDanger {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecdd3;
+}
+
+.iconButtonDanger:hover,
+.iconButtonDanger:focus-visible {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
 .icon {
   font-size: 1.1rem;
   line-height: 1;
@@ -1213,6 +1225,94 @@
   outline: none;
   background: rgba(248, 250, 252, 0.9);
   border-color: rgba(148, 163, 184, 0.7);
+}
+
+.detailPrimaryButton {
+  background: #0ea5e9;
+  border-color: #0284c7;
+  color: #fff;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.selectInput {
+  min-width: 200px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: #fff;
+  font-weight: 600;
+  color: rgba(30, 41, 59, 0.9);
+}
+
+.changeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.mutedText {
+  margin-top: 0.35rem;
+  color: rgba(100, 116, 139, 0.9);
+  font-size: 0.88rem;
+}
+
+.inlineNotice {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #f8fafc;
+  font-size: 0.92rem;
+  color: rgba(30, 41, 59, 0.9);
+}
+
+.noticeSuccess {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.noticeDanger {
+  border-color: #fecdd3;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.noticeNeutral {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.inputLabel {
+  display: block;
+  margin-top: 0.9rem;
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+  color: rgba(30, 41, 59, 0.9);
+}
+
+.textArea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: #fff;
+  resize: vertical;
+  font-size: 1rem;
+  color: rgba(30, 41, 59, 0.95);
 }
 
 .detailGrid {
