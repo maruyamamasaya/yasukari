@@ -213,6 +213,23 @@ export default function ReserveFlowStep3() {
           ? `テスト決済として予約ID ${reservation.id} を保存しました。マイページの予約状況に反映されます。`
           : "テスト決済を保存しました。しばらくしてから予約一覧を確認してください。"
       );
+
+      if (reservation) {
+        void router.push({
+          pathname: "/reserve/flow/complete",
+          query: {
+            reservationId: reservation.id,
+            store,
+            modelName,
+            managementNumber,
+            pickupDate,
+            returnDate,
+            pickupTime,
+            returnTime,
+            totalAmount: totalAmount.toString(),
+          },
+        });
+      }
     } catch (error) {
       console.error("Failed to save test payment", error);
       setStatusMessage("テスト決済の保存に失敗しました。時間をおいて再度お試しください。");
@@ -378,7 +395,7 @@ export default function ReserveFlowStep3() {
                   type="button"
                   onClick={handleTestPayment}
                   disabled={!authChecked || isSavingReservation}
-                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-emerald-600 transition disabled:cursor-not-allowed disabled:bg-emerald-200"
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-gray-900 shadow hover:bg-emerald-600 transition disabled:cursor-not-allowed disabled:bg-emerald-200"
                 >
                   {isSavingReservation ? "保存中…" : "テスト決済を保存"}
                 </button>
