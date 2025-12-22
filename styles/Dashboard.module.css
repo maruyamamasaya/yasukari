@@ -557,12 +557,33 @@
   align-items: stretch;
 }
 
+.buttonRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .calendarHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.calendarUtilityRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.25rem 0.35rem 0;
+}
+
+.calendarUtilityText {
+  flex: 1;
+  color: rgba(71, 85, 105, 0.92);
+  line-height: 1.5;
+  min-width: 240px;
 }
 
 .calendarControls {
@@ -752,6 +773,32 @@
 .statusLegendLabel {
   font-weight: 700;
   color: rgba(30, 41, 59, 0.95);
+}
+
+.saveHelper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.9rem;
+  background: #f8fafc;
+  border: 1px dashed rgba(148, 163, 184, 0.65);
+}
+
+.saveHelperIcon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.saveHelperTitle {
+  font-weight: 800;
+  color: rgba(30, 41, 59, 0.95);
+  margin-bottom: 0.15rem;
+}
+
+.saveButton {
+  min-width: 240px;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
 }
 
 .menuLinkList {

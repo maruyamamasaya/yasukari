@@ -306,6 +306,32 @@ export default function BikeScheduleDetailPage() {
     setStatusEditor(null);
   };
 
+  const handleBulkSetMonthAvailable = () => {
+    if (!selectedVehicle) {
+      setFormError("車両情報の読み込みを確認してから操作してください。");
+      return;
+    }
+
+    const year = displayMonth.getFullYear();
+    const month = displayMonth.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const updatedAvailability: RentalAvailabilityMap = { ...availabilityMap };
+
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const dateKey = formatDateInput(new Date(year, month, day));
+      updatedAvailability[dateKey] = { status: "AVAILABLE" };
+    }
+
+    setAvailabilityMap(updatedAvailability);
+    setActiveDate(null);
+    setActiveNote("");
+    setActiveStatus("AVAILABLE");
+    setSaveSuccess(null);
+    setFormError(null);
+    setStatusEditor(null);
+  };
+
   const handleSave = async () => {
     if (!selectedVehicle) {
       setSaveError("スケジュールを保存する車両を確認できませんでした。");
@@ -450,6 +476,19 @@ export default function BikeScheduleDetailPage() {
                           </button>
                         </div>
                       </div>
+                      <div className={styles.calendarUtilityRow}>
+                        <div className={styles.calendarUtilityText}>
+                          表示中の1か月分をまとめて「レンタル可」に設定できます。設定後に保存ボタンを押してください。
+                        </div>
+                        <button
+                          type="button"
+                          className={formStyles.primaryButton}
+                          onClick={handleBulkSetMonthAvailable}
+                        >
+                          <span aria-hidden>🗓️</span>
+                          <span>今月をレンタル可で一括設定</span>
+                        </button>
+                      </div>
                       <div className={`${styles.calendarCard} ${styles.calendarCardRaised}`} ref={calendarWrapperRef}>
                         <table className={styles.calendarTable}>
                           <thead>
@@ -587,18 +626,27 @@ export default function BikeScheduleDetailPage() {
                     </div>
                     <div className={styles.menuGroup} style={{ minHeight: "100%" }}>
                       <div className={styles.menuGroupTitle}>ステータスの保存</div>
-                      <p className={styles.menuGroupNote}>
-                        カレンダーで設定したステータスとメモを保存すると、データベースに反映されます。
-                      </p>
+                      <div className={styles.saveHelper}>
+                        <div className={styles.saveHelperIcon} aria-hidden>
+                          💾
+                        </div>
+                        <div>
+                          <div className={styles.saveHelperTitle}>設定内容を反映するには保存が必要です</div>
+                          <p className={styles.menuGroupNote}>
+                            カレンダーで設定したステータスとメモは、保存ボタンを押すとデータベースに反映されます。
+                          </p>
+                        </div>
+                      </div>
                       {formError && <p className={formStyles.formError}>{formError}</p>}
                       <div className={styles.buttonRow}>
                         <button
                           type="button"
-                          className={formStyles.submitButton}
+                          className={`${formStyles.primaryButton} ${styles.saveButton}`}
                           onClick={handleSave}
                           disabled={isSaving}
                         >
-                          {isSaving ? "保存中..." : "保存"}
+                          <span aria-hidden>{isSaving ? "⏳" : "✅"}</span>
+                          <span>{isSaving ? "保存中..." : "変更内容を保存"}</span>
                         </button>
                       </div>
                       {saveError && <p className={formStyles.formError}>{saveError}</p>}
