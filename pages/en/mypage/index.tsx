@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 
 import type { RegistrationData } from '../../../types/registration';
 import { REQUIRED_REGISTRATION_FIELDS } from '../../../types/registration';
+import type { Reservation } from '../../../lib/reservations';
 
 type SessionUser = {
   id: string;
@@ -20,6 +21,10 @@ type UserAttributes = {
 };
 
 export default function MyPageEn() {
+  const manualVideoUrl = process.env.NEXT_PUBLIC_MANUAL_VIDEO_URL ?? '/help#manual-video';
+  const paymentInfoUrl = process.env.NEXT_PUBLIC_PAYMENT_INFO_URL ?? '/help#payment-info';
+  const rentalContractUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL ?? '/help#rental-contract';
+
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -30,6 +35,9 @@ export default function MyPageEn() {
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
   const [registrationError, setRegistrationError] = useState('');
   const [loadingRegistration, setLoadingRegistration] = useState(true);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [reservationsError, setReservationsError] = useState('');
+  const [loadingReservations, setLoadingReservations] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -155,6 +163,44 @@ export default function MyPageEn() {
     return () => controller.abort();
   }, [loading, router]);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const controller = new AbortController();
+    const fetchReservations = async () => {
+      try {
+        const response = await fetch('/api/reservations/me', {
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (response.status === 401) {
+          await router.replace('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('failed to load reservations');
+        }
+
+        const data = (await response.json()) as { reservations?: Reservation[] };
+        setReservations(data.reservations ?? []);
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          console.error(err);
+          setReservationsError('Could not load your reservations. Please try again later.');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingReservations(false);
+        }
+      }
+    };
+
+    void fetchReservations();
+    return () => controller.abort();
+  }, [loading, router]);
+
   const localeLabel = (value: string | undefined) => {
     if (!value) return 'Not set';
     if (value.toLowerCase().startsWith('jp')) return 'Japanese region';
@@ -172,6 +218,47 @@ export default function MyPageEn() {
     if (!registration) return false;
     return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(registration[field]));
   }, [registration]);
+
+  const formatReservationDatetime = (value: string) => {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '-';
+
+    return parsed.toLocaleString('en-US', {
+      timeZone: 'Asia/Tokyo',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const reservationCompletionLabel = (flag: boolean) => (flag ? 'Reservation complete' : 'In use');
+
+  const markVehicleChangeSeen = async (reservationId: string) => {
+    try {
+      await fetch(`/api/reservations/${reservationId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vehicleChangeNotified: true }),
+      });
+
+      setReservations((prev) =>
+        prev.map((reservation) =>
+          reservation.id === reservationId ? { ...reservation, vehicleChangeNotified: true } : reservation
+        )
+      );
+    } catch (error) {
+      console.error('Failed to mark vehicle change as seen', error);
+    }
+  };
+
+  useEffect(() => {
+    reservations.forEach((reservation) => {
+      if (reservation.vehicleChangedAt && !reservation.vehicleChangeNotified) {
+        void markVehicleChangeSeen(reservation.id);
+      }
+    });
+  }, [reservations]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -237,6 +324,104 @@ export default function MyPageEn() {
                 <p className="text-sm text-red-700">{error}</p>
               </section>
             ) : null}
+
+            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Reservations</h2>
+                  <p className="mt-1 text-sm text-gray-600">Your latest bookings and usage will appear here.</p>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                  Show saved reservations
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-3 text-sm text-gray-700">
+                {reservationsError ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">{reservationsError}</p>
+                ) : loadingReservations ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">Loading reservation data…</p>
+                ) : reservations.length === 0 ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">
+                    You have no saved reservations yet. Press the test payment button to save a sample entry here.
+                  </p>
+                ) : (
+                  <ul className="space-y-3">
+                    {reservations.map((reservation) => (
+                      <li
+                        key={reservation.id}
+                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs text-gray-500">ID: {reservation.id}</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {reservation.startAt ? formatReservationDatetime(reservation.startAt) : 'Not set'}
+                            </p>
+                          </div>
+                          <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800 ring-1 ring-inset ring-gray-200">
+                            {reservationCompletionLabel(Boolean(reservation.isCompleted))}
+                          </span>
+                        </div>
+
+                        <dl className="mt-3 grid gap-3 text-xs text-gray-600 sm:grid-cols-2">
+                          <div>
+                            <dt className="font-semibold text-gray-500">Vehicle</dt>
+                            <dd className="mt-1 text-gray-900">{reservation.vehicleName ?? '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-semibold text-gray-500">Vehicle status</dt>
+                            <dd className="mt-1 text-gray-900">{reservation.vehicleStatus ?? '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-semibold text-gray-500">Pickup store</dt>
+                            <dd className="mt-1 text-gray-900">{reservation.pickupStoreName ?? '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-semibold text-gray-500">Return store</dt>
+                            <dd className="mt-1 text-gray-900">{reservation.returnStoreName ?? '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-semibold text-gray-500">Usage start</dt>
+                            <dd className="mt-1 text-gray-900">{reservation.rentalStartedAt ? formatReservationDatetime(reservation.rentalStartedAt) : 'Not set'}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-semibold text-gray-500">Usage end</dt>
+                            <dd className="mt-1 text-gray-900">{reservation.rentalCompletedAt ? formatReservationDatetime(reservation.rentalCompletedAt) : 'Not set'}</dd>
+                          </div>
+                        </dl>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Link
+                            href={manualVideoUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Watch manual video
+                          </Link>
+                          <Link
+                            href={paymentInfoUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Check payment info
+                          </Link>
+                          <Link
+                            href={rentalContractUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View rental contract
+                          </Link>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
