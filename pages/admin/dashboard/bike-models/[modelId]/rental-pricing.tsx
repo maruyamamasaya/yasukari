@@ -1,12 +1,12 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 import type { ChangeEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import DashboardLayout from "../../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../../styles/AdminForm.module.css";
 import tableStyles from "../../../../../styles/AdminTable.module.css";
 import styles from "../../../../../styles/Dashboard.module.css";
-import { BikeModel } from "../../../../../lib/dashboard/types";
+import { BikeClass, BikeModel } from "../../../../../lib/dashboard/types";
 import { toNumber } from "../../../../../lib/dashboard/utils";
 
 type VehicleRentalPrice = {
@@ -35,6 +35,26 @@ type Plan = {
 };
 
 const MAX_DAYS = 31;
+
+const durationLabels = {
+  "24h": "24時間",
+  "2d": "2日間",
+  "4d": "4日間",
+  "1w": "1週間",
+  "2w": "2週間",
+  "1m": "1ヶ月",
+} as const;
+
+const durationDays = {
+  "24h": 1,
+  "2d": 2,
+  "4d": 4,
+  "1w": 7,
+  "2w": 14,
+  "1m": 31,
+} as const;
+
+type DurationPriceKey = keyof typeof durationLabels;
 
 const BASE_RATES: BaseRate[] = [
   { days: 1, label: "24時間", placeholder: "例: 4,000" },
@@ -85,6 +105,28 @@ const buildPlans = (options: RateOption[], maxDays: number): (Plan | null)[] => 
 const formatPrice = (price: number | null) =>
   typeof price === "number" ? `${price.toLocaleString()}円` : "-";
 
+const buildRateOptionsFromClass = (bikeClass: BikeClass | null): RateOption[] => {
+  if (!bikeClass?.base_prices) {
+    return [];
+  }
+
+  return (Object.entries(bikeClass.base_prices) as [DurationPriceKey, number][]) // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
+    .filter((entry): entry is [DurationPriceKey, number] =>
+      entry[1] != null && Number.isFinite(entry[1])
+    )
+    .map(([key, price]) => ({
+      days: durationDays[key],
+      label: durationLabels[key],
+      price,
+    }))
+    .sort((a, b) => a.days - b.days || a.price - b.price);
+};
+
+const buildEntriesFromPlans = (plans: (Plan | null)[]) =>
+  plans
+    .map((plan, index) => (plan ? { days: index + 1, price: plan.cost } : null))
+    .filter((item): item is { days: number; price: number } => item != null);
+
 export default function BikeModelRentalPricingPage() {
   const router = useRouter();
   const modelIdParam = router.query.modelId;
@@ -94,6 +136,7 @@ export default function BikeModelRentalPricingPage() {
   }, [modelIdParam]);
 
   const [model, setModel] = useState<BikeModel | null>(null);
+  const [bikeClass, setBikeClass] = useState<BikeClass | null>(null);
   const [prices, setPrices] = useState<VehicleRentalPrice[]>([]);
   const [baseInputs, setBaseInputs] = useState<Record<number, string>>(() =>
     BASE_RATES.reduce<Record<number, string>>((acc, rate) => {
@@ -103,8 +146,10 @@ export default function BikeModelRentalPricingPage() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAutoRegistering, setIsAutoRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const autoRegisterAttemptedRef = useRef(false);
 
   useEffect(() => {
     if (!router.isReady || modelId == null) {
@@ -113,13 +158,20 @@ export default function BikeModelRentalPricingPage() {
 
     const loadModel = async () => {
       try {
-        const response = await fetch("/api/bike-models");
-        if (!response.ok) {
-          setError("車種情報の取得に失敗しました。");
+        const [modelsResponse, classesResponse] = await Promise.all([
+          fetch("/api/bike-models"),
+          fetch("/api/bike-classes"),
+        ]);
+
+        if (!modelsResponse.ok || !classesResponse.ok) {
+          setError("車種・クラス情報の取得に失敗しました。");
           return;
         }
 
-        const models: BikeModel[] = await response.json();
+        const [models, bikeClasses] = await Promise.all([
+          modelsResponse.json() as Promise<BikeModel[]>,
+          classesResponse.json() as Promise<BikeClass[]>,
+        ]);
         const found = models.find((item) => item.modelId === modelId) ?? null;
         if (!found) {
           setError("指定された車種が見つかりません。");
@@ -127,6 +179,8 @@ export default function BikeModelRentalPricingPage() {
         }
 
         setModel(found);
+        const relatedClass = bikeClasses.find((item) => item.classId === found.classId);
+        setBikeClass(relatedClass ?? null);
       } catch (loadError) {
         console.error("Failed to load bike model", loadError);
         setError("車種情報の取得に失敗しました。");
@@ -193,6 +247,22 @@ export default function BikeModelRentalPricingPage() {
     });
   }, [prices]);
 
+  useEffect(() => {
+    if (classBaseOptions.length === 0) {
+      return;
+    }
+
+    setBaseInputs((prev) => {
+      const next = { ...prev };
+      classBaseOptions.forEach((option) => {
+        if (!prev[option.days]) {
+          next[option.days] = String(option.price);
+        }
+      });
+      return next;
+    });
+  }, [classBaseOptions]);
+
   const baseOptions = useMemo(() => {
     const options: RateOption[] = [];
     BASE_RATES.forEach(({ days, label }) => {
@@ -209,6 +279,11 @@ export default function BikeModelRentalPricingPage() {
     return options;
   }, [baseInputs]);
 
+  const classBaseOptions = useMemo(
+    () => buildRateOptionsFromClass(bikeClass),
+    [bikeClass]
+  );
+
   const autoPlans = useMemo(() => buildPlans(baseOptions, MAX_DAYS), [baseOptions]);
 
   const handleBaseInputChange = (day: number) => (event: ChangeEvent<HTMLInputElement>) => {
@@ -216,7 +291,57 @@ export default function BikeModelRentalPricingPage() {
     setBaseInputs((prev) => ({ ...prev, [day]: value }));
   };
 
-  const handleSaveAutoPrices = async () => {
+  const upsertComputedPrices = useCallback(
+    async (
+      entries: { days: number; price: number }[],
+      successMessage: string,
+      isAuto = false
+    ) => {
+      setIsSubmitting(true);
+      setIsAutoRegistering(isAuto);
+      setError(null);
+      setSuccess(null);
+
+      try {
+        const updated: VehicleRentalPrice[] = [];
+        for (const entry of entries) {
+          const response = await fetch("/api/vehicle-rental-prices", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              vehicle_type_id: modelId,
+              days: entry.days,
+              price: entry.price,
+            }),
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data?.message ?? "料金の保存に失敗しました。");
+          }
+
+          const item: VehicleRentalPrice = await response.json();
+          updated.push(item);
+        }
+
+        setPrices((prev) => {
+          const targetDays = new Set(updated.map((item) => item.days));
+          const others = prev.filter((price) => !targetDays.has(price.days));
+          return [...others, ...updated];
+        });
+        setSuccess(successMessage);
+      } catch (submitError) {
+        console.error("Failed to save rental price", submitError);
+        setError(submitError instanceof Error ? submitError.message : "料金の保存に失敗しました。");
+      } finally {
+        setIsSubmitting(false);
+        setIsAutoRegistering(false);
+      }
+    },
+    [modelId]
+  );
+
+  const handleSaveAutoPrices = useCallback(async () => {
     if (isSubmitting) {
       return;
     }
@@ -226,54 +351,84 @@ export default function BikeModelRentalPricingPage() {
       return;
     }
 
-    const computed = autoPlans
-      .map((plan, index) => (plan ? { days: index + 1, price: plan.cost } : null))
-      .filter((item): item is { days: number; price: number } => item != null);
+    const computed = buildEntriesFromPlans(autoPlans);
 
     if (computed.length === 0) {
       setError("自動計算できる料金がありません。基準料金を入力してください。");
       return;
     }
 
-    setIsSubmitting(true);
-    setError(null);
-    setSuccess(null);
+    await upsertComputedPrices(computed, "自動計算した料金を保存しました。");
+  }, [autoPlans, isSubmitting, modelId, upsertComputedPrices]);
 
-    try {
-      const updated: VehicleRentalPrice[] = [];
-      for (const entry of computed) {
-        const response = await fetch("/api/vehicle-rental-prices", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            vehicle_type_id: modelId,
-            days: entry.days,
-            price: entry.price,
-          }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data?.message ?? "料金の保存に失敗しました。");
-        }
-
-        const item: VehicleRentalPrice = await response.json();
-        updated.push(item);
+  const handleAutoRegisterFromClass = useCallback(
+    async (triggeredAutomatically = false) => {
+      if (isSubmitting || isAutoRegistering) {
+        return;
       }
 
-      setPrices((prev) => {
-        const targetDays = new Set(updated.map((item) => item.days));
-        const others = prev.filter((price) => !targetDays.has(price.days));
-        return [...others, ...updated];
+      if (modelId == null) {
+        setError("車種IDを正しく指定してください。");
+        return;
+      }
+
+      if (classBaseOptions.length === 0) {
+        if (!triggeredAutomatically) {
+          setError("クラスに料金の初期値が設定されていません。");
+        }
+        return;
+      }
+
+      autoRegisterAttemptedRef.current = true;
+
+      setBaseInputs((prev) => {
+        const next = { ...prev };
+        classBaseOptions.forEach((option) => {
+          next[option.days] = String(option.price);
+        });
+        return next;
       });
-      setSuccess("自動計算した料金を保存しました。");
-    } catch (submitError) {
-      console.error("Failed to save rental price", submitError);
-      setError(submitError instanceof Error ? submitError.message : "料金の保存に失敗しました。");
-    } finally {
-      setIsSubmitting(false);
+
+      const computed = buildEntriesFromPlans(buildPlans(classBaseOptions, MAX_DAYS));
+
+      if (computed.length === 0) {
+        if (!triggeredAutomatically) {
+          setError("クラスの料金から計算できる日次料金がありません。");
+        }
+        return;
+      }
+
+      await upsertComputedPrices(
+        computed,
+        "クラスの料金をもとに初期値を登録しました。",
+        true
+      );
+    },
+    [
+      classBaseOptions,
+      isAutoRegistering,
+      isSubmitting,
+      modelId,
+      upsertComputedPrices,
+    ]
+  );
+
+  useEffect(() => {
+    if (autoRegisterAttemptedRef.current) {
+      return;
     }
-  };
+
+    if (!router.isReady || modelId == null || prices.length > 0) {
+      return;
+    }
+
+    if (classBaseOptions.length === 0) {
+      return;
+    }
+
+    autoRegisterAttemptedRef.current = true;
+    void handleAutoRegisterFromClass(true);
+  }, [classBaseOptions, handleAutoRegisterFromClass, modelId, prices.length, router.isReady]);
 
   const handleDelete = async (price: VehicleRentalPrice) => {
     if (isSubmitting) {
@@ -443,13 +598,34 @@ export default function BikeModelRentalPricingPage() {
           </div>
 
           <div className={formStyles.card}>
-            <div className={formStyles.body}>
-              <h2 className={styles.sectionTitle}>設定済みの料金</h2>
-              {isLoading && <p className={formStyles.hint}>読み込み中です…</p>}
-              {!isLoading && sortedPrices.length === 0 && (
-                <p className={formStyles.hint}>まだ料金が登録されていません。</p>
-              )}
-              {!isLoading && sortedPrices.length > 0 && (
+              <div className={formStyles.body}>
+                <h2 className={styles.sectionTitle}>設定済みの料金</h2>
+                {isLoading && <p className={formStyles.hint}>読み込み中です…</p>}
+                {!isLoading && sortedPrices.length === 0 && (
+                  <div className={formStyles.stacked}>
+                    <p className={formStyles.hint}>まだ料金が登録されていません。</p>
+                    <div className={formStyles.actions}>
+                      <button
+                        type="button"
+                        className={formStyles.primaryButton}
+                        onClick={() => void handleAutoRegisterFromClass(false)}
+                        disabled={
+                          isSubmitting ||
+                          isAutoRegistering ||
+                          classBaseOptions.length === 0
+                        }
+                      >
+                        {isAutoRegistering ? "自動登録中..." : "クラスの料金から自動登録"}
+                      </button>
+                    </div>
+                    {classBaseOptions.length === 0 && (
+                      <p className={formStyles.hint}>
+                        関連クラスに基準料金が未設定のため自動登録できません。
+                      </p>
+                    )}
+                  </div>
+                )}
+                {!isLoading && sortedPrices.length > 0 && (
                 <div className={tableStyles.wrapper}>
                   <table className={tableStyles.table}>
                     <thead>
