@@ -147,6 +147,7 @@ export default function BikeModelRentalPricingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAutoRegistering, setIsAutoRegistering] = useState(false);
+  const [hasLoadedPrices, setHasLoadedPrices] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const autoRegisterAttemptedRef = useRef(false);
@@ -196,6 +197,7 @@ export default function BikeModelRentalPricingPage() {
     }
 
     const loadPrices = async () => {
+      setHasLoadedPrices(false);
       setIsLoading(true);
       setError(null);
       try {
@@ -216,6 +218,7 @@ export default function BikeModelRentalPricingPage() {
         setError("料金情報の取得に失敗しました。");
       } finally {
         setIsLoading(false);
+        setHasLoadedPrices(true);
       }
     };
 
@@ -418,7 +421,12 @@ export default function BikeModelRentalPricingPage() {
       return;
     }
 
-    if (!router.isReady || modelId == null || prices.length > 0) {
+    if (
+      !router.isReady ||
+      modelId == null ||
+      !hasLoadedPrices ||
+      prices.length > 0
+    ) {
       return;
     }
 
@@ -428,7 +436,14 @@ export default function BikeModelRentalPricingPage() {
 
     autoRegisterAttemptedRef.current = true;
     void handleAutoRegisterFromClass(true);
-  }, [classBaseOptions, handleAutoRegisterFromClass, modelId, prices.length, router.isReady]);
+  }, [
+    classBaseOptions,
+    handleAutoRegisterFromClass,
+    hasLoadedPrices,
+    modelId,
+    prices.length,
+    router.isReady,
+  ]);
 
   const handleDelete = async (price: VehicleRentalPrice) => {
     if (isSubmitting) {
