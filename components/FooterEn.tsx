@@ -21,10 +21,10 @@ export default function FooterEn() {
               Rentals are available from one day, with monthly plans and corporate services.
             </p>
             <div className="space-y-1">
-              <Link href="/" className="text-red-600 hover:underline block">
+              <Link href="/en" className="text-red-600 hover:underline block">
                 Home
               </Link>
-              <Link href="/contact" className="text-red-600 hover:underline block">
+              <Link href="/en/contact" className="text-red-600 hover:underline block">
                 Contact us
               </Link>
             </div>
@@ -82,12 +82,12 @@ export default function FooterEn() {
                 </Link>
               </li>
               <li>
-                <Link href="/beginner" className="hover:underline">
+                <Link href="/en/beginner" className="hover:underline">
                   Beginner's guide
                 </Link>
               </li>
               <li>
-                <Link href="/help" className="hover:underline">
+                <Link href="/en/help" className="hover:underline">
                   FAQ
                 </Link>
               </li>

@@ -148,7 +148,7 @@ export default function HomeEn({ blogSlides, bikeModelsAll, bikeClasses }: Props
     },
     {
       title: "See all models",
-      href: "/products",
+      href: "/en/products",
       icon: <FaMotorcycle className="h-16 w-16 text-red-500" />,
       keywords: "\u00A0",
     },
