@@ -15,6 +15,7 @@ import {
   BikeModel,
 } from "../../../../lib/dashboard/types";
 import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
+import { buildMaintenanceAvailability, formatDateKey } from "../../../../lib/dashboard/utils";
 
 const STATUS_LABELS: Record<RentalAvailabilityStatus, string> = {
   AVAILABLE: "レンタル可",
@@ -28,13 +29,6 @@ const STATUS_COLORS: Record<RentalAvailabilityStatus, string> = {
   UNAVAILABLE: "#ef4444",
   MAINTENANCE: "#f59e0b",
   RENTED: "#3b82f6",
-};
-
-const formatDateInput = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
 };
 
 type CalendarCell = {
@@ -63,7 +57,7 @@ const buildCalendarGrid = (month: Date): CalendarCell[][] => {
       const cellDate = new Date(current);
       row.push({
         date: cellDate,
-        key: formatDateInput(cellDate),
+        key: formatDateKey(cellDate),
         isCurrentMonth: cellDate.getMonth() === month.getMonth(),
       });
       current.setDate(current.getDate() + 1);
@@ -151,6 +145,10 @@ export default function BikeScheduleDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
   const [statusEditor, setStatusEditor] = useState<StatusEditorState | null>(null);
+  const [maintenanceStartDate, setMaintenanceStartDate] = useState(() =>
+    formatDateKey(new Date())
+  );
+  const [maintenanceMonths, setMaintenanceMonths] = useState(1);
 
   const calendarWrapperRef = useRef<HTMLDivElement | null>(null);
   const statusEditorRef = useRef<HTMLDivElement | null>(null);
@@ -198,17 +196,23 @@ export default function BikeScheduleDetailPage() {
   useEffect(() => {
     if (selectedVehicle) {
       const normalized = normalizeAvailabilityMap(selectedVehicle.rentalAvailability);
-    setAvailabilityMap(normalized);
-  } else {
-    setAvailabilityMap({});
-  }
-  setActiveDate(null);
-  setActiveNote("");
-  setActiveStatus("AVAILABLE");
-  setStatusEditor(null);
-  setSaveSuccess(null);
-  setSaveError(null);
-}, [selectedVehicle]);
+      setAvailabilityMap(normalized);
+      setMaintenanceStartDate(
+        selectedVehicle.liabilityInsuranceExpiryDate ??
+          selectedVehicle.inspectionExpiryDate ??
+          formatDateKey(new Date())
+      );
+    } else {
+      setAvailabilityMap({});
+      setMaintenanceStartDate(formatDateKey(new Date()));
+    }
+    setActiveDate(null);
+    setActiveNote("");
+    setActiveStatus("AVAILABLE");
+    setStatusEditor(null);
+    setSaveSuccess(null);
+    setSaveError(null);
+  }, [selectedVehicle]);
 
   const displayMonth = useMemo(() => {
     const today = new Date();
@@ -319,7 +323,7 @@ export default function BikeScheduleDetailPage() {
     const updatedAvailability: RentalAvailabilityMap = { ...availabilityMap };
 
     for (let day = 1; day <= daysInMonth; day += 1) {
-      const dateKey = formatDateInput(new Date(year, month, day));
+      const dateKey = formatDateKey(new Date(year, month, day));
       updatedAvailability[dateKey] = { status: "AVAILABLE" };
     }
 
@@ -388,6 +392,30 @@ export default function BikeScheduleDetailPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleApplyMaintenanceRange = (
+    startDate: string,
+    label: string,
+    months = maintenanceMonths
+  ) => {
+    if (!startDate) {
+      setFormError(`${label}の開始日を設定してください。`);
+      return;
+    }
+
+    const maintenanceMap = buildMaintenanceAvailability(startDate, months, label);
+
+    if (Object.keys(maintenanceMap).length === 0) {
+      setFormError(`${label}の日付が正しくありません。`);
+      return;
+    }
+
+    setAvailabilityMap((prev) => ({ ...prev, ...maintenanceMap }));
+    setFormError(null);
+    setSaveSuccess(null);
+    setStatusEditor(null);
+    setActiveDate(null);
   };
 
   return (
@@ -489,11 +517,75 @@ export default function BikeScheduleDetailPage() {
                           <span>今月をレンタル可で一括設定</span>
                         </button>
                       </div>
-                      <div className={`${styles.calendarCard} ${styles.calendarCardRaised}`} ref={calendarWrapperRef}>
-                        <table className={styles.calendarTable}>
-                          <thead>
-                            <tr>
-                              {"日月火水木金土".split("").map((weekday) => (
+                      <div className={styles.calendarUtilityRow}>
+                        <div className={styles.calendarUtilityText}>
+                          メンテナンス期間を一括で設定できます。月数は共通で利用されます（最小1か月）。
+                        </div>
+                        <div className={styles.calendarMaintenanceControls}>
+                          <label className={styles.inlineInputLabel}>
+                            開始日
+                            <input
+                              type="date"
+                              value={maintenanceStartDate}
+                              className={formStyles.formInput}
+                              onChange={(event) => setMaintenanceStartDate(event.target.value)}
+                            />
+                          </label>
+                          <label className={styles.inlineInputLabel}>
+                            期間（月）
+                            <input
+                              type="number"
+                              min={1}
+                              value={maintenanceMonths}
+                              className={formStyles.formInput}
+                              onChange={(event) =>
+                                setMaintenanceMonths(Math.max(1, Number(event.target.value) || 1))
+                              }
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            className={formStyles.secondaryButton}
+                            onClick={() => handleApplyMaintenanceRange(maintenanceStartDate, "メンテナンス期間")}
+                          >
+                            <span aria-hidden>🛠️</span>
+                            <span>メンテナンス期間設定</span>
+                          </button>
+                          <button
+                            type="button"
+                            className={formStyles.secondaryButton}
+                            disabled={!selectedVehicle?.liabilityInsuranceExpiryDate}
+                            onClick={() =>
+                              handleApplyMaintenanceRange(
+                                selectedVehicle?.liabilityInsuranceExpiryDate ?? "",
+                                "自賠責満了期間"
+                              )
+                            }
+                          >
+                            <span aria-hidden>🧾</span>
+                            <span>自賠責満了期間設定</span>
+                          </button>
+                          <button
+                            type="button"
+                            className={formStyles.secondaryButton}
+                            disabled={!selectedVehicle?.inspectionExpiryDate}
+                            onClick={() =>
+                              handleApplyMaintenanceRange(
+                                selectedVehicle?.inspectionExpiryDate ?? "",
+                                "車検満了期間"
+                              )
+                            }
+                          >
+                            <span aria-hidden>🧰</span>
+                            <span>車検満了期間設定</span>
+                          </button>
+                        </div>
+                      </div>
+                    <div className={`${styles.calendarCard} ${styles.calendarCardRaised}`} ref={calendarWrapperRef}>
+                      <table className={styles.calendarTable}>
+                        <thead>
+                          <tr>
+                            {"日月火水木金土".split("").map((weekday) => (
                                 <th key={weekday}>{weekday}</th>
                               ))}
                             </tr>

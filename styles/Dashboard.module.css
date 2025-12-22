@@ -586,6 +586,22 @@
   min-width: 240px;
 }
 
+.calendarMaintenanceControls {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.inlineInputLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: rgba(51, 65, 85, 0.95);
+  min-width: 160px;
+}
+
 .calendarControls {
   display: inline-flex;
   align-items: center;
