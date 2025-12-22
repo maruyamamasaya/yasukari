@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 
 import type { RegistrationData } from '../../types/registration';
 import { REQUIRED_REGISTRATION_FIELDS } from '../../types/registration';
+import type { Reservation } from '../../lib/reservations';
 
 type SessionUser = {
   id: string;
@@ -30,6 +31,9 @@ export default function MyPage() {
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
   const [registrationError, setRegistrationError] = useState('');
   const [loadingRegistration, setLoadingRegistration] = useState(true);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [reservationsError, setReservationsError] = useState('');
+  const [loadingReservations, setLoadingReservations] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -155,6 +159,44 @@ export default function MyPage() {
     return () => controller.abort();
   }, [loading, router]);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const controller = new AbortController();
+    const fetchReservations = async () => {
+      try {
+        const response = await fetch('/api/reservations/me', {
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (response.status === 401) {
+          await router.replace('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('failed to load reservations');
+        }
+
+        const data = (await response.json()) as { reservations?: Reservation[] };
+        setReservations(data.reservations ?? []);
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          console.error(err);
+          setReservationsError('予約状況の取得に失敗しました。時間をおいて再度お試しください。');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingReservations(false);
+        }
+      }
+    };
+
+    void fetchReservations();
+    return () => controller.abort();
+  }, [loading, router]);
+
   const localeLabel = (value: string | undefined) => {
     if (!value) return '未設定';
     if (value.toLowerCase().startsWith('jp')) return '日本語圏';
@@ -172,6 +214,21 @@ export default function MyPage() {
     if (!registration) return false;
     return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(registration[field]));
   }, [registration]);
+
+  const formatReservationDatetime = (value: string) => {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '-';
+
+    return parsed.toLocaleString('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const reservationCompletionLabel = (flag: boolean) => (flag ? '予約完了' : '利用中');
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -363,15 +420,74 @@ export default function MyPage() {
                   <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
                   <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
                 </div>
-                <span className="inline-flex items-center rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-200">
-                  準備中
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                  保存された予約を表示
                 </span>
               </div>
 
               <div className="mt-4 space-y-3 text-sm text-gray-700">
-                <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">
-                  予約状況の表示機能を準備しています。公開まで今しばらくお待ちください。
-                </p>
+                {reservationsError ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">{reservationsError}</p>
+                ) : loadingReservations ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">予約データを読み込み中です…</p>
+                ) : reservations.length === 0 ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">
+                    まだ予約データがありません。テスト決済ボタンを押すと保存内容がここに表示されます。
+                  </p>
+                ) : (
+                  <ul className="space-y-3">
+                    {reservations.map((reservation) => (
+                      <li
+                        key={reservation.id}
+                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs text-gray-500">ID: {reservation.id}</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {reservation.storeName} / {reservation.vehicleModel}
+                            </p>
+                            <p className="text-xs text-gray-600">{reservation.vehicleCode} {reservation.vehiclePlate}</p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+                              {reservation.status}
+                            </span>
+                            <span
+                              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${reservation.reservationCompletedFlag ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}
+                            >
+                              {reservationCompletionLabel(reservation.reservationCompletedFlag)}
+                            </span>
+                          </div>
+                        </div>
+                        <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">貸出〜返却</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {formatReservationDatetime(reservation.pickupAt)} → {formatReservationDatetime(reservation.returnAt)}
+                            </dd>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">決済金額</dt>
+                            <dd className="font-semibold text-gray-900">{reservation.paymentAmount} 円</dd>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">決済日時</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {reservation.paymentDate ? formatReservationDatetime(reservation.paymentDate) : '未登録'}
+                            </dd>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">完了日時（保管のみ）</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {reservation.rentalCompletedAt ? formatReservationDatetime(reservation.rentalCompletedAt) : '未設定'}
+                            </dd>
+                          </div>
+                        </dl>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </section>
 
