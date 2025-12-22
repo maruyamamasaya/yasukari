@@ -14,11 +14,28 @@ const TABLE_NAME =
   "vehicle_rental_prices";
 
 type VehicleRentalPrice = {
-  vehicle_type_id: number;
+  vehicle_type_id: string;
   days: number;
   price: number;
   createdAt?: string;
   updatedAt?: string;
+};
+
+const parseVehicleTypeId = (value: unknown): string | null => {
+  if (Array.isArray(value)) {
+    return parseVehicleTypeId(value[0]);
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  return null;
 };
 
 const parsePositiveInteger = (value: unknown): number | null => {
@@ -41,7 +58,7 @@ async function handleGet(
   request: NextApiRequest,
   response: NextApiResponse<VehicleRentalPrice[] | { message: string }>
 ) {
-  const vehicleTypeId = parsePositiveInteger(request.query.vehicle_type_id);
+  const vehicleTypeId = parseVehicleTypeId(request.query.vehicle_type_id);
 
   if (!vehicleTypeId) {
     response
@@ -80,7 +97,7 @@ async function handlePut(
 ) {
   const { vehicle_type_id, days, price } = request.body ?? {};
 
-  const vehicleTypeId = parsePositiveInteger(vehicle_type_id);
+  const vehicleTypeId = parseVehicleTypeId(vehicle_type_id);
   if (!vehicleTypeId) {
     response
       .status(400)
@@ -140,7 +157,7 @@ async function handleDelete(
   response: NextApiResponse<{ deleted: boolean } | { message: string }>
 ) {
   const { vehicle_type_id, days } = request.body ?? {};
-  const vehicleTypeId = parsePositiveInteger(vehicle_type_id);
+  const vehicleTypeId = parseVehicleTypeId(vehicle_type_id);
   const normalizedDays = parsePositiveInteger(days);
 
   if (!vehicleTypeId || !normalizedDays) {
