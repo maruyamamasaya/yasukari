@@ -13,6 +13,8 @@ export default function HeaderEn() {
   const menuRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
+  const isReservationPaymentFlow = /^(\/en)?\/reserve\/(models|flow)/.test(router.pathname);
+  const languageSwitchDisabled = updatingLocale || isReservationPaymentFlow;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -71,7 +73,7 @@ export default function HeaderEn() {
   }, [menuOpen]);
 
   const handleLanguageClick = async (target: 'ja' | 'en') => {
-    if (updatingLocale) return;
+    if (languageSwitchDisabled) return;
 
     if (sessionUser) {
       setUpdatingLocale(true);
@@ -89,12 +91,17 @@ export default function HeaderEn() {
       }
     }
 
-    if (target === 'en') {
-      await router.push('/en');
-      return;
-    }
+    const hasEnPrefix = router.asPath.startsWith('/en');
+    const nextPath =
+      target === 'en'
+        ? hasEnPrefix
+          ? router.asPath
+          : `/en${router.asPath}`
+        : hasEnPrefix
+          ? router.asPath.slice(3) || '/'
+          : router.asPath || '/';
 
-    await router.push('/');
+    await router.push(nextPath);
   };
   return (
     <div className="sticky top-0 z-50">
@@ -152,7 +159,7 @@ export default function HeaderEn() {
                   type="button"
                   className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
                   onClick={() => handleLanguageClick('en')}
-                  disabled={updatingLocale}
+                  disabled={languageSwitchDisabled}
                   aria-current="page"
                 >
                   English
@@ -162,7 +169,7 @@ export default function HeaderEn() {
                   type="button"
                   className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
                   onClick={() => handleLanguageClick('ja')}
-                  disabled={updatingLocale}
+                  disabled={languageSwitchDisabled}
                 >
                   日本語
                 </button>
@@ -219,7 +226,7 @@ export default function HeaderEn() {
                     type="button"
                     className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
                     onClick={() => handleLanguageClick('en')}
-                    disabled={updatingLocale}
+                    disabled={languageSwitchDisabled}
                     aria-current="page"
                   >
                     English
@@ -229,7 +236,7 @@ export default function HeaderEn() {
                     type="button"
                     className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
                     onClick={() => handleLanguageClick('ja')}
-                    disabled={updatingLocale}
+                    disabled={languageSwitchDisabled}
                   >
                     日本語
                   </button>
