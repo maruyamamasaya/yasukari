@@ -9,7 +9,9 @@ import {
 import { getDocumentClient } from "../../lib/dynamodb";
 
 const TABLE_NAME =
-  process.env.VEHICLE_RENTAL_PRICE_TABLE ?? "VehicleRentalPriceTable";
+  process.env.VEHICLE_RENTAL_PRICE_TABLE ||
+  process.env.VEHICLE_RENTAL_PRICES_TABLE ||
+  "vehicle_rental_prices";
 
 type VehicleRentalPrice = {
   vehicle_type_id: number;
