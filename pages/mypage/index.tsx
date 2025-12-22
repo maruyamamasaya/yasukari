@@ -329,6 +329,121 @@ export default function MyPage() {
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
+                  <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
+                  <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                  保存された予約を表示
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-3 text-sm text-gray-700">
+                {reservationsError ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">{reservationsError}</p>
+                ) : loadingReservations ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">予約データを読み込み中です…</p>
+                ) : reservations.length === 0 ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">
+                    まだ予約データがありません。テスト決済ボタンを押すと保存内容がここに表示されます。
+                  </p>
+                ) : (
+                  <ul className="space-y-3">
+                    {reservations.map((reservation) => (
+                      <li
+                        key={reservation.id}
+                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs text-gray-500">ID: {reservation.id}</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {reservation.storeName} / {reservation.vehicleModel}
+                            </p>
+                            <p className="text-xs text-gray-600">{reservation.vehicleCode} {reservation.vehiclePlate}</p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+                              {reservation.status}
+                            </span>
+                            <span
+                              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${reservation.reservationCompletedFlag ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}
+                            >
+                              {reservationCompletionLabel(reservation.reservationCompletedFlag)}
+                            </span>
+                          </div>
+                        </div>
+                        {reservation.vehicleChangedAt && !reservation.vehicleChangeNotified && (
+                          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+                            管理側で車両が変更されました。新しい車両: {reservation.vehicleCode} /{' '}
+                            {reservation.vehiclePlate || '未設定'}
+                          </p>
+                        )}
+                        <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">貸出〜返却</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {formatReservationDatetime(reservation.pickupAt)} → {formatReservationDatetime(reservation.returnAt)}
+                            </dd>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">ご予約情報</dt>
+                            <dd className="font-semibold text-gray-900">
+                              車両コード: {reservation.vehicleCode || '-'} / ナンバープレート: {reservation.vehiclePlate || '未設定'}
+                            </dd>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">決済金額</dt>
+                            <dd className="font-semibold text-gray-900">{reservation.paymentAmount} 円</dd>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">決済日時</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {reservation.paymentDate ? formatReservationDatetime(reservation.paymentDate) : '未登録'}
+                            </dd>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">完了日時（保管のみ）</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {reservation.rentalCompletedAt ? formatReservationDatetime(reservation.rentalCompletedAt) : '未設定'}
+                            </dd>
+                          </div>
+                        </dl>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Link
+                            href={manualVideoUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            マニュアル動画を見る
+                          </Link>
+                          <Link
+                            href={paymentInfoUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            決済情報を確認
+                          </Link>
+                          <Link
+                            href={rentalContractUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            貸渡契約書を見る
+                          </Link>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              </section>
+
+              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
                   <h2 className="text-lg font-semibold text-gray-900">プロフィール情報</h2>
                 </div>
                 <Link
@@ -446,120 +561,7 @@ export default function MyPage() {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
-                  <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
-                </div>
-                <span className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
-                  保存された予約を表示
-                </span>
-              </div>
-
-              <div className="mt-4 space-y-3 text-sm text-gray-700">
-                {reservationsError ? (
-                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">{reservationsError}</p>
-                ) : loadingReservations ? (
-                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">予約データを読み込み中です…</p>
-                ) : reservations.length === 0 ? (
-                  <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">
-                    まだ予約データがありません。テスト決済ボタンを押すと保存内容がここに表示されます。
-                  </p>
-                ) : (
-                  <ul className="space-y-3">
-                    {reservations.map((reservation) => (
-                      <li
-                        key={reservation.id}
-                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xs text-gray-500">ID: {reservation.id}</p>
-                            <p className="text-sm font-semibold text-gray-900">
-                              {reservation.storeName} / {reservation.vehicleModel}
-                            </p>
-                            <p className="text-xs text-gray-600">{reservation.vehicleCode} {reservation.vehiclePlate}</p>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
-                              {reservation.status}
-                            </span>
-                            <span
-                              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${reservation.reservationCompletedFlag ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}
-                            >
-                              {reservationCompletionLabel(reservation.reservationCompletedFlag)}
-                            </span>
-                          </div>
-                        </div>
-                        {reservation.vehicleChangedAt && !reservation.vehicleChangeNotified && (
-                          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
-                            管理側で車両が変更されました。新しい車両: {reservation.vehicleCode} /{' '}
-                            {reservation.vehiclePlate || '未設定'}
-                          </p>
-                        )}
-                        <dl className="mt-3 grid gap-2 sm:grid-cols-2">
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">貸出〜返却</dt>
-                            <dd className="font-semibold text-gray-900">
-                              {formatReservationDatetime(reservation.pickupAt)} → {formatReservationDatetime(reservation.returnAt)}
-                            </dd>
-                          </div>
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">ご予約情報</dt>
-                            <dd className="font-semibold text-gray-900">
-                              車両コード: {reservation.vehicleCode || '-'} / ナンバープレート: {reservation.vehiclePlate || '未設定'}
-                            </dd>
-                          </div>
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">決済金額</dt>
-                            <dd className="font-semibold text-gray-900">{reservation.paymentAmount} 円</dd>
-                          </div>
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">決済日時</dt>
-                            <dd className="font-semibold text-gray-900">
-                              {reservation.paymentDate ? formatReservationDatetime(reservation.paymentDate) : '未登録'}
-                            </dd>
-                          </div>
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">完了日時（保管のみ）</dt>
-                            <dd className="font-semibold text-gray-900">
-                              {reservation.rentalCompletedAt ? formatReservationDatetime(reservation.rentalCompletedAt) : '未設定'}
-                            </dd>
-                          </div>
-                        </dl>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Link
-                            href={manualVideoUrl}
-                            className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            マニュアル動画を見る
-                          </Link>
-                          <Link
-                            href={paymentInfoUrl}
-                            className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            決済情報を確認
-                          </Link>
-                          <Link
-                            href={rentalContractUrl}
-                            className="inline-flex items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            貸渡契約書を見る
-                          </Link>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </section>
+            
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900">ログアウト</h2>
