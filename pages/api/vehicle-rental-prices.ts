@@ -15,9 +15,10 @@ import {
 } from "../../lib/server/vehicleRentalPrices";
 
 const TABLE_NAME =
-  process.env.VEHICLE_RENTAL_PRICE_TABLE ||
   process.env.VEHICLE_RENTAL_PRICES_TABLE ||
-  "vehicle_rental_prices";
+  process.env.VEHICLE_RENTAL_PRICE_TABLE ||
+  // Fallback for environments where the table name itself is used as the env value
+  "VEHICLE_RENTAL_PRICES_TABLE";
 
 type VehicleRentalPrice = {
   vehicle_type_id: number;
@@ -102,7 +103,10 @@ async function handleGet(
 
     response.status(200).json(items);
   } catch (error) {
-    console.error("Failed to fetch vehicle rental prices", error);
+    console.error("Failed to fetch vehicle rental prices", {
+      table: TABLE_NAME,
+      error,
+    });
     response
       .status(500)
       .json({ message: "料金情報の取得に失敗しました。" });
@@ -176,7 +180,10 @@ async function handlePut(
 
     response.status(200).json(item);
   } catch (error) {
-    console.error("Failed to upsert vehicle rental price", error);
+    console.error("Failed to upsert vehicle rental price", {
+      table: TABLE_NAME,
+      error,
+    });
     response.status(500).json({ message: "料金の保存に失敗しました。" });
   }
 }
@@ -213,7 +220,10 @@ async function handleDelete(
 
     response.status(200).json({ deleted: true });
   } catch (error) {
-    console.error("Failed to delete vehicle rental price", error);
+    console.error("Failed to delete vehicle rental price", {
+      table: TABLE_NAME,
+      error,
+    });
     response.status(500).json({ message: "料金の削除に失敗しました。" });
   }
 }
