@@ -112,7 +112,7 @@ export default function BikeModelRentalPricingListPage() {
                         <div className={tableStyles.actions}>
                           <Link
                             href={`/admin/dashboard/bike-models/${model.modelId}/rental-pricing`}
-                            className={tableStyles.link}
+                            className={`${tableStyles.link} ${tableStyles.actionButton}`}
                           >
                             編集
                           </Link>
