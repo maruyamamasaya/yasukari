@@ -3,9 +3,14 @@ import { FormEvent, useEffect, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
-import { BikeModel, PublishStatus, Vehicle } from "../../../../lib/dashboard/types";
+import {
+  BikeModel,
+  PublishStatus,
+  RentalAvailabilityMap,
+  Vehicle,
+} from "../../../../lib/dashboard/types";
 import { STORE_OPTIONS } from "../../../../lib/dashboard/storeOptions";
-import { parseTags } from "../../../../lib/dashboard/utils";
+import { buildMaintenanceAvailability, parseTags } from "../../../../lib/dashboard/utils";
 
 type VehicleFormState = {
   managementNumber: string;
@@ -143,6 +148,25 @@ export default function VehicleRegisterPage() {
         payload[field] = value;
       }
     });
+
+    const maintenanceAvailability: RentalAvailabilityMap = {};
+
+    const mergeMaintenanceWindow = (date: string | undefined, label: string) => {
+      if (!date?.trim()) {
+        return;
+      }
+      const range = buildMaintenanceAvailability(date, 1, label);
+      Object.entries(range).forEach(([dateKey, entry]) => {
+        maintenanceAvailability[dateKey] = entry;
+      });
+    };
+
+    mergeMaintenanceWindow(form.liabilityInsuranceExpiryDate, "自賠責満了期間");
+    mergeMaintenanceWindow(form.inspectionExpiryDate, "車検満了期間");
+
+    if (Object.keys(maintenanceAvailability).length > 0) {
+      payload.rentalAvailability = maintenanceAvailability;
+    }
 
     try {
       const response = await fetch("/api/vehicles", {
