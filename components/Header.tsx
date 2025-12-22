@@ -21,6 +21,9 @@ export default function Header() {
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
 
+  const isReservationPaymentFlow = /^(\/en)?\/reserve\/(models|flow)/.test(router.pathname);
+  const languageSwitchDisabled = updatingLocale || isReservationPaymentFlow;
+
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e: MouseEvent | TouchEvent) => {
@@ -94,14 +97,20 @@ export default function Header() {
   };
 
   const handleLanguageClick = async (target: 'ja' | 'en') => {
-    if (target === 'en') {
-      void updatePreferredLocale('en-US');
-      await router.push('/en');
-      return;
-    }
+    if (languageSwitchDisabled) return;
 
-    void updatePreferredLocale('ja-JP');
-    await router.push('/');
+    const hasEnPrefix = router.asPath.startsWith('/en');
+    const nextPath =
+      target === 'en'
+        ? hasEnPrefix
+          ? router.asPath
+          : `/en${router.asPath}`
+        : hasEnPrefix
+          ? router.asPath.slice(3) || '/'
+          : router.asPath || '/';
+
+    void updatePreferredLocale(target === 'en' ? 'en-US' : 'ja-JP');
+    await router.push(nextPath);
   };
 
   return (
@@ -163,7 +172,7 @@ export default function Header() {
                   className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
                   aria-current="page"
                   onClick={() => handleLanguageClick('ja')}
-                  disabled={updatingLocale}
+                  disabled={languageSwitchDisabled}
                 >
                   日本語
                 </button>
@@ -172,7 +181,7 @@ export default function Header() {
                   type="button"
                   className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
                   onClick={() => handleLanguageClick('en')}
-                  disabled={updatingLocale}
+                  disabled={languageSwitchDisabled}
                 >
                   English
                 </button>
@@ -230,7 +239,7 @@ export default function Header() {
                     className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
                     aria-current="page"
                     onClick={() => handleLanguageClick('ja')}
-                    disabled={updatingLocale}
+                    disabled={languageSwitchDisabled}
                   >
                     日本語
                   </button>
@@ -239,7 +248,7 @@ export default function Header() {
                     type="button"
                     className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
                     onClick={() => handleLanguageClick('en')}
-                    disabled={updatingLocale}
+                    disabled={languageSwitchDisabled}
                   >
                     English
                   </button>
