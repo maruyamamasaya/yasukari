@@ -10,7 +10,7 @@ import { BikeClass, BikeModel } from "../../../../../lib/dashboard/types";
 import { toNumber } from "../../../../../lib/dashboard/utils";
 
 type VehicleRentalPrice = {
-  vehicle_type_id: number;
+  vehicle_type_id: string;
   days: number;
   price: number;
   createdAt?: string;
