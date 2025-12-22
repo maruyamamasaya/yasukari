@@ -45,7 +45,7 @@ export default function RecentlyViewedEn() {
             key={bike.modelCode}
             className="group overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_36px_62px_-34px_rgba(220,38,38,0.45)]"
           >
-            <Link href={`/products/${bike.modelCode}`} className="flex h-full flex-col">
+            <Link href={`/en/products/${bike.modelCode}`} className="flex h-full flex-col">
               <div className="relative h-44 overflow-hidden">
                 <img
                   src={bike.img}
@@ -66,7 +66,7 @@ export default function RecentlyViewedEn() {
         {bikes.length > visibleCount ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-red-200 bg-red-50/60 p-6 text-center text-sm text-red-600">
             <p className="font-semibold">See the full history</p>
-            <Link href="/products" className="btn-primary">
+            <Link href="/en/products" className="btn-primary">
               Explore more
             </Link>
           </div>
