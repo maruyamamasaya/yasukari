@@ -356,38 +356,55 @@ export default function MyPageEn() {
                           <div>
                             <p className="text-xs text-gray-500">ID: {reservation.id}</p>
                             <p className="text-sm font-semibold text-gray-900">
-                              {reservation.startAt ? formatReservationDatetime(reservation.startAt) : 'Not set'}
+                              {reservation.storeName} / {reservation.vehicleModel}
                             </p>
+                            <p className="text-xs text-gray-600">{reservation.vehicleCode} {reservation.vehiclePlate}</p>
                           </div>
-                          <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800 ring-1 ring-inset ring-gray-200">
-                            {reservationCompletionLabel(Boolean(reservation.isCompleted))}
-                          </span>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+                              {reservation.status}
+                            </span>
+                            <span
+                              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${reservation.reservationCompletedFlag ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}
+                            >
+                              {reservationCompletionLabel(reservation.reservationCompletedFlag)}
+                            </span>
+                          </div>
                         </div>
-
-                        <dl className="mt-3 grid gap-3 text-xs text-gray-600 sm:grid-cols-2">
-                          <div>
-                            <dt className="font-semibold text-gray-500">Vehicle</dt>
-                            <dd className="mt-1 text-gray-900">{reservation.vehicleName ?? '-'}</dd>
+                        {reservation.vehicleChangedAt && !reservation.vehicleChangeNotified && (
+                          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+                            The vehicle has been changed by the administrator. New vehicle: {reservation.vehicleCode} /{' '}
+                            {reservation.vehiclePlate || 'Not set'}
+                          </p>
+                        )}
+                        <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">Pickup → Return</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {formatReservationDatetime(reservation.pickupAt)} → {formatReservationDatetime(reservation.returnAt)}
+                            </dd>
                           </div>
-                          <div>
-                            <dt className="font-semibold text-gray-500">Vehicle status</dt>
-                            <dd className="mt-1 text-gray-900">{reservation.vehicleStatus ?? '-'}</dd>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">Reservation details</dt>
+                            <dd className="font-semibold text-gray-900">
+                              Vehicle code: {reservation.vehicleCode || '-'} / Plate number: {reservation.vehiclePlate || 'Not set'}
+                            </dd>
                           </div>
-                          <div>
-                            <dt className="font-semibold text-gray-500">Pickup store</dt>
-                            <dd className="mt-1 text-gray-900">{reservation.pickupStoreName ?? '-'}</dd>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">Payment amount</dt>
+                            <dd className="font-semibold text-gray-900">{reservation.paymentAmount} yen</dd>
                           </div>
-                          <div>
-                            <dt className="font-semibold text-gray-500">Return store</dt>
-                            <dd className="mt-1 text-gray-900">{reservation.returnStoreName ?? '-'}</dd>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">Payment date</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {reservation.paymentDate ? formatReservationDatetime(reservation.paymentDate) : 'Not recorded'}
+                            </dd>
                           </div>
-                          <div>
-                            <dt className="font-semibold text-gray-500">Usage start</dt>
-                            <dd className="mt-1 text-gray-900">{reservation.rentalStartedAt ? formatReservationDatetime(reservation.rentalStartedAt) : 'Not set'}</dd>
-                          </div>
-                          <div>
-                            <dt className="font-semibold text-gray-500">Usage end</dt>
-                            <dd className="mt-1 text-gray-900">{reservation.rentalCompletedAt ? formatReservationDatetime(reservation.rentalCompletedAt) : 'Not set'}</dd>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">Completion date (storage only)</dt>
+                            <dd className="font-semibold text-gray-900">
+                              {reservation.rentalCompletedAt ? formatReservationDatetime(reservation.rentalCompletedAt) : 'Not set'}
+                            </dd>
                           </div>
                         </dl>
                         <div className="mt-4 flex flex-wrap gap-2">
