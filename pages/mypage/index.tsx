@@ -21,6 +21,10 @@ type UserAttributes = {
 };
 
 export default function MyPage() {
+  const manualVideoUrl = process.env.NEXT_PUBLIC_MANUAL_VIDEO_URL ?? '/help#manual-video';
+  const paymentInfoUrl = process.env.NEXT_PUBLIC_PAYMENT_INFO_URL ?? '/help#payment-info';
+  const rentalContractUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL ?? '/help#rental-contract';
+
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -468,6 +472,12 @@ export default function MyPage() {
                             </dd>
                           </div>
                           <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <dt className="text-xs text-gray-500">ご予約情報</dt>
+                            <dd className="font-semibold text-gray-900">
+                              車両コード: {reservation.vehicleCode || '-'} / ナンバープレート: {reservation.vehiclePlate || '未設定'}
+                            </dd>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
                             <dt className="text-xs text-gray-500">決済金額</dt>
                             <dd className="font-semibold text-gray-900">{reservation.paymentAmount} 円</dd>
                           </div>
@@ -484,6 +494,32 @@ export default function MyPage() {
                             </dd>
                           </div>
                         </dl>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Link
+                            href={manualVideoUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            マニュアル動画を見る
+                          </Link>
+                          <Link
+                            href={paymentInfoUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            決済情報を確認
+                          </Link>
+                          <Link
+                            href={rentalContractUrl}
+                            className="inline-flex items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            貸渡契約書を見る
+                          </Link>
+                        </div>
                       </li>
                     ))}
                   </ul>
