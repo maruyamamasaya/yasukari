@@ -7,6 +7,12 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient } from "../../lib/dynamodb";
+import {
+  readVehicleRentalPrices,
+  removeVehicleRentalPrice,
+  upsertVehicleRentalPrice,
+  type VehicleRentalPriceRecord,
+} from "../../lib/server/vehicleRentalPrices";
 
 const TABLE_NAME =
   process.env.VEHICLE_RENTAL_PRICE_TABLE ||
@@ -20,6 +26,13 @@ type VehicleRentalPrice = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+const shouldUseLocalStorage =
+  process.env.USE_LOCAL_VEHICLE_RENTAL_PRICE_STORAGE === "true" ||
+  (!process.env.AWS_ACCESS_KEY_ID &&
+    !process.env.AWS_PROFILE &&
+    !process.env.AWS_REGION &&
+    !process.env.AWS_DEFAULT_REGION);
 
 const parseVehicleTypeId = (value: unknown): number | null => {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -67,6 +80,12 @@ async function handleGet(
   }
 
   try {
+    if (shouldUseLocalStorage) {
+      const items = await readVehicleRentalPrices(vehicleTypeId);
+      response.status(200).json(items);
+      return;
+    }
+
     const client = getDocumentClient();
     const result = await client.send(
       new QueryCommand({
@@ -117,6 +136,17 @@ async function handlePut(
   }
 
   try {
+    if (shouldUseLocalStorage) {
+      const item = await upsertVehicleRentalPrice({
+        vehicle_type_id: vehicleTypeId,
+        days: normalizedDays,
+        price: normalizedPrice,
+      });
+
+      response.status(200).json(item as VehicleRentalPriceRecord);
+      return;
+    }
+
     const client = getDocumentClient();
     const timestamp = new Date().toISOString();
 
@@ -167,6 +197,12 @@ async function handleDelete(
   }
 
   try {
+    if (shouldUseLocalStorage) {
+      await removeVehicleRentalPrice(vehicleTypeId, normalizedDays);
+      response.status(200).json({ deleted: true });
+      return;
+    }
+
     const client = getDocumentClient();
     await client.send(
       new DeleteCommand({
