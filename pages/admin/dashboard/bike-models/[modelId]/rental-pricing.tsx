@@ -271,21 +271,30 @@ export default function BikeModelRentalPricingPage() {
     [bikeClass]
   );
 
+  const classMonthlyPlans = useMemo(
+    () => buildPlans(classBaseOptions, MAX_DAYS),
+    [classBaseOptions]
+  );
+
   useEffect(() => {
-    if (classBaseOptions.length === 0) {
+    if (classMonthlyPlans.length === 0) {
       return;
     }
 
     setBaseInputs((prev) => {
       const next = { ...prev };
-      classBaseOptions.forEach((option) => {
-        if (!prev[option.days]) {
-          next[option.days] = String(option.price);
+      BASE_RATES.forEach(({ days }) => {
+        if (prev[days]) {
+          return;
+        }
+        const plan = classMonthlyPlans[days - 1];
+        if (plan) {
+          next[days] = String(plan.cost);
         }
       });
       return next;
     });
-  }, [classBaseOptions]);
+  }, [classMonthlyPlans]);
 
   const autoPlans = useMemo(() => buildPlans(baseOptions, MAX_DAYS), [baseOptions]);
 
@@ -386,8 +395,11 @@ export default function BikeModelRentalPricingPage() {
 
       setBaseInputs((prev) => {
         const next = { ...prev };
-        classBaseOptions.forEach((option) => {
-          next[option.days] = String(option.price);
+        BASE_RATES.forEach(({ days }) => {
+          const plan = classMonthlyPlans[days - 1];
+          if (plan) {
+            next[days] = String(plan.cost);
+          }
         });
         return next;
       });
@@ -409,6 +421,7 @@ export default function BikeModelRentalPricingPage() {
     },
     [
       classBaseOptions,
+      classMonthlyPlans,
       isAutoRegistering,
       isSubmitting,
       modelId,
