@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import { Reservation } from "../../../../lib/reservations";
@@ -30,6 +30,14 @@ export default function ReservationDetailPage() {
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [vehicleOptions, setVehicleOptions] = useState<{ code: string; plate: string }[]>([]);
+  const [selectedVehicleCode, setSelectedVehicleCode] = useState<string>("");
+  const [vehicleChangeMessage, setVehicleChangeMessage] = useState<string>("");
+  const [vehicleChangeError, setVehicleChangeError] = useState<string>("");
+  const [isUpdatingVehicle, setIsUpdatingVehicle] = useState<boolean>(false);
+  const [isCancelling, setIsCancelling] = useState<boolean>(false);
+  const [refundNote, setRefundNote] = useState<string>("");
+  const [cancelError, setCancelError] = useState<string>("");
 
   useEffect(() => {
     if (!router.isReady || typeof reservationId !== "string") return;
@@ -73,6 +81,41 @@ export default function ReservationDetailPage() {
     return () => controller.abort();
   }, [reservationId, router.isReady]);
 
+  useEffect(() => {
+    if (!reservation) return;
+
+    const controller = new AbortController();
+    const loadVehicleOptions = async () => {
+      try {
+        const response = await fetch("/api/reservations", { signal: controller.signal });
+        if (!response.ok) throw new Error(`Failed to fetch vehicles: ${response.status}`);
+
+        const data = (await response.json()) as { reservations?: Reservation[] };
+        const sameModel = (data.reservations ?? []).filter(
+          (item) => item.vehicleModel === reservation.vehicleModel
+        );
+
+        const uniqueOptions = sameModel.reduce<{ code: string; plate: string }[]>((acc, curr) => {
+          if (!acc.some((option) => option.code === curr.vehicleCode)) {
+            acc.push({ code: curr.vehicleCode, plate: curr.vehiclePlate });
+          }
+          return acc;
+        }, []);
+
+        setVehicleOptions(uniqueOptions);
+        setSelectedVehicleCode((prev) => prev || reservation.vehicleCode);
+      } catch (vehicleError) {
+        if (!controller.signal.aborted) {
+          console.error(vehicleError);
+          setVehicleChangeError("車両一覧の取得に失敗しました");
+        }
+      }
+    };
+
+    void loadVehicleOptions();
+    return () => controller.abort();
+  }, [reservation]);
+
   const formatDatetime = (value: string) => {
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return "-";
@@ -86,6 +129,103 @@ export default function ReservationDetailPage() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const formatPhoneNumber = (phone: string, countryCode?: string) => {
+    const sanitized = phone.replace(/[^0-9+]/g, "");
+    if (!sanitized) return "-";
+
+    const detectedCode =
+      countryCode || sanitized.match(/^\+\d{1,3}/)?.[0] || (sanitized.startsWith("+") ? sanitized : "");
+
+    const countryLabel = (() => {
+      switch (detectedCode) {
+        case "+81":
+          return "日本";
+        case "+1":
+          return "アメリカ・カナダ";
+        case "+44":
+          return "イギリス";
+        default:
+          return detectedCode ? `国コード ${detectedCode}` : "国不明";
+      }
+    })();
+
+    const localNumber =
+      sanitized.startsWith("+") || sanitized.startsWith("0") ? sanitized : `0${sanitized}`;
+
+    return `${localNumber} (${countryLabel})`;
+  };
+
+  const handleVehicleChange = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!reservation || typeof reservationId !== "string") return;
+
+    setVehicleChangeMessage("");
+    setVehicleChangeError("");
+    setIsUpdatingVehicle(true);
+
+    try {
+      const nextVehicle = vehicleOptions.find((option) => option.code === selectedVehicleCode);
+      const response = await fetch(`/api/reservations/${reservationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vehicleCode: selectedVehicleCode,
+          vehiclePlate: nextVehicle?.plate ?? reservation.vehiclePlate,
+          vehicleModel: reservation.vehicleModel,
+          vehicleChangeNotified: false,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`車両変更に失敗しました (${response.status})`);
+      }
+
+      const data = (await response.json()) as { reservation?: Reservation };
+      if (data.reservation) {
+        setReservation(data.reservation);
+        setVehicleChangeMessage("同じ車種から車両を更新し、ユーザーへ通知を設定しました。");
+      }
+    } catch (updateError) {
+      const message =
+        updateError instanceof Error ? updateError.message : "車両変更中にエラーが発生しました";
+      setVehicleChangeError(message);
+    } finally {
+      setIsUpdatingVehicle(false);
+    }
+  };
+
+  const handleCancelReservation = async () => {
+    if (!reservation || typeof reservationId !== "string") return;
+
+    setIsCancelling(true);
+    setCancelError("");
+
+    try {
+      const response = await fetch(`/api/reservations/${reservationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "キャンセル", refundNote: refundNote || "返金設定未入力" }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`キャンセル処理に失敗しました (${response.status})`);
+      }
+
+      const data = (await response.json()) as { reservation?: Reservation };
+      if (data.reservation) {
+        setReservation(data.reservation);
+      }
+    } catch (cancelErrorResponse) {
+      const message =
+        cancelErrorResponse instanceof Error
+          ? cancelErrorResponse.message
+          : "キャンセル処理でエラーが発生しました";
+      setCancelError(message);
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   return (
@@ -178,6 +318,10 @@ export default function ReservationDetailPage() {
                       <span className={statusClassName(reservation.status)}>{reservation.status}</span>
                     </dd>
                   </div>
+                  <div className={styles.detailItem}>
+                    <dt>返金メモ</dt>
+                    <dd>{reservation.refundNote || "返金設定は未入力です"}</dd>
+                  </div>
                 </dl>
               </div>
 
@@ -193,10 +337,46 @@ export default function ReservationDetailPage() {
                   <div className={styles.detailItem}>
                     <dt>ナンバープレート</dt>
                     <dd>
-                      <div>{reservation.vehiclePlate}</div>
-                      <button className={styles.detailEditButton} type="button">
-                        車両を変更
-                      </button>
+                      <div className={styles.monospace}>{reservation.vehiclePlate}</div>
+                      <form className={styles.changeRow} onSubmit={handleVehicleChange}>
+                        <label className={styles.srOnly} htmlFor="vehicle-select">
+                          同じ車種から車両を選ぶ
+                        </label>
+                        <select
+                          id="vehicle-select"
+                          className={styles.selectInput}
+                          value={selectedVehicleCode}
+                          onChange={(event) => setSelectedVehicleCode(event.target.value)}
+                        >
+                          {vehicleOptions.length === 0 ? (
+                            <option>候補がありません</option>
+                          ) : (
+                            vehicleOptions.map((option) => (
+                              <option key={option.code} value={option.code}>
+                                {option.code} / {option.plate}
+                              </option>
+                            ))
+                          )}
+                        </select>
+                        <button
+                          className={`${styles.detailEditButton} ${styles.detailPrimaryButton}`}
+                          type="submit"
+                          disabled={isUpdatingVehicle || vehicleOptions.length === 0}
+                        >
+                          {isUpdatingVehicle ? "変更中..." : "車両を変更"}
+                        </button>
+                      </form>
+                      <p className={styles.mutedText}>同じ車種の車両一覧から選択できます。</p>
+                      {vehicleChangeError && (
+                        <p className={`${styles.inlineNotice} ${styles.noticeDanger}`}>
+                          {vehicleChangeError}
+                        </p>
+                      )}
+                      {vehicleChangeMessage && (
+                        <p className={`${styles.inlineNotice} ${styles.noticeSuccess}`}>
+                          {vehicleChangeMessage}
+                        </p>
+                      )}
                     </dd>
                   </div>
                   <div className={styles.detailItem}>
@@ -228,7 +408,9 @@ export default function ReservationDetailPage() {
                   </div>
                   <div className={styles.detailItem}>
                     <dt>電話番号</dt>
-                    <dd>{reservation.memberPhone || "-"}</dd>
+                    <dd>
+                      {formatPhoneNumber(reservation.memberPhone, reservation.memberCountryCode)}
+                    </dd>
                   </div>
                 </dl>
               </div>
@@ -247,6 +429,45 @@ export default function ReservationDetailPage() {
                     <dd>{reservation.couponDiscount}</dd>
                   </div>
                 </dl>
+              </div>
+
+              <div className={styles.detailPanel}>
+                <div className={styles.detailHeader}>
+                  <h3 className={styles.detailTitle}>予約キャンセル・返金メモ</h3>
+                </div>
+                <div className={`${styles.inlineNotice} ${styles.noticeNeutral}`}>
+                  返金設定は後から行えるようにするため、現時点では返金メモのみを残します。
+                  ステータスをキャンセルに変更すると、ユーザー側で最新状態が確認できます。
+                </div>
+                <label className={styles.inputLabel} htmlFor="refund-note">
+                  返金メモ
+                </label>
+                <textarea
+                  id="refund-note"
+                  className={styles.textArea}
+                  rows={3}
+                  placeholder="返金設定は後から登録予定。現時点での対応メモを残してください。"
+                  value={refundNote}
+                  onChange={(event) => setRefundNote(event.target.value)}
+                />
+                <div className={styles.detailActions}>
+                  <button
+                    className={`${styles.iconButton} ${styles.iconButtonDanger}`}
+                    type="button"
+                    onClick={handleCancelReservation}
+                    disabled={isCancelling || reservation.status === "キャンセル"}
+                  >
+                    {isCancelling ? "キャンセル処理中..." : "予約をキャンセル"}
+                  </button>
+                  {reservation.status === "キャンセル" && (
+                    <span className={`${tableStyles.badge} ${tableStyles.badgeOff}`}>
+                      既にキャンセル済み
+                    </span>
+                  )}
+                </div>
+                {cancelError && (
+                  <p className={`${styles.inlineNotice} ${styles.noticeDanger}`}>{cancelError}</p>
+                )}
               </div>
             </div>
           )}
