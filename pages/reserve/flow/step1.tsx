@@ -162,6 +162,25 @@ export default function ReserveFlowStep1() {
 
   const canProceed = Boolean(pickupTime && returnTime);
 
+  useEffect(() => {
+    if (!pickupDate) return;
+
+    const date = new Date(pickupDate);
+    if (Number.isNaN(date.getTime())) return;
+
+    const updated = new Date(date);
+    updated.setDate(updated.getDate() + 1);
+    const newReturnDate = updated.toISOString().split("T")[0];
+
+    setReturnDate((prev) => (prev === newReturnDate ? prev : newReturnDate));
+  }, [pickupDate]);
+
+  useEffect(() => {
+    if (!pickupTime) return;
+
+    setReturnTime((prev) => (prev === pickupTime ? prev : pickupTime));
+  }, [pickupTime]);
+
   const handleNext = () => {
     if (!registrationChecked) return;
 
@@ -332,16 +351,17 @@ export default function ReserveFlowStep1() {
                     <p className="text-sm text-gray-600">{returnLabel}</p>
                     <select
                       value={returnTime}
-                      onChange={(e) => setReturnTime(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none"
+                      disabled
+                      className="w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-3 text-sm shadow-sm text-gray-500"
                     >
-                      <option value="">時間を選択</option>
+                      <option value="">貸出希望日から自動設定されます</option>
                       {timeOptions.map((time) => (
                         <option key={time} value={time}>
                           {time}
                         </option>
                       ))}
                     </select>
+                    <p className="text-xs text-gray-500">貸出希望日の24時間後が返却日時になります。</p>
                   </div>
                 </div>
                 {!canProceed ? (
