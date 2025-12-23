@@ -85,6 +85,17 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: "写真アップロード確認",
     href: `${ADMIN_DASHBOARD_ROOT}/photo-uploads`,
+    children: [
+      { label: "アップロード一覧", href: `${ADMIN_DASHBOARD_ROOT}/photo-uploads` },
+      {
+        label: "事故・転倒報告",
+        href: `${ADMIN_DASHBOARD_ROOT}/photo-uploads/accident-reports`,
+      },
+      {
+        label: "バイクの返却完了",
+        href: `${ADMIN_DASHBOARD_ROOT}/photo-uploads/return-completions`,
+      },
+    ],
   },
   {
     label: "チャットボット",
