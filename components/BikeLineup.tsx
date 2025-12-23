@@ -86,6 +86,9 @@ export default function BikeLineup({ bikes, classes }: Props) {
         title="排気量から人気モデルをチェック"
         description="経験値別にセレクトされた多彩なラインアップ。初心者向けのコンパクトスクーターから、ロングツーリングで頼れる大型ネイキッドまで、好みに合わせて最適な1台が見つかります。"
       />
+      <p className="mt-3 text-sm text-slate-600">
+        整備済み &amp; 24時間予約対応。用途や体格に合わせたフィット感で、週末のツーリングも安心です。
+      </p>
 
       <div className="lineup-marquee mt-4 overflow-x-auto scroll-row">
         <div className="lineup-marquee__track flex flex-nowrap items-center gap-2 pb-2">
@@ -140,8 +143,8 @@ export default function BikeLineup({ bikes, classes }: Props) {
                       className="card-title text-base font-semibold text-slate-800"
                       dangerouslySetInnerHTML={{ __html: bike.modelName.replace(/\\n/g, "<br>") }}
                     />
-                    <p className="text-sm text-slate-500">
-                      整備済み &amp; 24時間予約対応。用途や体格に合わせたフィット感で、週末のツーリングも安心です。
+                    <p className="text-sm font-semibold text-red-500">
+                      {bike.price24h ? `基本料金 24時間 ${bike.price24h}` : "基本料金 24時間〜"}
                     </p>
                     <span className="text-sm font-semibold text-red-500">
                       詳細を見る →
