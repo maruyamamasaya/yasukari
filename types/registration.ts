@@ -25,6 +25,8 @@ export type RegistrationData = {
   enquete_touring: string;
   enquete_magazine: string;
   enquete_chance: string;
+  accident_report_url?: string;
+  accident_report_uploaded_at?: string;
 };
 
 export const REQUIRED_REGISTRATION_FIELDS: (keyof RegistrationData)[] = [
