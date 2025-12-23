@@ -149,7 +149,7 @@ export default function LoginPage() {
           </nav>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <section className="order-2 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:order-1">
               <h1 className="text-2xl font-bold text-gray-900">マイページでレンタルをスムーズに管理</h1>
               <p className="mt-3 text-sm leading-relaxed text-gray-600">
                 ご契約状況の確認や延長手続き、支払い情報の更新まで、マイページからまとめて行えます。
@@ -183,7 +183,7 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
               </div>
             </section>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="order-1 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:order-2">
               <div className="mb-6 space-y-2 text-center">
                 <h2 className="text-xl font-semibold text-gray-900">ログイン / 新規登録</h2>
               </div>
