@@ -125,7 +125,7 @@ export default function ProductDetailPage({
         <title>{bike.modelName} - yasukari</title>
       </Head>
       <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+        <div className="w-full py-8 space-y-10">
           <nav className="text-sm text-gray-500" aria-label="Breadcrumb">
             <ol className="flex items-center gap-2">
               <li>
@@ -326,7 +326,7 @@ export default function ProductDetailPage({
               </div>
               <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 p-6">
                 {specEntries.length > 0 ? (
-                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     {specEntries.map(([key, value]) => (
                       <div
                         key={key}
