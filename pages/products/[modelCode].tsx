@@ -253,16 +253,16 @@ export default function ProductDetailPage({
                           在庫がありません
                         </button>
                       )}
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex flex-col gap-2">
                         <Link
                           href="/pricing"
-                          className="inline-flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                          className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition"
                         >
                           料金プランを見る
                         </Link>
                         <Link
                           href="/contact"
-                          className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-300 transition"
+                          className="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 transition"
                         >
                           お問い合わせ
                         </Link>
