@@ -592,7 +592,7 @@ export default function MyPage() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-800 transition hover:border-indigo-300 hover:bg-indigo-100"
+                  className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700"
                 >
                   レンタル延長
                 </button>
@@ -600,14 +600,14 @@ export default function MyPage() {
                   type="button"
                   onClick={handleReturnOpen}
                   disabled={!activeReturnReservation}
-                  className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300"
                 >
                   返却
                 </button>
                 <button
                   type="button"
                   onClick={handleAccidentOpen}
-                  className="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-800 transition hover:border-rose-300 hover:bg-rose-100"
+                  className="inline-flex items-center justify-center rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-rose-700"
                 >
                   事故・転倒
                 </button>
@@ -944,6 +944,21 @@ export default function MyPage() {
                 }}
                 className="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
               />
+              <label className="block text-xs font-semibold text-gray-600 sm:hidden">
+                スマホで撮影してアップロード
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={(event) => {
+                    setAccidentSubmitted(false);
+                    setAccidentError('');
+                    const file = event.target.files?.[0] ?? null;
+                    setAccidentFile(file);
+                  }}
+                  className="mt-2 block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+                />
+              </label>
               {accidentError ? (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
                   {accidentError}
@@ -1008,6 +1023,20 @@ export default function MyPage() {
                   }}
                   className="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
                 />
+                <label className="block text-xs font-semibold text-gray-600 sm:hidden">
+                  スマホで撮影してアップロード
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={(event) => {
+                      setReturnError('');
+                      const file = event.target.files?.[0] ?? null;
+                      setReturnFile(file);
+                    }}
+                    className="mt-2 block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+                  />
+                </label>
                 {returnError ? (
                   <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{returnError}</p>
                 ) : null}
