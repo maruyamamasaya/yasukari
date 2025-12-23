@@ -48,7 +48,7 @@ export default function FaqCategoryAccordion({
               className={`faq-category-panel ${isOpen ? 'open' : ''}`}
               aria-hidden={!isOpen}
             >
-              <FaqAccordion faqs={cat.faqs} />
+              <FaqAccordion faqs={cat.faqs} showAll />
             </div>
           </div>
         );
