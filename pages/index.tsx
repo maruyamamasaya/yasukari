@@ -17,7 +17,7 @@ import {
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import BikeModelCarousel, { BikeItem } from "../components/BikeModelCarousel";
+import BikeModelCarousel from "../components/BikeModelCarousel";
 import GenreCarousel, { GenreItem } from "../components/GenreCarousel";
 import BikeLineup from "../components/BikeLineup";
 import HeroSlider from "../components/HeroSlider";
@@ -157,49 +157,6 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
     },
   ];
 
-  const bikeModels: BikeItem[] = [
-    {
-      modelName: "ドラックスター250",
-      modelCode: "dragstar250",
-      img: "https://yasukari.com/storage/models/DXD10WTKLvRB45VWYVtm.jpg",
-      price24h: "7,980円",
-    },
-    {
-      modelName: "クロスカブ110",
-      modelCode: "crosscub110",
-      img: "https://yasukari.com/storage/models/yIj7Bnk5KSgr05pITe8y.jpg",
-      price24h: "6,980円",
-    },
-    {
-      modelName: "CB400SFVボルドール",
-      modelCode: "cb400sfv",
-      img: "https://yasukari.com/storage/models/nXUvT7KLr38W99F5xmqy.jpg",
-      price24h: "11,980円",
-    },
-    {
-      modelName: "CB1300SFボルドール",
-      modelCode: "cb1300sf",
-      img: "https://yasukari.com/storage/models/nP97p32L9F4o2mL4TtX6.jpg",
-      price24h: "14,980円",
-    },
-    {
-      modelName: "CBR400R",
-      modelCode: "cbr400r",
-      img: "https://yasukari.com/storage/models/c9kas47ob2ulkaeppka0.jpg",
-      price24h: "11,980円",
-    },
-    {
-      modelName: "トゥデイ-2",
-      modelCode: "today2",
-      img: "https://yasukari.com/storage/models/chzPCoSkTibLXYsrMN93.jpg",
-    },
-    {
-      modelName: "タクト　ベーシック",
-      modelCode: "tact-basic",
-      img: "https://yasukari.com/storage/models/cai2v0vob2uptbmdc4n0.jpg",
-    },
-  ];
-
   const stores = [
     {
       name: "足立小台本店",
@@ -263,7 +220,7 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
       </section>
 
       <BikeModelCarousel
-        items={bikeModels}
+        items={bikeModelsAll}
         title="人気モデル"
         subtitle="ライダーに選ばれる定番モデル"
         headingTitle="ライダーに選ばれる定番モデル"

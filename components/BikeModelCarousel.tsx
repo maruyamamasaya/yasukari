@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import SectionHeading from "./SectionHeading";
 
@@ -29,11 +29,22 @@ export default function BikeModelCarousel({
   detailLabel = "詳細を見る",
   pricePrefix = "24時間",
 }: Props) {
+  const [randomizedItems, setRandomizedItems] = useState(items);
   const description =
     headingDescription ??
     `${
       subtitle ?? "Popular models"
     }. A curated lineup balancing comfort, style, and cost—ideal picks even for first-time renters.`;
+
+  useEffect(() => {
+    const shuffled = [...items];
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    setRandomizedItems(shuffled);
+  }, [items]);
+
   return (
     <section className="section-surface section-padding">
       <SectionHeading
@@ -42,7 +53,7 @@ export default function BikeModelCarousel({
         description={description}
       />
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {items.slice(0, 6).map((item) => (
+        {randomizedItems.slice(0, 6).map((item) => (
           <article
             key={item.modelCode}
             className="group overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_54px_-30px_rgba(220,38,38,0.45)]"
