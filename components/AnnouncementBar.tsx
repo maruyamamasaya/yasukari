@@ -56,18 +56,12 @@ export default function AnnouncementBar() {
 
   const message = useMemo(() => banner?.text?.trim() ?? "", [banner]);
 
-  if (router.pathname !== "/") {
-    return null;
-  }
-
-  if (!message) {
-    return null;
-  }
-
-  const linkHref = banner ? buildLink(banner) : undefined;
-  const isExternal = linkHref ? /^https?:\/\//.test(linkHref) : false;
-
   useEffect(() => {
+    if (router.pathname !== "/" || !message) {
+      setShouldScroll(false);
+      return;
+    }
+
     const container = containerRef.current;
     const content = contentRef.current;
     if (!container || !content) {
@@ -89,7 +83,18 @@ export default function AnnouncementBar() {
 
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, [message]);
+  }, [message, router.pathname]);
+
+  if (router.pathname !== "/") {
+    return null;
+  }
+
+  if (!message) {
+    return null;
+  }
+
+  const linkHref = banner ? buildLink(banner) : undefined;
+  const isExternal = linkHref ? /^https?:\/\//.test(linkHref) : false;
 
   return (
     <div className="announcement-bar">
