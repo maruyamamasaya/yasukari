@@ -73,8 +73,8 @@ export default function BeginnerGuidePage() {
         />
       </section>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-[10px] py-10">
-        <section className="rounded-3xl border border-slate-200 bg-white px-[10px] py-6 shadow-sm sm:px-[10px] sm:py-8">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-4 py-12 sm:px-8 sm:py-14 lg:px-12">
+        <section className="rounded-3xl border border-slate-200 bg-white px-4 py-7 shadow-sm sm:px-8 sm:py-10">
           <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-indigo-600">
             Beginner Guide
           </span>
@@ -100,7 +100,7 @@ export default function BeginnerGuidePage() {
           </div>
         </section>
 
-        <section className="grid gap-[5px] sm:grid-cols-3">
+        <section className="grid gap-4 sm:grid-cols-3">
           {[
             {
               title: '受付時間',
@@ -111,7 +111,7 @@ export default function BeginnerGuidePage() {
           ].map((item) => (
             <div
               key={item.title}
-              className="rounded-2xl border border-white bg-white px-[10px] py-5 text-sm shadow-sm"
+              className="rounded-2xl border border-white bg-white px-4 py-6 text-sm shadow-sm sm:px-6"
             >
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                 {item.title}
@@ -123,7 +123,7 @@ export default function BeginnerGuidePage() {
           ))}
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white px-[10px] py-6 shadow-sm sm:px-[10px] sm:py-8">
+        <section className="rounded-3xl border border-slate-200 bg-white px-4 py-7 shadow-sm sm:px-8 sm:py-10">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-amber-500">
@@ -134,10 +134,10 @@ export default function BeginnerGuidePage() {
             <p className="text-sm text-slate-500">初めての方でも安心して進められます。</p>
           </div>
 
-          <div className="space-y-[5px]">
+          <div className="space-y-4">
             {steps.map((step, index) => (
               <div key={step.title}>
-                <div className="rounded-2xl border border-slate-100 bg-slate-50 px-[10px] py-5 sm:px-[10px] sm:py-6">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-6 sm:px-6 sm:py-7">
                   <h3 className="text-lg font-semibold text-slate-900">
                     {step.title}
                   </h3>
@@ -158,7 +158,7 @@ export default function BeginnerGuidePage() {
                   ) : null}
 
                   {step.title.startsWith('03') ? (
-                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white px-[10px] py-4 sm:px-[10px] sm:py-5">
+                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6">
                       <h4 className="text-sm font-semibold text-slate-900">
                         走行距離の目安
                       </h4>
@@ -214,7 +214,7 @@ export default function BeginnerGuidePage() {
                   ) : null}
                 </div>
                 {index < steps.length - 1 ? (
-                  <div className="flex justify-center py-[5px] text-2xl text-amber-500">
+                  <div className="flex justify-center py-3 text-2xl text-amber-500">
                     ↓
                   </div>
                 ) : null}
@@ -223,7 +223,7 @@ export default function BeginnerGuidePage() {
           </div>
         </section>
 
-        <section className="rounded-3xl bg-slate-900 px-[10px] py-8 text-white sm:px-[10px]">
+        <section className="rounded-3xl bg-slate-900 px-4 py-9 text-white sm:px-8 sm:py-10">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">
