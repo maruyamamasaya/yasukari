@@ -95,11 +95,11 @@ export default function BikeLineupEn({ bikes, classes }: Props) {
             className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_32px_56px_-28px_rgba(220,38,38,0.4)]"
           >
             <Link href={`/products/${bike.modelCode}`} className="flex h-full flex-col">
-              <div className="relative overflow-hidden">
+              <div className="bike-lineup-card__image relative aspect-[3/4] w-full overflow-hidden">
                 <img
                   src={bike.img}
                   alt={bike.modelName}
-                  className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 {bike.badge ? (
                   <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-red-500 shadow">
