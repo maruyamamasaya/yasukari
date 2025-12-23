@@ -1,5 +1,9 @@
-import { promises as fs } from "fs";
-import path from "path";
+import {
+  DeleteCommand,
+  PutCommand,
+  QueryCommand,
+} from "@aws-sdk/lib-dynamodb";
+import { getDocumentClient } from "../dynamodb";
 
 export type HolidayRecord = {
   date: string;
@@ -8,100 +12,78 @@ export type HolidayRecord = {
   note?: string;
 };
 
-export const DEFAULT_STORE_ID = "adachi-odai";
+const TABLE_NAME = "HolidayCalendar";
 
-const DATA_FILE_PATH = path.join(process.cwd(), "data", "holiday-calendar.json");
+type DynamoHolidayRecord = {
+  store_id: string;
+  date: string;
+  is_holiday: boolean;
+  note?: string;
+};
 
-async function ensureDataFile(): Promise<void> {
-  try {
-    await fs.access(DATA_FILE_PATH);
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      await fs.mkdir(path.dirname(DATA_FILE_PATH), { recursive: true });
-      await fs.writeFile(DATA_FILE_PATH, "[]", "utf-8");
-    } else {
-      throw error;
-    }
+export async function readHolidayRecords(
+  store: string,
+  month?: string
+): Promise<HolidayRecord[]> {
+  const client = getDocumentClient();
+  const expressionAttributeNames: Record<string, string> = {
+    "#store_id": "store_id",
+    "#date": "date",
+  };
+  const expressionAttributeValues: Record<string, unknown> = {
+    ":store_id": store,
+  };
+  let keyCondition = "#store_id = :store_id";
+
+  if (month) {
+    expressionAttributeValues[":month_prefix"] = `${month}-`;
+    keyCondition += " AND begins_with(#date, :month_prefix)";
   }
-}
 
-export async function readHolidayRecords(): Promise<HolidayRecord[]> {
-  await ensureDataFile();
-  const raw = await fs.readFile(DATA_FILE_PATH, "utf-8");
-
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return (parsed as unknown[])
-      .map<HolidayRecord | null>((item) => {
-        if (typeof item !== "object" || item === null) {
-          return null;
-        }
-        const { date, note, store, isHoliday } = item as {
-          date?: unknown;
-          note?: unknown;
-          store?: unknown;
-          isHoliday?: unknown;
-        };
-
-        if (typeof date !== "string") {
-          return null;
-        }
-
-        return {
-          date,
-          store: typeof store === "string" ? store : DEFAULT_STORE_ID,
-          isHoliday: typeof isHoliday === "boolean" ? isHoliday : true,
-          note: typeof note === "string" && note.length > 0 ? note : undefined,
-        } satisfies HolidayRecord;
-      })
-      .filter((item): item is HolidayRecord => item !== null);
-  } catch (error) {
-    console.error("Failed to parse holiday calendar data", error);
-    return [];
-  }
-}
-
-export async function writeHolidayRecords(records: HolidayRecord[]): Promise<void> {
-  await ensureDataFile();
-  await fs.writeFile(
-    DATA_FILE_PATH,
-    `${JSON.stringify(records, null, 2)}\n`,
-    "utf-8"
+  const response = await client.send(
+    new QueryCommand({
+      TableName: TABLE_NAME,
+      KeyConditionExpression: keyCondition,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+    })
   );
+
+  return (response.Items ?? []).map((item) => {
+    const record = item as DynamoHolidayRecord;
+    return {
+      date: record.date,
+      store: record.store_id,
+      isHoliday: record.is_holiday,
+      note: record.note,
+    } satisfies HolidayRecord;
+  });
 }
 
 export async function upsertHolidayRecord(record: HolidayRecord): Promise<void> {
-  const records = await readHolidayRecords();
-  const nextRecords = [...records];
-  const index = nextRecords.findIndex(
-    (item) => item.date === record.date && item.store === record.store
+  const client = getDocumentClient();
+  await client.send(
+    new PutCommand({
+      TableName: TABLE_NAME,
+      Item: {
+        store_id: record.store,
+        date: record.date,
+        is_holiday: record.isHoliday,
+        note: record.note,
+      } satisfies DynamoHolidayRecord,
+    })
   );
-
-  if (index >= 0) {
-    nextRecords[index] = { ...record };
-  } else {
-    nextRecords.push({ ...record });
-  }
-
-  nextRecords.sort((a, b) => {
-    const storeCompare = a.store.localeCompare(b.store);
-    if (storeCompare !== 0) {
-      return storeCompare;
-    }
-    return a.date.localeCompare(b.date);
-  });
-
-  await writeHolidayRecords(nextRecords);
 }
 
 export async function removeHolidayRecord(date: string, store: string): Promise<void> {
-  const records = await readHolidayRecords();
-  const nextRecords = records.filter(
-    (record) => !(record.date === date && record.store === store)
+  const client = getDocumentClient();
+  await client.send(
+    new DeleteCommand({
+      TableName: TABLE_NAME,
+      Key: {
+        store_id: store,
+        date,
+      },
+    })
   );
-  await writeHolidayRecords(nextRecords);
 }
