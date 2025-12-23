@@ -47,6 +47,7 @@ export default function MyPage() {
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [returnFile, setReturnFile] = useState<File | null>(null);
   const [returnError, setReturnError] = useState('');
+  const [returnUploading, setReturnUploading] = useState(false);
   const [returnStep, setReturnStep] = useState<'check' | 'survey' | 'done'>('check');
   const [returnRating, setReturnRating] = useState(0);
   const [returnSurvey, setReturnSurvey] = useState('');
@@ -81,6 +82,7 @@ export default function MyPage() {
   const resetReturnModal = () => {
     setReturnFile(null);
     setReturnError('');
+    setReturnUploading(false);
     setReturnStep('check');
     setReturnRating(0);
     setReturnSurvey('');
@@ -420,14 +422,39 @@ export default function MyPage() {
     resetReturnModal();
   };
 
-  const handleReturnComplete = () => {
+  const handleReturnComplete = async () => {
     if (!returnFile) {
       setReturnError('写真をアップロードしてください。');
       return;
     }
 
     setReturnError('');
-    setReturnStep('survey');
+    setReturnUploading(true);
+
+    try {
+      const data = await readFileAsBase64(returnFile);
+      const response = await fetch('/api/return-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data,
+          fileName: returnFile.name,
+          contentType: returnFile.type,
+        }),
+      });
+
+      if (!response.ok) {
+        const message = (await response.json())?.message ?? '送信に失敗しました。';
+        throw new Error(message);
+      }
+
+      setReturnStep('survey');
+    } catch (error) {
+      console.error('Failed to submit return report', error);
+      setReturnError(error instanceof Error ? error.message : '送信に失敗しました。');
+    } finally {
+      setReturnUploading(false);
+    }
   };
 
   const handleReturnSubmit = async () => {
@@ -961,9 +988,10 @@ export default function MyPage() {
                 <button
                   type="button"
                   onClick={handleReturnComplete}
+                  disabled={returnUploading}
                   className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
                 >
-                  返却完了
+                  {returnUploading ? '送信中…' : '返却完了'}
                 </button>
               </div>
             ) : null}
