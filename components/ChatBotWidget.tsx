@@ -10,7 +10,7 @@ export default function ChatBotWidget({ visible = true }: ChatBotWidgetProps) {
   const [open, setOpen] = useState(false);
   return (
     <div
-      className="fixed bottom-4 right-4 z-50 flex flex-col items-end"
+      className="fixed bottom-[46px] right-4 z-50 flex flex-col items-end sm:bottom-4"
       hidden={!visible}
       aria-hidden={!visible}
     >
@@ -34,9 +34,9 @@ export default function ChatBotWidget({ visible = true }: ChatBotWidgetProps) {
       )}
       <button
         onClick={() => setOpen(!open)}
-        className="bg-red-600 text-white p-3 sm:p-4 rounded-full shadow-lg"
+        className="bg-red-600 text-white p-2.5 sm:p-4 rounded-full shadow-lg"
       >
-        <FaComments className="h-6 w-6 sm:h-8 sm:w-8" />
+        <FaComments className="h-5 w-5 sm:h-8 sm:w-8" />
       </button>
     </div>
   );
