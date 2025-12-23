@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 import type { Accessory, AccessoryPriceKey } from "../../../lib/dashboard/types";
+import type { CouponRule } from "../../../lib/dashboard/types";
 
 type AddOn = {
   key: string;
@@ -48,6 +49,9 @@ export default function ReserveFlowStep2() {
   const [returnTime, setReturnTime] = useState("10:00");
   const [managementNumber, setManagementNumber] = useState("");
   const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(defaultFees.couponDiscount);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponMessage, setCouponMessage] = useState<string | null>(null);
   const [rentalFee, setRentalFee] = useState(defaultFees.rental);
   const [rentalFeeError, setRentalFeeError] = useState<string | null>(null);
 
@@ -197,8 +201,6 @@ export default function ReserveFlowStep2() {
   );
 
   const highSeasonFee = defaultFees.highSeason;
-  const couponDiscount = defaultFees.couponDiscount;
-
   const totalAmount = rentalFee + selectedAccessoryFee + selectedProtectionFee + highSeasonFee - couponDiscount;
 
   const formatDateLabel = (dateString: string, fallback: string) => {
@@ -222,6 +224,71 @@ export default function ReserveFlowStep2() {
 
   const toggleAccessory = (key: string) => {
     setAccessorySelection((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const isCouponActive = (coupon: CouponRule, now: Date) => {
+    const start = new Date(`${coupon.start_date}T00:00:00`);
+    const end = new Date(`${coupon.end_date}T23:59:59`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+    return now >= start && now <= end;
+  };
+
+  const calculateCouponDiscount = (coupon: CouponRule, baseAmount: number) => {
+    if (typeof coupon.discount_amount === "number") {
+      return Math.min(coupon.discount_amount, baseAmount);
+    }
+    if (typeof coupon.discount_percentage === "number") {
+      return Math.min(Math.round((baseAmount * coupon.discount_percentage) / 100), baseAmount);
+    }
+    return 0;
+  };
+
+  const handleApplyCoupon = async () => {
+    const trimmedCode = couponCode.trim();
+    setCouponMessage(null);
+    if (!trimmedCode) {
+      setCouponError("クーポンコードを入力してください。");
+      setCouponDiscount(0);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/coupon-rules");
+      if (!response.ok) {
+        throw new Error("Failed to fetch coupons");
+      }
+
+      const coupons = (await response.json()) as CouponRule[];
+      const matched = coupons.find((coupon) => coupon.coupon_code === trimmedCode);
+      if (!matched) {
+        setCouponError("クーポンコードが見つかりません。");
+        setCouponDiscount(0);
+        return;
+      }
+
+      const now = new Date();
+      if (!isCouponActive(matched, now)) {
+        setCouponError("クーポンの適用期間外です。");
+        setCouponDiscount(0);
+        return;
+      }
+
+      const baseAmount = rentalFee + selectedAccessoryFee + selectedProtectionFee + highSeasonFee;
+      const discount = calculateCouponDiscount(matched, baseAmount);
+      if (discount <= 0) {
+        setCouponError("クーポンの割引額を計算できませんでした。");
+        setCouponDiscount(0);
+        return;
+      }
+
+      setCouponDiscount(discount);
+      setCouponError(null);
+      setCouponMessage("クーポンを適用しました。");
+    } catch (error) {
+      console.error("Failed to apply coupon", error);
+      setCouponError("クーポンの適用に失敗しました。時間をおいて再度お試しください。");
+      setCouponDiscount(0);
+    }
   };
 
   useEffect(() => {
@@ -289,6 +356,7 @@ export default function ReserveFlowStep2() {
       pickupTime,
       returnTime,
       couponCode,
+      couponDiscount: couponDiscount.toString(),
       accessoryTotal: selectedAccessoryFee.toString(),
       protectionTotal: selectedProtectionFee.toString(),
       totalAmount: totalAmount.toString(),
@@ -436,16 +504,27 @@ export default function ReserveFlowStep2() {
                     type="text"
                     placeholder="クーポン・コード"
                     value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
+                    onChange={(e) => {
+                      setCouponCode(e.target.value);
+                      setCouponError(null);
+                      setCouponMessage(null);
+                      setCouponDiscount(0);
+                    }}
                     className="flex-1 rounded-lg border border-gray-200 px-3 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none"
                   />
                   <button
                     type="button"
+                    onClick={handleApplyCoupon}
                     className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300"
                   >
                     適用する
                   </button>
                 </div>
+                {couponError ? (
+                  <p className="text-xs text-red-600">{couponError}</p>
+                ) : couponMessage ? (
+                  <p className="text-xs text-emerald-600">{couponMessage}</p>
+                ) : null}
               </div>
             </div>
 

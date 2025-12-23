@@ -42,6 +42,7 @@ export default function ReserveFlowStep3() {
   const [returnTime, setReturnTime] = useState("10:00");
   const [totalAmount, setTotalAmount] = useState(7830);
   const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
   const [protectionTotal, setProtectionTotal] = useState(0);
   const [accessoryTotal, setAccessoryTotal] = useState(0);
 
@@ -99,6 +100,7 @@ export default function ReserveFlowStep3() {
       if (!Number.isNaN(parsed)) setTotalAmount(parsed);
     }
     if (typeof params.couponCode === "string") setCouponCode(params.couponCode);
+    if (typeof params.couponDiscount === "string") setCouponDiscount(Number(params.couponDiscount));
     if (typeof params.accessoryTotal === "string") setAccessoryTotal(Number(params.accessoryTotal));
     if (typeof params.protectionTotal === "string") setProtectionTotal(Number(params.protectionTotal));
   }, [router.isReady, router.query]);
@@ -195,7 +197,7 @@ export default function ReserveFlowStep3() {
           memberEmail: registration?.email ?? sessionUser.email ?? "",
           memberPhone: registration?.mobile ?? registration?.tel ?? "",
           couponCode,
-          couponDiscount: accessoryTotal + protectionTotal,
+          couponDiscount,
           notes: "テスト決済経由で保存",
         }),
       });
@@ -248,6 +250,7 @@ export default function ReserveFlowStep3() {
       pickupTime,
       returnTime,
       couponCode,
+      couponDiscount: couponDiscount.toString(),
       accessoryTotal: accessoryTotal.toString(),
       protectionTotal: protectionTotal.toString(),
       totalAmount: totalAmount.toString(),
