@@ -8,11 +8,27 @@ import tableStyles from "../../../../styles/AdminTable.module.css";
 import styles from "../../../../styles/Dashboard.module.css";
 import { BikeClass, BikeModel } from "../../../../lib/dashboard/types";
 
+type VehicleRentalPrice = {
+  vehicle_type_id: number;
+  days: number;
+  price: number;
+};
+
+type PricingStatus = {
+  isComplete: boolean;
+  missingDays: number[];
+  error?: boolean;
+};
+
+const MAX_DAYS = 31;
+
 export default function BikeModelRentalPricingListPage() {
   const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pricingStatus, setPricingStatus] = useState<Record<number, PricingStatus>>({});
+  const [isPricingStatusLoading, setIsPricingStatusLoading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -55,6 +71,79 @@ export default function BikeModelRentalPricingListPage() {
     [bikeClasses]
   );
 
+  useEffect(() => {
+    if (bikeModels.length === 0) {
+      setPricingStatus({});
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadPricingStatus = async () => {
+      setIsPricingStatusLoading(true);
+      try {
+        const results = await Promise.all(
+          bikeModels.map(async (model) => {
+            try {
+              const response = await fetch(
+                `/api/vehicle-rental-prices?vehicle_type_id=${model.modelId}`
+              );
+
+              if (!response.ok) {
+                throw new Error("Failed to load pricing");
+              }
+
+              const items: VehicleRentalPrice[] = await response.json();
+              const registeredDays = new Set(items.map((item) => item.days));
+              const missingDays = Array.from(
+                { length: MAX_DAYS },
+                (_, index) => index + 1
+              ).filter((day) => !registeredDays.has(day));
+
+              return {
+                modelId: model.modelId,
+                status: {
+                  isComplete: missingDays.length === 0,
+                  missingDays,
+                } as PricingStatus,
+              };
+            } catch (pricingError) {
+              console.error("Failed to load rental pricing status", {
+                modelId: model.modelId,
+                pricingError,
+              });
+              return {
+                modelId: model.modelId,
+                status: { isComplete: false, missingDays: [], error: true },
+              };
+            }
+          })
+        );
+
+        if (isCancelled) {
+          return;
+        }
+
+        setPricingStatus(
+          results.reduce<Record<number, PricingStatus>>((acc, current) => {
+            acc[current.modelId] = current.status;
+            return acc;
+          }, {})
+        );
+      } finally {
+        if (!isCancelled) {
+          setIsPricingStatusLoading(false);
+        }
+      }
+    };
+
+    void loadPricingStatus();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [bikeModels]);
+
   return (
     <>
       <Head>
@@ -81,13 +170,14 @@ export default function BikeModelRentalPricingListPage() {
                   <th scope="col">車種名</th>
                   <th scope="col">クラス</th>
                   <th scope="col">掲載状態</th>
+                  <th scope="col">料金登録</th>
                   <th scope="col">操作</th>
                 </tr>
               </thead>
               <tbody>
                 {bikeModels.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className={tableStyles.emptyRow}>
+                    <td colSpan={6} className={tableStyles.emptyRow}>
                       {isLoading ? "読み込み中..." : "登録済みの車種はまだありません。"}
                     </td>
                   </tr>
@@ -107,6 +197,56 @@ export default function BikeModelRentalPricingListPage() {
                         >
                           {model.publishStatus}
                         </span>
+                      </td>
+                      <td>
+                        {(() => {
+                          const status = pricingStatus[model.modelId];
+
+                          if (!status && isPricingStatusLoading) {
+                            return (
+                              <span
+                                className={`${tableStyles.badge} ${tableStyles.badgeNeutral}`}
+                              >
+                                確認中...
+                              </span>
+                            );
+                          }
+
+                          if (status?.error) {
+                            return (
+                              <span
+                                className={`${tableStyles.badge} ${tableStyles.badgeOff}`}
+                              >
+                                取得失敗
+                              </span>
+                            );
+                          }
+
+                          if (status?.isComplete) {
+                            return (
+                              <span
+                                className={`${tableStyles.badge} ${tableStyles.badgeOn}`}
+                              >
+                                登録済み
+                              </span>
+                            );
+                          }
+
+                          return (
+                            <div>
+                              <span
+                                className={`${tableStyles.badge} ${tableStyles.badgeOff}`}
+                              >
+                                未登録
+                              </span>
+                              {status?.missingDays.length ? (
+                                <div className={tableStyles.statusNote}>
+                                  不足 {status.missingDays.length}日分
+                                </div>
+                              ) : null}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td>
                         <div className={tableStyles.actions}>
