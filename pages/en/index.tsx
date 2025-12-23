@@ -196,10 +196,10 @@ export default function HomeEn({ blogSlides, blogTags, bikeModelsAll, bikeClasse
           />
           <FaqAccordion faqs={faqs} hideToggle />
           <div className="faq-section__actions mt-8">
-            <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
+            <Link href="/en/beginner" className="btn-primary w-full justify-center sm:w-auto">
               Learn more in the beginner guide
             </Link>
-            <Link href="/help" className="btn-primary w-full justify-center sm:w-auto">
+            <Link href="/en/help" className="btn-primary w-full justify-center sm:w-auto">
               See more FAQs
             </Link>
           </div>
@@ -287,12 +287,12 @@ function FeatureHighlight({
   text: string;
 }) {
   return (
-    <article className="flex h-full flex-col gap-4 rounded-2xl border border-white/60 bg-white/80 p-6 text-center shadow-[0_20px_40px_-28px_rgba(15,23,42,0.4)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_52px_-28px_rgba(220,38,38,0.4)]">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100/70 text-red-500">
+    <article className="feature-highlight-card flex h-full flex-col gap-4 rounded-2xl border border-white/60 bg-white/80 p-6 text-center shadow-[0_20px_40px_-28px_rgba(15,23,42,0.4)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_52px_-28px_rgba(220,38,38,0.4)]">
+      <div className="feature-highlight-card__icon mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100/70 text-red-500">
         {icon}
       </div>
-      <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
-      <p className="text-sm leading-relaxed text-slate-600">{text}</p>
+      <h3 className="card-title text-lg font-semibold text-slate-800">{title}</h3>
+      <p className="feature-highlight-card__text text-sm leading-relaxed text-slate-600">{text}</p>
     </article>
   );
 }
@@ -343,5 +343,5 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     getBikeClasses(),
   ]);
 
-  return { props: { blogSlides, blogTags, bikeModelsAll, bikeClasses } };
+  return { props: { blogSlides, blogTags, bikeModelsAll, bikeClasses }, revalidate: 60 };
 };
