@@ -83,6 +83,10 @@ const NAV_ITEMS: NavItem[] = [
     children: [{ label: "予約一覧", href: `${ADMIN_DASHBOARD_ROOT}/reservations` }],
   },
   {
+    label: "写真アップロード確認",
+    href: `${ADMIN_DASHBOARD_ROOT}/photo-uploads`,
+  },
+  {
     label: "チャットボット",
     href: `${ADMIN_DASHBOARD_ROOT}/chatbot/inquiries`,
     children: [
@@ -414,4 +418,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
