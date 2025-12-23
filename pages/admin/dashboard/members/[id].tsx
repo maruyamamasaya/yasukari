@@ -3,9 +3,11 @@ import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
-import { Member, members } from "../../../../lib/members";
+import type { Member } from "../../../../lib/members";
+import type { Reservation } from "../../../../lib/reservations";
 import styles from "../../../../styles/Dashboard.module.css";
 import memberStyles from "../../../../styles/AdminMember.module.css";
+import tableStyles from "../../../../styles/AdminTable.module.css";
 
 const statusBadgeClassName = (status: Member["status"]): string => {
   if (status === "認証済") {
@@ -26,10 +28,10 @@ export default function MemberDetailPage() {
     return Array.isArray(id) ? id[0] : id;
   }, [router.query]);
 
-  const member = useMemo(
-    () => members.find((item) => item.id === memberId),
-    [memberId]
-  );
+  const [member, setMember] = useState<Member | null>(null);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [noteEdit, setNoteEdit] = useState(member?.notes ?? "");
 
@@ -37,9 +39,65 @@ export default function MemberDetailPage() {
     setNoteEdit(member?.notes ?? "");
   }, [member]);
 
+  useEffect(() => {
+    if (!memberId) return;
+    let isMounted = true;
+
+    const loadMember = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage(null);
+        const response = await fetch(`/api/admin/members/${memberId}`);
+        if (!response.ok) {
+          throw new Error("会員情報の取得に失敗しました。");
+        }
+        const data = (await response.json()) as {
+          member: Member;
+          reservations: Reservation[];
+        };
+        if (isMounted) {
+          setMember(data.member);
+          setReservations(data.reservations);
+        }
+      } catch (error) {
+        console.error("Failed to load member", error);
+        if (isMounted) {
+          setErrorMessage("会員情報の取得に失敗しました。");
+          setMember(null);
+          setReservations([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadMember();
+    return () => {
+      isMounted = false;
+    };
+  }, [memberId]);
+
   const handleBackToList = () => {
     router.push("/admin/dashboard/members");
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout
+        title="会員管理"
+        description="会員情報の確認や状態の把握を行うためのダッシュボードです。"
+      >
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>会員詳細</h2>
+            <p className={styles.sectionDescription}>会員情報を読み込み中です...</p>
+          </div>
+        </section>
+      </DashboardLayout>
+    );
+  }
 
   if (!member) {
     return (
@@ -51,7 +109,8 @@ export default function MemberDetailPage() {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>会員詳細</h2>
             <p className={styles.sectionDescription}>
-              該当する会員情報が見つかりませんでした。会員一覧に戻って再度お試しください。
+              {errorMessage ??
+                "該当する会員情報が見つかりませんでした。会員一覧に戻って再度お試しください。"}
             </p>
           </div>
 
@@ -187,7 +246,38 @@ export default function MemberDetailPage() {
 
             <div>
               <div className={memberStyles.sectionTitle}>予約一覧</div>
-              <p className={memberStyles.sectionHelper}>まだ予約はありません</p>
+              {reservations.length === 0 ? (
+                <p className={memberStyles.sectionHelper}>まだ予約はありません</p>
+              ) : (
+                <div className={`${tableStyles.wrapper} ${tableStyles.tableWrapper}`}>
+                  <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
+                    <thead>
+                      <tr>
+                        <th scope="col">予約ID</th>
+                        <th scope="col">車両</th>
+                        <th scope="col">受取日時</th>
+                        <th scope="col">返却日時</th>
+                        <th scope="col">状態</th>
+                        <th scope="col">支払額</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reservations.map((reservation) => (
+                        <tr key={reservation.id}>
+                          <td className={tableStyles.monospace}>{reservation.id}</td>
+                          <td>
+                            {reservation.vehicleModel} ({reservation.vehicleCode})
+                          </td>
+                          <td>{reservation.pickupAt || "-"}</td>
+                          <td>{reservation.returnAt || "-"}</td>
+                          <td>{reservation.status}</td>
+                          <td>{reservation.paymentAmount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             <div className={memberStyles.buttonRow}>
