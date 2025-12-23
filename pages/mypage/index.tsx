@@ -610,7 +610,6 @@ export default function MyPage() {
                               </span>
                             </div>
                           </div>
-                        </div>
                         {reservation.vehicleChangedAt && !reservation.vehicleChangeNotified && (
                           <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
                             管理側で車両が変更されました。新しい車両: {reservation.vehicleCode} /{' '}
