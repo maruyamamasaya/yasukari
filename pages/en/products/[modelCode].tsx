@@ -336,34 +336,6 @@ export default function ProductDetailPageEn({
           </section>
 
           <section className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Specifications</h2>
-                <span className="text-xs font-medium text-gray-500">Spec</span>
-              </div>
-              <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 p-6">
-                {specEntries.length > 0 ? (
-                  <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                    {specEntries.map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="flex flex-col gap-1 rounded-lg bg-gray-50 px-4 py-3"
-                      >
-                        <dt className="text-xs font-semibold text-gray-500">
-                          {specLabels[key as keyof BikeSpec]}
-                        </dt>
-                        <dd className="text-sm font-medium text-gray-900">{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : (
-                  <p className="text-sm text-gray-600">
-                    Detailed specs are being prepared. Contact our team for the latest information.
-                  </p>
-                )}
-              </div>
-            </div>
-
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Price guide</h2>
@@ -393,6 +365,34 @@ export default function ProductDetailPageEn({
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">Specifications</h2>
+                <span className="text-xs font-medium text-gray-500">Spec</span>
+              </div>
+              <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 p-6">
+                {specEntries.length > 0 ? (
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                    {specEntries.map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex flex-col gap-1 rounded-lg bg-gray-50 px-4 py-3"
+                      >
+                        <dt className="text-xs font-semibold text-gray-500">
+                          {specLabels[key as keyof BikeSpec]}
+                        </dt>
+                        <dd className="text-sm font-medium text-gray-900">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <p className="text-sm text-gray-600">
+                    Detailed specs are being prepared. Contact our team for the latest information.
+                  </p>
+                )}
               </div>
             </div>
           </section>
