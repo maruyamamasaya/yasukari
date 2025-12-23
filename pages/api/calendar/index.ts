@@ -31,11 +31,7 @@ export default async function handler(
     return;
   }
 
-  const records = await readHolidayRecords();
-  const monthPrefix = `${month}-`;
-  const monthRecords = records.filter(
-    (record) => record.date.startsWith(monthPrefix) && record.store === store
-  );
+  const monthRecords = await readHolidayRecords(store, month);
 
   response.status(200).json({ holidays: monthRecords });
 }
