@@ -194,7 +194,7 @@ export default function HomeEn({ blogSlides, blogTags, bikeModelsAll, bikeClasse
             title="Frequently asked questions"
             description="Find answers on pricing, insurance, and reservation changes. Our support team is only a chat away if you need more help."
           />
-          <FaqAccordion faqs={faqs} />
+          <FaqAccordion faqs={faqs} hideToggle />
           <div className="faq-section__actions mt-8">
             <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
               Learn more in the beginner guide

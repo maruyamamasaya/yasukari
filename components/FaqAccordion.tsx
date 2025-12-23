@@ -9,9 +9,11 @@ export interface FAQItem {
 export default function FaqAccordion({
   faqs,
   showAll = false,
+  hideToggle = false,
 }: {
   faqs: FAQItem[];
   showAll?: boolean;
+  hideToggle?: boolean;
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [expandedAll, setExpandedAll] = useState(showAll);
@@ -20,7 +22,7 @@ export default function FaqAccordion({
     setOpenIndex((prev) => (prev === idx ? null : idx));
   };
 
-  const visibleFaqs = showAll || expandedAll ? faqs : faqs.slice(0, 3);
+  const visibleFaqs = showAll || expandedAll || hideToggle ? faqs : faqs.slice(0, 3);
 
   return (
     <div className="faq-accordion">
@@ -51,7 +53,7 @@ export default function FaqAccordion({
           </dl>
         );
       })}
-      {!showAll && faqs.length > 3 ? (
+      {!showAll && !hideToggle && faqs.length > 3 ? (
         <button
           type="button"
           onClick={() => setExpandedAll((prev) => !prev)}
