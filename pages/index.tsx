@@ -186,7 +186,7 @@ export default function HomePage({ blogSlides, blogTags, bikeModelsAll, bikeClas
             title="よくある質問"
             description="料金・保険・予約変更など、よくいただく質問をまとめました。もっと詳しく知りたいときは、ヘルプページもご覧ください。"
           />
-          <FaqAccordion faqs={faqs} />
+          <FaqAccordion faqs={faqs} hideToggle />
           <div className="faq-section__actions mt-8">
             <Link href="/beginner" className="btn-primary w-full justify-center sm:w-auto">
               はじめてガイドで利用の流れを詳しく知る
