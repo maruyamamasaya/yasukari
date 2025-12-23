@@ -6,19 +6,11 @@ import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import fs from "fs";
 import path from "path";
 import { GetStaticProps } from "next";
-import {
-  FaClock,
-  FaTruck,
-  FaStar,
-  FaHashtag,
-  FaMotorcycle,
-  FaMapMarkerAlt,
-} from "react-icons/fa";
+import { FaClock, FaTruck, FaStar, FaHashtag, FaMapMarkerAlt } from "react-icons/fa";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import BikeModelCarousel from "../components/BikeModelCarousel";
-import GenreCarousel, { GenreItem } from "../components/GenreCarousel";
 import BikeLineup from "../components/BikeLineup";
 import HeroSlider from "../components/HeroSlider";
 import RecentlyViewed from "../components/RecentlyViewed";
@@ -106,57 +98,6 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
     },
   ];
 
-  const genreItems: GenreItem[] = [
-    {
-      title: "原付スクーター",
-      keywords: "50cc",
-      img: "/image/category/原付スクーター.png",
-      href: "/t/genre/scooter-50cc?click_from=top_genres",
-    },
-    {
-      title: "ジャイロキャノビー原付",
-      img: "/image/category/ジャイロキャノビー原付.png",
-      href: "/t/genre/gyrocanopy-moped?click_from=top_genres",
-    },
-    {
-      title: "ジャイロキャノビーミニカー",
-      img: "/image/category/ジャイロキャノビーミニカー.png",
-      href: "/t/genre/gyrocanopy-minicar?click_from=top_genres",
-    },
-    {
-      title: "原付二種スクーター",
-      keywords: "〜125cc",
-      img: "/image/category/原付二種スクーター.png",
-      href: "/t/genre/scooter-125cc?click_from=top_genres",
-    },
-    {
-      title: "原付ミッション",
-      img: "/image/category/原付ミッション.png",
-      href: "/t/genre/moped-manual?click_from=top_genres",
-    },
-    {
-      title: "126〜250cc",
-      img: "/image/category/126〜250cc.png",
-      href: "/t/genre/cc126-250?click_from=top_genres",
-    },
-    {
-      title: "251〜400cc",
-      img: "/image/category/251〜400cc.png",
-      href: "/t/genre/cc251-400?click_from=top_genres",
-    },
-    {
-      title: "400cc超",
-      img: "/image/category/400cc超.png",
-      href: "/t/genre/cc400-plus?click_from=top_genres",
-    },
-    {
-      title: "全ての機種を見る",
-      href: "/products",
-      icon: <FaMotorcycle className="h-16 w-16 text-red-500" />,
-      keywords: "\u00A0",
-    },
-  ];
-
   const stores = [
     {
       name: "足立小台本店",
@@ -225,16 +166,6 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
         subtitle="ライダーに選ばれる定番モデル"
         headingTitle="ライダーに選ばれる定番モデル"
         headingDescription="快適さとデザイン、価格のバランスに優れ、初めてのレンタルにもおすすめのラインアップです。"
-      />
-
-      <GenreCarousel
-        items={genreItems}
-        title="おすすめジャンル"
-        subtitle="利用シーンから探す"
-        headingTitle="利用シーンから探す"
-        headingDescription="利用シーンがイメージしやすいカテゴリから、ぴったりのバイクを見つけましょう。"
-        cardDescription="受け取りやすさ、積載性、快適性などの観点からスタッフがおすすめポイントをご紹介。あなたに合う一台がきっと見つかります。"
-        detailLabel="詳細を見る"
       />
 
       <section className="section-surface section-padding">
