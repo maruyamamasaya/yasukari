@@ -123,10 +123,6 @@
 }
 
 @media print {
-  :global(body) {
-    background: #fff;
-  }
-
   .printActions {
     display: none;
   }
