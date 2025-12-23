@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import type { Member } from "../../../../lib/members";
 import type { Reservation } from "../../../../lib/reservations";
+import { formatDisplayPhoneNumber } from "../../../../lib/phoneNumber";
 import styles from "../../../../styles/Dashboard.module.css";
 import memberStyles from "../../../../styles/AdminMember.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
@@ -19,6 +20,12 @@ const statusBadgeClassName = (status: Member["status"]): string => {
   }
 
   return `${memberStyles.statusBadge} ${memberStyles.statusBadgeOff}`;
+};
+
+const formatPhoneValue = (value?: string) => {
+  if (!value || value === "-") return "-";
+  const formatted = formatDisplayPhoneNumber(value);
+  return formatted || value;
 };
 
 export default function MemberDetailPage() {
@@ -180,11 +187,11 @@ export default function MemberDetailPage() {
               </div>
               <div className={memberStyles.fieldBlock}>
                 <div className={memberStyles.fieldLabel}>携帯電話</div>
-                <div className={memberStyles.fieldValue}>{member.mobilePhone}</div>
+                <div className={memberStyles.fieldValue}>{formatPhoneValue(member.mobilePhone)}</div>
               </div>
               <div className={memberStyles.fieldBlock}>
                 <div className={memberStyles.fieldLabel}>電話番号</div>
-                <div className={memberStyles.fieldValue}>{member.phoneNumber}</div>
+                <div className={memberStyles.fieldValue}>{formatPhoneValue(member.phoneNumber)}</div>
               </div>
               <div className={memberStyles.fieldBlock}>
                 <div className={memberStyles.fieldLabel}>生年月日</div>
@@ -212,7 +219,9 @@ export default function MemberDetailPage() {
               </div>
               <div className={memberStyles.fieldBlock}>
                 <div className={memberStyles.fieldLabel}>通勤先電話番号</div>
-                <div className={memberStyles.fieldValue}>{member.workplacePhone}</div>
+                <div className={memberStyles.fieldValue}>
+                  {formatPhoneValue(member.workplacePhone)}
+                </div>
               </div>
               <div className={memberStyles.fieldBlock}>
                 <div className={memberStyles.fieldLabel}>その他連絡先名</div>
@@ -224,7 +233,9 @@ export default function MemberDetailPage() {
               </div>
               <div className={memberStyles.fieldBlock}>
                 <div className={memberStyles.fieldLabel}>その他連絡先電話番号</div>
-                <div className={memberStyles.fieldValue}>{member.otherContactPhone}</div>
+                <div className={memberStyles.fieldValue}>
+                  {formatPhoneValue(member.otherContactPhone)}
+                </div>
               </div>
             </div>
 

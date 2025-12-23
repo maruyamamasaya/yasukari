@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
+import { formatDisplayPhoneNumber } from '../../lib/phoneNumber';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -86,13 +87,15 @@ const chanceOptions = [
   { value: '5', label: 'その他' },
 ];
 
-const formatPhoneDisplay = (phone: string) => {
+const formatPhoneInputValue = (phone: string) => {
   const normalized = phone.replace(/^\+/, '');
   if (normalized.startsWith('81') && normalized.length > 2) {
     return `0${normalized.slice(2)}`;
   }
   return phone;
 };
+
+const formatPhoneOptionLabel = (phone: string) => formatDisplayPhoneNumber(phone) || phone;
 
 const normalizeMobileInput = (phone: string) => {
   const digitsOnly = phone.replace(/\D/g, '');
@@ -526,8 +529,7 @@ const RegistrationPage: NextPage = () => {
                         const countryCode = normalized.startsWith('81') ? '+81' : '';
                         return (
                           <option key={phone} value={phone}>
-                            {countryCode ? `${countryCode} ` : ''}
-                            {formatPhoneDisplay(phone)}
+                            {formatPhoneOptionLabel(phone)}
                           </option>
                         );
                       })}
@@ -537,7 +539,7 @@ const RegistrationPage: NextPage = () => {
                     id="mobile"
                     name="mobile"
                     type="tel"
-                    value={formatPhoneDisplay(formData.mobile)}
+                    value={formatPhoneInputValue(formData.mobile)}
                     onChange={handleChange}
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                     placeholder="09012345678"

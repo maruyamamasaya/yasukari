@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
 
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
+import { formatDisplayPhoneNumberWithCountryCode } from "../../../../lib/phoneNumber";
 import { Reservation } from "../../../../lib/reservations";
 import styles from "../../../../styles/Dashboard.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
@@ -131,31 +132,8 @@ export default function ReservationDetailPage() {
     });
   };
 
-  const formatPhoneNumber = (phone: string, countryCode?: string) => {
-    const sanitized = phone.replace(/[^0-9+]/g, "");
-    if (!sanitized) return "-";
-
-    const detectedCode =
-      countryCode || sanitized.match(/^\+\d{1,3}/)?.[0] || (sanitized.startsWith("+") ? sanitized : "");
-
-    const countryLabel = (() => {
-      switch (detectedCode) {
-        case "+81":
-          return "日本";
-        case "+1":
-          return "アメリカ・カナダ";
-        case "+44":
-          return "イギリス";
-        default:
-          return detectedCode ? `国コード ${detectedCode}` : "国不明";
-      }
-    })();
-
-    const localNumber =
-      sanitized.startsWith("+") || sanitized.startsWith("0") ? sanitized : `0${sanitized}`;
-
-    return `${localNumber} (${countryLabel})`;
-  };
+  const formatPhoneNumber = (phone: string, countryCode?: string) =>
+    formatDisplayPhoneNumberWithCountryCode(phone, countryCode) || "-";
 
   const handleVehicleChange = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

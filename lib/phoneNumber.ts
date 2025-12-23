@@ -71,3 +71,74 @@ export const formatInternationalPhoneNumber = (countryDialCode: string, national
 
   return `+${normalizedCountry}${subscriberNumber}`;
 };
+
+const getJapanOption = (): CountryOption | undefined =>
+  COUNTRY_OPTIONS.find((option) => option.code === 'JP');
+
+const formatJapaneseNationalNumber = (nationalNumber: string): string => {
+  const digits = nationalNumber.replace(/[^0-9]/g, '');
+  if (!digits) return '';
+
+  if (digits.length === 10) {
+    return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+
+  if (digits.length === 11) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+
+  return digits;
+};
+
+export const formatDisplayPhoneNumber = (value?: string): string => {
+  if (!value) return '';
+
+  const digits = value.replace(/[^0-9]/g, '');
+  if (!digits) return '';
+
+  const japanOption = getJapanOption();
+  const matchedCountry = findCountryByDialCodePrefix(digits);
+
+  let country = matchedCountry;
+  let national = '';
+
+  if (matchedCountry) {
+    national = digits.slice(matchedCountry.dialCode.length);
+    if (national && !national.startsWith('0')) {
+      national = `0${national}`;
+    }
+  } else if (digits.startsWith('0') && japanOption) {
+    country = japanOption;
+    national = digits;
+  }
+
+  if (!country) {
+    return `+${digits}`;
+  }
+
+  const formattedNational =
+    country.code === 'JP' ? formatJapaneseNationalNumber(national) : national;
+  const label = `${country.name} +${country.dialCode}`;
+
+  return formattedNational ? `${label} ${formattedNational}` : label;
+};
+
+export const formatDisplayPhoneNumberWithCountryCode = (
+  phone: string,
+  countryCode?: string
+): string => {
+  const digits = phone.replace(/[^0-9]/g, '');
+  if (!digits) return '';
+
+  const dialCode = (countryCode ?? '').replace(/[^0-9]/g, '');
+  if (!dialCode) {
+    return formatDisplayPhoneNumber(digits);
+  }
+
+  if (digits.startsWith(dialCode)) {
+    return formatDisplayPhoneNumber(digits);
+  }
+
+  const national = digits.startsWith('0') ? digits.slice(1) : digits;
+  return formatDisplayPhoneNumber(`${dialCode}${national}`);
+};

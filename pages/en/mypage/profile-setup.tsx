@@ -171,9 +171,17 @@ const ProfileSetupPageEn: NextPage = () => {
 
   const localeLabel = (value: string | undefined) => {
     if (!value) return 'Not set';
-    if (value.toLowerCase().startsWith('jp')) return 'Japanese region';
-    if (value.toLowerCase().startsWith('en')) return 'English-speaking region';
+    const normalized = value.toLowerCase();
+    if (normalized.startsWith('ja') || normalized.startsWith('jp')) return 'Japanese region';
+    if (normalized.startsWith('en')) return 'English-speaking region';
     return value;
+  };
+
+  const localeSelectValue = () => {
+    if (!normalizedLocale) return '';
+    if (normalizedLocale.startsWith('ja') || normalizedLocale.startsWith('jp')) return 'jp';
+    if (normalizedLocale.startsWith('en')) return 'en';
+    return attributes['custom:locale'] ?? '';
   };
 
   const missingKeys = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
@@ -394,7 +402,7 @@ const ProfileSetupPageEn: NextPage = () => {
                         id="locale"
                         name="locale"
                         required
-                        defaultValue={attributes['custom:locale'] ?? ''}
+                      defaultValue={localeSelectValue()}
                         className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                       >
                         <option value="">Select</option>
