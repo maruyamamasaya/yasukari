@@ -237,9 +237,11 @@ export default function MyPage() {
         const canceledReservations = allReservations.filter(
           (reservation) => reservation.status === 'キャンセル'
         );
-        const activeReservations = allReservations.filter(
-          (reservation) => reservation.status !== 'キャンセル'
-        );
+        const activeReservations = allReservations.filter((reservation) => {
+          const isCompleted =
+            reservation.reservationCompletedFlag || reservation.status === '予約完了';
+          return !isCompleted && reservation.status !== 'キャンセル';
+        });
 
         if (canceledReservations.length > 0 && typeof window !== 'undefined') {
           const storageKey = 'yasukari-cancelled-reservation-ids';
@@ -410,7 +412,7 @@ export default function MyPage() {
 
   const activeReturnReservation =
     reservations.find((reservation) => !reservation.reservationCompletedFlag) ?? null;
-  const hasActiveReservation = reservations.some((reservation) => reservation.status !== 'キャンセル');
+  const hasActiveReservation = reservations.length > 0;
 
   const handleReturnOpen = () => {
     resetReturnModal();
@@ -562,14 +564,24 @@ export default function MyPage() {
                   <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
                   <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
                 </div>
-                {hasActiveReservation ? (
-                  <button
-                    type="button"
-                    className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200"
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href="/mypage/past-reservations"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
                   >
-                    予約詳細
-                  </button>
-                ) : null}
+                    過去の予約
+                  </Link>
+                  {hasActiveReservation ? (
+                    <button
+                      type="button"
+                      className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200"
+                    >
+                      予約詳細
+                    </button>
+                  ) : null}
+                </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -602,7 +614,7 @@ export default function MyPage() {
                   <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">予約データを読み込み中です…</p>
                 ) : reservations.length === 0 ? (
                   <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">
-                    まだ予約データがありません。テスト決済ボタンを押すと保存内容がここに表示されます。
+                    まだ利用中の予約はありません。予約完了分は「過去の予約」から確認できます。
                   </p>
                 ) : (
                   <ul className="space-y-3">

@@ -189,9 +189,11 @@ export default function MyPageEn() {
         const canceledReservations = allReservations.filter(
           (reservation) => reservation.status === 'キャンセル'
         );
-        const activeReservations = allReservations.filter(
-          (reservation) => reservation.status !== 'キャンセル'
-        );
+        const activeReservations = allReservations.filter((reservation) => {
+          const isCompleted =
+            reservation.reservationCompletedFlag || reservation.status === '予約完了';
+          return !isCompleted && reservation.status !== 'キャンセル';
+        });
 
         if (canceledReservations.length > 0 && typeof window !== 'undefined') {
           const storageKey = 'yasukari-cancelled-reservation-ids';
@@ -367,9 +369,14 @@ export default function MyPageEn() {
                   <h2 className="text-lg font-semibold text-gray-900">Reservations</h2>
                   <p className="mt-1 text-sm text-gray-600">Your latest bookings and usage will appear here.</p>
                 </div>
-                <span className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
-                  Show saved reservations
-                </span>
+                <Link
+                  href="/en/mypage/past-reservations"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
+                >
+                  Past reservations
+                </Link>
               </div>
 
               <div className="mt-4 space-y-3 text-sm text-gray-700">
@@ -379,7 +386,7 @@ export default function MyPageEn() {
                   <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">Loading reservation data…</p>
                 ) : reservations.length === 0 ? (
                   <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700">
-                    You have no saved reservations yet. Press the test payment button to save a sample entry here.
+                    You have no active reservations right now. Completed bookings are listed under Past reservations.
                   </p>
                 ) : (
                   <ul className="space-y-3">
