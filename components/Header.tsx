@@ -17,7 +17,7 @@ export default function Header() {
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState(false);
   const [updatingLocale, setUpdatingLocale] = useState(false);
-  const menuRef = useRef<HTMLElement | null>(null);
+  const menuRef = useRef<HTMLUListElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
 
