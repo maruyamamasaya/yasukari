@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { AnnouncementBannerSettings } from "../types/announcement";
 
@@ -22,7 +22,10 @@ function buildLink(settings: AnnouncementBannerSettings): string | undefined {
 
 export default function AnnouncementBar() {
   const [banner, setBanner] = useState<BannerState>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
   const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -64,26 +67,57 @@ export default function AnnouncementBar() {
   const linkHref = banner ? buildLink(banner) : undefined;
   const isExternal = linkHref ? /^https?:\/\//.test(linkHref) : false;
 
+  useEffect(() => {
+    const container = containerRef.current;
+    const content = contentRef.current;
+    if (!container || !content) {
+      return;
+    }
+
+    const update = () => {
+      setShouldScroll(content.scrollWidth > container.clientWidth);
+    };
+
+    update();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(update);
+      observer.observe(container);
+      observer.observe(content);
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [message]);
+
   return (
-    <div className="relative bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 text-sm px-8">
-      {linkHref ? (
-        isExternal ? (
-          <a
-            href={linkHref}
-            target="_blank"
-            rel="noreferrer"
-            className="text-white no-underline"
-          >
-            {message}
-          </a>
-        ) : (
-          <Link href={linkHref} className="text-white no-underline">
-            {message}
-          </Link>
-        )
-      ) : (
-        message
-      )}
+    <div className="announcement-bar">
+      <div className="announcement-bar__container" ref={containerRef}>
+        <div
+          className={`announcement-bar__track${shouldScroll ? " is-scrolling" : ""}`}
+          ref={contentRef}
+        >
+          {linkHref ? (
+            isExternal ? (
+              <a
+                href={linkHref}
+                target="_blank"
+                rel="noreferrer"
+                className="announcement-bar__link"
+              >
+                {message}
+              </a>
+            ) : (
+              <Link href={linkHref} className="announcement-bar__link">
+                {message}
+              </Link>
+            )
+          ) : (
+            <span className="announcement-bar__text">{message}</span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
