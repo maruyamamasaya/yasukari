@@ -63,8 +63,8 @@ export default function ReserveFlowStep2() {
   );
 
   const [accessorySelection, setAccessorySelection] = useState(() =>
-    ACCESSORY_DISPLAY_ORDER.reduce<Record<string, boolean>>((acc, option) => {
-      acc[option.key] = false;
+    ACCESSORY_DISPLAY_ORDER.reduce<Record<string, number>>((acc, option) => {
+      acc[option.key] = 0;
       return acc;
     }, {})
   );
@@ -195,7 +195,8 @@ export default function ReserveFlowStep2() {
   const selectedAccessoryFee = useMemo(
     () =>
       accessoryOptions.reduce((total, option) => {
-        return accessorySelection[option.key] ? total + (option.price ?? 0) : total;
+        const selectedCount = accessorySelection[option.key] ?? 0;
+        return total + (option.price ?? 0) * selectedCount;
       }, 0),
     [accessoryOptions, accessorySelection]
   );
@@ -220,10 +221,6 @@ export default function ReserveFlowStep2() {
 
   const toggleProtection = (key: string) => {
     setProtectionSelection((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const toggleAccessory = (key: string) => {
-    setAccessorySelection((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const isCouponActive = (coupon: CouponRule, now: Date) => {
@@ -367,7 +364,7 @@ export default function ReserveFlowStep2() {
     });
 
     accessoryOptions.forEach((option) => {
-      params.append(option.key, accessorySelection[option.key] ? "1" : "0");
+      params.append(option.key, String(accessorySelection[option.key] ?? 0));
     });
 
     void router.push(`/reserve/flow/step3?${params.toString()}`);
@@ -467,6 +464,7 @@ export default function ReserveFlowStep2() {
                   <h3 className="text-sm font-semibold text-gray-900">用品オプションの選択</h3>
                   <span className="text-xs text-gray-500">必要なものを選択</span>
                 </div>
+                <p className="text-xs text-gray-500">オプション：1種類あたり2個まで</p>
                 {accessoryError ? (
                   <p className="text-xs text-red-600">{accessoryError}</p>
                 ) : null}
@@ -478,16 +476,26 @@ export default function ReserveFlowStep2() {
                     >
                       <div className="space-y-1">
                         <p className="text-sm font-semibold text-gray-900">{option.label}</p>
-                        <p className="text-xs text-gray-600">あり / なし を切り替えできます</p>
+                        <p className="text-xs text-gray-600">個数をプルダウンで選択できます</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold text-gray-900">{formatAccessoryPrice(option.price)}</span>
-                        <input
-                          type="checkbox"
-                          checked={accessorySelection[option.key]}
-                          onChange={() => toggleAccessory(option.key)}
-                          className="h-5 w-5 rounded border-gray-300 text-red-500 focus:ring-red-500"
-                        />
+                        <select
+                          value={accessorySelection[option.key]}
+                          onChange={(event) => {
+                            const selected = Number(event.target.value);
+                            setAccessorySelection((prev) => ({
+                              ...prev,
+                              [option.key]: Number.isNaN(selected) ? 0 : Math.min(2, Math.max(0, selected)),
+                            }));
+                          }}
+                          className="rounded-lg border border-gray-200 px-2 py-1 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                          aria-label={`${option.label}の個数`}
+                        >
+                          <option value={0}>0</option>
+                          <option value={1}>1</option>
+                          <option value={2}>2</option>
+                        </select>
                       </div>
                     </label>
                   ))}
