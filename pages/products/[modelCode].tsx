@@ -45,6 +45,31 @@ const durationDays = {
 
 type DurationKey = keyof typeof durationDays;
 
+const formatPrice = (price: number | undefined) =>
+  typeof price === "number" && Number.isFinite(price)
+    ? `${price.toLocaleString()}円`
+    : "-";
+
+const normalizePrice = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const sanitized = value.replace(/,/g, "").trim();
+    if (!sanitized) {
+      return undefined;
+    }
+
+    const numericValue = Number(sanitized);
+    if (Number.isFinite(numericValue)) {
+      return numericValue;
+    }
+  }
+
+  return undefined;
+};
+
 export default function ProductDetailPage({
   bike,
   className,
@@ -329,15 +354,15 @@ export default function ProductDetailPage({
               </div>
               <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 p-6 space-y-3">
                 <p className="text-sm text-gray-700">
-                  24時間料金を基準に、長期レンタルほどお得になる料金プランをご用意しています。詳しい料金は店舗までお問い合わせください。
+                  24時間料金を基準に、長期レンタルほどお得になる料金プランをご用意しています。
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                   {[
-                    { label: "24時間", value: priceGuide["24h"] ?? "お問い合わせ" },
-                    { label: "2日間", value: priceGuide["2d"] ?? "お問い合わせ" },
-                    { label: "1週間", value: priceGuide["1w"] ?? "お問い合わせ" },
-                    { label: "2週間", value: priceGuide["2w"] ?? "お問い合わせ" },
-                    { label: "1ヶ月", value: priceGuide["1m"] ?? "お問い合わせ" },
+                    { label: "24時間", value: priceGuide["24h"] ?? "-" },
+                    { label: "2日間", value: priceGuide["2d"] ?? "-" },
+                    { label: "1週間", value: priceGuide["1w"] ?? "-" },
+                    { label: "2週間", value: priceGuide["2w"] ?? "-" },
+                    { label: "1ヶ月", value: priceGuide["1m"] ?? "-" },
                     { label: "補償プラン", value: "加入可能" },
                   ].map((item) => (
                     <div
@@ -375,12 +400,14 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
     return { notFound: true };
   }
 
-  const [className, vehicles, rentalPrices] = await Promise.all([
-    Promise.resolve(classes.find((cls) => cls.classId === bike.classId)?.className),
+  const [bikeClass, vehicles, rentalPrices] = await Promise.all([
+    Promise.resolve(classes.find((cls) => cls.classId === bike.classId)),
     bike.modelId != null ? getVehiclesByModel(bike.modelId) : Promise.resolve([]),
     bike.modelId != null ? readVehicleRentalPrices(bike.modelId) : Promise.resolve([]),
   ]);
 
+  const classNameLabel = bikeClass?.className;
+  const classPriceMap = bikeClass?.base_prices ?? {};
   const rentalPriceMap = rentalPrices.reduce<Record<number, number>>((acc, record) => {
     acc[record.days] = record.price;
     return acc;
@@ -388,16 +415,16 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
 
   const priceGuide = (Object.entries(durationDays) as [DurationKey, number][])
     .map(([key, days]) => {
-      const price = rentalPriceMap[days];
-      if (typeof price === "number") {
-        return [key, `${price.toLocaleString()}円`] as [DurationKey, string];
+      const rentalPrice = rentalPriceMap[days];
+      if (typeof rentalPrice === "number") {
+        return [key, formatPrice(rentalPrice)] as [DurationKey, string];
       }
-      if (key === "24h" && bike.price24h) {
-        return [key, bike.price24h] as [DurationKey, string];
+      const classPrice = normalizePrice(classPriceMap[key]);
+      if (classPrice != null) {
+        return [key, formatPrice(classPrice)] as [DurationKey, string];
       }
-      return null;
+      return [key, "-"] as [DurationKey, string];
     })
-    .filter((entry): entry is [DurationKey, string] => Boolean(entry))
     .reduce<Partial<Record<DurationKey, string>>>((acc, [key, value]) => {
       acc[key] = value;
       return acc;
@@ -406,7 +433,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
   return {
     props: {
       bike,
-      className: className ?? undefined,
+      className: classNameLabel ?? undefined,
       vehicles,
       priceGuide,
     },
