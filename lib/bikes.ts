@@ -1,6 +1,7 @@
 import bikesData from "../data/bikes.json";
 import { scanAllItems } from "./dynamodb";
 import { getRequiredLicenseLabel } from "./dashboard/licenseOptions";
+import type { DurationPriceMap } from "./dashboard/types";
 
 type DynamoBikeModel = {
   modelId: number;
@@ -33,6 +34,7 @@ export interface BikeClass {
   classId: number;
   className: string;
   class_id?: string;
+  base_prices?: DurationPriceMap;
 }
 
 export interface BikeSpec {
