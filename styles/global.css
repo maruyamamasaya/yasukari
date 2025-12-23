@@ -323,6 +323,15 @@ a:hover {
   gap: 0.6rem;
   flex: 1;
   font-weight: 700;
+  min-width: 0;
+}
+
+.faq-category-trigger__title {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .faq-category-trigger__badge {
@@ -439,6 +448,14 @@ a:hover {
   color: #475569;
   font-weight: 800;
   font-size: 0.85rem;
+}
+
+.faq-question__text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .faq-question__icon {
