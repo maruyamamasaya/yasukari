@@ -375,9 +375,12 @@ export default function MyPage() {
                   <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
                   <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
                 </div>
-                <span className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
-                  保存された予約を表示
-                </span>
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200"
+                >
+                  詳細確認する
+                </button>
               </div>
 
               <div className="mt-4 space-y-3 text-sm text-gray-700">
