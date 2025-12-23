@@ -30,35 +30,54 @@ export default function PhotoUploadListPage() {
             ) : (
               <div className={styles.photoGrid}>
                 {PHOTO_UPLOADS.map((upload) => (
-                  <Link
-                    key={upload.id}
-                    href={`/admin/dashboard/photo-uploads/${upload.id}`}
-                    className={styles.photoCard}
-                  >
-                    <img
-                      src={upload.imageUrl}
-                      alt={`${upload.fileName} のサムネイル`}
-                      className={styles.photoThumb}
-                    />
-                    <div className={styles.photoMeta}>
-                      <span className={styles.photoName}>{upload.fileName}</span>
-                      <span className={styles.photoSubtext}>
-                        {upload.uploaderName}
-                      </span>
-                      <span className={styles.photoSubtext}>
-                        {upload.uploadedAt}
-                      </span>
-                      <span
-                        className={`${styles.photoBadge} ${
-                          upload.status === "確認済み"
-                            ? styles.photoBadgeConfirmed
-                            : ""
-                        }`}
-                      >
-                        {upload.status}
-                      </span>
+                  <div key={upload.id} className={styles.photoCard}>
+                    <Link
+                      href={`/admin/dashboard/photo-uploads/${upload.id}`}
+                      className={styles.photoLink}
+                    >
+                      <img
+                        src={upload.imageUrl}
+                        alt={`${upload.fileName} のサムネイル`}
+                        className={styles.photoThumb}
+                      />
+                      <div className={styles.photoMeta}>
+                        <span className={styles.photoName}>
+                          {upload.fileName}
+                        </span>
+                        <span className={styles.photoSubtext}>
+                          登録日: {upload.uploadedAt}
+                        </span>
+                        <span className={styles.photoSubtext}>
+                          画像URL:{" "}
+                          <span className={styles.photoUrl}>
+                            {upload.imageUrl}
+                          </span>
+                        </span>
+                        <span
+                          className={`${styles.photoBadge} ${
+                            upload.status === "確認済み"
+                              ? styles.photoBadgeConfirmed
+                              : ""
+                          }`}
+                        >
+                          {upload.status}
+                        </span>
+                      </div>
+                    </Link>
+                    <div className={styles.photoActions}>
+                      <label className={styles.photoCheckbox}>
+                        <input type="checkbox" name={`delete-${upload.id}`} />
+                        削除
+                      </label>
+                      <label className={styles.photoCheckbox}>
+                        <input
+                          type="checkbox"
+                          name={`confirm-delete-${upload.id}`}
+                        />
+                        削除しますか
+                      </label>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}
