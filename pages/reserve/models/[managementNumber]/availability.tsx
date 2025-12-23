@@ -141,7 +141,7 @@ export default function BikeAvailabilityPreviewPage() {
       setIsLoading(true);
       try {
         const [vehicleResponse, modelResponse] = await Promise.all([
-          fetch("/api/vehicles"),
+          fetch(`/api/vehicles/${managementNumber}`),
           fetch("/api/bike-models"),
         ]);
 
@@ -149,14 +149,10 @@ export default function BikeAvailabilityPreviewPage() {
           throw new Error("failed to load");
         }
 
-        const vehicles: Vehicle[] = await vehicleResponse.json();
+        const matchedVehicle = (await vehicleResponse.json()) as Vehicle;
         const models: BikeModel[] = await modelResponse.json();
-
-        const matchedVehicle =
-          vehicles.find((item) => item.managementNumber === managementNumber) ?? null;
-        const matchedModel = matchedVehicle
-          ? models.find((item) => item.modelId === matchedVehicle.modelId) ?? null
-          : null;
+        const matchedModel =
+          models.find((item) => item.modelId === matchedVehicle.modelId) ?? null;
 
         setVehicle(matchedVehicle);
         setModel(matchedModel ?? null);
