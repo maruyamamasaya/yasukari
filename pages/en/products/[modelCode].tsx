@@ -11,12 +11,14 @@ import {
   getVehiclesByModel,
   BikeVehicle,
 } from "../../../lib/bikes";
+import { readVehicleRentalPrices } from "../../../lib/server/vehicleRentalPrices";
 import RecentlyViewedEn from "../../../components/RecentlyViewedEn";
 
 interface Props {
   bike: BikeModel;
   className?: string;
   vehicles: BikeVehicle[];
+  priceGuide: Partial<Record<DurationKey, string>>;
 }
 
 const specLabels: Record<keyof BikeSpec, string> = {
@@ -34,7 +36,47 @@ const specLabels: Record<keyof BikeSpec, string> = {
   torque: "Maximum torque",
 };
 
-export default function ProductDetailPageEn({ bike, className, vehicles }: Props) {
+const durationDays = {
+  "24h": 1,
+  "2d": 2,
+  "1w": 7,
+  "2w": 14,
+  "1m": 31,
+} as const;
+
+type DurationKey = keyof typeof durationDays;
+
+const formatPrice = (price: number | undefined) =>
+  typeof price === "number" && Number.isFinite(price)
+    ? `${price.toLocaleString()}円`
+    : undefined;
+
+const normalizePrice = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const sanitized = value.replace(/,/g, "").trim();
+    if (!sanitized) {
+      return undefined;
+    }
+
+    const numericValue = Number(sanitized);
+    if (Number.isFinite(numericValue)) {
+      return numericValue;
+    }
+  }
+
+  return undefined;
+};
+
+export default function ProductDetailPageEn({
+  bike,
+  className,
+  vehicles,
+  priceGuide,
+}: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<string>(
     vehicles[0]?.managementNumber ?? ""
   );
@@ -52,7 +94,7 @@ export default function ProductDetailPageEn({ bike, className, vehicles }: Props
   );
 
   const hasStock = vehicleOptions.length > 0;
-  const showPrice = Boolean(bike.price24h);
+  const showPrice = Boolean(priceGuide["24h"]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -176,7 +218,7 @@ export default function ProductDetailPageEn({ bike, className, vehicles }: Props
                   <div className="space-y-4">
                     {showPrice ? (
                       <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-red-50 to-white p-4 shadow-sm">
-                        <p className="text-3xl font-bold text-gray-900">{bike.price24h}</p>
+                        <p className="text-3xl font-bold text-gray-900">{priceGuide["24h"]}</p>
                       </div>
                     ) : null}
                     <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
@@ -333,11 +375,11 @@ export default function ProductDetailPageEn({ bike, className, vehicles }: Props
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                   {[
-                    { label: "24 hours", value: bike.price24h || "Contact us" },
-                    { label: "2 days", value: "Contact us" },
-                    { label: "1 week", value: "Contact us" },
-                    { label: "2 weeks", value: "Contact us" },
-                    { label: "1 month", value: "Contact us" },
+                    { label: "24 hours", value: priceGuide["24h"] },
+                    { label: "2 days", value: priceGuide["2d"] },
+                    { label: "1 week", value: priceGuide["1w"] },
+                    { label: "2 weeks", value: priceGuide["2w"] },
+                    { label: "1 month", value: priceGuide["1m"] },
                     { label: "Insurance plan", value: "Available" },
                   ].map((item) => (
                     <div
@@ -345,7 +387,9 @@ export default function ProductDetailPageEn({ bike, className, vehicles }: Props
                       className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-3 text-center"
                     >
                       <div className="text-xs font-semibold text-gray-500">{item.label}</div>
-                      <div className="mt-1 text-base font-bold text-gray-900">{item.value}</div>
+                      <div className="mt-1 text-base font-bold text-gray-900">
+                        {item.value ?? "Contact us"}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -416,16 +460,44 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
     return { notFound: true };
   }
 
-  const [className, vehicles] = await Promise.all([
-    Promise.resolve(classes.find((cls) => cls.classId === bike.classId)?.className),
+  const [bikeClass, vehicles, rentalPrices] = await Promise.all([
+    Promise.resolve(classes.find((cls) => cls.classId === bike.classId)),
     bike.modelId != null ? getVehiclesByModel(bike.modelId) : Promise.resolve([]),
+    bike.modelId != null ? readVehicleRentalPrices(bike.modelId) : Promise.resolve([]),
   ]);
+
+  const className = bikeClass?.className;
+  const classPriceMap = bikeClass?.base_prices ?? {};
+  const rentalPriceMap = rentalPrices.reduce<Record<number, number>>((acc, record) => {
+    acc[record.days] = record.price;
+    return acc;
+  }, {});
+
+  const priceGuide = (Object.entries(durationDays) as [DurationKey, number][])
+    .map(([key, days]) => {
+      const rentalPrice = rentalPriceMap[days];
+      if (typeof rentalPrice === "number") {
+        return [key, formatPrice(rentalPrice)] as [DurationKey, string | undefined];
+      }
+      const classPrice = normalizePrice(classPriceMap[key]);
+      if (classPrice != null) {
+        return [key, formatPrice(classPrice)] as [DurationKey, string | undefined];
+      }
+      return [key, undefined] as [DurationKey, undefined];
+    })
+    .reduce<Partial<Record<DurationKey, string>>>((acc, [key, value]) => {
+      if (value) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
 
   return {
     props: {
       bike,
       className: className ?? undefined,
       vehicles,
+      priceGuide,
     },
   };
 };
