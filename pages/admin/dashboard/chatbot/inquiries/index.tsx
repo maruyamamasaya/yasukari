@@ -151,9 +151,8 @@ export default function ChatbotInquiryListPage() {
               <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
                 <thead>
                   <tr>
-                    <th scope="col">セッションID</th>
-                    <th scope="col">user_id</th>
-                    <th scope="col">client_id</th>
+                    <th scope="col">顧客名</th>
+                    <th scope="col">ログインしているユーザー名</th>
                     <th scope="col">受付日時</th>
                     <th scope="col">最終更新</th>
                     <th scope="col">ユーザー発言</th>
@@ -173,9 +172,8 @@ export default function ChatbotInquiryListPage() {
                         tabIndex={0}
                         aria-label={`${inquiry.sessionId} の詳細を開く`}
                       >
-                        <td className={tableStyles.monospace}>{inquiry.sessionId}</td>
-                        <td className={tableStyles.monospace}>{inquiry.userId ?? "(null)"}</td>
                         <td className={tableStyles.monospace}>{inquiry.clientId}</td>
+                        <td>{inquiry.userId ?? "未ログインユーザー"}</td>
                         <td>{formatDatetime(inquiry.createdAt)}</td>
                         <td>{formatDatetime(inquiry.lastActivityAt)}</td>
                         <td>{inquiry.userMessageCount} 件</td>
