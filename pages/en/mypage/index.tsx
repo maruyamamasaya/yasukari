@@ -38,6 +38,7 @@ export default function MyPageEn() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [reservationsError, setReservationsError] = useState('');
   const [loadingReservations, setLoadingReservations] = useState(true);
+  const [showCancelNotice, setShowCancelNotice] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -184,7 +185,42 @@ export default function MyPageEn() {
         }
 
         const data = (await response.json()) as { reservations?: Reservation[] };
-        setReservations(data.reservations ?? []);
+        const allReservations = data.reservations ?? [];
+        const canceledReservations = allReservations.filter(
+          (reservation) => reservation.status === 'キャンセル'
+        );
+        const activeReservations = allReservations.filter(
+          (reservation) => reservation.status !== 'キャンセル'
+        );
+
+        if (canceledReservations.length > 0 && typeof window !== 'undefined') {
+          const storageKey = 'yasukari-cancelled-reservation-ids';
+          let seenIds: string[] = [];
+
+          try {
+            const stored = window.localStorage.getItem(storageKey);
+            if (stored) {
+              const parsed = JSON.parse(stored) as unknown;
+              if (Array.isArray(parsed)) {
+                seenIds = parsed.filter((value): value is string => typeof value === 'string');
+              }
+            }
+          } catch (storageError) {
+            console.warn('Failed to parse cancelled reservation cache', storageError);
+          }
+
+          const canceledIds = canceledReservations.map((reservation) => reservation.id);
+          const unseenIds = canceledIds.filter((id) => !seenIds.includes(id));
+
+          if (unseenIds.length > 0) {
+            setShowCancelNotice(true);
+          }
+
+          const mergedIds = Array.from(new Set([...seenIds, ...canceledIds]));
+          window.localStorage.setItem(storageKey, JSON.stringify(mergedIds));
+        }
+
+        setReservations(activeReservations);
       } catch (err) {
         if (!controller.signal.aborted) {
           console.error(err);
@@ -611,6 +647,24 @@ export default function MyPageEn() {
           </ul>
         </section>
       </main>
+      {showCancelNotice ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-lg font-semibold text-gray-900">Reservation cancellation notice</h2>
+            <p className="mt-3 text-sm text-gray-700">
+              Your reservation has been marked as cancelled by our staff. If you have any
+              questions, please contact support.
+            </p>
+            <button
+              type="button"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+              onClick={() => setShowCancelNotice(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
