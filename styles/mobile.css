@@ -1,6 +1,24 @@
 @media (max-width: 640px) {
   body {
-    font-size: 15px;
+    font-size: 14px;
+  }
+  .layout-shell {
+    gap: 2.5rem;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 1.5rem;
+  }
+  .section-padding {
+    padding: 1.5rem 10px;
+  }
+  .section-heading__eyebrow {
+    font-size: 0.65rem;
+  }
+  .section-heading__title {
+    font-size: 1.35rem;
+  }
+  .section-heading__description {
+    font-size: 0.85rem;
   }
   .section-surface {
     border: none;
@@ -24,6 +42,59 @@
     border: none;
     box-shadow: none;
   }
+  .hero-bleed {
+    margin-left: -10px;
+    margin-right: -10px;
+  }
+  .hero-bleed .swiper-button-next,
+  .hero-bleed .swiper-button-prev {
+    display: none;
+  }
+  .lineup-marquee {
+    overflow: hidden;
+  }
+  .lineup-marquee__track {
+    animation: lineup-marquee 18s linear infinite;
+    width: max-content;
+  }
+  .lineup-marquee__button {
+    font-size: 0.75rem;
+  }
+  .card-title {
+    font-size: 0.95rem;
+  }
+  .recently-viewed-card__image {
+    height: 140px;
+  }
+  .recently-viewed-card__body {
+    padding: 0.75rem 0.75rem 0.85rem;
+    gap: 0.5rem;
+  }
+  .bike-lineup-card__image {
+    height: 160px;
+  }
+  .bike-lineup-card__body {
+    padding: 0.85rem 0.85rem 1rem;
+    gap: 0.6rem;
+  }
+  .bike-model-carousel__image {
+    height: 160px;
+  }
+  .bike-model-carousel__body {
+    padding: 0.85rem 0.85rem 1rem;
+    gap: 0.6rem;
+  }
+  .feature-highlight-card {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+  .feature-highlight-card__icon {
+    height: 48px;
+    width: 48px;
+  }
+  .feature-highlight-card__text {
+    font-size: 0.85rem;
+  }
 }
 
 .mobile-nav {
@@ -41,10 +112,14 @@
 .mobile-nav a {
   color: #555;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 .mobile-nav a:hover {
   color: var(--primary-color);
+}
+
+.mobile-nav svg {
+  font-size: 1.25rem;
 }
 
 .scroll-row {
@@ -83,4 +158,21 @@
   animation: fade-up 0.3s ease forwards;
   animation-iteration-count: 1;
   animation-fill-mode: both;
+}
+
+@media (max-width: 640px) {
+  @keyframes lineup-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lineup-marquee__track {
+    animation: none;
+  }
 }

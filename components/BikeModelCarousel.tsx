@@ -74,7 +74,7 @@ export default function BikeModelCarousel({
                   href={`/products/${item.modelCode}?click_from=top_modelcarousel`}
                   className="flex h-full flex-col"
                 >
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="bike-model-carousel__image relative h-48 overflow-hidden">
                     <img
                       src={item.img}
                       alt={item.modelName}
@@ -86,8 +86,8 @@ export default function BikeModelCarousel({
                       </span>
                     ) : null}
                   </div>
-                  <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
-                    <h3 className="text-base font-semibold text-slate-800">{item.modelName}</h3>
+                  <div className="bike-model-carousel__body flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
+                    <h3 className="card-title text-base font-semibold text-slate-800">{item.modelName}</h3>
                     {item.price24h ? (
                       <p className="text-sm font-semibold text-red-500">{pricePrefix} {item.price24h}</p>
                     ) : null}
