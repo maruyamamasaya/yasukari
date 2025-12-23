@@ -65,7 +65,7 @@
     font-size: 0.95rem;
   }
   .recently-viewed-card__image {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 3;
     height: auto;
   }
   .recently-viewed-card__body {
@@ -73,7 +73,7 @@
     gap: 0.5rem;
   }
   .bike-lineup-card__image {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 3;
     height: auto;
   }
   .bike-lineup-card__body {
@@ -81,7 +81,7 @@
     gap: 0.6rem;
   }
   .bike-model-carousel__image {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 3;
     height: auto;
   }
   .bike-model-carousel__body {
