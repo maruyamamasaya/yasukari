@@ -14,6 +14,7 @@ export type Reservation = {
   vehicleModel: string;
   vehicleCode: string;
   vehiclePlate: string;
+  vehicleThumbnailUrl?: string;
   vehicleChangedAt?: string;
   vehicleChangeNotified?: boolean;
   pickupAt: string;
@@ -51,6 +52,8 @@ type ReservationRecord = {
   vehicleCode?: string;
   vehicle_plate?: string;
   vehiclePlate?: string;
+  vehicle_thumbnail_url?: string;
+  vehicleThumbnailUrl?: string;
   vehicle_changed_at?: string | number;
   vehicleChangedAt?: string | number;
   vehicle_change_notified?: boolean;
@@ -150,6 +153,11 @@ const normalizeReservation = (record: ReservationRecord): Reservation => {
     vehicleModel: stringFrom(record, ["vehicle_model", "vehicleModel"], "-"),
     vehicleCode: stringFrom(record, ["vehicle_code", "vehicleCode"], "-"),
     vehiclePlate: stringFrom(record, ["vehicle_plate", "vehiclePlate"], "-"),
+    vehicleThumbnailUrl: stringFrom(
+      record,
+      ["vehicle_thumbnail_url", "vehicleThumbnailUrl"],
+      ""
+    ),
     vehicleChangedAt: datetimeFrom(record, ["vehicle_changed_at", "vehicleChangedAt"]),
     vehicleChangeNotified: booleanFrom(
       record,
