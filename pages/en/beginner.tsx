@@ -15,10 +15,18 @@ export default function BeginnerGuidePageEn() {
         className="w-full h-[300px] object-cover mb-6"
       />
 
-      <h1 className="text-2xl font-bold mb-6 text-center">Beginner&apos;s Guide</h1>
+      <div className="text-center space-y-2">
+        <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-indigo-600">
+          Beginner Guide
+        </span>
+        <h1 className="text-2xl font-bold text-indigo-700">Beginner&apos;s Guide</h1>
+        <p className="text-slate-600">
+          We&apos;ve summarized each step from booking to return so you can rent with confidence.
+        </p>
+      </div>
 
       <section className="border rounded p-4 space-y-2">
-        <h2 className="text-lg font-semibold">01. Making a reservation</h2>
+        <h2 className="text-lg font-semibold text-slate-900">01. Making a reservation</h2>
         <p>Check availability and book from each vehicle detail page. *Customers under 18 cannot use the service.</p>
         <ul className="list-disc list-inside space-y-1">
           <li>Booking window: From 90 days before the rental date until 5:00 p.m. on the previous business day</li>
@@ -42,7 +50,7 @@ export default function BeginnerGuidePageEn() {
       <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
       <section className="border rounded p-4 space-y-2">
-        <h2 className="text-lg font-semibold">02. Visiting the store</h2>
+        <h2 className="text-lg font-semibold text-slate-900">02. Visiting the store</h2>
         <p>Please bring the following. If you did not add a helmet option, bring your own helmet.</p>
         <ul className="list-disc list-inside space-y-1">
           <li>Driver&apos;s license</li>
@@ -56,7 +64,7 @@ export default function BeginnerGuidePageEn() {
       <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
       <section className="border rounded p-4 space-y-2">
-        <h2 className="text-lg font-semibold">03. During your rental</h2>
+        <h2 className="text-lg font-semibold text-slate-900">03. During your rental</h2>
         <ul className="list-disc list-inside space-y-1">
           <li>The contract holder must pick up and return the bike in person and within business hours.</li>
           <li>Only the contract holder may ride the bike. (Corporate rentals can be discussed separately.)</li>
@@ -65,7 +73,7 @@ export default function BeginnerGuidePageEn() {
             receipt when returning the bike. If we cannot confirm payment, a fee of ¥20,000 per violation will be charged.
           </li>
         </ul>
-        <h3 className="font-semibold">Suggested mileage limits</h3>
+        <h3 className="font-semibold text-amber-600">Suggested mileage limits</h3>
         <p>
           Maintenance may be required to ride beyond the distances below. For safe riding, oil changes and maintenance are
           necessary. If damage occurs because maintenance was not performed, we may charge the vehicle&apos;s market value.
@@ -110,7 +118,7 @@ export default function BeginnerGuidePageEn() {
       <FaArrowDown className="mx-auto text-2xl text-gray-500" />
 
       <section className="border rounded p-4 space-y-2">
-        <h2 className="text-lg font-semibold">04. Returning the bike</h2>
+        <h2 className="text-lg font-semibold text-slate-900">04. Returning the bike</h2>
         <p>Please return between 10:00 and 18:30 on your return date (time is needed for paperwork).</p>
         <p>If the fuel tank is not full upon return, a fee will be charged according to our policy.</p>
         <ul className="list-disc list-inside space-y-1">
