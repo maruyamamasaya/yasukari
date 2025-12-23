@@ -74,12 +74,12 @@ export default function AllProductsPage({ bikes, classes }: Props) {
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredBikes.map((bike) => (
               <Link key={bike.modelCode} href={`/products/${bike.modelCode}`}>
-                <div className="group bg-white rounded-2xl shadow-sm p-4 hover:-translate-y-1 hover:shadow-lg transition text-center border border-gray-100">
+                <div className="group bg-white rounded-2xl shadow-sm p-4 hover:-translate-y-1 hover:shadow-lg transition text-center border border-gray-100 aspect-square flex flex-col">
                   <div className="relative">
                     <img
                       src={bike.img}
                       alt={bike.modelName}
-                      className="w-full h-44 object-cover rounded-xl mb-3"
+                      className="w-full aspect-[4/3] object-cover rounded-xl mb-3"
                     />
                     {bike.classId && classLabelMap.has(bike.classId) ? (
                       <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
