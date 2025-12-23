@@ -4,7 +4,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
-import { COUNTRY_OPTIONS, findCountryByDialCodePrefix, formatInternationalPhoneNumber } from '../../lib/phoneNumber';
+import {
+  COUNTRY_OPTIONS,
+  findCountryByDialCodePrefix,
+  formatDisplayPhoneNumber,
+  formatInternationalPhoneNumber,
+} from '../../lib/phoneNumber';
 
 type UserAttributes = {
   phone_number?: string;
@@ -166,9 +171,17 @@ const ProfileSetupPage: NextPage = () => {
 
   const localeLabel = (value: string | undefined) => {
     if (!value) return '未設定';
-    if (value.toLowerCase().startsWith('jp')) return '日本語圏';
-    if (value.toLowerCase().startsWith('en')) return '英語圏';
+    const normalized = value.toLowerCase();
+    if (normalized.startsWith('ja') || normalized.startsWith('jp')) return '日本語語';
+    if (normalized.startsWith('en')) return '英語圏';
     return value;
+  };
+
+  const localeSelectValue = () => {
+    if (!normalizedLocale) return '';
+    if (normalizedLocale.startsWith('ja') || normalizedLocale.startsWith('jp')) return 'jp';
+    if (normalizedLocale.startsWith('en')) return 'en';
+    return attributes['custom:locale'] ?? '';
   };
 
   const missingKeys = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
@@ -186,22 +199,9 @@ const ProfileSetupPage: NextPage = () => {
     };
   }, [attributes.phone_number]);
 
-  const formatDisplayPhoneNumber = (value?: string) => {
-    if (!value) return '未設定';
-
-    const digits = value.replace(/[^0-9]/g, '');
-    if (!digits) return '未設定';
-
-    const matchedCountry = findCountryByDialCodePrefix(digits);
-    if (!matchedCountry) return `+${digits}`;
-
-    const national = digits.startsWith(matchedCountry.dialCode)
-      ? digits.slice(matchedCountry.dialCode.length)
-      : '';
-    const nationalWithZero = national ? `0${national}` : '';
-
-    const prefix = `${matchedCountry.name} (+${matchedCountry.dialCode})`;
-    return nationalWithZero ? `${matchedCountry.name} ${nationalWithZero}` : prefix;
+  const formatPhoneLabel = (value?: string) => {
+    const formatted = formatDisplayPhoneNumber(value);
+    return formatted || '未設定';
   };
 
   return (
@@ -339,14 +339,14 @@ const ProfileSetupPage: NextPage = () => {
                     <select
                       id="locale"
                       name="locale"
-                      defaultValue={attributes['custom:locale'] ?? ''}
+                      defaultValue={localeSelectValue()}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
                       required
                     >
                       <option value="" disabled>
                         選択してください
                       </option>
-                      <option value="jp">日本語圏</option>
+                      <option value="jp">日本語語</option>
                       <option value="en">英語圏</option>
                     </select>
                     <p className="text-xs text-gray-500">選択したロケーションに応じてサイト表示を調整します。</p>
@@ -376,7 +376,7 @@ const ProfileSetupPage: NextPage = () => {
               <dl className="mt-4 grid gap-4 text-sm text-gray-700 md:grid-cols-2">
                 <div>
                   <dt className="font-medium text-gray-600">電話番号</dt>
-                  <dd className="mt-1 text-gray-900">{formatDisplayPhoneNumber(attributes.phone_number)}</dd>
+                  <dd className="mt-1 text-gray-900">{formatPhoneLabel(attributes.phone_number)}</dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-600">ハンドルネーム</dt>

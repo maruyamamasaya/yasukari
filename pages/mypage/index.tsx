@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import type { RegistrationData } from '../../types/registration';
 import { REQUIRED_REGISTRATION_FIELDS } from '../../types/registration';
 import type { Reservation } from '../../lib/reservations';
+import { formatDisplayPhoneNumber } from '../../lib/phoneNumber';
 
 type SessionUser = {
   id: string;
@@ -289,9 +290,15 @@ export default function MyPage() {
 
   const localeLabel = (value: string | undefined) => {
     if (!value) return '未設定';
-    if (value.toLowerCase().startsWith('jp')) return '日本語圏';
-    if (value.toLowerCase().startsWith('en')) return '英語圏';
+    const normalized = value.toLowerCase();
+    if (normalized.startsWith('ja') || normalized.startsWith('jp')) return '日本語語';
+    if (normalized.startsWith('en')) return '英語圏';
     return value;
+  };
+
+  const formatPhoneLabel = (value?: string) => {
+    const formatted = formatDisplayPhoneNumber(value);
+    return formatted || '未設定';
   };
 
   const sexLabel = (value: string | undefined) => {
@@ -757,7 +764,7 @@ export default function MyPage() {
                 <dl className="mt-4 grid gap-4 text-sm text-gray-700 md:grid-cols-2">
                   <div>
                     <dt className="font-medium text-gray-600">電話番号</dt>
-                    <dd className="mt-1 text-gray-800">{attributes.phone_number ?? '未設定'}</dd>
+                    <dd className="mt-1 text-gray-800">{formatPhoneLabel(attributes.phone_number)}</dd>
                   </div>
                   <div>
                     <dt className="font-medium text-gray-600">ハンドルネーム</dt>
