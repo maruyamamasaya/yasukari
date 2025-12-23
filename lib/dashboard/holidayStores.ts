@@ -11,3 +11,7 @@ export const HOLIDAY_MANAGER_STORES: HolidayManagerStore[] = [
 export const findHolidayStoreById = (storeId?: string) => {
   return HOLIDAY_MANAGER_STORES.find((store) => store.id === storeId);
 };
+
+export const findHolidayStoreByLabel = (label?: string) => {
+  return HOLIDAY_MANAGER_STORES.find((store) => store.label === label);
+};
