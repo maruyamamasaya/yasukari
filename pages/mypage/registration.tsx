@@ -339,7 +339,7 @@ const RegistrationPage: NextPage = () => {
           <section className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h1 className="text-2xl font-semibold text-gray-900">本登録フォーム</h1>
             <p className="mt-2 text-sm text-gray-600">
-              レンタルのご利用に必要な基本情報を入力してください。送信後、内容が DynamoDB の yasukariUserMain に保存されます。
+              レンタルのご利用に必要な基本情報を入力してください。
             </p>
             {userError ? (
               <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{userError}</p>
