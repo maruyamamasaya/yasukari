@@ -389,12 +389,31 @@ export const fetchMembers = async (): Promise<Member[]> => {
   const registrationById = new Map(
     registrations.map((registration) => [registration.user_id, registration])
   );
-  const members = cognitoUsers.map((user) =>
-    mapMember(user, registrationById.get(user.id))
+  const cognitoUserById = new Map(cognitoUsers.map((user) => [user.id, user]));
+  const registrationsNeedingLookup = registrations.filter(
+    (registration) => !cognitoUserById.has(registration.user_id)
   );
 
+  if (registrationsNeedingLookup.length > 0) {
+    const fetchedUsers = await Promise.all(
+      registrationsNeedingLookup.map((registration) =>
+        fetchCognitoUserById(registration.user_id)
+      )
+    );
+    for (const user of fetchedUsers) {
+      if (user && !cognitoUserById.has(user.id)) {
+        cognitoUserById.set(user.id, user);
+      }
+    }
+  }
+
+  const members = Array.from(cognitoUserById.values()).map((user) =>
+    mapMember(user, registrationById.get(user.id))
+  );
+  const memberIds = new Set(members.map((member) => member.id));
+
   for (const registration of registrations) {
-    if (members.some((member) => member.id === registration.user_id)) continue;
+    if (memberIds.has(registration.user_id)) continue;
     members.push(mapMember(undefined, registration));
   }
 
