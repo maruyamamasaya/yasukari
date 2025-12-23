@@ -47,18 +47,18 @@ export default function RecentlyViewed() {
         >
           {displayList.map((bike) => (
             <SwiperSlide key={bike.modelCode} className="h-auto">
-              <article className="group h-full overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_36px_62px_-34px_rgba(220,38,38,0.45)]">
+              <article className="recently-viewed-card group h-full overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_36px_62px_-34px_rgba(220,38,38,0.45)]">
                 <Link href={`/products/${bike.modelCode}`} className="flex h-full flex-col">
-                  <div className="relative h-44 overflow-hidden">
+                  <div className="recently-viewed-card__image relative h-44 overflow-hidden">
                     <img
                       src={bike.img}
                       alt={bike.modelName}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
-                  <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
+                  <div className="recently-viewed-card__body flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
                     <h3
-                      className="text-base font-semibold text-slate-800"
+                      className="card-title text-base font-semibold text-slate-800"
                       dangerouslySetInnerHTML={{ __html: bike.modelName.replace(/\\n/g, "<br>") }}
                     />
                     <span className="text-sm font-semibold text-red-500">詳細を見る →</span>

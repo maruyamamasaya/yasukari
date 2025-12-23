@@ -190,11 +190,11 @@ export default function Header() {
           </div>
         </div>
         {menuOpen && (
-          <nav
-            ref={menuRef}
-            className="sm:hidden absolute left-0 top-full w-full bg-white border-b shadow-md min-h-[calc(100vh-4rem)] overflow-y-auto"
-          >
-            <ul className="flex flex-col p-5 gap-5 text-base font-semibold">
+          <nav className="sm:hidden fixed inset-0 z-50 flex items-center justify-center bg-white/95 px-6 py-10 text-center backdrop-blur">
+            <ul
+              ref={menuRef}
+              className="flex w-full max-w-sm flex-col items-center gap-6 text-lg font-semibold"
+            >
               <li>
                 <Link href="/">
                   <NavItem label="ホーム" />
@@ -232,21 +232,20 @@ export default function Header() {
                   <NavItem label="ヘルプ" />
                 </Link>
               </li>
-              <li className="pt-2 border-t border-gray-100">
-                <div className="flex items-center rounded-full border border-red-500 bg-red-50/70 shadow-sm text-xs font-semibold text-gray-800 w-fit">
+              <li className="w-full pt-4">
+                <div className="grid w-full grid-cols-2 overflow-hidden rounded-full border border-red-500 bg-red-50/70 text-sm font-semibold text-gray-800 shadow-sm">
                   <button
                     type="button"
-                    className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
+                    className="px-4 py-2 transition-colors hover:bg-red-100"
                     aria-current="page"
                     onClick={() => handleLanguageClick('ja')}
                     disabled={languageSwitchDisabled}
                   >
                     日本語
                   </button>
-                  <span className="h-5 w-px bg-red-200" aria-hidden />
                   <button
                     type="button"
-                    className="px-3 py-1 rounded-full transition-colors hover:bg-red-100"
+                    className="px-4 py-2 transition-colors hover:bg-red-100"
                     onClick={() => handleLanguageClick('en')}
                     disabled={languageSwitchDisabled}
                   >

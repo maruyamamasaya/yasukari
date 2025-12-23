@@ -128,32 +128,42 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
           title="お近くの店舗を選ぶ"
           description="都内2店舗で営業中。アクセスの良い立地と広々としたピットで、受け取りから返却まで快適にご利用いただけます。"
         />
-        <div className="grid gap-6 md:grid-cols-2">
-          {stores.map((store) => (
-            <article
-              key={store.name}
-              className="group overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_36px_62px_-34px_rgba(220,38,38,0.45)]"
-            >
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={store.img}
-                  alt={store.name}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-red-500 shadow">
-                  <FaMapMarkerAlt />
-                  {store.name}
-                </span>
-              </div>
-              <div className="flex flex-col gap-3 px-6 py-6">
-                <p className="text-sm text-slate-600">{store.description}</p>
-                <Link href={store.href} className="inline-flex items-center gap-2 text-sm font-semibold text-red-500">
-                  詳細を見る
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
-            </article>
-          ))}
+        <div className="mt-8">
+          <Swiper
+            modules={[Pagination]}
+            pagination={{ clickable: true }}
+            spaceBetween={16}
+            breakpoints={{
+              0: { slidesPerView: 1.05 },
+              640: { slidesPerView: 2 },
+              1024: { slidesPerView: 2 },
+            }}
+          >
+            {stores.map((store) => (
+              <SwiperSlide key={store.name} className="h-auto">
+                <article className="group h-full overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_36px_62px_-34px_rgba(220,38,38,0.45)]">
+                  <div className="relative h-56 overflow-hidden">
+                    <img
+                      src={store.img}
+                      alt={store.name}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-red-500 shadow">
+                      <FaMapMarkerAlt />
+                      {store.name}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-3 px-6 py-6">
+                    <p className="text-sm text-slate-600">{store.description}</p>
+                    <Link href={store.href} className="inline-flex items-center gap-2 text-sm font-semibold text-red-500">
+                      詳細を見る
+                      <span aria-hidden>→</span>
+                    </Link>
+                  </div>
+                </article>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </section>
 
@@ -293,12 +303,12 @@ function FeatureHighlight({
   text: string;
 }) {
   return (
-    <article className="flex h-full flex-col gap-4 rounded-2xl border border-white/60 bg-white/80 p-6 text-center shadow-[0_20px_40px_-28px_rgba(15,23,42,0.4)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_52px_-28px_rgba(220,38,38,0.4)]">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100/70 text-red-500">
+    <article className="feature-highlight-card flex h-full flex-col gap-4 rounded-2xl border border-white/60 bg-white/80 p-6 text-center shadow-[0_20px_40px_-28px_rgba(15,23,42,0.4)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_52px_-28px_rgba(220,38,38,0.4)]">
+      <div className="feature-highlight-card__icon mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100/70 text-red-500">
         {icon}
       </div>
-      <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
-      <p className="text-sm leading-relaxed text-slate-600">{text}</p>
+      <h3 className="card-title text-lg font-semibold text-slate-800">{title}</h3>
+      <p className="feature-highlight-card__text text-sm leading-relaxed text-slate-600">{text}</p>
     </article>
   );
 }
