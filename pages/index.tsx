@@ -28,11 +28,12 @@ type BlogSlide = {
 
 interface Props {
   blogSlides: BlogSlide[];
+  blogTags: string[];
   bikeModelsAll: BikeModel[];
   bikeClasses: BikeClass[];
 }
 
-export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Props) {
+export default function HomePage({ blogSlides, blogTags, bikeModelsAll, bikeClasses }: Props) {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
@@ -47,35 +48,10 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
     return all.slice(0, 10);
   }, []);
 
-  const hotKeywords = [
-    {
-      label: "50cc 原付スクーター",
-      href: "/rental_bike/tag/%E5%8E%9F%E4%BB%98%E3%82%B9%E3%82%AF%E3%83%BC%E3%82%BF%E3%83%BC?click_from=top_keywords",
-    },
-    {
-      label: "ジャイロキャノビー原付",
-      href: "/rental_bike/tag/%E3%82%B8%E3%83%A3%E3%82%A4%E3%83%AD%E3%82%AD%E3%83%A3%E3%83%8E%E3%83%93%E3%83%BC%E5%8E%9F%E4%BB%98?click_from=top_keywords",
-    },
-    {
-      label: "ジャイロキャノビーミニカー",
-      href: "/rental_bike/tag/%E3%82%B8%E3%83%A3%E3%82%A4%E3%83%AD%E3%82%AD%E3%83%A3%E3%83%8E%E3%83%93%E3%83%BC%E3%83%9F%E3%83%8B%E3%82%AB%E3%83%BC?click_from=top_keywords",
-    },
-    {
-      label: "2種スクーター",
-      href: "/rental_bike/tag/%E5%8E%9F%E4%BB%98%E4%BA%8C%E7%A8%AE%E3%82%B9%E3%82%AF%E3%83%BC%E3%82%BF%E3%83%BC?click_from=top_keywords",
-    },
-    {
-      label: "原付2種ミッション車",
-      href: "/rental_bike/tag/%E5%8E%9F%E4%BB%98%EF%BC%92%E7%A8%AE%E3%83%9F%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%BB%8A?click_from=top_keywords",
-    },
-    {
-      label: "原付50ccミッション車",
-      href: "/rental_bike/tag/%E5%8E%9F%E4%BB%9850cc%E3%83%9F%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%BB%8A?click_from=top_keywords",
-    },
-    { label: "126〜250cc", href: "/rental_bike/tag/126%E3%80%9C250cc?click_from=top_keywords" },
-    { label: "251〜400cc", href: "/rental_bike/tag/251%E3%80%9C400cc?click_from=top_keywords" },
-    { label: "400cc超", href: "/rental_bike/tag/400cc%E8%B6%85?click_from=top_keywords" },
-  ];
+  const hotKeywords = blogTags.slice(0, 12).map((tag) => ({
+    label: tag,
+    href: `/blog_for_custmor/tag/${encodeURIComponent(tag)}?click_from=top_keywords`,
+  }));
 
   const featureHighlights = [
     {
@@ -335,10 +311,19 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     const title = meta.title || (heading ? heading.replace(/^#\s*/, "") : slug);
     const date = meta.date || slug.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || "";
     const eyecatch = meta.eyecatch;
-    return { slug, title, date, eyecatch };
+    const tags = meta.tags;
+    return { slug, title, date, eyecatch, tags };
   });
 
   posts.sort((a, b) => b.date.localeCompare(a.date));
+  const tagSet = new Set<string>();
+  posts.forEach((post) => {
+    post.tags?.split(",").forEach((tag) => {
+      const trimmed = tag.trim();
+      if (trimmed) tagSet.add(trimmed);
+    });
+  });
+  const blogTags = Array.from(tagSet);
 
   const blogSlides: BlogSlide[] = posts.slice(0, 10).map((p) => ({
     title: p.title,
@@ -350,5 +335,5 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     getBikeClasses(),
   ]);
 
-  return { props: { blogSlides, bikeModelsAll, bikeClasses }, revalidate: 60 };
+  return { props: { blogSlides, blogTags, bikeModelsAll, bikeClasses }, revalidate: 60 };
 };
