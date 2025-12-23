@@ -10,7 +10,7 @@ const formatDateLabel = (dateString: string, fallback: string) => {
   const parsed = new Date(dateString);
   if (Number.isNaN(parsed.getTime())) return fallback;
 
-  return parsed.toLocaleDateString("ja-JP", {
+  return parsed.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -33,9 +33,9 @@ export default function ReserveFlowStep3() {
   const [isSavingReservation, setIsSavingReservation] = useState(false);
   const [reservationPreview, setReservationPreview] = useState<Reservation | null>(null);
 
-  const [store, setStore] = useState("足立小台店");
-  const [modelName, setModelName] = useState("車両");
-  const [managementNumber, setManagementNumber] = useState("未設定");
+  const [store, setStore] = useState("Adachi-Odai");
+  const [modelName, setModelName] = useState("Vehicle");
+  const [managementNumber, setManagementNumber] = useState("Not set");
   const [pickupDate, setPickupDate] = useState("2025-12-26");
   const [returnDate, setReturnDate] = useState("2025-12-27");
   const [pickupTime, setPickupTime] = useState("10:00");
@@ -72,7 +72,7 @@ export default function ReserveFlowStep3() {
       } catch (error) {
         if (!controller.signal.aborted) {
           console.error(error);
-          setAuthError("ログイン状態の確認に失敗しました。時間をおいて再度お試しください。");
+          setAuthError("Unable to verify your login session. Please try again shortly.");
           setAuthChecked(true);
         }
       }
@@ -128,7 +128,7 @@ export default function ReserveFlowStep3() {
       } catch (error) {
         if (!controller.signal.aborted) {
           console.error(error);
-          setRegistrationError("本登録情報の取得に失敗しました。時間をおいて再度お試しください。");
+          setRegistrationError("Unable to load your registration details. Please try again shortly.");
         }
       }
     };
@@ -137,8 +137,8 @@ export default function ReserveFlowStep3() {
     return () => controller.abort();
   }, [authChecked]);
 
-  const pickupLabel = useMemo(() => formatDateLabel(pickupDate, "2025年12月26日"), [pickupDate]);
-  const returnLabel = useMemo(() => formatDateLabel(returnDate, "2025年12月27日"), [returnDate]);
+  const pickupLabel = useMemo(() => formatDateLabel(pickupDate, "Dec 26, 2025"), [pickupDate]);
+  const returnLabel = useMemo(() => formatDateLabel(returnDate, "Dec 27, 2025"), [returnDate]);
 
   const rentalDurationHours = useMemo(() => {
     const pickup = new Date(`${pickupDate}T${pickupTime}:00`);
@@ -152,22 +152,22 @@ export default function ReserveFlowStep3() {
 
   const handlePayWithCard = () => {
     setStatusMessage(
-      `Pay.JPの公開鍵(${payJpPublicKey})を使ってトークン化を行う処理をここに実装してください。現在はサンプルです。`
+      `Integrate the tokenization flow using the Pay.JP public key (${payJpPublicKey}) here. This is a sample message.`
     );
   };
 
   const handleSubmitPayment = () => {
-    setStatusMessage("決済フローのサンプルです。Pay.JPのトークン生成後にAPIへ送信してください。");
+    setStatusMessage("This is a sample payment flow. Submit the Pay.JP token to the API.");
   };
 
   const handleTestPayment = async () => {
     if (!sessionUser) {
-      setStatusMessage("ログイン情報を確認できませんでした。再度お試しください。");
+      setStatusMessage("We could not verify your login information. Please try again.");
       return;
     }
 
     setIsSavingReservation(true);
-    setStatusMessage("決済データを保存しています…");
+    setStatusMessage("Saving payment data...");
 
     const paymentId = `test-payment-${Date.now()}`;
     const pickupAt = new Date(`${pickupDate}T${pickupTime}:00`).toISOString();
@@ -196,7 +196,7 @@ export default function ReserveFlowStep3() {
           memberPhone: registration?.mobile ?? registration?.tel ?? "",
           couponCode,
           couponDiscount: accessoryTotal + protectionTotal,
-          notes: "テスト決済経由で保存",
+          notes: "Saved via test payment flow",
         }),
       });
 
@@ -210,8 +210,8 @@ export default function ReserveFlowStep3() {
       setReservationPreview(reservation ?? null);
       setStatusMessage(
         reservation
-          ? `テスト決済として予約ID ${reservation.id} を保存しました。マイページの予約状況に反映されます。`
-          : "テスト決済を保存しました。しばらくしてから予約一覧を確認してください。"
+          ? `Saved reservation ID ${reservation.id} as a test payment. It will appear in your account shortly.`
+          : "Saved the test payment. Please check your reservation list shortly."
       );
 
       if (reservation) {
@@ -232,7 +232,7 @@ export default function ReserveFlowStep3() {
       }
     } catch (error) {
       console.error("Failed to save test payment", error);
-      setStatusMessage("テスト決済の保存に失敗しました。時間をおいて再度お試しください。");
+      setStatusMessage("Failed to save the test payment. Please try again later.");
     } finally {
       setIsSavingReservation(false);
     }
@@ -253,27 +253,27 @@ export default function ReserveFlowStep3() {
       totalAmount: totalAmount.toString(),
     });
 
-    void router.push(`/reserve/flow/step2?${params.toString()}`);
+    void router.push(`/en/reserve/flow/step2?${params.toString()}`);
   };
 
   return (
     <>
       <Head>
-        <title>決済情報の入力 - ステップ3</title>
+        <title>Payment details - Step 3</title>
       </Head>
       <main className="min-h-screen bg-gray-50 pb-16">
         <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
           <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-red-500">Step 3 / 3</p>
-              <h1 className="text-2xl font-bold text-gray-900">決済情報の入力</h1>
-              <p className="text-sm text-gray-600">Pay.JP API を用いた決済入力のサンプル画面です。</p>
+              <h1 className="text-2xl font-bold text-gray-900">Enter payment details</h1>
+              <p className="text-sm text-gray-600">Sample payment input screen using the Pay.JP API.</p>
             </div>
             <Link
-              href="/products"
+              href="/en/products"
               className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300"
             >
-              車種一覧に戻る
+              Back to models
             </Link>
           </header>
 
@@ -285,7 +285,7 @@ export default function ReserveFlowStep3() {
             <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">貸出・返却日時</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Pickup & return</p>
                   <h2 className="text-lg font-bold text-gray-900">
                     {pickupLabel} {pickupTime} → {returnLabel} {returnTime}
                   </h2>
@@ -297,29 +297,29 @@ export default function ReserveFlowStep3() {
               </div>
               <div className="rounded-xl bg-gray-50 p-4">
                 <div className="flex items-center justify-between text-lg font-bold text-gray-900">
-                  <span>レンタル料金 合計（税込）</span>
-                  <span>{totalAmount.toLocaleString()}円</span>
+                  <span>Total rental fee (tax included)</span>
+                  <span>¥{totalAmount.toLocaleString()}</span>
                 </div>
                 <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
                   <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
-                    <dt>用品・補償の内訳</dt>
+                    <dt>Accessories & protection</dt>
                     <dd className="font-semibold text-gray-900">
-                      {(accessoryTotal + protectionTotal).toLocaleString()}円
+                      ¥{(accessoryTotal + protectionTotal).toLocaleString()}
                     </dd>
                   </div>
                   <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
-                    <dt>クーポン</dt>
-                    <dd className="font-semibold text-gray-900">{couponCode || "未使用"}</dd>
+                    <dt>Coupon</dt>
+                    <dd className="font-semibold text-gray-900">{couponCode || "None"}</dd>
                   </div>
                   <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
-                    <dt>想定レンタル時間</dt>
+                    <dt>Estimated rental duration</dt>
                     <dd className="font-semibold text-gray-900">
-                      {rentalDurationHours ? `${rentalDurationHours} 時間` : "算出不可"}
+                      {rentalDurationHours ? `${rentalDurationHours} hours` : "Unavailable"}
                     </dd>
                   </div>
                   <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
-                    <dt>完了フラグ</dt>
-                    <dd className="font-semibold text-gray-900">未完了</dd>
+                    <dt>Completion flag</dt>
+                    <dd className="font-semibold text-gray-900">Incomplete</dd>
                   </div>
                 </dl>
               </div>
@@ -327,12 +327,12 @@ export default function ReserveFlowStep3() {
 
             <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">クレジットカード情報入力</h3>
-                <span className="text-xs text-gray-500">Pay.JP サンプル</span>
+                <h3 className="text-sm font-semibold text-gray-900">Credit card details</h3>
+                <span className="text-xs text-gray-500">Pay.JP sample</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-2 text-sm">
-                  <span className="text-gray-700">カード番号</span>
+                  <span className="text-gray-700">Card number</span>
                   <input
                     type="text"
                     value={cardNumber}
@@ -342,7 +342,7 @@ export default function ReserveFlowStep3() {
                   />
                 </label>
                 <label className="space-y-2 text-sm">
-                  <span className="text-gray-700">有効期限 (MM/YY)</span>
+                  <span className="text-gray-700">Expiry (MM/YY)</span>
                   <input
                     type="text"
                     value={expiry}
@@ -352,7 +352,7 @@ export default function ReserveFlowStep3() {
                   />
                 </label>
                 <label className="space-y-2 text-sm">
-                  <span className="text-gray-700">セキュリティコード</span>
+                  <span className="text-gray-700">Security code</span>
                   <input
                     type="text"
                     value={cvc}
@@ -363,9 +363,9 @@ export default function ReserveFlowStep3() {
                 </label>
               </div>
               <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-700">
-                <p>Pay.JP の公開鍵: {payJpPublicKey}</p>
+                <p>Pay.JP public key: {payJpPublicKey}</p>
                 <p className="mt-1 text-gray-600">
-                  NEXT_PUBLIC_PAYJP_PUBLIC_KEY を環境変数として設定すると、実際の公開鍵がここに表示されます。
+                  Set NEXT_PUBLIC_PAYJP_PUBLIC_KEY to display the live public key here.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -374,14 +374,14 @@ export default function ReserveFlowStep3() {
                   onClick={handlePayWithCard}
                   className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-800 ring-1 ring-gray-200 shadow-sm hover:bg-gray-50"
                 >
-                  クレジットカードで支払う
+                  Pay with card
                 </button>
                 <button
                   type="button"
                   onClick={handleBack}
                   className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300"
                 >
-                  戻る
+                  Back
                 </button>
                 <button
                   type="button"
@@ -389,7 +389,7 @@ export default function ReserveFlowStep3() {
                   disabled={!authChecked}
                   className="inline-flex items-center justify-center rounded-full bg-red-500 px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-red-200"
                 >
-                  決済する
+                  Submit payment
                 </button>
                 <button
                   type="button"
@@ -397,7 +397,7 @@ export default function ReserveFlowStep3() {
                   disabled={!authChecked || isSavingReservation}
                   className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-gray-900 shadow hover:bg-emerald-600 transition disabled:cursor-not-allowed disabled:bg-emerald-200"
                 >
-                  {isSavingReservation ? "保存中…" : "テスト決済を保存"}
+                  {isSavingReservation ? "Saving..." : "Save test payment"}
                 </button>
               </div>
               {statusMessage ? (
@@ -408,25 +408,25 @@ export default function ReserveFlowStep3() {
               ) : null}
               {reservationPreview ? (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-                  <p className="font-semibold">保存された予約情報（プレビュー）</p>
+                  <p className="font-semibold">Saved reservation preview</p>
                   <dl className="mt-2 grid gap-2 sm:grid-cols-2">
                     <div>
-                      <dt className="text-xs text-emerald-800">予約ID</dt>
+                      <dt className="text-xs text-emerald-800">Reservation ID</dt>
                       <dd className="font-mono">{reservationPreview.id}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-emerald-800">利用ステータス</dt>
+                      <dt className="text-xs text-emerald-800">Status</dt>
                       <dd>{reservationPreview.status}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-emerald-800">貸出〜返却</dt>
+                      <dt className="text-xs text-emerald-800">Pickup → return</dt>
                       <dd>
                         {formatDateLabel(reservationPreview.pickupAt, pickupLabel)} → {formatDateLabel(reservationPreview.returnAt, returnLabel)}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-emerald-800">決済金額</dt>
-                      <dd>{reservationPreview.paymentAmount} 円</dd>
+                      <dt className="text-xs text-emerald-800">Payment amount</dt>
+                      <dd>¥{reservationPreview.paymentAmount}</dd>
                     </div>
                   </dl>
                 </div>
