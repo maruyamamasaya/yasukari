@@ -6,15 +6,21 @@ export interface FAQItem {
   a: string;
 }
 
-export default function FaqAccordion({ faqs }: { faqs: FAQItem[] }) {
+export default function FaqAccordion({
+  faqs,
+  showAll = false,
+}: {
+  faqs: FAQItem[];
+  showAll?: boolean;
+}) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  const [expandedAll, setExpandedAll] = useState(showAll);
 
   const toggle = (idx: number) => {
     setOpenIndex((prev) => (prev === idx ? null : idx));
   };
 
-  const visibleFaqs = showAll ? faqs : faqs.slice(0, 3);
+  const visibleFaqs = showAll || expandedAll ? faqs : faqs.slice(0, 3);
 
   return (
     <div className="faq-accordion">
@@ -45,13 +51,13 @@ export default function FaqAccordion({ faqs }: { faqs: FAQItem[] }) {
           </dl>
         );
       })}
-      {faqs.length > 3 ? (
+      {!showAll && faqs.length > 3 ? (
         <button
           type="button"
-          onClick={() => setShowAll((prev) => !prev)}
+          onClick={() => setExpandedAll((prev) => !prev)}
           className="btn-primary mt-2 w-full justify-center"
         >
-          {showAll ? "閉じる" : "もっと見る"}
+          {expandedAll ? "閉じる" : "もっと見る"}
         </button>
       ) : null}
     </div>
