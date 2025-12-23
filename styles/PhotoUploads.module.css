@@ -1,0 +1,183 @@
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.92);
+}
+
+.sectionNote {
+  font-size: 0.9rem;
+  color: rgba(71, 85, 105, 0.82);
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.photoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.photoCard:hover,
+.photoCard:focus-visible {
+  outline: none;
+  transform: translateY(-3px);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+}
+
+.photoThumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  background: #f1f5f9;
+}
+
+.photoMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.photoName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(30, 41, 59, 0.95);
+}
+
+.photoSubtext {
+  font-size: 0.82rem;
+  color: rgba(100, 116, 139, 0.9);
+}
+
+.photoBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(248, 113, 113, 0.14);
+  color: rgba(185, 28, 28, 0.9);
+}
+
+.photoBadgeConfirmed {
+  background: rgba(34, 197, 94, 0.14);
+  color: rgba(22, 101, 52, 0.9);
+}
+
+.detailLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.detailImageCard {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detailImage {
+  width: 100%;
+  border-radius: 0.9rem;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.detailMetaCard {
+  padding: 1rem 1.2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.detailMetaRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.detailMetaLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.detailMetaValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(30, 41, 59, 0.95);
+}
+
+.detailNote {
+  font-size: 0.9rem;
+  color: rgba(71, 85, 105, 0.9);
+  line-height: 1.6;
+}
+
+.emptyState {
+  padding: 1rem 1.2rem;
+  border-radius: 0.9rem;
+  border: 1px dashed rgba(226, 232, 240, 0.9);
+  background: #f8fafc;
+  font-weight: 600;
+  color: rgba(71, 85, 105, 0.9);
+}
+
+@media (max-width: 1280px) {
+  .photoGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .photoGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .detailLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .photoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .photoGrid {
+    grid-template-columns: 1fr;
+  }
+}
