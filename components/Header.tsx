@@ -157,8 +157,8 @@ export default function Header() {
                   <NavItem icon={<FaUser />} label="ログイン" />
                 </Link>
               )}
-              <Link href="/pricing">
-                <NavItem icon={<FaClipboardList />} label="車種・料金" />
+              <Link href="/products">
+                <NavItem icon={<FaClipboardList />} label="全ての車種一覧" />
               </Link>
               <Link href="/beginner">
                 <NavItem icon={<FaQuestionCircle />} label="はじめてガイド" />
@@ -218,8 +218,8 @@ export default function Header() {
                 )}
               </li>
               <li>
-                <Link href="/pricing">
-                  <NavItem icon={<FaClipboardList />} label="車種・料金" />
+                <Link href="/products">
+                  <NavItem icon={<FaClipboardList />} label="全ての車種一覧" />
                 </Link>
               </li>
               <li>
