@@ -592,7 +592,7 @@ export default function MyPage() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-700"
+                  className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
                 >
                   レンタル延長
                 </button>
@@ -600,14 +600,14 @@ export default function MyPage() {
                   type="button"
                   onClick={handleReturnOpen}
                   disabled={!activeReturnReservation}
-                  className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 disabled:text-white disabled:ring-emerald-100"
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-emerald-50 disabled:text-black/60 disabled:ring-emerald-50"
                 >
                   返却
                 </button>
                 <button
                   type="button"
                   onClick={handleAccidentOpen}
-                  className="inline-flex items-center justify-center rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-700"
+                  className="inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-200"
                 >
                   事故・転倒
                 </button>
