@@ -71,25 +71,27 @@ export default function AllProductsPage({ bikes, classes }: Props) {
             ) : null}
           </div>
 
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredBikes.map((bike) => (
               <Link key={bike.modelCode} href={`/products/${bike.modelCode}`}>
-                <div className="bg-white rounded-xl shadow-sm p-2 hover:-translate-y-0.5 hover:shadow-md transition text-center border border-gray-100">
+                <div className="group bg-white rounded-2xl shadow-sm p-4 hover:-translate-y-1 hover:shadow-lg transition text-center border border-gray-100">
                   <div className="relative">
                     <img
                       src={bike.img}
                       alt={bike.modelName}
-                      className="w-full h-36 object-cover rounded-lg mb-2"
+                      className="w-full h-44 object-cover rounded-xl mb-3"
                     />
                     {bike.classId && classLabelMap.has(bike.classId) ? (
-                      <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[10px] font-semibold text-red-500 shadow">
+                      <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
                         {classLabelMap.get(bike.classId)}
                       </span>
                     ) : null}
                   </div>
-                  <div className="text-sm font-semibold truncate">{bike.modelName}</div>
+                  <div className="text-base font-semibold truncate group-hover:text-red-600 transition-colors">
+                    {bike.modelName}
+                  </div>
                   {bike.description ? (
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{bike.description}</p>
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">{bike.description}</p>
                   ) : null}
                 </div>
               </Link>
