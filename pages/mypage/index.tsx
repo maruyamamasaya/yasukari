@@ -23,7 +23,7 @@ type UserAttributes = {
 export default function MyPage() {
   const manualVideoUrl = process.env.NEXT_PUBLIC_MANUAL_VIDEO_URL ?? '/help#manual-video';
   const paymentInfoUrl = process.env.NEXT_PUBLIC_PAYMENT_INFO_URL ?? '/help#payment-info';
-  const rentalContractUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL ?? '/help#rental-contract';
+  const rentalContractBaseUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL;
 
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -462,7 +462,7 @@ export default function MyPage() {
                             決済情報を確認
                           </Link>
                           <Link
-                            href={rentalContractUrl}
+                            href={rentalContractBaseUrl ?? `/rental-contract/${reservation.id}`}
                             className="inline-flex items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
                             target="_blank"
                             rel="noreferrer"
