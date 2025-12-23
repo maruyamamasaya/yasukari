@@ -175,12 +175,20 @@ export default function ChatbotFaqManagerPage() {
               <p className={formStyles.description}>
                 質問と回答の組み合わせをカテゴリごとに管理します。カテゴリーIDはチャットボットの内部参照として利用されます。
               </p>
-              <div className={styles.managerMeta}>
-                <span>
-                  カテゴリ: {categories.length.toLocaleString()}件 / QA: {totalFaqs.toLocaleString()}件
-                </span>
-                {updatedAt && <span>最終更新: {new Date(updatedAt).toLocaleString("ja-JP")}</span>}
-              </div>
+            <div className={styles.managerMeta}>
+              <span>
+                カテゴリ: {categories.length.toLocaleString()}件 / QA: {totalFaqs.toLocaleString()}件
+              </span>
+              {updatedAt && <span>最終更新: {new Date(updatedAt).toLocaleString("ja-JP")}</span>}
+            </div>
+            <div className={styles.treeGuide}>
+              <p>階層構造でカテゴリ → Q&amp;Aの順に並びます。カテゴリ名をクリックすると詳細を開閉できます。</p>
+              <ul>
+                <li>カテゴリ名とIDを編集してからQ&amp;Aを追加してください。</li>
+                <li>各Q&amp;Aはカテゴリ配下に表示されます。</li>
+                <li>CSVバックアップで編集内容を保存できます。</li>
+              </ul>
+            </div>
             </div>
 
             {error && <div className={formStyles.error}>{error}</div>}
@@ -214,18 +222,20 @@ export default function ChatbotFaqManagerPage() {
               </button>
             </div>
 
-            <div className={styles.categoryGrid}>
+            <div className={styles.categoryList}>
               {loading ? (
                 <p className={styles.helperText}>読み込み中です…</p>
               ) : categories.length === 0 ? (
                 <p className={styles.helperText}>カテゴリがありません。新規追加してください。</p>
               ) : (
                 categories.map((category, index) => (
-                  <div className={styles.categoryCard} key={category.id || index}>
-                    <div className={styles.cardHeader}>
-                      <div className={styles.labelRow}>
-                        <span className={styles.badge}>カテゴリ {index + 1}</span>
-                      </div>
+                  <details className={styles.categoryNode} key={category.id || index} open>
+                    <summary className={styles.categorySummary}>
+                      <span className={styles.badge}>カテゴリ {index + 1}</span>
+                      <span className={styles.categoryTitleText}>{category.title || "カテゴリ名未入力"}</span>
+                      <span className={styles.countPill}>{category.faqs.length.toLocaleString()}件</span>
+                    </summary>
+                    <div className={styles.categoryContent}>
                       <div className={styles.categoryFields}>
                         <div className={formStyles.field}>
                           <label htmlFor={`category-id-${index}`}>カテゴリーID</label>
@@ -250,67 +260,74 @@ export default function ChatbotFaqManagerPage() {
                           />
                         </div>
                       </div>
-                    </div>
 
-                    <div className={styles.faqList}>
-                      {category.faqs.map((faq, faqIndex) => (
-                        <div className={styles.faqItem} key={`${category.id}-${faqIndex}`}>
-                          <div className={formStyles.field}>
-                            <label htmlFor={`faq-q-${index}-${faqIndex}`}>質問</label>
-                            <input
-                              id={`faq-q-${index}-${faqIndex}`}
-                              type="text"
-                              value={faq.q}
-                              onChange={(event) => handleFaqChange(index, faqIndex, "q", event.target.value)}
-                              placeholder="営業時間はいつですか？"
-                              disabled={saving}
-                            />
+                      <div className={styles.faqTree}>
+                        {category.faqs.map((faq, faqIndex) => (
+                          <div className={styles.faqNode} key={`${category.id}-${faqIndex}`}>
+                            <div className={styles.faqHeader}>
+                              <span className={styles.faqIndex}>Q&amp;A {faqIndex + 1}</span>
+                            </div>
+                            <div className={styles.faqFields}>
+                              <div className={formStyles.field}>
+                                <label htmlFor={`faq-q-${index}-${faqIndex}`}>質問</label>
+                                <input
+                                  id={`faq-q-${index}-${faqIndex}`}
+                                  type="text"
+                                  value={faq.q}
+                                  onChange={(event) => handleFaqChange(index, faqIndex, "q", event.target.value)}
+                                  placeholder="営業時間はいつですか？"
+                                  disabled={saving}
+                                />
+                              </div>
+                              <div className={formStyles.field}>
+                                <label htmlFor={`faq-a-${index}-${faqIndex}`}>回答</label>
+                                <textarea
+                                  id={`faq-a-${index}-${faqIndex}`}
+                                  value={faq.a}
+                                  onChange={(event) => handleFaqChange(index, faqIndex, "a", event.target.value)}
+                                  rows={3}
+                                  placeholder="月・木曜が定休日です。営業時間は10:00〜19:00です。"
+                                  disabled={saving}
+                                />
+                              </div>
+                            </div>
+                            <div className={styles.itemControls}>
+                              <button
+                                type="button"
+                                className={formStyles.secondaryButton}
+                                onClick={() => handleRemoveFaq(index, faqIndex)}
+                                disabled={saving || category.faqs.length <= 1}
+                              >
+                                このQ&Aを削除
+                              </button>
+                            </div>
                           </div>
-                          <div className={formStyles.field}>
-                            <label htmlFor={`faq-a-${index}-${faqIndex}`}>回答</label>
-                            <textarea
-                              id={`faq-a-${index}-${faqIndex}`}
-                              value={faq.a}
-                              onChange={(event) => handleFaqChange(index, faqIndex, "a", event.target.value)}
-                              rows={3}
-                              placeholder="月・木曜が定休日です。営業時間は10:00〜19:00です。"
-                              disabled={saving}
-                            />
-                          </div>
-                          <div className={styles.itemControls}>
-                            <button
-                              type="button"
-                              className={formStyles.secondaryButton}
-                              onClick={() => handleRemoveFaq(index, faqIndex)}
-                              disabled={saving || category.faqs.length <= 1}
-                            >
-                              このQ&Aを削除
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        className={formStyles.secondaryButton}
-                        onClick={() => handleAddFaq(index)}
-                        disabled={saving}
-                      >
-                        質問を追加
-                      </button>
-                    </div>
+                        ))}
+                        <button
+                          type="button"
+                          className={formStyles.secondaryButton}
+                          onClick={() => handleAddFaq(index)}
+                          disabled={saving}
+                        >
+                          質問を追加
+                        </button>
+                      </div>
 
-                    <div className={styles.cardFooter}>
-                      <p className={styles.helperText}>カテゴリー単位で削除できます。必要に応じてIDとタイトルを更新してください。</p>
-                      <button
-                        type="button"
-                        className={formStyles.secondaryButton}
-                        onClick={() => handleRemoveCategory(index)}
-                        disabled={saving}
-                      >
-                        カテゴリを削除
-                      </button>
+                      <div className={styles.cardFooter}>
+                        <p className={styles.helperText}>
+                          カテゴリー単位で削除できます。必要に応じてIDとタイトルを更新してください。
+                        </p>
+                        <button
+                          type="button"
+                          className={formStyles.secondaryButton}
+                          onClick={() => handleRemoveCategory(index)}
+                          disabled={saving}
+                        >
+                          カテゴリを削除
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </details>
                 ))
               )}
             </div>
