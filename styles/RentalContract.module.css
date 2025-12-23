@@ -123,7 +123,7 @@
 }
 
 @media print {
-  body {
+  :global(body) {
     background: #fff;
   }
 
