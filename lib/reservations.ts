@@ -15,6 +15,7 @@ export type Reservation = {
   vehicleCode: string;
   vehiclePlate: string;
   vehicleThumbnailUrl?: string;
+  videoUrl?: string;
   vehicleChangedAt?: string;
   vehicleChangeNotified?: boolean;
   pickupAt: string;
@@ -54,6 +55,8 @@ type ReservationRecord = {
   vehiclePlate?: string;
   vehicle_thumbnail_url?: string;
   vehicleThumbnailUrl?: string;
+  video_url?: string;
+  videoUrl?: string;
   vehicle_changed_at?: string | number;
   vehicleChangedAt?: string | number;
   vehicle_change_notified?: boolean;
@@ -155,9 +158,10 @@ const normalizeReservation = (record: ReservationRecord): Reservation => {
     vehiclePlate: stringFrom(record, ["vehicle_plate", "vehiclePlate"], "-"),
     vehicleThumbnailUrl: stringFrom(
       record,
-      ["vehicle_thumbnail_url", "vehicleThumbnailUrl"],
+      ["vehicle_thumbnail_url", "vehicleThumbnailUrl", "thumbnail_url"],
       ""
     ),
+    videoUrl: stringFrom(record, ["video_url", "videoUrl"], ""),
     vehicleChangedAt: datetimeFrom(record, ["vehicle_changed_at", "vehicleChangedAt"]),
     vehicleChangeNotified: booleanFrom(
       record,
@@ -276,6 +280,8 @@ const reservationToRecord = (reservation: Reservation): ReservationRecord => {
     vehicle_model: reservation.vehicleModel,
     vehicle_code: reservation.vehicleCode,
     vehicle_plate: reservation.vehiclePlate,
+    vehicle_thumbnail_url: reservation.vehicleThumbnailUrl ?? "",
+    video_url: reservation.videoUrl ?? "",
     vehicle_changed_at:
       toIsoStringIfPossible(reservation.vehicleChangedAt) ?? reservation.vehicleChangedAt,
     vehicle_change_notified: reservation.vehicleChangeNotified ?? false,
