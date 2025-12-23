@@ -73,8 +73,8 @@ export default function BeginnerGuidePage() {
         />
       </section>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 py-10">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-[5px] py-10">
+        <section className="rounded-3xl border border-slate-200 bg-white px-[5px] py-6 shadow-sm sm:px-[5px] sm:py-8">
           <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-indigo-600">
             Beginner Guide
           </span>
@@ -111,7 +111,7 @@ export default function BeginnerGuidePage() {
           ].map((item) => (
             <div
               key={item.title}
-              className="rounded-2xl border border-white bg-white p-5 text-sm shadow-sm"
+              className="rounded-2xl border border-white bg-white px-[5px] py-5 text-sm shadow-sm"
             >
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                 {item.title}
@@ -123,7 +123,7 @@ export default function BeginnerGuidePage() {
           ))}
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="rounded-3xl border border-slate-200 bg-white px-[5px] py-6 shadow-sm sm:px-[5px] sm:py-8">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-amber-500">
@@ -137,7 +137,7 @@ export default function BeginnerGuidePage() {
           <div className="space-y-6">
             {steps.map((step, index) => (
               <div key={step.title}>
-                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5 sm:p-6">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50 px-[5px] py-5 sm:px-[5px] sm:py-6">
                   <h3 className="text-lg font-semibold text-slate-900">
                     {step.title}
                   </h3>
@@ -158,7 +158,7 @@ export default function BeginnerGuidePage() {
                   ) : null}
 
                   {step.title.startsWith('03') ? (
-                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white px-[5px] py-4 sm:px-[5px] sm:py-5">
                       <h4 className="text-sm font-semibold text-slate-900">
                         走行距離の目安
                       </h4>
@@ -223,7 +223,7 @@ export default function BeginnerGuidePage() {
           </div>
         </section>
 
-        <section className="rounded-3xl bg-slate-900 px-6 py-8 text-white sm:px-10">
+        <section className="rounded-3xl bg-slate-900 px-[5px] py-8 text-white sm:px-[5px]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">
