@@ -262,7 +262,7 @@ export default function ProductDetailPage({
                         </Link>
                         <Link
                           href="/contact"
-                          className="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 transition"
+                          className="inline-flex w-full items-center justify-center rounded-lg border border-emerald-600 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow hover:bg-emerald-50 transition"
                         >
                           お問い合わせ
                         </Link>
