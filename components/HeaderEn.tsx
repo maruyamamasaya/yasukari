@@ -10,7 +10,7 @@ export default function HeaderEn() {
   const [sessionUser, setSessionUser] = useState<{ email?: string; username?: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState(false);
-  const menuRef = useRef<HTMLElement | null>(null);
+  const menuRef = useRef<HTMLUListElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
   const isReservationPaymentFlow = /^(\/en)?\/reserve\/(models|flow)/.test(router.pathname);
