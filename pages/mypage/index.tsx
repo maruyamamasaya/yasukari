@@ -863,8 +863,8 @@ export default function MyPage() {
         </div>
       ) : null}
       {showAccidentModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl border-2 border-rose-200 bg-white p-6 shadow-2xl ring-1 ring-rose-100">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">【事故・転倒報告】</h2>
@@ -900,7 +900,7 @@ export default function MyPage() {
                 type="button"
                 onClick={handleAccidentSubmit}
                 disabled={accidentUploading}
-                className="inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300"
+                className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
               >
                 {accidentUploading ? '送信中…' : '送信'}
               </button>
@@ -921,8 +921,8 @@ export default function MyPage() {
         </div>
       ) : null}
       {showReturnModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl border-2 border-amber-200 bg-white p-6 shadow-2xl ring-1 ring-amber-100">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">【バイクの返却】</h2>
@@ -961,7 +961,7 @@ export default function MyPage() {
                 <button
                   type="button"
                   onClick={handleReturnComplete}
-                  className="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
                 >
                   返却完了
                 </button>
