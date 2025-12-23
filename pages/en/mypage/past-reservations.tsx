@@ -6,7 +6,6 @@ import { useRouter } from 'next/router';
 import type { Reservation } from '../../../lib/reservations';
 
 export default function PastReservationsPage() {
-  const manualVideoUrl = process.env.NEXT_PUBLIC_MANUAL_VIDEO_URL ?? '/help#manual-video';
   const paymentInfoUrl = process.env.NEXT_PUBLIC_PAYMENT_INFO_URL ?? '/help#payment-info';
   const rentalContractBaseUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL;
 
@@ -182,10 +181,7 @@ export default function PastReservationsPage() {
                 ) : (
                   <ul className="space-y-3">
                     {reservations.map((reservation) => {
-                      const showReservationDetail =
-                        reservation.status === '予約中' ||
-                        reservation.status === '予約受付完了' ||
-                        !reservation.reservationCompletedFlag;
+                      const manualVideoUrl = reservation.videoUrl?.trim();
 
                       return (
                         <li
@@ -194,7 +190,6 @@ export default function PastReservationsPage() {
                         >
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <p className="text-xs text-gray-500">ID: {reservation.id}</p>
                               <p className="text-sm font-semibold text-gray-900">
                                 {reservation.storeName} / {reservation.vehicleModel}
                               </p>
@@ -262,24 +257,16 @@ export default function PastReservationsPage() {
                             </div>
                           </dl>
                           <div className="mt-4 flex flex-wrap gap-2">
-                            {showReservationDetail ? (
+                            {manualVideoUrl ? (
                               <Link
-                                href={`/rental-contract/${reservation.id}`}
-                                className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-gray-50"
+                                href={manualVideoUrl}
+                                className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
                                 target="_blank"
                                 rel="noreferrer"
                               >
-                                View reservation details
+                                Watch manual video
                               </Link>
                             ) : null}
-                            <Link
-                              href={manualVideoUrl}
-                              className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Watch manual video
-                            </Link>
                             <Link
                               href={paymentInfoUrl}
                               className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"

@@ -21,7 +21,6 @@ type UserAttributes = {
 };
 
 export default function MyPageEn() {
-  const manualVideoUrl = process.env.NEXT_PUBLIC_MANUAL_VIDEO_URL ?? '/help#manual-video';
   const paymentInfoUrl = process.env.NEXT_PUBLIC_PAYMENT_INFO_URL ?? '/help#payment-info';
   const rentalContractUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL ?? '/help#rental-contract';
 
@@ -391,94 +390,99 @@ export default function MyPageEn() {
                   </p>
                 ) : (
                   <ul className="space-y-3">
-                    {reservations.map((reservation) => (
-                      <li
-                        key={reservation.id}
-                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xs text-gray-500">ID: {reservation.id}</p>
-                            <p className="text-sm font-semibold text-gray-900">
-                              {reservation.storeName} / {reservation.vehicleModel}
+                    {reservations.map((reservation) => {
+                      const manualVideoUrl = reservation.videoUrl?.trim();
+
+                      return (
+                        <li
+                          key={reservation.id}
+                          className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {reservation.storeName} / {reservation.vehicleModel}
+                              </p>
+                              <p className="text-xs text-gray-600">{reservation.vehicleCode} {reservation.vehiclePlate}</p>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+                                {reservation.status}
+                              </span>
+                              <span
+                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${reservation.reservationCompletedFlag ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}
+                              >
+                                {reservationCompletionLabel(reservation.reservationCompletedFlag)}
+                              </span>
+                            </div>
+                          </div>
+                          {reservation.vehicleChangedAt && !reservation.vehicleChangeNotified && (
+                            <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+                              The vehicle has been changed by the administrator. New vehicle: {reservation.vehicleCode} /{' '}
+                              {reservation.vehiclePlate || 'Not set'}
                             </p>
-                            <p className="text-xs text-gray-600">{reservation.vehicleCode} {reservation.vehiclePlate}</p>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
-                              {reservation.status}
-                            </span>
-                            <span
-                              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${reservation.reservationCompletedFlag ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}
+                          )}
+                          <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                            <div className="rounded-lg bg-gray-50 px-3 py-2">
+                              <dt className="text-xs text-gray-500">Pickup → Return</dt>
+                              <dd className="font-semibold text-gray-900">
+                                {formatReservationDatetime(reservation.pickupAt)} → {formatReservationDatetime(reservation.returnAt)}
+                              </dd>
+                            </div>
+                            <div className="rounded-lg bg-gray-50 px-3 py-2">
+                              <dt className="text-xs text-gray-500">Reservation details</dt>
+                              <dd className="font-semibold text-gray-900">
+                                Vehicle code: {reservation.vehicleCode || '-'} / Plate number: {reservation.vehiclePlate || 'Not set'}
+                              </dd>
+                            </div>
+                            <div className="rounded-lg bg-gray-50 px-3 py-2">
+                              <dt className="text-xs text-gray-500">Payment amount</dt>
+                              <dd className="font-semibold text-gray-900">{reservation.paymentAmount} yen</dd>
+                            </div>
+                            <div className="rounded-lg bg-gray-50 px-3 py-2">
+                              <dt className="text-xs text-gray-500">Payment date</dt>
+                              <dd className="font-semibold text-gray-900">
+                                {reservation.paymentDate ? formatReservationDatetime(reservation.paymentDate) : 'Not recorded'}
+                              </dd>
+                            </div>
+                            <div className="rounded-lg bg-gray-50 px-3 py-2">
+                              <dt className="text-xs text-gray-500">Completion date (storage only)</dt>
+                              <dd className="font-semibold text-gray-900">
+                                {reservation.rentalCompletedAt ? formatReservationDatetime(reservation.rentalCompletedAt) : 'Not set'}
+                              </dd>
+                            </div>
+                          </dl>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {manualVideoUrl ? (
+                              <Link
+                                href={manualVideoUrl}
+                                className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Watch manual video
+                              </Link>
+                            ) : null}
+                            <Link
+                              href={paymentInfoUrl}
+                              className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
+                              target="_blank"
+                              rel="noreferrer"
                             >
-                              {reservationCompletionLabel(reservation.reservationCompletedFlag)}
-                            </span>
+                              Check payment info
+                            </Link>
+                            <Link
+                              href={rentalContractUrl}
+                              className="inline-flex items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              View rental contract
+                            </Link>
                           </div>
-                        </div>
-                        {reservation.vehicleChangedAt && !reservation.vehicleChangeNotified && (
-                          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
-                            The vehicle has been changed by the administrator. New vehicle: {reservation.vehicleCode} /{' '}
-                            {reservation.vehiclePlate || 'Not set'}
-                          </p>
-                        )}
-                        <dl className="mt-3 grid gap-2 sm:grid-cols-2">
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">Pickup → Return</dt>
-                            <dd className="font-semibold text-gray-900">
-                              {formatReservationDatetime(reservation.pickupAt)} → {formatReservationDatetime(reservation.returnAt)}
-                            </dd>
-                          </div>
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">Reservation details</dt>
-                            <dd className="font-semibold text-gray-900">
-                              Vehicle code: {reservation.vehicleCode || '-'} / Plate number: {reservation.vehiclePlate || 'Not set'}
-                            </dd>
-                          </div>
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">Payment amount</dt>
-                            <dd className="font-semibold text-gray-900">{reservation.paymentAmount} yen</dd>
-                          </div>
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">Payment date</dt>
-                            <dd className="font-semibold text-gray-900">
-                              {reservation.paymentDate ? formatReservationDatetime(reservation.paymentDate) : 'Not recorded'}
-                            </dd>
-                          </div>
-                          <div className="rounded-lg bg-gray-50 px-3 py-2">
-                            <dt className="text-xs text-gray-500">Completion date (storage only)</dt>
-                            <dd className="font-semibold text-gray-900">
-                              {reservation.rentalCompletedAt ? formatReservationDatetime(reservation.rentalCompletedAt) : 'Not set'}
-                            </dd>
-                          </div>
-                        </dl>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Link
-                            href={manualVideoUrl}
-                            className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Watch manual video
-                          </Link>
-                          <Link
-                            href={paymentInfoUrl}
-                            className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Check payment info
-                          </Link>
-                          <Link
-                            href={rentalContractUrl}
-                            className="inline-flex items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View rental contract
-                          </Link>
-                        </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
