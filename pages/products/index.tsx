@@ -40,7 +40,6 @@ export default function AllProductsPage({ bikes, classes }: Props) {
             </p>
             <h1 className="text-2xl font-bold">全ての車種一覧</h1>
             <p className="text-sm text-gray-600">
-              DynamoDBに登録された最新の車種データを表示しています。
             </p>
           </div>
 
