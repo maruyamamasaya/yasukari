@@ -39,7 +39,7 @@ export default function FaqAccordion({
                 aria-expanded={isOpen}
               >
                 <span className="faq-question__eyebrow">Q</span>
-                <span className="flex-1">{faq.q}</span>
+                <span className="faq-question__text">{faq.q}</span>
                 <FaChevronDown
                   className={`faq-question__icon ${isOpen ? 'rotate-180' : ''}`}
                 />

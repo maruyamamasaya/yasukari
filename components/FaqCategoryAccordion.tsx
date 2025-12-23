@@ -38,7 +38,7 @@ export default function FaqCategoryAccordion({
               aria-expanded={isOpen}
             >
               <div className="faq-category-trigger__text">
-                <span className="flex-1">{cat.title}</span>
+                <span className="faq-category-trigger__title">{cat.title}</span>
               </div>
               <FaChevronDown
                 className={`faq-category-trigger__icon ${isOpen ? 'rotate-180' : ''}`}
