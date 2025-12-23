@@ -7,8 +7,8 @@ import "swiper/css/pagination";
 
 export default function HeroSlider({ slides }: { slides: { img: string }[] }) {
   return (
-    <section className="relative mx-auto w-full max-w-6xl">
-      <div className="section-surface overflow-hidden rounded-3xl">
+    <section className="relative mx-auto w-full max-w-none sm:max-w-6xl">
+      <div className="section-surface hero-surface overflow-hidden rounded-3xl">
         <div className="relative aspect-[16/9] w-full">
           <Swiper
             modules={[Autoplay, Navigation, Pagination]}

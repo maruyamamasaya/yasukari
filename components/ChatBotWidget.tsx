@@ -34,9 +34,9 @@ export default function ChatBotWidget({ visible = true }: ChatBotWidgetProps) {
       )}
       <button
         onClick={() => setOpen(!open)}
-        className="bg-red-600 text-white p-4 rounded-full shadow-lg"
+        className="bg-red-600 text-white p-3 sm:p-4 rounded-full shadow-lg"
       >
-        <FaComments className="w-8 h-8" />
+        <FaComments className="h-6 w-6 sm:h-8 sm:w-8" />
       </button>
     </div>
   );
