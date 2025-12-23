@@ -184,9 +184,6 @@ export default function ProductDetailPage({
                         <p className="text-sm font-semibold text-gray-900">在庫の選択</p>
                         <span className="text-xs text-gray-500">{vehicles.length}件</span>
                       </div>
-                      <p className="text-xs text-gray-600">
-                        Vehiclesテーブルに登録された管理番号を選択できます。表示名はパーティションキーを使用しています。
-                      </p>
                       <select
                         value={selectedVehicle}
                         onChange={(e) => setSelectedVehicle(e.target.value)}
