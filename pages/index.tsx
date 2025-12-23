@@ -271,7 +271,7 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
             <Link
               key={idx}
               href={k.href}
-              className="group inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_12px_28px_-18px_rgba(220,38,38,0.35)] transition hover:-translate-y-0.5 hover:border-red-200 hover:bg-white"
+              className="group inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_12px_28px_-18px_rgba(220,38,38,0.35)] transition hover:-translate-y-0.5 hover:border-red-200 hover:bg-white whitespace-nowrap md:whitespace-normal"
             >
               <FaHashtag className="text-base text-red-500 transition group-hover:text-red-600" />
               <span>{k.label}</span>
