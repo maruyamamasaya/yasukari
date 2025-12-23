@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
+import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import SectionHeading from "./SectionHeading";
@@ -58,8 +58,10 @@ export default function BikeModelCarousel({
       />
       <div className="mt-8">
         <Swiper
-          modules={[Pagination]}
+          modules={[Autoplay, Pagination]}
           pagination={{ clickable: true }}
+          autoplay={{ delay: 3000, disableOnInteraction: false }}
+          loop
           spaceBetween={16}
           breakpoints={{
             0: { slidesPerView: 1.1 },
