@@ -417,7 +417,7 @@ export default function ProductDetailPage({
       {showAuthModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="bg-gradient-to-r from-red-500 via-rose-500 to-orange-400 px-6 py-4 text-white">
+            <div className="bg-red-500 px-6 py-4 text-white">
               <p className="text-sm font-semibold uppercase tracking-wide">yasukari Member</p>
               <h2 className="mt-1 text-xl font-bold">会員登録で予約がスムーズに</h2>
             </div>
