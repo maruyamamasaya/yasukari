@@ -39,7 +39,37 @@ export default function MyPage() {
   const [reservationsError, setReservationsError] = useState('');
   const [loadingReservations, setLoadingReservations] = useState(true);
   const [showCancelNotice, setShowCancelNotice] = useState(false);
+  const [showAccidentModal, setShowAccidentModal] = useState(false);
+  const [accidentFile, setAccidentFile] = useState<File | null>(null);
+  const [accidentError, setAccidentError] = useState('');
+  const [accidentUploading, setAccidentUploading] = useState(false);
+  const [accidentSubmitted, setAccidentSubmitted] = useState(false);
   const router = useRouter();
+
+  const readFileAsBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result;
+        if (typeof result === 'string') {
+          const base64 = result.split(',')[1] ?? '';
+          resolve(base64);
+        } else {
+          reject(new Error('Invalid file data'));
+        }
+      };
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'));
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const resetAccidentModal = () => {
+    setAccidentFile(null);
+    setAccidentError('');
+    setAccidentUploading(false);
+    setAccidentSubmitted(false);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -315,6 +345,53 @@ export default function MyPage() {
     }
   };
 
+  const handleAccidentOpen = () => {
+    resetAccidentModal();
+    setShowAccidentModal(true);
+  };
+
+  const handleAccidentClose = () => {
+    setShowAccidentModal(false);
+    resetAccidentModal();
+  };
+
+  const handleAccidentSubmit = async () => {
+    if (!accidentFile) {
+      setAccidentError('写真をアップロードしてください。');
+      return;
+    }
+
+    setAccidentError('');
+    setAccidentUploading(true);
+
+    try {
+      const data = await readFileAsBase64(accidentFile);
+      const response = await fetch('/api/accident-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data,
+          fileName: accidentFile.name,
+          contentType: accidentFile.type,
+        }),
+      });
+
+      if (!response.ok) {
+        const message = (await response.json())?.message ?? '送信に失敗しました。';
+        throw new Error(message);
+      }
+
+      setAccidentSubmitted(true);
+    } catch (error) {
+      console.error('Failed to submit accident report', error);
+      setAccidentError(error instanceof Error ? error.message : '送信に失敗しました。');
+    } finally {
+      setAccidentUploading(false);
+    }
+  };
+
+  const hasActiveReservation = reservations.some((reservation) => reservation.status !== 'キャンセル');
+
   return (
     <>
       <Head>
@@ -375,11 +452,34 @@ export default function MyPage() {
                   <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
                   <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
                 </div>
+                {hasActiveReservation ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200"
+                  >
+                    予約詳細
+                  </button>
+                ) : null}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200"
+                  className="inline-flex items-center justify-center rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-800 transition hover:border-indigo-300 hover:bg-indigo-100"
                 >
-                  詳細確認する
+                  レンタル延長
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
+                >
+                  返却
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAccidentOpen}
+                  className="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-800 transition hover:border-rose-300 hover:bg-rose-100"
+                >
+                  事故・転倒
                 </button>
               </div>
 
@@ -394,28 +494,41 @@ export default function MyPage() {
                   </p>
                 ) : (
                   <ul className="space-y-3">
-                    {reservations.map((reservation) => (
-                      <li
-                        key={reservation.id}
-                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xs text-gray-500">ID: {reservation.id}</p>
-                            <p className="text-sm font-semibold text-gray-900">
-                              {reservation.storeName} / {reservation.vehicleModel}
-                            </p>
-                            <p className="text-xs text-gray-600">{reservation.vehicleCode} {reservation.vehiclePlate}</p>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
-                              {reservation.status}
-                            </span>
-                            <span
-                              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${reservation.reservationCompletedFlag ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}
-                            >
-                              {reservationCompletionLabel(reservation.reservationCompletedFlag)}
-                            </span>
+                    {reservations.map((reservation) => {
+                      const showReservationDetail =
+                        reservation.status === '予約中' ||
+                        reservation.status === '予約受付完了' ||
+                        !reservation.reservationCompletedFlag;
+
+                      return (
+                        <li
+                          key={reservation.id}
+                          className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs text-gray-500">ID: {reservation.id}</p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {reservation.storeName} / {reservation.vehicleModel}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                {reservation.vehicleCode} {reservation.vehiclePlate}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+                                {reservation.status}
+                              </span>
+                              <span
+                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                                  reservation.reservationCompletedFlag
+                                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                    : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                                }`}
+                              >
+                                {reservationCompletionLabel(reservation.reservationCompletedFlag)}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         {reservation.vehicleChangedAt && !reservation.vehicleChangeNotified && (
@@ -455,6 +568,16 @@ export default function MyPage() {
                           </div>
                         </dl>
                         <div className="mt-4 flex flex-wrap gap-2">
+                          {showReservationDetail ? (
+                            <Link
+                              href={`/rental-contract/${reservation.id}`}
+                              className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-gray-50"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              予約詳細
+                            </Link>
+                          ) : null}
                           <Link
                             href={manualVideoUrl}
                             className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100"
@@ -480,14 +603,15 @@ export default function MyPage() {
                             貸渡契約書を見る
                           </Link>
                         </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
-              </section>
+            </section>
 
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">プロフィール情報</h2>
@@ -656,6 +780,64 @@ export default function MyPage() {
             >
               閉じる
             </button>
+          </div>
+        </div>
+      ) : null}
+      {showAccidentModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">【事故・転倒報告】</h2>
+                <p className="mt-2 text-sm text-gray-600">バイクの状態を写真で送付してください</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAccidentClose}
+                className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800"
+              >
+                閉じる
+              </button>
+            </div>
+            <div className="mt-4 space-y-3">
+              <label className="block text-xs font-semibold text-gray-600">写真アップロード</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => {
+                  setAccidentSubmitted(false);
+                  setAccidentError('');
+                  const file = event.target.files?.[0] ?? null;
+                  setAccidentFile(file);
+                }}
+                className="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+              />
+              {accidentError ? (
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                  {accidentError}
+                </p>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleAccidentSubmit}
+                disabled={accidentUploading}
+                className="inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300"
+              >
+                {accidentUploading ? '送信中…' : '送信'}
+              </button>
+              {accidentSubmitted ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                  <p className="font-semibold">送信が完了しました。</p>
+                  <div className="mt-3 space-y-2 text-xs text-emerald-900">
+                    <p>① レッカーTELの案内</p>
+                    <p>② 保証内容の案内</p>
+                    <p className="pl-4 text-[11px] text-emerald-800">
+                      → 詳細はレッカーを担当した保険会社に確認してください
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       ) : null}
