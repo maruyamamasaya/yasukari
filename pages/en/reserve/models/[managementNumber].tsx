@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { GetServerSideProps } from "next";
@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { getDocumentClient } from "../../../../lib/dynamodb";
 import { BikeModel as LegacyBikeModel, getBikeModels } from "../../../../lib/bikes";
 import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
+import { RentalAvailabilityMap } from "../../../../lib/dashboard/types";
 
 interface VehicleRecord {
   managementNumber: string;
@@ -35,6 +36,10 @@ interface CalendarDay {
   date: Date;
   inCurrentMonth: boolean;
 }
+
+type AvailabilityResponse = {
+  rentalAvailability?: RentalAvailabilityMap;
+};
 
 export default function ReserveModelPage({
   vehicle,
@@ -70,6 +75,9 @@ export default function ReserveModelPage({
     tomorrow.setHours(0, 0, 0, 0);
     return tomorrow;
   });
+  const [availabilityMap, setAvailabilityMap] = useState<RentalAvailabilityMap>({});
+  const [availabilityLoaded, setAvailabilityLoaded] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
   const minDate = useMemo(() => {
     const base = new Date();
@@ -88,6 +96,39 @@ export default function ReserveModelPage({
   const canProceed = store && pickup && returnDate;
 
   const [checkingSession, setCheckingSession] = useState(false);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadAvailability = async () => {
+      setAvailabilityLoaded(false);
+      setAvailabilityError(null);
+      try {
+        const response = await fetch(`/api/vehicles/${managementNumber}`);
+        if (!response.ok) {
+          throw new Error("failed to load availability");
+        }
+
+        const data = (await response.json()) as AvailabilityResponse;
+        if (!isActive) return;
+        setAvailabilityMap(data.rentalAvailability ?? {});
+      } catch (error) {
+        console.error(error);
+        if (!isActive) return;
+        setAvailabilityMap({});
+        setAvailabilityError("Unable to load availability.");
+      } finally {
+        if (!isActive) return;
+        setAvailabilityLoaded(true);
+      }
+    };
+
+    void loadAvailability();
+
+    return () => {
+      isActive = false;
+    };
+  }, [managementNumber]);
 
   const handleReviewReservation = async () => {
     if (!canProceed || checkingSession) return;
@@ -287,6 +328,8 @@ export default function ReserveModelPage({
                     minDate={minDate}
                     pickupDate={pickupDate}
                     returnDate={returnDateValue}
+                    availabilityMap={availabilityMap}
+                    availabilityLoaded={availabilityLoaded}
                     onSelectDate={(date) => {
                       const formatted = formatInputDate(date);
 
@@ -306,6 +349,11 @@ export default function ReserveModelPage({
                       ? "Please choose a pickup date from tomorrow onwards."
                       : "Choose a return date on or after your pickup date."}
                   </p>
+                  {!availabilityLoaded ? (
+                    <p className="mt-2 text-xs text-gray-500">Loading availability...</p>
+                  ) : availabilityError ? (
+                    <p className="mt-2 text-xs text-red-500">{availabilityError}</p>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -402,6 +450,8 @@ interface CalendarProps {
   minDate: Date;
   pickupDate: Date | null;
   returnDate: Date | null;
+  availabilityMap: RentalAvailabilityMap;
+  availabilityLoaded: boolean;
 }
 
 function Calendar({
@@ -412,6 +462,8 @@ function Calendar({
   minDate,
   pickupDate,
   returnDate,
+  availabilityMap,
+  availabilityLoaded,
 }: CalendarProps) {
   const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
   const startDay = monthStart.getDay();
@@ -439,10 +491,41 @@ function Calendar({
     onMonthChange(next);
   };
 
+  const isDateAvailable = (date: Date) => {
+    if (!availabilityLoaded) {
+      return false;
+    }
+    const key = formatInputDate(date);
+    return availabilityMap[key]?.status === "AVAILABLE";
+  };
+
+  const isRangeAvailable = (start: Date, end: Date) => {
+    if (!availabilityLoaded) {
+      return false;
+    }
+
+    const cursor = new Date(start);
+    cursor.setHours(0, 0, 0, 0);
+    const endDate = new Date(end);
+    endDate.setHours(0, 0, 0, 0);
+
+    for (; cursor <= endDate; cursor.setDate(cursor.getDate() + 1)) {
+      if (!isDateAvailable(cursor)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const isDateDisabled = (date: Date) => {
     const isBeforeMin = date < minDate;
     const isBeforePickup = activeSelection === "return" && pickupDate ? date < pickupDate : false;
-    return isBeforeMin || isBeforePickup;
+    const isUnavailable = !isDateAvailable(date);
+    const isRangeUnavailable =
+      activeSelection === "return" && pickupDate
+        ? !isRangeAvailable(pickupDate, date)
+        : false;
+    return isBeforeMin || isBeforePickup || isUnavailable || isRangeUnavailable;
   };
 
   return (
