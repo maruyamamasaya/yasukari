@@ -10,12 +10,14 @@ import {
   getVehiclesByModel,
   BikeVehicle,
 } from "../../lib/bikes";
+import { readVehicleRentalPrices } from "../../lib/server/vehicleRentalPrices";
 import RecentlyViewed from "../../components/RecentlyViewed";
 
 interface Props {
   bike: BikeModel;
   className?: string;
   vehicles: BikeVehicle[];
+  priceGuide: Partial<Record<DurationKey, string>>;
 }
 
 const specLabels: Record<keyof BikeSpec, string> = {
@@ -33,7 +35,22 @@ const specLabels: Record<keyof BikeSpec, string> = {
   torque: "最大トルク",
 };
 
-export default function ProductDetailPage({ bike, className, vehicles }: Props) {
+const durationDays = {
+  "24h": 1,
+  "2d": 2,
+  "1w": 7,
+  "2w": 14,
+  "1m": 31,
+} as const;
+
+type DurationKey = keyof typeof durationDays;
+
+export default function ProductDetailPage({
+  bike,
+  className,
+  vehicles,
+  priceGuide,
+}: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<string>(
     vehicles[0]?.managementNumber ?? ""
   );
@@ -319,11 +336,11 @@ export default function ProductDetailPage({ bike, className, vehicles }: Props) 
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                   {[
-                    { label: "24時間", value: bike.price24h || "お問い合わせ" },
-                    { label: "2日間", value: "お問い合わせ" },
-                    { label: "1週間", value: "お問い合わせ" },
-                    { label: "2週間", value: "お問い合わせ" },
-                    { label: "1ヶ月", value: "お問い合わせ" },
+                    { label: "24時間", value: priceGuide["24h"] ?? "お問い合わせ" },
+                    { label: "2日間", value: priceGuide["2d"] ?? "お問い合わせ" },
+                    { label: "1週間", value: priceGuide["1w"] ?? "お問い合わせ" },
+                    { label: "2週間", value: priceGuide["2w"] ?? "お問い合わせ" },
+                    { label: "1ヶ月", value: priceGuide["1m"] ?? "お問い合わせ" },
                     { label: "補償プラン", value: "加入可能" },
                   ].map((item) => (
                     <div
@@ -361,16 +378,40 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
     return { notFound: true };
   }
 
-  const [className, vehicles] = await Promise.all([
+  const [className, vehicles, rentalPrices] = await Promise.all([
     Promise.resolve(classes.find((cls) => cls.classId === bike.classId)?.className),
     bike.modelId != null ? getVehiclesByModel(bike.modelId) : Promise.resolve([]),
+    bike.modelId != null ? readVehicleRentalPrices(bike.modelId) : Promise.resolve([]),
   ]);
+
+  const rentalPriceMap = rentalPrices.reduce<Record<number, number>>((acc, record) => {
+    acc[record.days] = record.price;
+    return acc;
+  }, {});
+
+  const priceGuide = (Object.entries(durationDays) as [DurationKey, number][])
+    .map(([key, days]) => {
+      const price = rentalPriceMap[days];
+      if (typeof price === "number") {
+        return [key, `${price.toLocaleString()}円`] as const;
+      }
+      if (key === "24h" && bike.price24h) {
+        return [key, bike.price24h] as const;
+      }
+      return null;
+    })
+    .filter((entry): entry is readonly [DurationKey, string] => Boolean(entry))
+    .reduce<Partial<Record<DurationKey, string>>>((acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    }, {});
 
   return {
     props: {
       bike,
       className: className ?? undefined,
       vehicles,
+      priceGuide,
     },
   };
 };
