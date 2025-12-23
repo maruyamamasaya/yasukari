@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { FaBell, FaCheckCircle, FaEnvelopeOpenText } from 'react-icons/fa';
@@ -13,7 +14,7 @@ type NotificationItem = {
   unread?: boolean;
   actionLabel?: string;
   actionHref?: string;
-  icon: JSX.Element;
+  icon: ReactElement;
 };
 
 const notifications: NotificationItem[] = [
