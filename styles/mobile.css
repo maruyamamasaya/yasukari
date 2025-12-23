@@ -43,8 +43,9 @@
     box-shadow: none;
   }
   .hero-bleed {
-    margin-left: -10px;
-    margin-right: -10px;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
   }
   .hero-bleed .swiper-button-next,
   .hero-bleed .swiper-button-prev {
