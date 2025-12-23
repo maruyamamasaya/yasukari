@@ -118,7 +118,7 @@ export default function HomePage({ blogSlides, blogTags, bikeModelsAll, bikeClas
             {stores.map((store) => (
               <SwiperSlide key={store.name} className="h-auto">
                 <article className="group h-full overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_36px_62px_-34px_rgba(220,38,38,0.45)]">
-                  <div className="relative h-48 overflow-hidden sm:h-56">
+                  <div className="store-card__image relative aspect-[3/4] w-full overflow-hidden">
                     <img
                       src={store.img}
                       alt={store.name}

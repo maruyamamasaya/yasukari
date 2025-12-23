@@ -76,7 +76,7 @@ export default function BikeModelCarousel({
                   href={`/products/${item.modelCode}?click_from=top_modelcarousel`}
                   className="flex h-full flex-col"
                 >
-                  <div className="bike-model-carousel__image relative h-48 overflow-hidden">
+                  <div className="bike-model-carousel__image relative aspect-[3/4] w-full overflow-hidden">
                     <img
                       src={item.img}
                       alt={item.modelName}

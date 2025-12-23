@@ -46,7 +46,7 @@ export default function RecentlyViewedEn() {
             className="group overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_36px_62px_-34px_rgba(220,38,38,0.45)]"
           >
             <Link href={`/en/products/${bike.modelCode}`} className="flex h-full flex-col">
-              <div className="relative h-44 overflow-hidden">
+              <div className="recently-viewed-card__image relative aspect-[3/4] w-full overflow-hidden">
                 <img
                   src={bike.img}
                   alt={bike.modelName}
