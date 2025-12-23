@@ -1,0 +1,138 @@
+.page {
+  margin: 0 auto;
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  color: #111;
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 14mm 12mm;
+  box-sizing: border-box;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 8mm;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.subtitle {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.section {
+  margin-top: 14px;
+}
+
+.sectionTitle {
+  font-weight: 700;
+  border-bottom: 1px solid #333;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.gridTwo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px;
+  border-bottom: 1px solid #333;
+  padding: 4px 0;
+}
+
+.fieldLabel {
+  font-weight: 600;
+}
+
+.muted {
+  color: #555;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.table th,
+.table td {
+  border: 1px solid #333;
+  padding: 6px;
+  vertical-align: top;
+}
+
+.table th {
+  font-weight: 600;
+  text-align: left;
+  background: #f4f4f4;
+}
+
+.checkbox {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #333;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.splitRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.memoBox {
+  border: 1px solid #333;
+  min-height: 80px;
+  padding: 8px;
+}
+
+.footerInfo {
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.printActions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 12px auto;
+  max-width: 210mm;
+  gap: 8px;
+}
+
+.printButton {
+  border: 1px solid #333;
+  background: #fff;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .printActions {
+    display: none;
+  }
+
+  .page {
+    margin: 0;
+    box-shadow: none;
+  }
+}

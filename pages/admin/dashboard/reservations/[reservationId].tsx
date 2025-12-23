@@ -251,9 +251,16 @@ export default function ReservationDetailPage() {
               <button className={styles.iconButton} onClick={() => router.back()} type="button">
                 一覧に戻る
               </button>
-              <button className={`${styles.iconButton} ${styles.iconButtonAccent}`} type="button">
-                貸渡契約書
-              </button>
+              {typeof reservationId === "string" ? (
+                <Link
+                  className={`${styles.iconButton} ${styles.iconButtonAccent}`}
+                  href={`/rental-contract/${reservationId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  貸渡契約書
+                </Link>
+              ) : null}
             </div>
           </div>
 
