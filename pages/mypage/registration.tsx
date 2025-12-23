@@ -345,10 +345,7 @@ const RegistrationPage: NextPage = () => {
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
             <Link href="/" className="flex items-center gap-3">
               <img src="/static/images/logo/250x50.png" alt="ヤスカリ" width={200} height={40} className="hidden md:block" />
-              <div className="flex items-center gap-2 md:hidden">
-                <img src="/static/images/logo/300x300.jpg" alt="ヤスカリ" width={44} height={44} className="rounded-full" />
-                <span className="text-sm font-semibold text-gray-800">レンタルバイクのヤスカリ</span>
-              </div>
+              <span className="text-base font-semibold text-gray-800 md:hidden">レンタルバイクのヤスカリ</span>
             </Link>
           </div>
         </header>
