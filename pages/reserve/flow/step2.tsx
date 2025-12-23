@@ -48,6 +48,8 @@ export default function ReserveFlowStep2() {
   const [returnTime, setReturnTime] = useState("10:00");
   const [managementNumber, setManagementNumber] = useState("");
   const [couponCode, setCouponCode] = useState("");
+  const [rentalFee, setRentalFee] = useState(defaultFees.rental);
+  const [rentalFeeError, setRentalFeeError] = useState<string | null>(null);
 
   const [protectionSelection, setProtectionSelection] = useState(() =>
     vehicleProtectionOptions.reduce<Record<string, boolean>>((acc, option) => {
@@ -153,6 +155,17 @@ export default function ReserveFlowStep2() {
     return "1w";
   }, [pickupDate, pickupTime, returnDate, returnTime]);
 
+  const rentalDays = useMemo(
+    () =>
+      ({
+        "24h": 1,
+        "2d": 2,
+        "4d": 4,
+        "1w": 7,
+      })[rentalPriceKey],
+    [rentalPriceKey]
+  );
+
   const selectedProtectionFee = useMemo(
     () =>
       vehicleProtectionOptions.reduce((total, option) => {
@@ -183,7 +196,6 @@ export default function ReserveFlowStep2() {
     [accessoryOptions, accessorySelection]
   );
 
-  const rentalFee = defaultFees.rental;
   const highSeasonFee = defaultFees.highSeason;
   const couponDiscount = defaultFees.couponDiscount;
 
@@ -211,6 +223,61 @@ export default function ReserveFlowStep2() {
   const toggleAccessory = (key: string) => {
     setAccessorySelection((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  useEffect(() => {
+    if (!managementNumber) return;
+
+    const controller = new AbortController();
+
+    const loadRentalFee = async () => {
+      try {
+        const vehicleResponse = await fetch(`/api/vehicles/${managementNumber}`, {
+          signal: controller.signal,
+        });
+
+        if (!vehicleResponse.ok) {
+          throw new Error("Failed to load vehicle");
+        }
+
+        const vehicleData = (await vehicleResponse.json()) as { modelId?: number };
+        if (!vehicleData.modelId) {
+          throw new Error("Vehicle model not found");
+        }
+
+        const pricesResponse = await fetch(
+          `/api/vehicle-rental-prices?vehicle_type_id=${vehicleData.modelId}`,
+          { signal: controller.signal }
+        );
+
+        if (!pricesResponse.ok) {
+          throw new Error("Failed to load rental prices");
+        }
+
+        const prices = (await pricesResponse.json()) as Array<{
+          days: number;
+          price: number;
+        }>;
+        const matched = prices.find((item) => item.days === rentalDays);
+
+        if (matched?.price != null) {
+          setRentalFee(matched.price);
+          setRentalFeeError(null);
+        } else {
+          setRentalFee(defaultFees.rental);
+          setRentalFeeError("レンタル料金が設定されていません。");
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error("Failed to load rental fee", error);
+        setRentalFee(defaultFees.rental);
+        setRentalFeeError("レンタル料金の取得に失敗しました。");
+      }
+    };
+
+    void loadRentalFee();
+
+    return () => controller.abort();
+  }, [managementNumber, rentalDays]);
 
   const handleNext = () => {
     const params = new URLSearchParams({
@@ -393,6 +460,9 @@ export default function ReserveFlowStep2() {
                     <dt className="text-gray-500">バイクレンタル料金</dt>
                     <dd className="font-semibold text-gray-900">{rentalFee.toLocaleString()}円</dd>
                   </div>
+                  {rentalFeeError ? (
+                    <p className="text-xs text-red-600">{rentalFeeError}</p>
+                  ) : null}
                   <div className="flex items-center justify-between">
                     <dt className="text-gray-500">用品オプション料金</dt>
                     <dd className="font-semibold text-gray-900">{selectedAccessoryFee.toLocaleString()}円</dd>
