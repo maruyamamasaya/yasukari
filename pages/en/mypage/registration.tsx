@@ -102,6 +102,16 @@ const normalizeMobileInput = (phone: string) => {
   return digitsOnly;
 };
 
+const normalizeBirthInput = (birth: string) => {
+  if (!birth) return birth;
+  const [year, ...rest] = birth.split('-');
+  const normalizedYear = year.slice(0, 4);
+  if (rest.length === 0) {
+    return normalizedYear;
+  }
+  return [normalizedYear, ...rest].join('-');
+};
+
 const initialFormData: RegisterFormData = {
   name1: '',
   name2: '',
@@ -220,6 +230,14 @@ const RegistrationPage: NextPage = () => {
       setFormData((prev) => ({
         ...prev,
         mobile: normalizedMobile,
+      }));
+      return;
+    }
+    if (name === 'birth') {
+      const normalizedBirth = normalizeBirthInput(value);
+      setFormData((prev) => ({
+        ...prev,
+        birth: normalizedBirth,
       }));
       return;
     }
@@ -454,6 +472,7 @@ const RegistrationPage: NextPage = () => {
                     value={formData.birth}
                     onChange={handleChange}
                     required
+                    max="9999-12-31"
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                   />
                 </div>
