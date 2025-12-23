@@ -11,14 +11,12 @@ import {
   FaTruck,
   FaStar,
   FaHashtag,
-  FaMotorcycle,
   FaMapMarkerAlt,
 } from "react-icons/fa";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import BikeModelCarousel, { BikeItem } from "../../components/BikeModelCarousel";
-import GenreCarousel, { GenreItem } from "../../components/GenreCarousel";
 import BikeLineupEn from "../../components/BikeLineupEn";
 import HeroSlider from "../../components/HeroSlider";
 import RecentlyViewedEn from "../../components/RecentlyViewedEn";
@@ -100,57 +98,6 @@ export default function HomeEn({ blogSlides, bikeModelsAll, bikeClasses }: Props
       icon: <FaStar className="text-3xl text-red-500" />,
       title: "Premium support",
       text: "Rental gear, roadside assistance, and multilingual help keep your trip smooth.",
-    },
-  ];
-
-  const genreItems: GenreItem[] = [
-    {
-      title: "Moped Scooter",
-      keywords: "50cc",
-      img: "/image/category/原付スクーター.png",
-      href: "/t/genre/scooter-50cc?click_from=top_genres",
-    },
-    {
-      title: "Gyro Canopy Moped",
-      img: "/image/category/ジャイロキャノビー原付.png",
-      href: "/t/genre/gyrocanopy-moped?click_from=top_genres",
-    },
-    {
-      title: "Gyro Canopy Minicar",
-      img: "/image/category/ジャイロキャノビーミニカー.png",
-      href: "/t/genre/gyrocanopy-minicar?click_from=top_genres",
-    },
-    {
-      title: "Class 2 Scooter",
-      keywords: "~125cc",
-      img: "/image/category/原付二種スクーター.png",
-      href: "/t/genre/scooter-125cc?click_from=top_genres",
-    },
-    {
-      title: "Manual Moped",
-      img: "/image/category/原付ミッション.png",
-      href: "/t/genre/moped-manual?click_from=top_genres",
-    },
-    {
-      title: "126-250cc",
-      img: "/image/category/126〜250cc.png",
-      href: "/t/genre/cc126-250?click_from=top_genres",
-    },
-    {
-      title: "251-400cc",
-      img: "/image/category/251〜400cc.png",
-      href: "/t/genre/cc251-400?click_from=top_genres",
-    },
-    {
-      title: "Over 400cc",
-      img: "/image/category/400cc超.png",
-      href: "/t/genre/cc400-plus?click_from=top_genres",
-    },
-    {
-      title: "See all models",
-      href: "/en/products",
-      icon: <FaMotorcycle className="h-16 w-16 text-red-500" />,
-      keywords: "\u00A0",
     },
   ];
 
@@ -261,11 +208,13 @@ export default function HomeEn({ blogSlides, bikeModelsAll, bikeClasses }: Props
 
       <BikeModelCarousel
         items={bikeModels}
+        title="Popular models"
+        subtitle="Signature picks loved by riders"
+        headingTitle="Signature picks loved by riders"
+        headingDescription="A balanced lineup of comfort, design, and value—perfect for first-time rentals as well."
         detailLabel="View details"
         pricePrefix="24 hours"
       />
-
-      <GenreCarousel items={genreItems} />
 
       <section className="section-surface section-padding">
         <SectionHeading
