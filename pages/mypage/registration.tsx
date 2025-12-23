@@ -261,6 +261,21 @@ const RegistrationPage: NextPage = () => {
         return;
       }
 
+      const normalizedOtherName = formData.other_name.replace(/\s+/g, '');
+      const normalizedUserName = `${formData.name1}${formData.name2}`.replace(/\s+/g, '');
+      const isRepeatedName = normalizedOtherName.length > 1 && [...normalizedOtherName].every((char) => char === normalizedOtherName[0]);
+
+      if (
+        !normalizedOtherName ||
+        normalizedOtherName.length === 1 ||
+        isRepeatedName ||
+        (normalizedUserName && normalizedOtherName === normalizedUserName)
+      ) {
+        setSubmitStatus('error');
+        setSubmitMessage('緊急連絡先氏名を正しく入力してください。');
+        return;
+      }
+
       setIsSubmitting(true);
 
       try {
@@ -364,7 +379,6 @@ const RegistrationPage: NextPage = () => {
                   className="mt-1 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                   placeholder="example@example.com"
                 />
-                <p className="mt-1 text-xs text-gray-500">Cognito のアカウントに登録されたメールアドレスが使用されます。</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -592,6 +606,20 @@ const RegistrationPage: NextPage = () => {
                   {licenseFileName ? <p className="mt-1 text-xs text-gray-500">選択中: {licenseFileName}</p> : null}
                 </div>
               </div>
+              <div className="space-y-2 rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-600">
+                <p>※ 運転免許証をアップロードする際は、以下の点にご注意ください。</p>
+                <ul className="list-disc space-y-1 pl-5">
+                  <li>
+                    <span className="font-semibold text-red-600">日本国内で発行された有効な運転免許証</span>であることを確認してください。
+                  </li>
+                  <li>
+                    <span className="font-semibold text-red-600">文字や写真がはっきり確認できる鮮明な画像</span>をアップロードしてください（ピンぼけ・一部欠け・反射があるものは不可）。
+                  </li>
+                  <li>
+                    <span className="font-semibold text-red-600">免許証番号・氏名・有効期限などの必要情報がすべて判別できる状態</span>であることを確認してください。
+                  </li>
+                </ul>
+              </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
@@ -641,7 +669,7 @@ const RegistrationPage: NextPage = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="other_name">
-                    緊急連絡先氏名（任意）
+                    緊急連絡先氏名
                   </label>
                   <input
                     id="other_name"
@@ -649,13 +677,14 @@ const RegistrationPage: NextPage = () => {
                     type="text"
                     value={formData.other_name}
                     onChange={handleChange}
+                    required
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                     placeholder="山田花子"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="other_address">
-                    緊急連絡先住所（任意）
+                    緊急連絡先住所
                   </label>
                   <input
                     id="other_address"
@@ -663,13 +692,14 @@ const RegistrationPage: NextPage = () => {
                     type="text"
                     value={formData.other_address}
                     onChange={handleChange}
+                    required
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                     placeholder="東京都足立区千住曙町"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="other_tel">
-                    緊急連絡先電話番号（任意）
+                    緊急連絡先電話番号
                   </label>
                   <input
                     id="other_tel"
@@ -677,13 +707,14 @@ const RegistrationPage: NextPage = () => {
                     type="tel"
                     value={formData.other_tel}
                     onChange={handleChange}
+                    required
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                     placeholder="0312345678"
                   />
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-xl bg-red-50 p-4 text-sm text-gray-800">
+              <div className="space-y-4 rounded-xl bg-gray-50 p-4 text-sm text-gray-800">
                 <h2 className="text-base font-semibold text-gray-900">アンケート</h2>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
@@ -790,7 +821,7 @@ const RegistrationPage: NextPage = () => {
               ) : null}
 
               <div className="flex items-center justify-between">
-                <p className="text-xs text-gray-500">送信後、登録情報が DynamoDB の yasukariUserMain に保存されます。</p>
+                <span />
                 <button
                   type="submit"
                   disabled={isSubmitting || loadingUser}
