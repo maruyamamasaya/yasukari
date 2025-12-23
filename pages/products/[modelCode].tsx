@@ -393,14 +393,14 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
     .map(([key, days]) => {
       const price = rentalPriceMap[days];
       if (typeof price === "number") {
-        return [key, `${price.toLocaleString()}円`] as const;
+        return [key, `${price.toLocaleString()}円`] as [DurationKey, string];
       }
       if (key === "24h" && bike.price24h) {
-        return [key, bike.price24h] as const;
+        return [key, bike.price24h] as [DurationKey, string];
       }
       return null;
     })
-    .filter((entry): entry is readonly [DurationKey, string] => Boolean(entry))
+    .filter((entry): entry is [DurationKey, string] => Boolean(entry))
     .reduce<Partial<Record<DurationKey, string>>>((acc, [key, value]) => {
       acc[key] = value;
       return acc;
