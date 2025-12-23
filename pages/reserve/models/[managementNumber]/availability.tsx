@@ -7,22 +7,12 @@ import {
   BikeModel,
   RentalAvailabilityDay,
   RentalAvailabilityMap,
-  RentalAvailabilityStatus,
   Vehicle,
 } from "../../../../lib/dashboard/types";
 
-const STATUS_LABELS: Record<RentalAvailabilityStatus, string> = {
-  AVAILABLE: "レンタル可",
-  UNAVAILABLE: "貸出不可",
-  MAINTENANCE: "メンテナンス中",
-  RENTED: "レンタル中",
-};
-
-const STATUS_COLORS: Record<RentalAvailabilityStatus, string> = {
+const STATUS_COLORS: Record<"AVAILABLE" | "UNAVAILABLE", string> = {
   AVAILABLE: "bg-emerald-500",
   UNAVAILABLE: "bg-rose-500",
-  MAINTENANCE: "bg-amber-500",
-  RENTED: "bg-blue-500",
 };
 
 type CalendarCell = {
@@ -176,9 +166,13 @@ export default function BikeAvailabilityPreviewPage() {
     return new Date(today.getFullYear(), today.getMonth() + calendarMonthOffset, 1);
   }, [calendarMonthOffset]);
 
-  const calendarWeeks = useMemo(() => buildCalendarGrid(displayMonth), [displayMonth]);
+const calendarWeeks = useMemo(() => buildCalendarGrid(displayMonth), [displayMonth]);
 
-  const selectedEntry = selectedDate ? availabilityMap[selectedDate] : undefined;
+const selectedEntry = selectedDate ? availabilityMap[selectedDate] : undefined;
+const isAvailable = (entry?: RentalAvailabilityDay) => entry?.status === "AVAILABLE";
+const availabilityLabel = (entry?: RentalAvailabilityDay) =>
+  isAvailable(entry) ? "レンタル可" : "レンタル不可";
+const availabilityIcon = (entry?: RentalAvailabilityDay) => (isAvailable(entry) ? "⚪︎" : "❌");
 
   const resolvedModelName = model?.modelName ?? "車種";
   const resolvedStoreLabel = vehicle?.storeId ? getStoreLabel(vehicle.storeId) : "店舗";
@@ -300,17 +294,9 @@ export default function BikeAvailabilityPreviewPage() {
                                   <span className="text-xs font-semibold text-gray-700">
                                     {cell.date.getDate()}日
                                   </span>
-                                  {entry ? (
-                                    <span
-                                      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold text-white ${STATUS_COLORS[entry.status]}`}
-                                    >
-                                      {STATUS_LABELS[entry.status]}
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-200 px-2 py-1 text-[11px] font-semibold text-gray-700">
-                                      未設定
-                                    </span>
-                                  )}
+                                  <span className="text-sm font-semibold text-gray-700">
+                                    {availabilityIcon(entry)}
+                                  </span>
                                 </div>
                                 {entry?.note ? (
                                   <p className="text-[11px] text-gray-600 leading-snug line-clamp-2">
@@ -360,15 +346,13 @@ export default function BikeAvailabilityPreviewPage() {
                   <h2 className="text-lg font-bold text-gray-900">ステータス表示</h2>
                 </div>
                 <ul className="space-y-2 text-sm text-gray-700">
-                  {(Object.keys(STATUS_LABELS) as RentalAvailabilityStatus[]).map((status) => (
-                    <li key={status} className="flex items-center gap-3">
-                      <span className={`h-3 w-3 rounded-full ${STATUS_COLORS[status]}`} aria-hidden />
-                      <span className="font-semibold text-gray-900">{STATUS_LABELS[status]}</span>
-                    </li>
-                  ))}
                   <li className="flex items-center gap-3">
-                    <span className="h-3 w-3 rounded-full bg-gray-300" aria-hidden />
-                    <span className="font-semibold text-gray-900">未設定</span>
+                    <span className={`h-3 w-3 rounded-full ${STATUS_COLORS.AVAILABLE}`} aria-hidden />
+                    <span className="font-semibold text-gray-900">レンタル可</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className={`h-3 w-3 rounded-full ${STATUS_COLORS.UNAVAILABLE}`} aria-hidden />
+                    <span className="font-semibold text-gray-900">レンタル不可</span>
                   </li>
                 </ul>
               </div>
@@ -382,12 +366,12 @@ export default function BikeAvailabilityPreviewPage() {
                     <p className="inline-flex items-center gap-2 text-gray-900">
                       <span
                         className={`h-3 w-3 rounded-full ${
-                          selectedEntry ? STATUS_COLORS[selectedEntry.status] : "bg-gray-300"
+                          isAvailable(selectedEntry) ? STATUS_COLORS.AVAILABLE : STATUS_COLORS.UNAVAILABLE
                         }`}
                         aria-hidden
                       />
                       <span className="font-semibold">
-                        {selectedEntry ? STATUS_LABELS[selectedEntry.status] : "未設定"}
+                        {availabilityLabel(selectedEntry)}
                       </span>
                     </p>
                     {selectedEntry?.note ? (
