@@ -2,6 +2,7 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import {
   getBikeModels,
   BikeModel,
@@ -37,6 +38,8 @@ export default function ProductDetailPageEn({ bike, className, vehicles }: Props
   const [selectedVehicle, setSelectedVehicle] = useState<string>(
     vehicles[0]?.managementNumber ?? ""
   );
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const router = useRouter();
 
   const vehicleOptions = useMemo(
     () =>
@@ -65,6 +68,32 @@ export default function ProductDetailPageEn({ bike, className, vehicles }: Props
       // ignore write errors
     }
   }, [bike]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const controller = new AbortController();
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/me", {
+          credentials: "include",
+          signal: controller.signal,
+        });
+        if (response.status === 401) {
+          setShowAuthModal(true);
+          return;
+        }
+        if (!response.ok) {
+          setShowAuthModal(true);
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setShowAuthModal(true);
+      }
+    };
+
+    void checkSession();
+    return () => controller.abort();
+  }, []);
 
   const specEntries = Object.entries(bike.spec ?? {}).filter(
     ([, value]) => Boolean(value)
@@ -327,6 +356,51 @@ export default function ProductDetailPageEn({ bike, className, vehicles }: Props
           <RecentlyViewedEn />
         </div>
       </main>
+      {showAuthModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="bg-gradient-to-r from-red-500 via-rose-500 to-orange-400 px-6 py-4 text-white">
+              <p className="text-sm font-semibold uppercase tracking-wide">yasukari Member</p>
+              <h2 className="mt-1 text-xl font-bold">Finish signup to reserve</h2>
+            </div>
+            <div className="space-y-4 px-6 py-5 text-gray-700">
+              <p className="text-sm leading-relaxed">
+                If you are not logged in, please create an account and complete the full registration to make a reservation.
+              </p>
+              <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                Members enjoy better long-term rates, exclusive coupons, and more value every time you ride with yasukari.
+              </div>
+              <ul className="grid gap-2 text-sm text-gray-600">
+                {[
+                  "Save your details for quick, same-day reservations",
+                  "Receive member-only promotions and coupons",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-red-500" aria-hidden />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                  onClick={() => router.push("/en/login")}
+                >
+                  OK (Go to login / signup)
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:border-gray-300"
+                  onClick={() => setShowAuthModal(false)}
+                >
+                  Not now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
