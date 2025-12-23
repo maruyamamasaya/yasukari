@@ -637,14 +637,29 @@ export default function MyPage() {
                           className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-gray-100"
                         >
                           <div className="flex flex-wrap items-start justify-between gap-3">
-                            <div>
-                              <p className="text-xs text-gray-500">ID: {reservation.id}</p>
-                              <p className="text-sm font-semibold text-gray-900">
-                                {reservation.storeName} / {reservation.vehicleModel}
-                              </p>
-                              <p className="text-xs text-gray-600">
-                                {reservation.vehicleCode} {reservation.vehiclePlate}
-                              </p>
+                            <div className="flex items-start gap-3">
+                              <img
+                                src={
+                                  reservation.vehicleThumbnailUrl ||
+                                  '/image/vehicle-thumbnail-placeholder.svg'
+                                }
+                                alt={
+                                  reservation.vehicleModel
+                                    ? `${reservation.vehicleModel} のサムネイル`
+                                    : '車両サムネイル'
+                                }
+                                className="h-12 w-12 rounded-md border border-gray-200 bg-white object-cover shadow-sm"
+                                loading="lazy"
+                              />
+                              <div>
+                                <p className="text-xs text-gray-500">ID: {reservation.id}</p>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {reservation.storeName} / {reservation.vehicleModel}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  {reservation.vehicleCode} {reservation.vehiclePlate}
+                                </p>
+                              </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
                               <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
