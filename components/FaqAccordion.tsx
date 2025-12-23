@@ -8,14 +8,17 @@ export interface FAQItem {
 
 export default function FaqAccordion({ faqs }: { faqs: FAQItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   const toggle = (idx: number) => {
     setOpenIndex((prev) => (prev === idx ? null : idx));
   };
 
+  const visibleFaqs = showAll ? faqs : faqs.slice(0, 3);
+
   return (
     <div className="faq-accordion">
-      {faqs.map((faq, idx) => {
+      {visibleFaqs.map((faq, idx) => {
         const isOpen = openIndex === idx;
 
         return (
@@ -42,6 +45,15 @@ export default function FaqAccordion({ faqs }: { faqs: FAQItem[] }) {
           </dl>
         );
       })}
+      {faqs.length > 3 ? (
+        <button
+          type="button"
+          onClick={() => setShowAll((prev) => !prev)}
+          className="btn-primary mt-2 w-full justify-center"
+        >
+          {showAll ? "閉じる" : "もっと見る"}
+        </button>
+      ) : null}
     </div>
   );
 }

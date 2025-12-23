@@ -1,5 +1,8 @@
 import React from "react";
-import { FaCaretRight } from "react-icons/fa";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 import SectionHeading from "./SectionHeading";
 
 type Step = {
@@ -48,27 +51,35 @@ export default function HowToUse() {
         title="yasukariの利用方法"
         description="初めてでも迷わずにステップを完了できるよう、予約から返却までの流れをシンプルにまとめました。"
       />
-      <div className="flex flex-col items-stretch justify-center gap-6 md:flex-row md:items-start md:gap-4">
-        {steps.map((step, idx) => (
-          <React.Fragment key={idx}>
-            {idx > 0 && (
-              <FaCaretRight className="hidden text-2xl text-red-300 md:block" />
-            )}
-            <div className="flex flex-1 flex-col items-center gap-4 rounded-2xl border border-white/60 bg-white/80 p-6 text-center shadow-[0_20px_42px_-28px_rgba(15,23,42,0.45)]">
-              <div className="mx-auto w-44 overflow-hidden rounded-xl bg-white">
-                <img
-                  className="h-full w-full object-contain"
-                  alt={step.alt}
-                  loading="lazy"
-                  decoding="async"
-                  src={step.img}
-                />
+      <div className="mt-8">
+        <Swiper
+          modules={[Pagination]}
+          pagination={{ clickable: true }}
+          spaceBetween={16}
+          breakpoints={{
+            0: { slidesPerView: 1.1 },
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 4 },
+          }}
+        >
+          {steps.map((step, idx) => (
+            <SwiperSlide key={idx} className="h-auto">
+              <div className="flex h-full flex-col items-center gap-4 rounded-2xl border border-white/60 bg-white/80 p-6 text-center shadow-[0_20px_42px_-28px_rgba(15,23,42,0.45)]">
+                <div className="mx-auto w-44 overflow-hidden rounded-xl bg-white">
+                  <img
+                    className="h-full w-full object-contain"
+                    alt={step.alt}
+                    loading="lazy"
+                    decoding="async"
+                    src={step.img}
+                  />
+                </div>
+                <p className="text-base font-semibold text-slate-800">{step.title}</p>
+                <p className="text-sm leading-relaxed text-slate-600">{step.desc}</p>
               </div>
-              <p className="text-base font-semibold text-slate-800">{step.title}</p>
-              <p className="text-sm leading-relaxed text-slate-600">{step.desc}</p>
-            </div>
-          </React.Fragment>
-        ))}
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </section>
   );

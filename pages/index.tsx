@@ -48,15 +48,8 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
   }, []);
 
   const hotKeywords = [
-    { label: "夏のツーリング", href: "/t/scene/summer?click_from=top_keywords" },
-    { label: "初心者おすすめ", href: "/t/tag/beginner?click_from=top_keywords" },
     {
-      label: "キャンプツーリング",
-      href: "/blog/camp-touring?click_from=top_keywords",
-    },
-    { label: "ヘルメット", href: "/search?q=ヘルメット&click_from=top_keywords" },
-    {
-      label: "原付スクーター",
+      label: "50cc 原付スクーター",
       href: "/rental_bike/tag/%E5%8E%9F%E4%BB%98%E3%82%B9%E3%82%AF%E3%83%BC%E3%82%BF%E3%83%BC?click_from=top_keywords",
     },
     {
@@ -68,12 +61,16 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
       href: "/rental_bike/tag/%E3%82%B8%E3%83%A3%E3%82%A4%E3%83%AD%E3%82%AD%E3%83%A3%E3%83%8E%E3%83%93%E3%83%BC%E3%83%9F%E3%83%8B%E3%82%AB%E3%83%BC?click_from=top_keywords",
     },
     {
-      label: "原付二種スクーター",
+      label: "2種スクーター",
       href: "/rental_bike/tag/%E5%8E%9F%E4%BB%98%E4%BA%8C%E7%A8%AE%E3%82%B9%E3%82%AF%E3%83%BC%E3%82%BF%E3%83%BC?click_from=top_keywords",
     },
     {
-      label: "原付ミッション",
-      href: "/rental_bike/tag/%E5%8E%9F%E4%BB%98%E3%83%9F%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3?click_from=top_keywords",
+      label: "原付2種ミッション車",
+      href: "/rental_bike/tag/%E5%8E%9F%E4%BB%98%EF%BC%92%E7%A8%AE%E3%83%9F%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%BB%8A?click_from=top_keywords",
+    },
+    {
+      label: "原付50ccミッション車",
+      href: "/rental_bike/tag/%E5%8E%9F%E4%BB%9850cc%E3%83%9F%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%BB%8A?click_from=top_keywords",
     },
     { label: "126〜250cc", href: "/rental_bike/tag/126%E3%80%9C250cc?click_from=top_keywords" },
     { label: "251〜400cc", href: "/rental_bike/tag/251%E3%80%9C400cc?click_from=top_keywords" },
@@ -174,10 +171,23 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
           title="選ばれる3つの理由"
           description="スムーズな予約体験、整備士による徹底管理、そしてライダー目線のサポート。最新のオンライン体験で、旅の準備時間をぐっと短縮します。"
         />
-        <div className="grid gap-6 md:grid-cols-3">
-          {featureHighlights.map((feature) => (
-            <FeatureHighlight key={feature.title} {...feature} />
-          ))}
+        <div className="mt-8">
+          <Swiper
+            modules={[Pagination]}
+            pagination={{ clickable: true }}
+            spaceBetween={16}
+            breakpoints={{
+              0: { slidesPerView: 1.1 },
+              640: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+          >
+            {featureHighlights.map((feature) => (
+              <SwiperSlide key={feature.title} className="h-auto">
+                <FeatureHighlight {...feature} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </section>
 
@@ -239,7 +249,7 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
             {blogSlides.map((card, index) => (
               <SwiperSlide key={index}>
                 <Link href={card.href} className="block h-full">
-                  <div className="blog-slide h-full">
+                  <div className="blog-slide blog-slide--compact h-full">
                     <img src={card.img} alt={card.title} className="h-full w-full object-cover" />
                     <div className="blog-slide-title">{card.title}</div>
                   </div>
@@ -256,7 +266,7 @@ export default function HomePage({ blogSlides, bikeModelsAll, bikeClasses }: Pro
           title="注目キーワード"
           description="季節のおすすめや人気カテゴリから、気になるトピックをすぐにチェックできます。気軽な散策から本格ツーリングまで、あなたの目的に合うキーワードをピックアップ。"
         />
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex flex-nowrap items-center gap-3 overflow-x-auto pb-2 scroll-row">
           {hotKeywords.map((k, idx) => (
             <Link
               key={idx}

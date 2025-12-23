@@ -1,11 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-import { FaHome, FaUser, FaClipboardList } from 'react-icons/fa';
+import { FaHome, FaUser, FaBell } from 'react-icons/fa';
 
 export default function MobileNav() {
   const items = [
     { href: '/', label: 'ホーム', icon: <FaHome /> },
-    { href: '/rental-status', label: 'レンタル', icon: <FaClipboardList /> },
+    { href: '/notifications', label: '通知', icon: <FaBell /> },
     { href: '/mypage', label: 'マイページ', icon: <FaUser /> },
   ];
 

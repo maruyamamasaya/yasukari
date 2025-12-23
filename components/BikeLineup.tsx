@@ -1,4 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 import Link from "next/link";
 import { BikeClass, BikeModel } from "../lib/bikes";
 import SectionHeading from "./SectionHeading";
@@ -68,7 +72,7 @@ export default function BikeLineup({ bikes, classes }: Props) {
         description="経験値別にセレクトされた多彩なラインアップ。初心者向けのコンパクトスクーターから、ロングツーリングで頼れる大型ネイキッドまで、好みに合わせて最適な1台が見つかります。"
       />
 
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+      <div className="mt-4 flex flex-nowrap items-center gap-2 overflow-x-auto pb-2 scroll-row">
         {categories.map((c) => {
           const active = filter === c.value;
           return (
@@ -88,38 +92,48 @@ export default function BikeLineup({ bikes, classes }: Props) {
         })}
       </div>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {displayList.map((bike) => (
-          <article
-            key={bike.modelCode}
-            className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_32px_56px_-28px_rgba(220,38,38,0.4)]"
-          >
-            <Link href={`/products/${bike.modelCode}`} className="flex h-full flex-col">
-              <div className="relative overflow-hidden">
-                <img
-                  src={bike.img}
-                  alt={bike.modelName}
-                  className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                {bike.badge ? (
-                  <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-red-500 shadow">{bike.badge}</span>
-                ) : null}
-              </div>
-              <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
-                <h3
-                  className="text-base font-semibold text-slate-800"
-                  dangerouslySetInnerHTML={{ __html: bike.modelName.replace(/\\n/g, "<br>") }}
-                />
-                <p className="text-sm text-slate-500">
-                  整備済み &amp; 24時間予約対応。用途や体格に合わせたフィット感で、週末のツーリングも安心です。
-                </p>
-                <span className="text-sm font-semibold text-red-500">
-                  詳細を見る →
-                </span>
-              </div>
-            </Link>
-          </article>
-        ))}
+      <div className="mt-10">
+        <Swiper
+          modules={[Pagination]}
+          pagination={{ clickable: true }}
+          spaceBetween={16}
+          breakpoints={{
+            0: { slidesPerView: 1.1 },
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+        >
+          {displayList.map((bike) => (
+            <SwiperSlide key={bike.modelCode} className="h-auto">
+              <article className="group relative h-full overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_32px_56px_-28px_rgba(220,38,38,0.4)]">
+                <Link href={`/products/${bike.modelCode}`} className="flex h-full flex-col">
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={bike.img}
+                      alt={bike.modelName}
+                      className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    {bike.badge ? (
+                      <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-red-500 shadow">{bike.badge}</span>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
+                    <h3
+                      className="text-base font-semibold text-slate-800"
+                      dangerouslySetInnerHTML={{ __html: bike.modelName.replace(/\\n/g, "<br>") }}
+                    />
+                    <p className="text-sm text-slate-500">
+                      整備済み &amp; 24時間予約対応。用途や体格に合わせたフィット感で、週末のツーリングも安心です。
+                    </p>
+                    <span className="text-sm font-semibold text-red-500">
+                      詳細を見る →
+                    </span>
+                  </div>
+                </Link>
+              </article>
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
 
       {filtered.length > displayList.length ? (
