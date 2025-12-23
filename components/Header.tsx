@@ -41,6 +41,16 @@ export default function Header() {
     return () => document.removeEventListener('click', handler);
   }, [menuOpen]);
   useEffect(() => {
+    const handleRouteChange = () => {
+      setMenuOpen(false);
+    };
+
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [router.events]);
+  useEffect(() => {
     const controller = new AbortController();
     const fetchSession = async () => {
       try {
@@ -190,7 +200,7 @@ export default function Header() {
           </div>
         </div>
         {menuOpen && (
-          <nav className="sm:hidden fixed inset-0 z-50 flex items-center justify-center bg-white/95 px-6 py-10 text-center backdrop-blur">
+          <nav className="sm:hidden fixed inset-0 z-50 flex items-center justify-center bg-white px-6 py-10 text-center">
             <ul
               ref={menuRef}
               className="flex w-full max-w-sm flex-col items-center gap-6 text-lg font-semibold"
