@@ -45,11 +45,34 @@ export default function BikeLineup({ bikes, classes }: Props) {
     [classes]
   );
 
-  const [filter, setFilter] = useState<number>(categories[2]?.value ?? categories[0]?.value ?? 0);
+  const resolveStartIndex = (list: typeof categories) => {
+    if (!list.length) return 0;
+    const preferredLabels = ["50cc 原付スクーター", "50cc原付スクーター", "50cc以下", "原付スクーター"];
+    const exactIndex = preferredLabels
+      .map((label) => list.findIndex((item) => item.label === label))
+      .find((index) => index != null && index >= 0);
+    if (exactIndex != null && exactIndex >= 0) return exactIndex;
+    const fuzzyIndex = list.findIndex((item) => item.label.includes("50cc"));
+    return fuzzyIndex >= 0 ? fuzzyIndex : 0;
+  };
+
+  const [activeIndex, setActiveIndex] = useState<number>(
+    resolveStartIndex(categories)
+  );
+
+  const filter = categories[activeIndex]?.value ?? categories[0]?.value ?? 0;
 
   useEffect(() => {
-    setFilter(categories[2]?.value ?? categories[0]?.value ?? 0);
+    setActiveIndex(resolveStartIndex(categories));
   }, [categories]);
+
+  useEffect(() => {
+    if (categories.length <= 1) return;
+    const intervalId = window.setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % categories.length);
+    }, 2600);
+    return () => window.clearInterval(intervalId);
+  }, [categories.length]);
 
   const filtered = useMemo(
     () =>
@@ -75,12 +98,13 @@ export default function BikeLineup({ bikes, classes }: Props) {
       <div className="lineup-marquee mt-4 overflow-x-auto scroll-row">
         <div className="lineup-marquee__track flex flex-nowrap items-center gap-2 pb-2">
           {[...categories, ...categories].map((c, index) => {
-            const active = filter === c.value;
+            const originalIndex = index % categories.length;
+            const active = activeIndex === originalIndex;
             return (
               <button
                 key={`${c.value}-${index}`}
                 type="button"
-                onClick={() => setFilter(c.value)}
+                onClick={() => setActiveIndex(originalIndex)}
                 className={`lineup-marquee__button whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   active
                     ? "bg-red-500 text-white shadow-lg shadow-red-200/60"
