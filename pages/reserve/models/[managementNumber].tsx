@@ -6,6 +6,8 @@ import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { getDocumentClient } from "../../../lib/dynamodb";
 import { BikeModel as LegacyBikeModel, getBikeModels } from "../../../lib/bikes";
 import { getStoreLabel } from "../../../lib/dashboard/storeOptions";
+import { fetchMonthlyHolidays } from "../../../lib/dashboard/holidayManager";
+import { findHolidayStoreByLabel } from "../../../lib/dashboard/holidayStores";
 import { useRouter } from "next/router";
 import { RentalAvailabilityMap } from "../../../lib/dashboard/types";
 
@@ -77,6 +79,9 @@ export default function ReserveModelPage({
   const [availabilityMap, setAvailabilityMap] = useState<RentalAvailabilityMap>({});
   const [availabilityLoaded, setAvailabilityLoaded] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
+  const [holidayLoaded, setHolidayLoaded] = useState(false);
+  const [holidayError, setHolidayError] = useState<string | null>(null);
 
   const minDate = useMemo(() => {
     const base = new Date();
@@ -128,6 +133,53 @@ export default function ReserveModelPage({
       isActive = false;
     };
   }, [managementNumber]);
+
+  const holidayMonthKey = useMemo(() => {
+    const year = visibleMonth.getFullYear();
+    const month = `${visibleMonth.getMonth() + 1}`.padStart(2, "0");
+    return `${year}-${month}`;
+  }, [visibleMonth]);
+
+  useEffect(() => {
+    let isActive = true;
+    const storeId = findHolidayStoreByLabel(store)?.id;
+
+    if (!storeId) {
+      setHolidayDates(new Set());
+      setHolidayLoaded(true);
+      setHolidayError(null);
+      return () => {
+        isActive = false;
+      };
+    }
+
+    const loadHolidays = async () => {
+      setHolidayLoaded(false);
+      setHolidayError(null);
+      try {
+        const holidays = await fetchMonthlyHolidays(holidayMonthKey, storeId);
+        if (!isActive) return;
+        const holidaySet = new Set(
+          holidays.filter((holiday) => holiday.isHoliday).map((holiday) => holiday.date)
+        );
+        setHolidayDates(holidaySet);
+      } catch (error) {
+        console.error(error);
+        if (!isActive) return;
+        setHolidayDates(new Set());
+        setHolidayError("店舗休日の取得に失敗しました。");
+      } finally {
+        if (!isActive) return;
+        setHolidayLoaded(true);
+      }
+    };
+
+    void loadHolidays();
+
+    return () => {
+      isActive = false;
+    };
+  }, [holidayMonthKey, store]);
 
   const handleReviewReservation = async () => {
     if (!canProceed || checkingSession) return;
@@ -329,6 +381,8 @@ export default function ReserveModelPage({
                     returnDate={returnDateValue}
                     availabilityMap={availabilityMap}
                     availabilityLoaded={availabilityLoaded}
+                    holidayDates={holidayDates}
+                    holidayLoaded={holidayLoaded}
                     onSelectDate={(date) => {
                       const formatted = formatInputDate(date);
 
@@ -352,6 +406,10 @@ export default function ReserveModelPage({
                     <p className="mt-2 text-xs text-gray-500">空き状況を読み込み中です...</p>
                   ) : availabilityError ? (
                     <p className="mt-2 text-xs text-red-500">{availabilityError}</p>
+                  ) : !holidayLoaded ? (
+                    <p className="mt-2 text-xs text-gray-500">店舗休日を読み込み中です...</p>
+                  ) : holidayError ? (
+                    <p className="mt-2 text-xs text-red-500">{holidayError}</p>
                   ) : null}
                 </div>
               </div>
@@ -451,6 +509,8 @@ interface CalendarProps {
   returnDate: Date | null;
   availabilityMap: RentalAvailabilityMap;
   availabilityLoaded: boolean;
+  holidayDates: Set<string>;
+  holidayLoaded: boolean;
 }
 
 function Calendar({
@@ -463,6 +523,8 @@ function Calendar({
   returnDate,
   availabilityMap,
   availabilityLoaded,
+  holidayDates,
+  holidayLoaded,
 }: CalendarProps) {
   const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
   const startDay = monthStart.getDay();
@@ -491,10 +553,13 @@ function Calendar({
   };
 
   const isDateAvailable = (date: Date) => {
-    if (!availabilityLoaded) {
+    if (!availabilityLoaded || !holidayLoaded) {
       return false;
     }
     const key = formatInputDate(date);
+    if (holidayDates.has(key)) {
+      return false;
+    }
     return availabilityMap[key]?.status === "AVAILABLE";
   };
 
