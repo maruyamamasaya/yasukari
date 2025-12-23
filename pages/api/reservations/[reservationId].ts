@@ -76,6 +76,10 @@ export default async function handler(
         updates.memberCountryCode = body.memberCountryCode;
       }
 
+      if (typeof body.reservationCompletedFlag === "boolean") {
+        updates.reservationCompletedFlag = body.reservationCompletedFlag;
+      }
+
       if (typeof body.vehicleChangeNotified === "boolean" && !updates.vehicleChangedAt) {
         updates.vehicleChangeNotified = body.vehicleChangeNotified;
       }
