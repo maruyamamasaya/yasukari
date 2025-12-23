@@ -159,6 +159,12 @@
   color: #b91c1c;
 }
 
+.statusNote {
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
 .clickableRow {
   cursor: pointer;
 }
