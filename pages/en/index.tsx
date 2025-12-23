@@ -124,7 +124,7 @@ export default function HomeEn({ blogSlides, blogTags, bikeModelsAll, bikeClasse
             {stores.map((store) => (
               <SwiperSlide key={store.name} className="h-auto">
                 <article className="group h-full overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[0_28px_42px_-30px_rgba(15,23,42,0.6)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_36px_62px_-34px_rgba(220,38,38,0.45)]">
-                  <div className="relative h-56 overflow-hidden">
+                  <div className="relative h-48 overflow-hidden sm:h-56">
                     <img
                       src={store.img}
                       alt={store.name}
@@ -135,7 +135,7 @@ export default function HomeEn({ blogSlides, blogTags, bikeModelsAll, bikeClasse
                       {store.name}
                     </span>
                   </div>
-                  <div className="flex flex-col gap-3 px-6 py-6">
+                  <div className="flex flex-col gap-3 px-4 py-4 sm:px-6 sm:py-6">
                     <p className="text-sm text-slate-600">{store.description}</p>
                     <Link href={store.href} className="inline-flex items-center gap-2 text-sm font-semibold text-red-500">
                       View details
@@ -260,7 +260,7 @@ export default function HomeEn({ blogSlides, blogTags, bikeModelsAll, bikeClasse
           title="Hot keywords"
           description="Discover seasonal picks and trending topics to plan your next ride in seconds."
         />
-        <div className="flex flex-nowrap items-center gap-3 overflow-x-auto pb-2 scroll-row">
+        <div className="flex flex-wrap items-center gap-3 pb-2">
           {hotKeywords.map((k, idx) => (
             <Link
               key={idx}

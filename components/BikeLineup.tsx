@@ -66,14 +66,6 @@ export default function BikeLineup({ bikes, classes }: Props) {
     setActiveIndex(resolveStartIndex(categories));
   }, [categories]);
 
-  useEffect(() => {
-    if (categories.length <= 1) return;
-    const intervalId = window.setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % categories.length);
-    }, 2600);
-    return () => window.clearInterval(intervalId);
-  }, [categories.length]);
-
   const filtered = useMemo(
     () =>
       bikes.filter((b) => {
