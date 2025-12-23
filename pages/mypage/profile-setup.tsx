@@ -242,7 +242,7 @@ const ProfileSetupPage: NextPage = () => {
           <>
             {missingKeys.length === 0 ? (
               <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-                すでに基本情報が登録されています。内容を変更する場合は下のフォームから更新できます。
+                基本情報を編集するボタンを押すと更新できます
               </div>
             ) : (
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
