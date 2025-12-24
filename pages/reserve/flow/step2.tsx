@@ -24,6 +24,8 @@ const ACCESSORY_DISPLAY_ORDER: Array<{ key: string; label: string }> = [
   { key: "glove", label: "グローブ" },
 ];
 
+const HELMET_ACCESSORY_KEYS = new Set(["halfCap", "jetHelmet", "brandHelmet"]);
+
 const defaultFees = {
   rental: 3980,
   highSeason: 1100,
@@ -32,6 +34,12 @@ const defaultFees = {
 
 const formatAccessoryPrice = (price?: number) =>
   typeof price === "number" ? `${price.toLocaleString()}円` : "料金未設定";
+
+const getHelmetSelectedTotal = (selection: Record<string, number>) =>
+  Array.from(HELMET_ACCESSORY_KEYS).reduce(
+    (total, key) => total + (selection[key] ?? 0),
+    0
+  );
 
 export default function ReserveFlowStep2() {
   const router = useRouter();
@@ -67,6 +75,11 @@ export default function ReserveFlowStep2() {
       acc[option.key] = 0;
       return acc;
     }, {})
+  );
+
+  const helmetSelectionTotal = useMemo(
+    () => getHelmetSelectedTotal(accessorySelection),
+    [accessorySelection]
   );
 
   useEffect(() => {
@@ -464,7 +477,9 @@ export default function ReserveFlowStep2() {
                   <h3 className="text-sm font-semibold text-gray-900">用品オプションの選択</h3>
                   <span className="text-xs text-gray-500">必要なものを選択</span>
                 </div>
-                <p className="text-xs text-gray-500">オプション：1種類あたり2個まで</p>
+                <p className="text-xs text-gray-500">
+                  オプション：1種類あたり2個まで / ヘルメット合計2個まで
+                </p>
                 {accessoryError ? (
                   <p className="text-xs text-red-600">{accessoryError}</p>
                 ) : null}
@@ -480,22 +495,54 @@ export default function ReserveFlowStep2() {
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold text-gray-900">{formatAccessoryPrice(option.price)}</span>
+                        {(() => {
+                          const isHelmetAccessory = HELMET_ACCESSORY_KEYS.has(option.key);
+                          const currentValue = accessorySelection[option.key] ?? 0;
+                          const otherHelmetCount = isHelmetAccessory
+                            ? helmetSelectionTotal - currentValue
+                            : helmetSelectionTotal;
+                          const remainingHelmetSlots = Math.max(0, 2 - otherHelmetCount);
+                          const maxSelectable = isHelmetAccessory
+                            ? Math.min(2, remainingHelmetSlots)
+                            : 2;
+                          const selectableCounts = Array.from(
+                            { length: maxSelectable + 1 },
+                            (_, index) => index
+                          );
+
+                          return (
                         <select
                           value={accessorySelection[option.key]}
                           onChange={(event) => {
                             const selected = Number(event.target.value);
                             setAccessorySelection((prev) => ({
                               ...prev,
-                              [option.key]: Number.isNaN(selected) ? 0 : Math.min(2, Math.max(0, selected)),
+                              [option.key]: (() => {
+                                const parsed = Number.isNaN(selected)
+                                  ? 0
+                                  : Math.min(2, Math.max(0, selected));
+
+                                if (!HELMET_ACCESSORY_KEYS.has(option.key)) {
+                                  return parsed;
+                                }
+
+                                const currentHelmetValue = prev[option.key] ?? 0;
+                                const otherHelmets = getHelmetSelectedTotal(prev) - currentHelmetValue;
+                                return Math.min(parsed, Math.max(0, 2 - otherHelmets));
+                              })(),
                             }));
                           }}
                           className="rounded-lg border border-gray-200 px-2 py-1 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                           aria-label={`${option.label}の個数`}
                         >
-                          <option value={0}>0</option>
-                          <option value={1}>1</option>
-                          <option value={2}>2</option>
-                        </select>
+                            {selectableCounts.map((count) => (
+                              <option key={count} value={count}>
+                                {count}
+                              </option>
+                            ))}
+                          </select>
+                          );
+                        })()}
                       </div>
                     </label>
                   ))}
