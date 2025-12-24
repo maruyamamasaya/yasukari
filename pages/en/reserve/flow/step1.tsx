@@ -168,12 +168,18 @@ export default function ReserveFlowStep1() {
     const date = new Date(pickupDate);
     if (Number.isNaN(date.getTime())) return;
 
+    const currentReturn = returnDate ? new Date(returnDate) : null;
+    const hasValidReturn =
+      currentReturn && !Number.isNaN(currentReturn.getTime()) && currentReturn > date;
+
+    if (hasValidReturn) return;
+
     const updated = new Date(date);
     updated.setDate(updated.getDate() + 1);
     const newReturnDate = updated.toISOString().split("T")[0];
 
     setReturnDate((prev) => (prev === newReturnDate ? prev : newReturnDate));
-  }, [pickupDate]);
+  }, [pickupDate, returnDate]);
 
   useEffect(() => {
     if (!pickupTime) return;

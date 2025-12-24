@@ -172,16 +172,21 @@ export default function ReserveFlowStep2() {
     return "1w";
   }, [pickupDate, pickupTime, returnDate, returnTime]);
 
-  const rentalDays = useMemo(
-    () =>
-      ({
-        "24h": 1,
-        "2d": 2,
-        "4d": 4,
-        "1w": 7,
-      })[rentalPriceKey],
-    [rentalPriceKey]
-  );
+  const rentalDays = useMemo(() => {
+    const pickup = pickupTime ? `${pickupTime}:00` : "00:00:00";
+    const returnAt = returnTime ? `${returnTime}:00` : "00:00:00";
+
+    const pickupDateTime = new Date(`${pickupDate}T${pickup}`);
+    const returnDateTime = new Date(`${returnDate}T${returnAt}`);
+
+    const diffMs = returnDateTime.getTime() - pickupDateTime.getTime();
+    if (Number.isNaN(diffMs) || diffMs <= 0) {
+      return 1;
+    }
+
+    const hours = diffMs / (1000 * 60 * 60);
+    return Math.max(1, Math.ceil(hours / 24));
+  }, [pickupDate, pickupTime, returnDate, returnTime]);
 
   const selectedProtectionFee = useMemo(
     () =>
@@ -339,10 +344,22 @@ export default function ReserveFlowStep2() {
         if (matched?.price != null) {
           setRentalFee(matched.price);
           setRentalFeeError(null);
-        } else {
-          setRentalFee(defaultFees.rental);
-          setRentalFeeError("レンタル料金が設定されていません。");
+          return;
         }
+
+        if (rentalDays > 31) {
+          const monthPrice = prices.find((item) => item.days === 31)?.price;
+          if (monthPrice != null) {
+            const dailyRate = monthPrice / 31;
+            const prorated = Math.round(dailyRate * rentalDays);
+            setRentalFee(prorated);
+            setRentalFeeError(null);
+            return;
+          }
+        }
+
+        setRentalFee(defaultFees.rental);
+        setRentalFeeError("レンタル料金が設定されていません。");
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("Failed to load rental fee", error);
