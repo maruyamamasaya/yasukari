@@ -29,8 +29,9 @@ export default function Document() {
       </Head>
       <body>
         <Main />
-        <div id="payjp-root" />
         <NextScript />
+        <div id="payjp-root" />
+        <script src="https://checkout.pay.jp/" async></script>
       </body>
     </Html>
   )

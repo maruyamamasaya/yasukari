@@ -16,7 +16,36 @@ type PayjpCheckoutProps = {
 
 const PORTAL_ROOT_ID = "payjp-root";
 const CHECKOUT_CONTAINER_ID = "payjp-checkout-container";
-const CHECKOUT_SCRIPT_ID = "payjp-checkout-script";
+
+const buildCheckoutMarkup = ({
+  publicKey,
+  locale,
+  description,
+  amount,
+  email,
+  label,
+  submitText,
+}: Pick<
+  PayjpCheckoutProps,
+  "publicKey" | "locale" | "description" | "amount" | "email" | "label" | "submitText"
+>) =>
+  `
+    <form>
+      <script
+        class="payjp-button"
+        data-key="${publicKey}"
+        data-locale="${locale}"
+        data-name="Yasukari"
+        data-description="${description}"
+        data-amount="${amount}"
+        data-currency="jpy"
+        data-email="${email}"
+        data-token-name="payjp-token"
+        data-label="${label}"
+        data-submit-text="${submitText}"
+      ></script>
+    </form>
+  `;
 
 export default function PayjpCheckout({
   formRef,
@@ -45,41 +74,30 @@ export default function PayjpCheckout({
       createdContainer = true;
     }
 
-    let form = container.querySelector<HTMLFormElement>("form");
-    if (!form) {
-      form = document.createElement("form");
-      container.appendChild(form);
-    }
-
-    // ✅ safety: remove any extra Pay.JP scripts injected elsewhere
-    document.querySelectorAll<HTMLScriptElement>("script.payjp-button").forEach((existingScript) => {
-      if (existingScript.id !== CHECKOUT_SCRIPT_ID) {
-        existingScript.remove();
-      }
+    container.innerHTML = buildCheckoutMarkup({
+      publicKey,
+      locale,
+      description,
+      amount,
+      email,
+      label,
+      submitText,
     });
+    // 現在のPayjpCheckoutが appendChild のままだと Pay.JP がボタン生成しないため innerHTML が必要
+
+    const form = container.querySelector<HTMLFormElement>("form");
+    const script = container.querySelector<HTMLScriptElement>("script.payjp-button");
+
+    if (!form || !script) {
+      return () => {
+        if (createdContainer) {
+          root.removeChild(container);
+        }
+      };
+    }
 
     form.addEventListener("submit", onSubmit);
     formRef.current = form;
-
-    let script = form.querySelector<HTMLScriptElement>(`#${CHECKOUT_SCRIPT_ID}`);
-    if (!script) {
-      script = document.createElement("script");
-      script.id = CHECKOUT_SCRIPT_ID;
-      script.src = "https://checkout.pay.jp/";
-      script.className = "payjp-button";
-      form.appendChild(script);
-    }
-
-    script.dataset.key = publicKey;
-    script.dataset.locale = locale;
-    script.dataset.name = "Yasukari";
-    script.dataset.description = description;
-    script.dataset.amount = amount.toString();
-    script.dataset.currency = "jpy";
-    script.dataset.email = email;
-    script.dataset.tokenName = "payjp-token";
-    script.dataset.label = label;
-    script.dataset.submitText = submitText;
 
     script.addEventListener("load", onLoad);
     script.addEventListener("error", onError);
