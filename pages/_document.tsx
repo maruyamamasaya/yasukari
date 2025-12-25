@@ -31,7 +31,6 @@ export default function Document() {
         <Main />
         <NextScript />
         <div id="payjp-root" />
-        <script src="https://checkout.pay.jp/" async></script>
       </body>
     </Html>
   )
