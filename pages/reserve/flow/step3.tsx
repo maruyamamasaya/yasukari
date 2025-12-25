@@ -307,8 +307,13 @@ export default function ReserveFlowStep3() {
     setPayjpReady(false);
 
     const initializePayjp = () => {
-      if (!window.PayjpCheckout) return;
-      payjpHandlerRef.current = window.PayjpCheckout.configure({
+      const checkout = window.PayjpCheckout;
+      if (!checkout || typeof checkout.configure !== "function") {
+        setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。");
+        return;
+      }
+
+      payjpHandlerRef.current = checkout.configure({
         key: payJpPublicKey,
         locale: "ja",
         token: (response) => {
