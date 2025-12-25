@@ -1,13 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChatbotFaqCategory } from "../types/chatbotFaq";
-import {
-  FaUser,
-  FaRobot,
-  FaArrowDown,
-  FaArrowUp,
-  FaArrowLeft,
-  FaTimes,
-} from "react-icons/fa";
+import { FaUser, FaRobot, FaArrowLeft, FaTimes } from "react-icons/fa";
 
 interface Message {
   from: "bot" | "user";
@@ -292,51 +285,56 @@ export default function ChatBot({
   }
   const baseSizeClasses = fullScreen
     ? "h-screen w-full"
-    : "w-full sm:w-[420px] h-[90vh] max-h-[900px]";
+    : "w-full sm:w-[440px] h-[90vh] max-h-[900px]";
   const avatarWrapperClasses =
-    "flex items-center justify-center w-9 h-9 rounded-2xl border";
+    "flex items-center justify-center w-9 h-9 rounded-full border shadow-sm";
   const bubbleBaseClasses =
-    "max-w-[88%] px-3.5 py-2.5 rounded-2xl shadow-sm border bg-white/90";
+    "max-w-[88%] px-3.5 py-2.5 rounded-2xl shadow-sm border bg-white/90 backdrop-blur";
   const optionContainerClasses =
-    "w-full text-left rounded-2xl shadow-sm border border-gray-200 bg-white/80 hover:-translate-y-[1px] transition-transform";
+    "w-full text-left rounded-2xl shadow-sm border border-gray-200 bg-white/80 hover:border-red-200 hover:shadow-md transition-all";
   const visibleCategories = showAllCategories
     ? faqCategories
     : faqCategories.slice(0, 3);
 
   return (
     <div
-      className={`relative flex flex-col ${baseSizeClasses} ${fullScreen ? "pt-12 p-4" : "p-4 sm:p-6"} bg-gradient-to-b from-white via-red-50/50 to-white border border-red-100/70 rounded-3xl shadow-xl overflow-hidden ${className}`}
+      className={`relative flex flex-col ${baseSizeClasses} ${
+        fullScreen ? "pt-16 p-4" : "p-5 sm:p-6"
+      } bg-gradient-to-br from-white via-slate-50 to-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur ${className}`}
     >
-      <div className="sticky top-0 z-10 pb-4 mb-4 bg-gradient-to-b from-white via-white/95 to-transparent border-b border-red-100/70">
+      <div className="sticky top-0 z-10 pb-4 mb-4 bg-gradient-to-b from-white via-white/95 to-transparent border-b border-slate-200/70">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             {(selectedCategory || step === "free") && (
               <button
                 onClick={handleBackButton}
-                className="rounded-full border border-gray-200 bg-white p-2 shadow-sm hover:shadow transition"
+                className="rounded-full border border-slate-200 bg-white p-2 shadow-sm hover:shadow-md transition"
                 aria-label="前の画面に戻る"
               >
                 <FaArrowLeft className="w-4 h-4" />
               </button>
             )}
             <div>
-              <p className="text-base font-semibold text-gray-900">チャットでご相談</p>
+              <p className="text-sm font-semibold text-gray-900 tracking-wide">
+                チャットでご相談
+              </p>
+              <p className="text-[11px] text-gray-500 leading-snug">
+                FAQから探すか、直接お問い合わせください。
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleCloseButton}
-              className="rounded-full border border-gray-200 bg-white p-2 shadow-sm hover:shadow transition"
-              aria-label="チャットを閉じる"
-            >
-              <FaTimes className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={handleCloseButton}
+            className="rounded-full border border-slate-200 bg-white p-2 shadow-sm hover:shadow-md transition"
+            aria-label="チャットを閉じる"
+          >
+            <FaTimes className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
       <div
-        className="relative flex-1 min-h-0 w-full max-w-[800px] mx-auto overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-white/70 border border-gray-100 shadow-inner"
+        className="relative flex-1 min-h-0 w-full max-w-[820px] mx-auto overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-slate-50/80 border border-slate-100 shadow-inner"
         ref={scrollRef}
       >
         {messages.length === 0 && (
@@ -378,25 +376,6 @@ export default function ChatBot({
             </div>
           </div>
         ))}
-        <button
-          onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
-          className="absolute top-3 right-3 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm hover:shadow-md"
-          aria-label="一番上に移動"
-        >
-          <FaArrowUp className="w-4 h-4 text-gray-500" />
-        </button>
-        <button
-          onClick={() =>
-            scrollRef.current?.scrollTo({
-              top: scrollRef.current.scrollHeight,
-              behavior: "smooth",
-            })
-          }
-          className="absolute bottom-3 right-3 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm hover:shadow-md"
-          aria-label="最新メッセージへ移動"
-        >
-          <FaArrowDown className="w-4 h-4 text-gray-500" />
-        </button>
       </div>
 
       {showFeedback && (
