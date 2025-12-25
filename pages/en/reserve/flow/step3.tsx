@@ -33,6 +33,7 @@ export default function ReserveFlowStep3() {
   const [payjpError, setPayjpError] = useState("");
   const payjpFormRef = useRef<HTMLFormElement | null>(null);
   const payjpSlotRef = useRef<HTMLDivElement | null>(null);
+  const processedTokenRef = useRef<string | null>(null);
 
   const [store, setStore] = useState("Adachi-Odai");
   const [modelName, setModelName] = useState("Vehicle");
@@ -137,6 +138,21 @@ export default function ReserveFlowStep3() {
     void fetchRegistration();
     return () => controller.abort();
   }, [authChecked]);
+
+  useEffect(() => {
+    if (!router.isReady || !authChecked) return;
+
+    const token = router.query["payjp-token"];
+    if (typeof token !== "string" || !token) return;
+    if (processedTokenRef.current === token || isSavingReservation) return;
+
+    processedTokenRef.current = token;
+    setStatusMessage("Checking the payment result...");
+    void handlePaymentWithToken(token);
+
+    const { ["payjp-token"]: _ignored, ...restQuery } = router.query;
+    void router.replace({ pathname: router.pathname, query: restQuery }, undefined, { shallow: true });
+  }, [authChecked, handlePaymentWithToken, isSavingReservation, router]);
 
   const pickupLabel = useMemo(() => formatDateLabel(pickupDate, "Dec 26, 2025"), [pickupDate]);
   const returnLabel = useMemo(() => formatDateLabel(returnDate, "Dec 27, 2025"), [returnDate]);
