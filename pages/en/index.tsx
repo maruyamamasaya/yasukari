@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -37,22 +37,16 @@ interface Props {
   blogTags: string[];
   bikeModelsAll: BikeModel[];
   bikeClasses: BikeClass[];
+  faqItems: FAQItem[];
 }
 
-export default function HomeEn({ blogSlides, blogTags, bikeModelsAll, bikeClasses }: Props) {
+export default function HomeEn({ blogSlides, blogTags, bikeModelsAll, bikeClasses, faqItems }: Props) {
   const heroSlides = [
     { img: "https://yasukari.com/static/images/home/slide.jpg" },
     { img: "https://yasukari.com/static/images/home/slide2.jpg" },
   ];
 
-  const faqs: FAQItem[] = useMemo(() => {
-    const all: FAQItem[] = (faqData as any).categories.flatMap((c: any) => c.faqs);
-    for (let i = all.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [all[i], all[j]] = [all[j], all[i]];
-    }
-    return all.slice(0, 10);
-  }, []);
+  const faqs = faqItems;
 
   const hotKeywords = blogTags.slice(0, 12).map((tag) => ({
     label: tag,
@@ -298,6 +292,12 @@ function FeatureHighlight({
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  const faqs: FAQItem[] = (faqData as any).categories.flatMap((c: any) => c.faqs);
+  for (let i = faqs.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [faqs[i], faqs[j]] = [faqs[j], faqs[i]];
+  }
+  const faqItems = faqs.slice(0, 10);
   const dir = path.join(process.cwd(), "blog_for_custmor");
   const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
   const posts = files.map((file) => {
@@ -343,5 +343,5 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     getBikeClasses(),
   ]);
 
-  return { props: { blogSlides, blogTags, bikeModelsAll, bikeClasses }, revalidate: 60 };
+  return { props: { blogSlides, blogTags, bikeModelsAll, bikeClasses, faqItems }, revalidate: 60 };
 };
