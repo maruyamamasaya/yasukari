@@ -33,8 +33,10 @@ export default function PayjpCheckout({
 }: PayjpCheckoutProps) {
   useEffect(() => {
     const root = document.getElementById(PORTAL_ROOT_ID) ?? document.body;
+
     let container = root.querySelector<HTMLElement>(`#${CHECKOUT_CONTAINER_ID}`);
     let createdContainer = false;
+
     if (!container) {
       container = document.createElement("div");
       container.id = CHECKOUT_CONTAINER_ID;
@@ -48,6 +50,14 @@ export default function PayjpCheckout({
       form = document.createElement("form");
       container.appendChild(form);
     }
+
+    // ✅ safety: remove any extra Pay.JP scripts injected elsewhere
+    document.querySelectorAll<HTMLScriptElement>("script.payjp-button").forEach((existingScript) => {
+      if (existingScript.id !== CHECKOUT_SCRIPT_ID) {
+        existingScript.remove();
+      }
+    });
+
     form.addEventListener("submit", onSubmit);
     formRef.current = form;
 
@@ -59,10 +69,7 @@ export default function PayjpCheckout({
       script.className = "payjp-button";
       form.appendChild(script);
     }
-    const extraScripts = Array.from(document.querySelectorAll<HTMLScriptElement>("script.payjp-button")).filter(
-      (existing) => existing !== script
-    );
-    extraScripts.forEach((existing) => existing.remove());
+
     script.dataset.key = publicKey;
     script.dataset.locale = locale;
     script.dataset.name = "Yasukari";
@@ -73,6 +80,7 @@ export default function PayjpCheckout({
     script.dataset.tokenName = "payjp-token";
     script.dataset.label = label;
     script.dataset.submitText = submitText;
+
     script.addEventListener("load", onLoad);
     script.addEventListener("error", onError);
 
@@ -81,6 +89,7 @@ export default function PayjpCheckout({
       script.removeEventListener("error", onError);
       form.removeEventListener("submit", onSubmit);
       formRef.current = null;
+
       if (createdContainer) {
         root.removeChild(container);
       }
