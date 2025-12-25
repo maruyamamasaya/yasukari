@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
 export type CalendarPost = {
@@ -7,11 +7,32 @@ export type CalendarPost = {
   title: string;
 };
 
-export default function CalendarWidget({ posts = [] }: { posts?: CalendarPost[] }) {
-  const today = new Date();
-  const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth()); // 0 indexed
+function parseInitialDate(value?: string) {
+  if (!value) return new Date(0);
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) return parsed;
+  const withMidnight = new Date(`${value}T00:00:00`);
+  if (!Number.isNaN(withMidnight.getTime())) return withMidnight;
+  return new Date(0);
+}
+
+export default function CalendarWidget({
+  posts = [],
+  initialDate,
+}: {
+  posts?: CalendarPost[];
+  initialDate?: string;
+}) {
+  const initial = useMemo(() => parseInitialDate(initialDate), [initialDate]);
+  const [year, setYear] = useState(initial.getFullYear());
+  const [month, setMonth] = useState(initial.getMonth()); // 0 indexed
   const [selected, setSelected] = useState<CalendarPost[] | null>(null);
+
+  useEffect(() => {
+    const now = new Date();
+    setYear(now.getFullYear());
+    setMonth(now.getMonth());
+  }, []);
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();

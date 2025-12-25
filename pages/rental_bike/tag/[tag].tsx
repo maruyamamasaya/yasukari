@@ -82,7 +82,9 @@ export const getStaticProps: GetStaticProps = ({ params }) => {
     p.tags?.split(',').map((t) => t.trim()).includes(tag)
   )
 
-  return { props: { tag, tagPosts, calendarPosts, posts } }
+  const initialDate = new Date().toISOString()
+
+  return { props: { tag, tagPosts, calendarPosts, posts, initialDate } }
 }
 
 interface Props {
@@ -90,9 +92,10 @@ interface Props {
   tagPosts: PostMeta[]
   calendarPosts: CalendarPost[]
   posts: PostMeta[]
+  initialDate: string
 }
 
-export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) {
+export default function TagPage({ tag, tagPosts, calendarPosts, posts, initialDate }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <Head>
@@ -135,7 +138,7 @@ export default function TagPage({ tag, tagPosts, calendarPosts, posts }: Props) 
         </div>
       </div>
       <div className="w-[25%] space-y-4">
-        <CalendarWidget posts={calendarPosts} />
+        <CalendarWidget posts={calendarPosts} initialDate={initialDate} />
         <PostSearch posts={posts} basePath="/rental_bike" />
       </div>
     </div>
