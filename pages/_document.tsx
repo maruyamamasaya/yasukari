@@ -29,6 +29,7 @@ export default function Document() {
       </Head>
       <body>
         <Main />
+        <div id="payjp-root" />
         <NextScript />
       </body>
     </Html>
