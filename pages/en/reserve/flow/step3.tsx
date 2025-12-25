@@ -1,39 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 import type { RegistrationData } from "../../../../types/registration";
 import type { Reservation } from "../../../../lib/reservations";
-
-type PayjpTokenResponse = {
-  id?: string;
-  error?: {
-    message?: string;
-  };
-};
-
-type PayjpCheckoutHandler = {
-  open: (options: {
-    name: string;
-    description: string;
-    amount: number;
-    currency: string;
-    email?: string;
-  }) => void;
-};
-
-declare global {
-  interface Window {
-    PayjpCheckout?: {
-      configure: (options: {
-        key: string;
-        locale?: string;
-        token: (response: PayjpTokenResponse) => void;
-      }) => PayjpCheckoutHandler;
-    };
-  }
-}
 
 const formatDateLabel = (dateString: string, fallback: string) => {
   const parsed = new Date(dateString);
@@ -58,9 +29,8 @@ export default function ReserveFlowStep3() {
   const [statusMessage, setStatusMessage] = useState("");
   const [isSavingReservation, setIsSavingReservation] = useState(false);
   const [reservationPreview, setReservationPreview] = useState<Reservation | null>(null);
-  const [payjpReady, setPayjpReady] = useState(false);
   const [payjpError, setPayjpError] = useState("");
-  const payjpHandlerRef = useRef<PayjpCheckoutHandler | null>(null);
+  const payjpFormRef = useRef<HTMLFormElement | null>(null);
 
   const [store, setStore] = useState("Adachi-Odai");
   const [modelName, setModelName] = useState("Vehicle");
@@ -298,101 +268,28 @@ export default function ReserveFlowStep3() {
     totalAmount,
   ]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
+  const handleSubmitPayment = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setPayjpError("");
-    setPayjpReady(false);
 
-    const initializePayjp = () => {
-      const checkout = window.PayjpCheckout;
-      if (!checkout || typeof checkout.configure !== "function") {
-        setPayjpError("Pay.JP could not be loaded. Please try again later.");
-        return;
-      }
-
-      payjpHandlerRef.current = checkout.configure({
-        key: payJpPublicKey,
-        locale: "en",
-        token: (response) => {
-          if (!response?.id) {
-            setStatusMessage(response?.error?.message ?? "Failed to generate a Pay.JP token.");
-            return;
-          }
-          void handlePaymentWithToken(response.id);
-        },
-      });
-      setPayjpReady(true);
-    };
-
-    if (window.PayjpCheckout) {
-      initializePayjp();
+    const form = payjpFormRef.current;
+    if (!form) {
+      setStatusMessage("We could not access the payment form. Please try again.");
       return;
     }
 
-    const scriptId = "payjp-checkout-js";
-    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
-
-    const attachScript = () => {
-      const script = document.createElement("script");
-      script.id = scriptId;
-      script.src = "https://checkout.pay.jp/";
-      script.async = true;
-      script.className = "payjp-button";
-      script.onload = initializePayjp;
-      script.onerror = () => setPayjpError("Failed to load Pay.JP. Please try again shortly.");
-      document.body.appendChild(script);
-
-      return script;
-    };
-
-    if (existingScript) {
-      if (!existingScript.classList.contains("payjp-button")) {
-        existingScript.remove();
-        const newScript = attachScript();
-        return () => {
-          newScript.onload = null;
-          newScript.onerror = null;
-        };
-      }
-
-      existingScript.addEventListener("load", initializePayjp);
-      existingScript.addEventListener("error", () =>
-        setPayjpError("Failed to load Pay.JP. Please try again shortly.")
-      );
-      return () => {
-        existingScript.removeEventListener("load", initializePayjp);
-      };
-    }
-
-    const script = attachScript();
-
-    return () => {
-      script.onload = null;
-      script.onerror = null;
-    };
-  }, [payJpPublicKey, handlePaymentWithToken]);
-
-  const handleSubmitPayment = () => {
-    if (!sessionUser) {
-      setStatusMessage("We could not verify your login information. Please try again.");
-      return;
-    }
-
-    if (!payjpReady || !payjpHandlerRef.current) {
-      setStatusMessage("Pay.JP is still initializing. Please try again shortly.");
+    const tokenInput = form.querySelector<HTMLInputElement>('input[name="payjp-token"]');
+    const token = tokenInput?.value;
+    if (!token) {
+      setStatusMessage("Waiting for Pay.JP token generation. Please try again shortly.");
       return;
     }
 
     setStatusMessage("");
-
-    payjpHandlerRef.current.open({
-      name: "Yasukari",
-      description: `${store} ${modelName} ${managementNumber}`,
-      amount: totalAmount,
-      currency: "jpy",
-      email: sessionUser.email,
-    });
+    if (tokenInput) {
+      tokenInput.value = "";
+    }
+    void handlePaymentWithToken(token);
   };
 
   const handleBack = () => {
@@ -493,7 +390,7 @@ export default function ReserveFlowStep3() {
               {payjpError ? (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
               ) : null}
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -501,14 +398,24 @@ export default function ReserveFlowStep3() {
                 >
                   Back
                 </button>
-                <button
-                  type="button"
-                  onClick={handleSubmitPayment}
-                  disabled={!authChecked || isSavingReservation}
-                  className="inline-flex items-center justify-center rounded-full bg-red-500 px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-red-200"
-                >
-                  {isSavingReservation ? "Processing..." : "Submit payment"}
-                </button>
+                <form ref={payjpFormRef} onSubmit={handleSubmitPayment}>
+                  <script
+                    src="https://checkout.pay.jp/"
+                    className="payjp-button"
+                    data-key={payJpPublicKey}
+                    data-locale="en"
+                    data-name="Yasukari"
+                    data-description={`${store} ${modelName} ${managementNumber}`}
+                    data-amount={totalAmount}
+                    data-currency="jpy"
+                    data-email={sessionUser?.email ?? ""}
+                    data-token-name="payjp-token"
+                    data-label={isSavingReservation ? "Processing..." : "Submit payment"}
+                    data-submit-text="Submit payment"
+                    onLoad={() => setPayjpError("")}
+                    onError={() => setPayjpError("Failed to load Pay.JP. Please try again shortly.")}
+                  ></script>
+                </form>
               </div>
               {statusMessage ? (
                 <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">{statusMessage}</p>
