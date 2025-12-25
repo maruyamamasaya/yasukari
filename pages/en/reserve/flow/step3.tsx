@@ -32,6 +32,7 @@ export default function ReserveFlowStep3() {
   const [reservationPreview, setReservationPreview] = useState<Reservation | null>(null);
   const [payjpError, setPayjpError] = useState("");
   const payjpFormRef = useRef<HTMLFormElement | null>(null);
+  const payjpSlotRef = useRef<HTMLDivElement | null>(null);
 
   const [store, setStore] = useState("Adachi-Odai");
   const [modelName, setModelName] = useState("Vehicle");
@@ -407,8 +408,10 @@ export default function ReserveFlowStep3() {
                 >
                   Back
                 </button>
+                <div ref={payjpSlotRef} />
                 <PayjpCheckout
                   formRef={payjpFormRef}
+                  placeholderRef={payjpSlotRef}
                   onSubmit={handleSubmitPayment}
                   onLoad={handlePayjpLoaded}
                   onError={handlePayjpLoadError}

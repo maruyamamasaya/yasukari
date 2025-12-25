@@ -2,6 +2,7 @@ import { type MutableRefObject, useEffect, useRef } from "react";
 
 type PayjpCheckoutProps = {
   formRef: MutableRefObject<HTMLFormElement | null>;
+  placeholderRef: MutableRefObject<HTMLDivElement | null>;
   onSubmit: (event: Event) => void;
   onLoad: () => void;
   onError: () => void;
@@ -63,8 +64,15 @@ const resetContainer = (container: HTMLElement) => {
   container.innerHTML = "";
 };
 
+const removeStaleScripts = () => {
+  document
+    .querySelectorAll<HTMLScriptElement>('script.payjp-button, script[src="https://checkout.pay.jp/"]')
+    .forEach((script) => script.remove());
+};
+
 export default function PayjpCheckout({
   formRef,
+  placeholderRef,
   onSubmit,
   onLoad,
   onError,
@@ -94,6 +102,8 @@ export default function PayjpCheckout({
   }, [onError]);
 
   useEffect(() => {
+    removeStaleScripts();
+
     const portalRoot = document.getElementById(PORTAL_ROOT_ID);
     if (!portalRoot) {
       console.error(`[PayjpCheckout] #${PORTAL_ROOT_ID} not found`);
@@ -145,6 +155,11 @@ export default function PayjpCheckout({
       const box = container.querySelector("#payjp_checkout_box");
       if (box) {
         alreadyReady = true;
+        if (placeholderRef.current) {
+          placeholderRef.current.appendChild(box);
+        } else {
+          console.error("[PayjpCheckout] placeholderRef is not available");
+        }
         loadHandlerRef.current();
         observer.disconnect();
       }
@@ -169,6 +184,11 @@ export default function PayjpCheckout({
 
       // ✅ cleanup：rootごと消さない。containerの中身だけ消す
       resetContainer(container);
+      const placeholder = placeholderRef.current;
+      const existingBox = placeholder?.querySelector("#payjp_checkout_box");
+      if (existingBox) {
+        existingBox.remove();
+      }
     };
   }, [
     // ✅ ここが重要：PayJPは props が変わったら再初期化が必要なので deps に含める
@@ -180,6 +200,7 @@ export default function PayjpCheckout({
     label,
     submitText,
     formRef,
+    placeholderRef,
   ]);
 
   return null;
