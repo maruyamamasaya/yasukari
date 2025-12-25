@@ -318,7 +318,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     const heading = lines.find((l) => l.startsWith("# "));
     const title = meta.title || (heading ? heading.replace(/^#\s*/, "") : slug);
     const date = meta.date || slug.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || "";
-    const eyecatch = meta.eyecatch;
+    const eyecatch = meta.eyecatch || undefined;
     const tags = meta.tags;
     return { slug, title, date, eyecatch, tags };
   });

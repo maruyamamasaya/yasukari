@@ -101,7 +101,7 @@ export default function BikeModelListPage() {
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [classError, setClassError] = useState<string | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
-  const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState<number | undefined>(undefined);
   const [selectedModelIds, setSelectedModelIds] = useState<Set<number>>(
     () => new Set()
   );
@@ -170,8 +170,8 @@ export default function BikeModelListPage() {
   const selectedModel = useMemo(
     () =>
       selectedModelId == null
-        ? null
-        : bikeModels.find((model) => model.modelId === selectedModelId) ?? null,
+        ? undefined
+        : bikeModels.find((model) => model.modelId === selectedModelId),
     [bikeModels, selectedModelId]
   );
 
@@ -479,7 +479,7 @@ export default function BikeModelListPage() {
         if (current == null) {
           return current;
         }
-        return deletedIds.includes(current) ? null : current;
+        return deletedIds.includes(current) ? undefined : current;
       });
     } catch (error) {
       console.error("Failed to delete bike models", error);
