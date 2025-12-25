@@ -48,6 +48,11 @@ export default function PayjpCheckout({
       form = document.createElement("form");
       container.appendChild(form);
     }
+    document.querySelectorAll<HTMLScriptElement>("script.payjp-button").forEach((existingScript) => {
+      if (existingScript.id !== CHECKOUT_SCRIPT_ID) {
+        existingScript.remove();
+      }
+    });
     form.addEventListener("submit", onSubmit);
     formRef.current = form;
 
