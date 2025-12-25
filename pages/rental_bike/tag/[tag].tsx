@@ -12,7 +12,7 @@ type PostMeta = {
   date: string
   excerpt: string
   tags?: string
-  eyecatch?: string
+  eyecatch?: string | null
 }
 
 export const getStaticPaths: GetStaticPaths = () => {
@@ -65,7 +65,7 @@ export const getStaticProps: GetStaticProps = ({ params }) => {
     const excerptLine = lines.slice(idx).find((l) => l.trim() && !l.startsWith('#')) || ''
     const excerpt = excerptLine.replace(/\*/g, '').slice(0, 80)
     const tags = meta.tags
-    const eyecatch = meta.eyecatch || undefined
+    const eyecatch = meta.eyecatch ?? null
     return { slug, title, date: dateMatch, excerpt, tags, eyecatch }
   })
 
