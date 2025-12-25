@@ -191,7 +191,7 @@ export default function ReserveFlowStep2() {
   const selectedProtectionFee = useMemo(
     () =>
       vehicleProtectionOptions.reduce((total, option) => {
-        return protectionSelection[option.key] ? total + option.price : total;
+        return protectionSelection[option.key] ? total + (option.price ?? 0) : total;
       }, 0),
     [protectionSelection]
   );
