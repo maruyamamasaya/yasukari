@@ -23,7 +23,7 @@ type PayjpCard = {
 declare global {
   interface Window {
     Payjp?: (publicKey: string) => {
-      createToken: (card: PayjpCard) => Promise<PayjpTokenResponse>;
+      createToken: (payload: { card: PayjpCard }) => Promise<PayjpTokenResponse>;
     };
   }
 }
@@ -257,10 +257,12 @@ export default function ReserveFlowStep3() {
 
     try {
       const tokenResponse = await payjpRef.current.createToken({
-        number: cardNumber.replace(/\s+/g, ""),
-        cvc,
-        exp_month: expMonth,
-        exp_year: expYear,
+        card: {
+          number: cardNumber.replace(/\s+/g, ""),
+          cvc,
+          exp_month: expMonth,
+          exp_year: expYear,
+        },
       });
 
       if (!tokenResponse?.id) {
@@ -481,12 +483,6 @@ export default function ReserveFlowStep3() {
                     className="w-full rounded-lg border border-gray-200 px-3 py-3 text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
                   />
                 </label>
-              </div>
-              <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-700">
-                <p>Pay.JP public key: {payJpPublicKey}</p>
-                <p className="mt-1 text-gray-600">
-                  Set NEXT_PUBLIC_PAYJP_PUBLIC_KEY to display the live public key here.
-                </p>
               </div>
               {payjpError ? (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
