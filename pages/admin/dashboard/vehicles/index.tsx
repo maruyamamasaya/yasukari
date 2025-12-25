@@ -1184,7 +1184,7 @@ export default function VehicleListPage() {
               </table>
             </div>
           </div>
-          {false && selectedVehicle && (
+          {selectedVehicle && (
             <div className={styles.detailPanel}>
               <div className={styles.detailHeader}>
                 <h2 className={styles.detailTitle}>
