@@ -105,6 +105,7 @@ export default function BikeModelListPage() {
   const [selectedModelIds, setSelectedModelIds] = useState<Set<number>>(
     () => new Set()
   );
+  const showDetailPanel = false;
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ON" | "OFF">("ALL");
   const [sortState, setSortState] = useState<{
@@ -1178,7 +1179,7 @@ export default function BikeModelListPage() {
               </table>
             </div>
           </div>
-          {false && selectedModel && (
+          {selectedModel && showDetailPanel && (
             <div className={styles.detailPanel}>
               <div className={styles.detailHeader}>
                 <h2 className={styles.detailTitle}>
