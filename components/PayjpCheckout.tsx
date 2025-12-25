@@ -130,7 +130,8 @@ export default function PayjpCheckout({
   }, [onError]);
 
   useEffect(() => {
-    const root = document.getElementById(PORTAL_ROOT_ID) ?? document.body;
+    const portalRoot = document.getElementById(PORTAL_ROOT_ID);
+    const root = portalRoot ?? document.body;
 
     let container = root.querySelector<HTMLElement>(`#${CHECKOUT_CONTAINER_ID}`);
 
@@ -225,6 +226,12 @@ export default function PayjpCheckout({
       script.removeEventListener("error", handleError);
       form.removeEventListener("submit", handleSubmit);
       formRef.current = null;
+
+      if (portalRoot) {
+        portalRoot.innerHTML = "";
+      } else {
+        container.remove();
+      }
     };
   }, [formRef]);
 
