@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 
 import type { RegistrationData } from "../../../../types/registration";
 import type { Reservation } from "../../../../lib/reservations";
+import PayjpPortal from "../../../../components/PayjpPortal";
 
 const formatDateLabel = (dateString: string, fallback: string) => {
   const parsed = new Date(dateString);
@@ -398,24 +399,26 @@ export default function ReserveFlowStep3() {
                 >
                   Back
                 </button>
-                <form ref={payjpFormRef} onSubmit={handleSubmitPayment}>
-                  <script
-                    src="https://checkout.pay.jp/"
-                    className="payjp-button"
-                    data-key={payJpPublicKey}
-                    data-locale="en"
-                    data-name="Yasukari"
-                    data-description={`${store} ${modelName} ${managementNumber}`}
-                    data-amount={totalAmount}
-                    data-currency="jpy"
-                    data-email={sessionUser?.email ?? ""}
-                    data-token-name="payjp-token"
-                    data-label={isSavingReservation ? "Processing..." : "Submit payment"}
-                    data-submit-text="Submit payment"
-                    onLoad={() => setPayjpError("")}
-                    onError={() => setPayjpError("Failed to load Pay.JP. Please try again shortly.")}
-                  ></script>
-                </form>
+                <PayjpPortal>
+                  <form ref={payjpFormRef} onSubmit={handleSubmitPayment}>
+                    <script
+                      src="https://checkout.pay.jp/"
+                      className="payjp-button"
+                      data-key={payJpPublicKey}
+                      data-locale="en"
+                      data-name="Yasukari"
+                      data-description={`${store} ${modelName} ${managementNumber}`}
+                      data-amount={totalAmount}
+                      data-currency="jpy"
+                      data-email={sessionUser?.email ?? ""}
+                      data-token-name="payjp-token"
+                      data-label={isSavingReservation ? "Processing..." : "Submit payment"}
+                      data-submit-text="Submit payment"
+                      onLoad={() => setPayjpError("")}
+                      onError={() => setPayjpError("Failed to load Pay.JP. Please try again shortly.")}
+                    ></script>
+                  </form>
+                </PayjpPortal>
               </div>
               {statusMessage ? (
                 <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">{statusMessage}</p>
