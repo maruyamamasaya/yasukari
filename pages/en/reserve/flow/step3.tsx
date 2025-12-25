@@ -1,10 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 import type { RegistrationData } from "../../../../types/registration";
 import type { Reservation } from "../../../../lib/reservations";
+
+type PayjpTokenResponse = {
+  id?: string;
+  error?: {
+    message?: string;
+  };
+};
+
+type PayjpCard = {
+  number: string;
+  cvc: string;
+  exp_month: number;
+  exp_year: number;
+};
+
+declare global {
+  interface Window {
+    Payjp?: (publicKey: string) => {
+      createToken: (card: PayjpCard) => Promise<PayjpTokenResponse>;
+    };
+  }
+}
 
 const formatDateLabel = (dateString: string, fallback: string) => {
   const parsed = new Date(dateString);
@@ -32,6 +54,9 @@ export default function ReserveFlowStep3() {
   const [statusMessage, setStatusMessage] = useState("");
   const [isSavingReservation, setIsSavingReservation] = useState(false);
   const [reservationPreview, setReservationPreview] = useState<Reservation | null>(null);
+  const [payjpReady, setPayjpReady] = useState(false);
+  const [payjpError, setPayjpError] = useState("");
+  const payjpRef = useRef<ReturnType<NonNullable<typeof window.Payjp>> | null>(null);
 
   const [store, setStore] = useState("Adachi-Odai");
   const [modelName, setModelName] = useState("Vehicle");
@@ -150,30 +175,125 @@ export default function ReserveFlowStep3() {
 
   const payJpPublicKey = process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY ?? "pk_test_sample";
 
-  const handlePayWithCard = () => {
-    setStatusMessage(
-      `Integrate the tokenization flow using the Pay.JP public key (${payJpPublicKey}) here. This is a sample message.`
-    );
-  };
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  const handleSubmitPayment = () => {
-    setStatusMessage("This is a sample payment flow. Submit the Pay.JP token to the API.");
-  };
+    setPayjpError("");
+    setPayjpReady(false);
 
-  const handleTestPayment = async () => {
+    const initializePayjp = () => {
+      if (!window.Payjp) return;
+      payjpRef.current = window.Payjp(payJpPublicKey);
+      setPayjpReady(true);
+    };
+
+    if (window.Payjp) {
+      initializePayjp();
+      return;
+    }
+
+    const scriptId = "payjp-js";
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      existingScript.addEventListener("load", initializePayjp);
+      existingScript.addEventListener("error", () =>
+        setPayjpError("Failed to load Pay.JP. Please try again shortly.")
+      );
+      return () => {
+        existingScript.removeEventListener("load", initializePayjp);
+      };
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = "https://js.pay.jp/v2/pay.js";
+    script.async = true;
+    script.onload = initializePayjp;
+    script.onerror = () => setPayjpError("Failed to load Pay.JP. Please try again shortly.");
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+      script.onerror = null;
+    };
+  }, [payJpPublicKey]);
+
+  const handleSubmitPayment = async () => {
     if (!sessionUser) {
       setStatusMessage("We could not verify your login information. Please try again.");
       return;
     }
 
-    setIsSavingReservation(true);
-    setStatusMessage("Saving payment data...");
+    if (!payjpReady || !payjpRef.current) {
+      setStatusMessage("Pay.JP is still initializing. Please try again shortly.");
+      return;
+    }
 
-    const paymentId = `test-payment-${Date.now()}`;
+    if (!cardNumber || !expiry || !cvc) {
+      setStatusMessage("Please enter card number, expiration date, and CVC.");
+      return;
+    }
+
+    const expiryMatch = expiry.match(/^(\d{1,2})\s*\/\s*(\d{2,4})$/);
+    if (!expiryMatch) {
+      setStatusMessage("Please enter the expiration date in MM/YY format.");
+      return;
+    }
+
+    const expMonth = Number(expiryMatch[1]);
+    let expYear = Number(expiryMatch[2]);
+    if (expYear < 100) expYear += 2000;
+    if (Number.isNaN(expMonth) || expMonth < 1 || expMonth > 12 || Number.isNaN(expYear)) {
+      setStatusMessage("The expiration date looks invalid.");
+      return;
+    }
+
+    setIsSavingReservation(true);
+    setStatusMessage("Processing payment...");
+
     const pickupAt = new Date(`${pickupDate}T${pickupTime}:00`).toISOString();
     const returnAt = new Date(`${returnDate}T${returnTime}:00`).toISOString();
 
     try {
+      const tokenResponse = await payjpRef.current.createToken({
+        number: cardNumber.replace(/\s+/g, ""),
+        cvc,
+        exp_month: expMonth,
+        exp_year: expYear,
+      });
+
+      if (!tokenResponse?.id) {
+        throw new Error(tokenResponse?.error?.message ?? "Failed to generate a Pay.JP token.");
+      }
+
+      const chargeResponse = await fetch("/api/payments/payjp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          token: tokenResponse.id,
+          amount: totalAmount,
+          description: `${store} ${modelName} ${managementNumber}`,
+          metadata: {
+            pickupAt,
+            returnAt,
+            store,
+            modelName,
+            managementNumber,
+          },
+        }),
+      });
+
+      if (!chargeResponse.ok) {
+        const errorPayload = (await chargeResponse.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(errorPayload?.error ?? "Pay.JP payment failed.");
+      }
+
+      const chargeData = (await chargeResponse.json()) as { chargeId: string; paidAt?: string };
+      const paymentId = chargeData.chargeId;
+      const paymentDate = chargeData.paidAt ?? new Date().toISOString();
+
       const response = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -187,7 +307,7 @@ export default function ReserveFlowStep3() {
           returnAt,
           paymentAmount: totalAmount,
           paymentId,
-          paymentDate: new Date().toISOString(),
+          paymentDate,
           rentalDurationHours,
           rentalCompletedAt: "",
           reservationCompletedFlag: false,
@@ -196,7 +316,7 @@ export default function ReserveFlowStep3() {
           memberPhone: registration?.mobile ?? registration?.tel ?? "",
           couponCode,
           couponDiscount: accessoryTotal + protectionTotal,
-          notes: "Saved via test payment flow",
+          notes: "Saved via Pay.JP payment",
         }),
       });
 
@@ -210,8 +330,8 @@ export default function ReserveFlowStep3() {
       setReservationPreview(reservation ?? null);
       setStatusMessage(
         reservation
-          ? `Saved reservation ID ${reservation.id} as a test payment. It will appear in your account shortly.`
-          : "Saved the test payment. Please check your reservation list shortly."
+          ? `Payment completed. Saved reservation ID ${reservation.id}. It will appear in your account shortly.`
+          : "Payment completed. Please check your reservation list shortly."
       );
 
       if (reservation) {
@@ -231,8 +351,8 @@ export default function ReserveFlowStep3() {
         });
       }
     } catch (error) {
-      console.error("Failed to save test payment", error);
-      setStatusMessage("Failed to save the test payment. Please try again later.");
+      console.error("Failed to process Pay.JP payment", error);
+      setStatusMessage("Payment failed. Please double-check your details and try again.");
     } finally {
       setIsSavingReservation(false);
     }
@@ -267,7 +387,7 @@ export default function ReserveFlowStep3() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-red-500">Step 3 / 3</p>
               <h1 className="text-2xl font-bold text-gray-900">Enter payment details</h1>
-              <p className="text-sm text-gray-600">Sample payment input screen using the Pay.JP API.</p>
+              <p className="text-sm text-gray-600">Complete your payment securely via Pay.JP.</p>
             </div>
             <Link
               href="/en/products"
@@ -328,7 +448,7 @@ export default function ReserveFlowStep3() {
             <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900">Credit card details</h3>
-                <span className="text-xs text-gray-500">Pay.JP sample</span>
+                <span className="text-xs text-gray-500">Pay.JP</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-2 text-sm">
@@ -368,14 +488,10 @@ export default function ReserveFlowStep3() {
                   Set NEXT_PUBLIC_PAYJP_PUBLIC_KEY to display the live public key here.
                 </p>
               </div>
+              {payjpError ? (
+                <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
+              ) : null}
               <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handlePayWithCard}
-                  className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-800 ring-1 ring-gray-200 shadow-sm hover:bg-gray-50"
-                >
-                  Pay with card
-                </button>
                 <button
                   type="button"
                   onClick={handleBack}
@@ -386,18 +502,10 @@ export default function ReserveFlowStep3() {
                 <button
                   type="button"
                   onClick={handleSubmitPayment}
-                  disabled={!authChecked}
+                  disabled={!authChecked || isSavingReservation}
                   className="inline-flex items-center justify-center rounded-full bg-red-500 px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-red-200"
                 >
-                  Submit payment
-                </button>
-                <button
-                  type="button"
-                  onClick={handleTestPayment}
-                  disabled={!authChecked || isSavingReservation}
-                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-gray-900 shadow hover:bg-emerald-600 transition disabled:cursor-not-allowed disabled:bg-emerald-200"
-                >
-                  {isSavingReservation ? "Saving..." : "Save test payment"}
+                  {isSavingReservation ? "Processing..." : "Submit payment"}
                 </button>
               </div>
               {statusMessage ? (
