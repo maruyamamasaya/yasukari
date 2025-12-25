@@ -144,6 +144,15 @@ export default function PayjpCheckout({
     // ✅ submit handler
     const handleSubmit = (event: Event) => submitHandlerRef.current(event);
     form.addEventListener("submit", handleSubmit);
+    const nativeSubmit = form.submit.bind(form);
+    const interceptSubmit = () => {
+      const submitEvent = new Event("submit", { cancelable: true, bubbles: true });
+      const shouldSubmit = form.dispatchEvent(submitEvent);
+      if (shouldSubmit) {
+        nativeSubmit();
+      }
+    };
+    form.submit = interceptSubmit;
 
     // ✅ PayJPが box を作ったら onLoad
     let ready = false;
@@ -171,6 +180,7 @@ export default function PayjpCheckout({
       observer.disconnect();
       script.removeEventListener("error", handleError);
       form.removeEventListener("submit", handleSubmit);
+      form.submit = nativeSubmit;
       formRef.current = null;
 
       // ✅ cleanupで container を消すと壊れるので消さない
