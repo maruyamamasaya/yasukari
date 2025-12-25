@@ -97,19 +97,20 @@ export default function ChatbotInquiryDetailPage() {
         }
 
         const data = (await response.json()) as { inquiry?: ChatbotInquiryDetail };
-        if (data.inquiry?.messages) {
+        const nextInquiry = data.inquiry;
+        if (nextInquiry?.messages) {
           setInquiry((previous) => {
             if (!previous) {
               return null;
             }
 
-            const nextMessages = [...previous.messages, ...data.inquiry.messages];
+            const nextMessages = [...previous.messages, ...nextInquiry.messages];
 
             return {
               ...previous,
-              lastActivityAt: data.inquiry.lastActivityAt ?? previous.lastActivityAt,
+              lastActivityAt: nextInquiry.lastActivityAt ?? previous.lastActivityAt,
               messages: nextMessages.sort((a, b) => a.messageIndex - b.messageIndex),
-              history: data.inquiry.history ?? previous.history,
+              history: nextInquiry.history ?? previous.history,
             };
           });
         }
