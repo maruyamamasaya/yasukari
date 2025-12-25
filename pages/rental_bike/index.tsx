@@ -38,7 +38,7 @@ export async function getStaticProps() {
     const excerptLine = lines.slice(idx).find((l) => l.trim() && !l.startsWith('#')) || ''
     const excerpt = excerptLine.replace(/\*/g, '').slice(0, 80)
     const tags = meta.tags
-    const eyecatch = meta.eyecatch
+    const eyecatch = meta.eyecatch || undefined
     return { slug, title, date: dateMatch, excerpt, tags, eyecatch }
   })
 

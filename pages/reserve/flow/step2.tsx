@@ -32,8 +32,7 @@ const defaultFees = {
   couponDiscount: 0,
 };
 
-const formatAccessoryPrice = (price?: number) =>
-  typeof price === "number" ? `${price.toLocaleString()}円` : "料金未設定";
+const formatAccessoryPrice = (price?: number) => `${(price ?? 0).toLocaleString()}円`;
 
 const getHelmetSelectedTotal = (selection: Record<string, number>) =>
   Array.from(HELMET_ACCESSORY_KEYS).reduce(
@@ -191,7 +190,7 @@ export default function ReserveFlowStep2() {
   const selectedProtectionFee = useMemo(
     () =>
       vehicleProtectionOptions.reduce((total, option) => {
-        return protectionSelection[option.key] ? total + option.price : total;
+        return protectionSelection[option.key] ? total + (option.price ?? 0) : total;
       }, 0),
     [protectionSelection]
   );
@@ -476,7 +475,9 @@ export default function ReserveFlowStep2() {
                         <p className="text-xs text-gray-600">あり / なし を切り替えできます</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-gray-900">{option.price.toLocaleString()}円</span>
+                        <span className="text-sm font-semibold text-gray-900">
+                          {(option.price ?? 0).toLocaleString()}円
+                        </span>
                         <input
                           type="checkbox"
                           checked={protectionSelection[option.key]}

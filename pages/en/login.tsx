@@ -65,7 +65,7 @@ export default function LoginPageEn() {
     setStartingLogin(true);
     try {
       const state = createAndStoreOauthState();
-      window.location.href = buildAuthorizeUrl(state, { lang: null });
+      window.location.href = buildAuthorizeUrl(state, { lang: "en" });
     } catch (err) {
       console.error(err);
       setError('Unable to start login. Please try again later.');
@@ -95,7 +95,7 @@ export default function LoginPageEn() {
     setStartingSignup(true);
     try {
       const state = createAndStoreOauthState();
-      window.location.href = buildSignupUrl(state, { lang: null });
+      window.location.href = buildSignupUrl(state, { lang: "en" });
     } catch (err) {
       console.error(err);
       setStartingSignup(false);

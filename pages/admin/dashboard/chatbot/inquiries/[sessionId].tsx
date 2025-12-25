@@ -26,7 +26,7 @@ export default function ChatbotInquiryDetailPage() {
   const router = useRouter();
   const sessionId = typeof router.query.sessionId === "string" ? router.query.sessionId : "";
 
-  const [inquiry, setInquiry] = useState<ChatbotInquiryDetail | null>(null);
+  const [inquiry, setInquiry] = useState<ChatbotInquiryDetail | undefined>(undefined);
   const [replyText, setReplyText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -46,15 +46,17 @@ export default function ChatbotInquiryDetailPage() {
         }
 
         const data = (await response.json()) as { inquiry?: ChatbotInquiryDetail };
-        if (data.inquiry) {
-          setInquiry({
-            ...data.inquiry,
-            messages: [...data.inquiry.messages].sort((a, b) => a.messageIndex - b.messageIndex),
-            history: data.inquiry.history,
-          });
-        } else {
-          setInquiry(null);
+        const nextInquiry = data.inquiry;
+        if (!nextInquiry) {
+          setInquiry(undefined);
+          return;
         }
+
+        setInquiry({
+          ...nextInquiry,
+          messages: [...nextInquiry.messages].sort((a, b) => a.messageIndex - b.messageIndex),
+          history: nextInquiry.history,
+        });
       } catch (fetchError) {
         const message = fetchError instanceof Error ? fetchError.message : "不明なエラーが発生しました";
         setError(message);
@@ -101,7 +103,7 @@ export default function ChatbotInquiryDetailPage() {
         if (nextInquiry?.messages) {
           setInquiry((previous) => {
             if (!previous) {
-              return null;
+              return previous;
             }
 
             const nextMessages = [...previous.messages, ...nextInquiry.messages];

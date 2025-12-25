@@ -29,8 +29,7 @@ const defaultFees = {
   couponDiscount: 0,
 };
 
-const formatAccessoryPrice = (price?: number) =>
-  typeof price === "number" ? `¥${price.toLocaleString()}` : "Price not set";
+const formatAccessoryPrice = (price?: number) => `¥${(price ?? 0).toLocaleString()}`;
 
 export default function ReserveFlowStep2() {
   const router = useRouter();

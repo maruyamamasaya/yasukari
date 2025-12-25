@@ -45,9 +45,9 @@ export default async function handler(
 
       const post = await saveCustomerBlogPost(slug, {
         title,
-        date,
-        tags,
-        eyecatch,
+        date: date ?? undefined,
+        tags: tags ?? undefined,
+        eyecatch: eyecatch ?? undefined,
         content,
       });
 
