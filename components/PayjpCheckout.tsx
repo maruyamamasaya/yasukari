@@ -17,7 +17,7 @@ type PayjpCheckoutProps = {
 const PORTAL_ROOT_ID = "payjp-root";
 const CHECKOUT_CONTAINER_ID = "payjp-checkout-container";
 
-const buildCheckoutMarkup = ({
+const createCheckoutScript = ({
   publicKey,
   locale,
   description,
@@ -28,24 +28,29 @@ const buildCheckoutMarkup = ({
 }: Pick<
   PayjpCheckoutProps,
   "publicKey" | "locale" | "description" | "amount" | "email" | "label" | "submitText"
->) =>
-  `
-    <form>
-      <script
-        class="payjp-button"
-        data-key="${publicKey}"
-        data-locale="${locale}"
-        data-name="Yasukari"
-        data-description="${description}"
-        data-amount="${amount}"
-        data-currency="jpy"
-        data-email="${email}"
-        data-token-name="payjp-token"
-        data-label="${label}"
-        data-submit-text="${submitText}"
-      ></script>
-    </form>
-  `;
+>) => {
+  const script = document.createElement("script");
+  script.id = "payjp-checkout-script";
+  script.src = "https://checkout.pay.jp/";
+  script.className = "payjp-button";
+  script.dataset.key = publicKey;
+  script.dataset.locale = locale;
+  script.dataset.name = "Yasukari";
+  script.dataset.description = description;
+  script.dataset.amount = String(amount);
+  script.dataset.currency = "jpy";
+  script.dataset.email = email;
+  script.dataset.tokenName = "payjp-token";
+  script.dataset.label = label;
+  script.dataset.submitText = submitText;
+  return script;
+};
+
+const clearCheckoutContainer = (container: HTMLElement) => {
+  container.querySelectorAll("script.payjp-button").forEach((script) => script.remove());
+  container.querySelectorAll("#payjp_checkout_box").forEach((element) => element.remove());
+  container.textContent = "";
+};
 
 export default function PayjpCheckout({
   formRef,
@@ -74,7 +79,10 @@ export default function PayjpCheckout({
       createdContainer = true;
     }
 
-    container.innerHTML = buildCheckoutMarkup({
+    clearCheckoutContainer(container);
+
+    const form = document.createElement("form");
+    const script = createCheckoutScript({
       publicKey,
       locale,
       description,
@@ -83,12 +91,13 @@ export default function PayjpCheckout({
       label,
       submitText,
     });
-    // 現在のPayjpCheckoutが appendChild のままだと Pay.JP がボタン生成しないため innerHTML が必要
 
-    const form = container.querySelector<HTMLFormElement>("form");
-    const script = container.querySelector<HTMLScriptElement>("script.payjp-button");
+    form.appendChild(script);
+    container.appendChild(form);
 
-    if (!form || !script) {
+    const checkoutScript = container.querySelector<HTMLScriptElement>("script.payjp-button");
+
+    if (!checkoutScript) {
       return () => {
         if (createdContainer) {
           root.removeChild(container);
@@ -99,12 +108,12 @@ export default function PayjpCheckout({
     form.addEventListener("submit", onSubmit);
     formRef.current = form;
 
-    script.addEventListener("load", onLoad);
-    script.addEventListener("error", onError);
+    checkoutScript.addEventListener("load", onLoad);
+    checkoutScript.addEventListener("error", onError);
 
     return () => {
-      script.removeEventListener("load", onLoad);
-      script.removeEventListener("error", onError);
+      checkoutScript.removeEventListener("load", onLoad);
+      checkoutScript.removeEventListener("error", onError);
       form.removeEventListener("submit", onSubmit);
       formRef.current = null;
 
