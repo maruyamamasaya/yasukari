@@ -9,9 +9,10 @@ interface Props {
   filePath: string;
   content: string;
   tree: DirNode[];
+  initialDate: string;
 }
 
-export default function SourcePage({ filePath, content, tree }: Props) {
+export default function SourcePage({ filePath, content, tree, initialDate }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <div className="flex-1">
@@ -21,7 +22,7 @@ export default function SourcePage({ filePath, content, tree }: Props) {
         </pre>
       </div>
       <div className="w-64 space-y-4">
-        <CalendarWidget />
+        <CalendarWidget initialDate={initialDate} />
         <DirectoryTree tree={tree} />
       </div>
     </div>
@@ -40,5 +41,6 @@ export const getStaticProps: GetStaticProps = ({ params }) => {
   const absPath = path.join(process.cwd(), relPath);
   const content = fs.readFileSync(absPath, 'utf8');
   const tree = getDirTree(process.cwd(), 2);
-  return { props: { filePath: relPath, content, tree } };
+  const initialDate = new Date().toISOString();
+  return { props: { filePath: relPath, content, tree, initialDate } };
 };

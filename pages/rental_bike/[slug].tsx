@@ -91,9 +91,10 @@ interface Props {
   html: string
   meta: Record<string, string>
   posts: CalendarPost[]
+  initialDate: string
 }
 
-export default function BlogPost({ html, meta, posts }: Props) {
+export default function BlogPost({ html, meta, posts, initialDate }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
       <Head>
@@ -135,7 +136,7 @@ export default function BlogPost({ html, meta, posts }: Props) {
         <div dangerouslySetInnerHTML={{ __html: html }} />
       </article>
       <div className="w-[25%] space-y-4">
-        <CalendarWidget posts={posts} />
+        <CalendarWidget posts={posts} initialDate={initialDate} />
         <PostSearch posts={posts} basePath="/rental_bike" />
       </div>
     </div>
@@ -167,5 +168,7 @@ export const getStaticProps: GetStaticProps = ({ params }) => {
     return { slug: s, title, date }
   })
 
-  return { props: { html, meta, posts } }
+  const initialDate = new Date().toISOString()
+
+  return { props: { html, meta, posts, initialDate } }
 }

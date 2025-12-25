@@ -58,17 +58,21 @@ export async function getStaticProps() {
     )
   )
 
-  return { props: { posts, calendarPosts, tags } }
+  const initialDate = new Date().toISOString()
+
+  return { props: { posts, calendarPosts, tags, initialDate } }
 }
 
 export default function BlogIndex({
   posts,
   calendarPosts,
   tags,
+  initialDate,
 }: {
   posts: PostMeta[]
   calendarPosts: CalendarPost[]
   tags: string[]
+  initialDate: string
 }) {
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-row flex-wrap gap-6">
@@ -122,7 +126,7 @@ export default function BlogIndex({
         </div>
       </div>
       <div className="w-[25%] space-y-4">
-        <CalendarWidget posts={calendarPosts} />
+        <CalendarWidget posts={calendarPosts} initialDate={initialDate} />
         <PostSearch posts={posts} basePath="/rental_bike" />
       </div>
     </div>

@@ -46,15 +46,18 @@ export async function getStaticProps() {
 
   const tree: DirNode[] = getDirTree(process.cwd(), 2);
 
-  return { props: { posts, tree } };
+  const initialDate = new Date().toISOString();
+
+  return { props: { posts, tree, initialDate } };
 }
 
 type Props = {
   posts: PostMeta[];
   tree: DirNode[];
+  initialDate: string;
 };
 
-export default function ManualIndex({ posts, tree }: Props) {
+export default function ManualIndex({ posts, tree, initialDate }: Props) {
   const router = useRouter();
   const page = parseInt((router.query.page as string) || '1');
   const perPage = 10;
@@ -98,7 +101,7 @@ export default function ManualIndex({ posts, tree }: Props) {
         )}
       </div>
       <div className="w-[25%] space-y-4">
-        <CalendarWidget posts={posts} />
+        <CalendarWidget posts={posts} initialDate={initialDate} />
         <PostSearch posts={posts} />
         <DirectoryTree tree={tree} />
       </div>
