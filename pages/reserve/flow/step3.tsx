@@ -141,21 +141,6 @@ export default function ReserveFlowStep3() {
     return () => controller.abort();
   }, [authChecked]);
 
-  useEffect(() => {
-    if (!router.isReady || !authChecked) return;
-
-    const token = router.query["payjp-token"];
-    if (typeof token !== "string" || !token) return;
-    if (processedTokenRef.current === token || isSavingReservation) return;
-
-    processedTokenRef.current = token;
-    setStatusMessage("決済結果を確認しています…");
-    void handlePaymentWithToken(token);
-
-    const { ["payjp-token"]: _ignored, ...restQuery } = router.query;
-    void router.replace({ pathname: router.pathname, query: restQuery }, undefined, { shallow: true });
-  }, [authChecked, handlePaymentWithToken, isSavingReservation, router]);
-
   const pickupLabel = useMemo(() => formatDateLabel(pickupDate, "2025年12月26日"), [pickupDate]);
   const returnLabel = useMemo(() => formatDateLabel(returnDate, "2025年12月27日"), [returnDate]);
 
@@ -287,6 +272,21 @@ export default function ReserveFlowStep3() {
     store,
     totalAmount,
   ]);
+
+  useEffect(() => {
+    if (!router.isReady || !authChecked) return;
+
+    const token = router.query["payjp-token"];
+    if (typeof token !== "string" || !token) return;
+    if (processedTokenRef.current === token || isSavingReservation) return;
+
+    processedTokenRef.current = token;
+    setStatusMessage("決済結果を確認しています…");
+    void handlePaymentWithToken(token);
+
+    const { ["payjp-token"]: _ignored, ...restQuery } = router.query;
+    void router.replace({ pathname: router.pathname, query: restQuery }, undefined, { shallow: true });
+  }, [authChecked, handlePaymentWithToken, isSavingReservation, router]);
 
   const handleSubmitPayment = useCallback((event: Event) => {
     event.preventDefault();
