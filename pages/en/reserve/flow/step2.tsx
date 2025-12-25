@@ -314,7 +314,7 @@ const returnLabel = formatDateLabel(returnDate, "December 27, 2025");
                         <p className="text-xs text-gray-600">You can toggle on / off.</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-gray-900">¥{option.price.toLocaleString()}</span>
+                        <span className="text-sm font-semibold text-gray-900">{formatAccessoryPrice(option.price)}</span>
                         <input
                           type="checkbox"
                           checked={protectionSelection[option.key]}
