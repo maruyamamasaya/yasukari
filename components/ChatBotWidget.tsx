@@ -21,20 +21,14 @@ export default function ChatBotWidget({ visible = true }: ChatBotWidgetProps) {
             <ChatBot className="flex-1" fullScreen onClose={() => setOpen(false)} />
           </div>
           {/* Desktop popup */}
-          <div className="hidden sm:block relative mb-2 shadow-xl">
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-8 h-8 text-lg flex items-center justify-center shadow-md"
-            >
-              ×
-            </button>
+          <div className="hidden sm:block relative mb-2 shadow-2xl">
             <ChatBot className="w-[25rem] sm:w-[32rem]" onClose={() => setOpen(false)} />
           </div>
         </div>
       )}
       <button
         onClick={() => setOpen(!open)}
-        className="bg-red-600 text-white p-2.5 sm:p-4 rounded-full shadow-lg"
+        className="bg-red-600 text-white p-2.5 sm:p-4 rounded-full shadow-xl hover:shadow-2xl transition"
       >
         <FaComments className="h-5 w-5 sm:h-8 sm:w-8" />
       </button>
