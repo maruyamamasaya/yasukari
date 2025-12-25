@@ -1,10 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 import type { RegistrationData } from "../../../types/registration";
 import type { Reservation } from "../../../lib/reservations";
+
+type PayjpTokenResponse = {
+  id?: string;
+  error?: {
+    message?: string;
+  };
+};
+
+type PayjpCard = {
+  number: string;
+  cvc: string;
+  exp_month: number;
+  exp_year: number;
+};
+
+declare global {
+  interface Window {
+    Payjp?: (publicKey: string) => {
+      createToken: (card: PayjpCard) => Promise<PayjpTokenResponse>;
+    };
+  }
+}
 
 const formatDateLabel = (dateString: string, fallback: string) => {
   const parsed = new Date(dateString);
@@ -32,6 +54,9 @@ export default function ReserveFlowStep3() {
   const [statusMessage, setStatusMessage] = useState("");
   const [isSavingReservation, setIsSavingReservation] = useState(false);
   const [reservationPreview, setReservationPreview] = useState<Reservation | null>(null);
+  const [payjpReady, setPayjpReady] = useState(false);
+  const [payjpError, setPayjpError] = useState("");
+  const payjpRef = useRef<ReturnType<NonNullable<typeof window.Payjp>> | null>(null);
 
   const [store, setStore] = useState("足立小台店");
   const [modelName, setModelName] = useState("車両");
@@ -152,30 +177,126 @@ export default function ReserveFlowStep3() {
 
   const payJpPublicKey = process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY ?? "pk_test_sample";
 
-  const handlePayWithCard = () => {
-    setStatusMessage(
-      `Pay.JPの公開鍵(${payJpPublicKey})を使ってトークン化を行う処理をここに実装してください。現在はサンプルです。`
-    );
-  };
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  const handleSubmitPayment = () => {
-    setStatusMessage("決済フローのサンプルです。Pay.JPのトークン生成後にAPIへ送信してください。");
-  };
+    setPayjpError("");
+    setPayjpReady(false);
 
-  const handleTestPayment = async () => {
+    const initializePayjp = () => {
+      if (!window.Payjp) return;
+      payjpRef.current = window.Payjp(payJpPublicKey);
+      setPayjpReady(true);
+    };
+
+    if (window.Payjp) {
+      initializePayjp();
+      return;
+    }
+
+    const scriptId = "payjp-js";
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      existingScript.addEventListener("load", initializePayjp);
+      existingScript.addEventListener("error", () =>
+        setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。")
+      );
+      return () => {
+        existingScript.removeEventListener("load", initializePayjp);
+      };
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = "https://js.pay.jp/v2/pay.js";
+    script.async = true;
+    script.onload = initializePayjp;
+    script.onerror = () =>
+      setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。");
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+      script.onerror = null;
+    };
+  }, [payJpPublicKey]);
+
+  const handleSubmitPayment = async () => {
     if (!sessionUser) {
       setStatusMessage("ログイン情報を確認できませんでした。再度お試しください。");
       return;
     }
 
-    setIsSavingReservation(true);
-    setStatusMessage("決済データを保存しています…");
+    if (!payjpReady || !payjpRef.current) {
+      setStatusMessage("Pay.JP の初期化を待っています。しばらくしてから再度お試しください。");
+      return;
+    }
 
-    const paymentId = `test-payment-${Date.now()}`;
+    if (!cardNumber || !expiry || !cvc) {
+      setStatusMessage("カード番号・有効期限・セキュリティコードを入力してください。");
+      return;
+    }
+
+    const expiryMatch = expiry.match(/^(\d{1,2})\s*\/\s*(\d{2,4})$/);
+    if (!expiryMatch) {
+      setStatusMessage("有効期限は MM/YY 形式で入力してください。");
+      return;
+    }
+
+    const expMonth = Number(expiryMatch[1]);
+    let expYear = Number(expiryMatch[2]);
+    if (expYear < 100) expYear += 2000;
+    if (Number.isNaN(expMonth) || expMonth < 1 || expMonth > 12 || Number.isNaN(expYear)) {
+      setStatusMessage("有効期限の入力が正しくありません。");
+      return;
+    }
+
+    setIsSavingReservation(true);
+    setStatusMessage("決済処理を実行しています…");
+
     const pickupAt = new Date(`${pickupDate}T${pickupTime}:00`).toISOString();
     const returnAt = new Date(`${returnDate}T${returnTime}:00`).toISOString();
 
     try {
+      const tokenResponse = await payjpRef.current.createToken({
+        number: cardNumber.replace(/\s+/g, ""),
+        cvc,
+        exp_month: expMonth,
+        exp_year: expYear,
+      });
+
+      if (!tokenResponse?.id) {
+        throw new Error(tokenResponse?.error?.message ?? "Pay.JP のトークン取得に失敗しました。");
+      }
+
+      const chargeResponse = await fetch("/api/payments/payjp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          token: tokenResponse.id,
+          amount: totalAmount,
+          description: `${store} ${modelName} ${managementNumber}`,
+          metadata: {
+            pickupAt,
+            returnAt,
+            store,
+            modelName,
+            managementNumber,
+          },
+        }),
+      });
+
+      if (!chargeResponse.ok) {
+        const errorPayload = (await chargeResponse.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(errorPayload?.error ?? "Pay.JP の決済処理に失敗しました。");
+      }
+
+      const chargeData = (await chargeResponse.json()) as { chargeId: string; paidAt?: string };
+      const paymentId = chargeData.chargeId;
+      const paymentDate = chargeData.paidAt ?? new Date().toISOString();
+
       const response = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -189,7 +310,7 @@ export default function ReserveFlowStep3() {
           returnAt,
           paymentAmount: totalAmount,
           paymentId,
-          paymentDate: new Date().toISOString(),
+          paymentDate,
           rentalDurationHours,
           rentalCompletedAt: "",
           reservationCompletedFlag: false,
@@ -198,7 +319,7 @@ export default function ReserveFlowStep3() {
           memberPhone: registration?.mobile ?? registration?.tel ?? "",
           couponCode,
           couponDiscount,
-          notes: "テスト決済経由で保存",
+          notes: "Pay.JP 決済経由で保存",
         }),
       });
 
@@ -212,8 +333,8 @@ export default function ReserveFlowStep3() {
       setReservationPreview(reservation ?? null);
       setStatusMessage(
         reservation
-          ? `テスト決済として予約ID ${reservation.id} を保存しました。マイページの予約状況に反映されます。`
-          : "テスト決済を保存しました。しばらくしてから予約一覧を確認してください。"
+          ? `決済が完了しました。予約ID ${reservation.id} を保存しました。マイページの予約状況に反映されます。`
+          : "決済を保存しました。しばらくしてから予約一覧を確認してください。"
       );
 
       if (reservation) {
@@ -233,8 +354,8 @@ export default function ReserveFlowStep3() {
         });
       }
     } catch (error) {
-      console.error("Failed to save test payment", error);
-      setStatusMessage("テスト決済の保存に失敗しました。時間をおいて再度お試しください。");
+      console.error("Failed to process Pay.JP payment", error);
+      setStatusMessage("決済に失敗しました。入力内容を確認のうえ、再度お試しください。");
     } finally {
       setIsSavingReservation(false);
     }
@@ -270,7 +391,7 @@ export default function ReserveFlowStep3() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-red-500">Step 3 / 3</p>
               <h1 className="text-2xl font-bold text-gray-900">決済情報の入力</h1>
-              <p className="text-sm text-gray-600">Pay.JP API を用いた決済入力のサンプル画面です。</p>
+              <p className="text-sm text-gray-600">Pay.JP API を用いて決済を実行します。</p>
             </div>
             <Link
               href="/products"
@@ -331,7 +452,7 @@ export default function ReserveFlowStep3() {
             <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900">クレジットカード情報入力</h3>
-                <span className="text-xs text-gray-500">Pay.JP サンプル</span>
+                <span className="text-xs text-gray-500">Pay.JP</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-2 text-sm">
@@ -371,14 +492,10 @@ export default function ReserveFlowStep3() {
                   NEXT_PUBLIC_PAYJP_PUBLIC_KEY を環境変数として設定すると、実際の公開鍵がここに表示されます。
                 </p>
               </div>
+              {payjpError ? (
+                <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
+              ) : null}
               <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handlePayWithCard}
-                  className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-800 ring-1 ring-gray-200 shadow-sm hover:bg-gray-50"
-                >
-                  クレジットカードで支払う
-                </button>
                 <button
                   type="button"
                   onClick={handleBack}
@@ -389,18 +506,10 @@ export default function ReserveFlowStep3() {
                 <button
                   type="button"
                   onClick={handleSubmitPayment}
-                  disabled={!authChecked}
+                  disabled={!authChecked || isSavingReservation}
                   className="inline-flex items-center justify-center rounded-full bg-red-500 px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-red-200"
                 >
-                  決済する
-                </button>
-                <button
-                  type="button"
-                  onClick={handleTestPayment}
-                  disabled={!authChecked || isSavingReservation}
-                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-gray-900 shadow hover:bg-emerald-600 transition disabled:cursor-not-allowed disabled:bg-emerald-200"
-                >
-                  {isSavingReservation ? "保存中…" : "テスト決済を保存"}
+                  {isSavingReservation ? "決済中…" : "決済する"}
                 </button>
               </div>
               {statusMessage ? (
