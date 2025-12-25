@@ -305,8 +305,13 @@ export default function ReserveFlowStep3() {
     setPayjpReady(false);
 
     const initializePayjp = () => {
-      if (!window.PayjpCheckout) return;
-      payjpHandlerRef.current = window.PayjpCheckout.configure({
+      const checkout = window.PayjpCheckout;
+      if (!checkout || typeof checkout.configure !== "function") {
+        setPayjpError("Pay.JP could not be loaded. Please try again later.");
+        return;
+      }
+
+      payjpHandlerRef.current = checkout.configure({
         key: payJpPublicKey,
         locale: "en",
         token: (response) => {
