@@ -330,7 +330,30 @@ export default function ReserveFlowStep3() {
     const scriptId = "payjp-checkout-js";
     const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
 
+    const attachScript = () => {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://checkout.pay.jp/";
+      script.async = true;
+      script.className = "payjp-button";
+      script.onload = initializePayjp;
+      script.onerror = () =>
+        setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。");
+      document.body.appendChild(script);
+
+      return script;
+    };
+
     if (existingScript) {
+      if (!existingScript.classList.contains("payjp-button")) {
+        existingScript.remove();
+        const newScript = attachScript();
+        return () => {
+          newScript.onload = null;
+          newScript.onerror = null;
+        };
+      }
+
       existingScript.addEventListener("load", initializePayjp);
       existingScript.addEventListener("error", () =>
         setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。")
@@ -340,14 +363,7 @@ export default function ReserveFlowStep3() {
       };
     }
 
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = "https://checkout.pay.jp/";
-    script.async = true;
-    script.onload = initializePayjp;
-    script.onerror = () =>
-      setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。");
-    document.body.appendChild(script);
+    const script = attachScript();
 
     return () => {
       script.onload = null;
