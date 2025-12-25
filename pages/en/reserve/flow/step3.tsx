@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -13,17 +13,24 @@ type PayjpTokenResponse = {
   };
 };
 
-type PayjpCard = {
-  number: string;
-  cvc: string;
-  exp_month: number;
-  exp_year: number;
+type PayjpCheckoutHandler = {
+  open: (options: {
+    name: string;
+    description: string;
+    amount: number;
+    currency: string;
+    email?: string;
+  }) => void;
 };
 
 declare global {
   interface Window {
-    Payjp?: (publicKey: string) => {
-      createToken: (payload: { card: PayjpCard }) => Promise<PayjpTokenResponse>;
+    PayjpCheckout?: {
+      configure: (options: {
+        key: string;
+        locale?: string;
+        token: (response: PayjpTokenResponse) => void;
+      }) => PayjpCheckoutHandler;
     };
   }
 }
@@ -48,15 +55,12 @@ export default function ReserveFlowStep3() {
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
   const [registrationError, setRegistrationError] = useState("");
 
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [isSavingReservation, setIsSavingReservation] = useState(false);
   const [reservationPreview, setReservationPreview] = useState<Reservation | null>(null);
   const [payjpReady, setPayjpReady] = useState(false);
   const [payjpError, setPayjpError] = useState("");
-  const payjpRef = useRef<ReturnType<NonNullable<typeof window.Payjp>> | null>(null);
+  const payjpHandlerRef = useRef<PayjpCheckoutHandler | null>(null);
 
   const [store, setStore] = useState("Adachi-Odai");
   const [modelName, setModelName] = useState("Vehicle");
@@ -175,77 +179,9 @@ export default function ReserveFlowStep3() {
 
   const payJpPublicKey = process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY ?? "pk_test_sample";
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    setPayjpError("");
-    setPayjpReady(false);
-
-    const initializePayjp = () => {
-      if (!window.Payjp) return;
-      payjpRef.current = window.Payjp(payJpPublicKey);
-      setPayjpReady(true);
-    };
-
-    if (window.Payjp) {
-      initializePayjp();
-      return;
-    }
-
-    const scriptId = "payjp-js";
-    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
-
-    if (existingScript) {
-      existingScript.addEventListener("load", initializePayjp);
-      existingScript.addEventListener("error", () =>
-        setPayjpError("Failed to load Pay.JP. Please try again shortly.")
-      );
-      return () => {
-        existingScript.removeEventListener("load", initializePayjp);
-      };
-    }
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = "https://js.pay.jp/v2/pay.js";
-    script.async = true;
-    script.onload = initializePayjp;
-    script.onerror = () => setPayjpError("Failed to load Pay.JP. Please try again shortly.");
-    document.body.appendChild(script);
-
-    return () => {
-      script.onload = null;
-      script.onerror = null;
-    };
-  }, [payJpPublicKey]);
-
-  const handleSubmitPayment = async () => {
+  const handlePaymentWithToken = useCallback(async (tokenId: string) => {
     if (!sessionUser) {
       setStatusMessage("We could not verify your login information. Please try again.");
-      return;
-    }
-
-    if (!payjpReady || !payjpRef.current) {
-      setStatusMessage("Pay.JP is still initializing. Please try again shortly.");
-      return;
-    }
-
-    if (!cardNumber || !expiry || !cvc) {
-      setStatusMessage("Please enter card number, expiration date, and CVC.");
-      return;
-    }
-
-    const expiryMatch = expiry.match(/^(\d{1,2})\s*\/\s*(\d{2,4})$/);
-    if (!expiryMatch) {
-      setStatusMessage("Please enter the expiration date in MM/YY format.");
-      return;
-    }
-
-    const expMonth = Number(expiryMatch[1]);
-    let expYear = Number(expiryMatch[2]);
-    if (expYear < 100) expYear += 2000;
-    if (Number.isNaN(expMonth) || expMonth < 1 || expMonth > 12 || Number.isNaN(expYear)) {
-      setStatusMessage("The expiration date looks invalid.");
       return;
     }
 
@@ -256,25 +192,12 @@ export default function ReserveFlowStep3() {
     const returnAt = new Date(`${returnDate}T${returnTime}:00`).toISOString();
 
     try {
-      const tokenResponse = await payjpRef.current.createToken({
-        card: {
-          number: cardNumber.replace(/\s+/g, ""),
-          cvc,
-          exp_month: expMonth,
-          exp_year: expYear,
-        },
-      });
-
-      if (!tokenResponse?.id) {
-        throw new Error(tokenResponse?.error?.message ?? "Failed to generate a Pay.JP token.");
-      }
-
       const chargeResponse = await fetch("/api/payments/payjp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          token: tokenResponse.id,
+          token: tokenId,
           amount: totalAmount,
           description: `${store} ${modelName} ${managementNumber}`,
           metadata: {
@@ -358,6 +281,97 @@ export default function ReserveFlowStep3() {
     } finally {
       setIsSavingReservation(false);
     }
+  }, [
+    accessoryTotal,
+    couponCode,
+    managementNumber,
+    modelName,
+    pickupDate,
+    pickupTime,
+    protectionTotal,
+    registration,
+    rentalDurationHours,
+    returnDate,
+    returnTime,
+    sessionUser,
+    store,
+    totalAmount,
+  ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    setPayjpError("");
+    setPayjpReady(false);
+
+    const initializePayjp = () => {
+      if (!window.PayjpCheckout) return;
+      payjpHandlerRef.current = window.PayjpCheckout.configure({
+        key: payJpPublicKey,
+        locale: "en",
+        token: (response) => {
+          if (!response?.id) {
+            setStatusMessage(response?.error?.message ?? "Failed to generate a Pay.JP token.");
+            return;
+          }
+          void handlePaymentWithToken(response.id);
+        },
+      });
+      setPayjpReady(true);
+    };
+
+    if (window.PayjpCheckout) {
+      initializePayjp();
+      return;
+    }
+
+    const scriptId = "payjp-checkout-js";
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      existingScript.addEventListener("load", initializePayjp);
+      existingScript.addEventListener("error", () =>
+        setPayjpError("Failed to load Pay.JP. Please try again shortly.")
+      );
+      return () => {
+        existingScript.removeEventListener("load", initializePayjp);
+      };
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = "https://checkout.pay.jp/";
+    script.async = true;
+    script.onload = initializePayjp;
+    script.onerror = () => setPayjpError("Failed to load Pay.JP. Please try again shortly.");
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+      script.onerror = null;
+    };
+  }, [payJpPublicKey, handlePaymentWithToken]);
+
+  const handleSubmitPayment = () => {
+    if (!sessionUser) {
+      setStatusMessage("We could not verify your login information. Please try again.");
+      return;
+    }
+
+    if (!payjpReady || !payjpHandlerRef.current) {
+      setStatusMessage("Pay.JP is still initializing. Please try again shortly.");
+      return;
+    }
+
+    setStatusMessage("");
+
+    payjpHandlerRef.current.open({
+      name: "Yasukari",
+      description: `${store} ${modelName} ${managementNumber}`,
+      amount: totalAmount,
+      currency: "jpy",
+      email: sessionUser.email,
+    });
   };
 
   const handleBack = () => {
@@ -389,7 +403,7 @@ export default function ReserveFlowStep3() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-red-500">Step 3 / 3</p>
               <h1 className="text-2xl font-bold text-gray-900">Enter payment details</h1>
-              <p className="text-sm text-gray-600">Complete your payment securely via Pay.JP.</p>
+              <p className="text-sm text-gray-600">Complete your payment securely via Pay.JP Checkout.</p>
             </div>
             <Link
               href="/en/products"
@@ -449,41 +463,12 @@ export default function ReserveFlowStep3() {
 
             <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Credit card details</h3>
-                <span className="text-xs text-gray-500">Pay.JP</span>
+                <h3 className="text-sm font-semibold text-gray-900">Credit card payment</h3>
+                <span className="text-xs text-gray-500">Pay.JP Checkout</span>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="space-y-2 text-sm">
-                  <span className="text-gray-700">Card number</span>
-                  <input
-                    type="text"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    placeholder="4242 4242 4242 4242"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-3 text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
-                  />
-                </label>
-                <label className="space-y-2 text-sm">
-                  <span className="text-gray-700">Expiry (MM/YY)</span>
-                  <input
-                    type="text"
-                    value={expiry}
-                    onChange={(e) => setExpiry(e.target.value)}
-                    placeholder="12/25"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-3 text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
-                  />
-                </label>
-                <label className="space-y-2 text-sm">
-                  <span className="text-gray-700">Security code</span>
-                  <input
-                    type="text"
-                    value={cvc}
-                    onChange={(e) => setCvc(e.target.value)}
-                    placeholder="123"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-3 text-gray-900 shadow-sm focus:border-red-500 focus:outline-none"
-                  />
-                </label>
-              </div>
+              <p className="text-sm text-gray-600">
+                Click the payment button to open the Pay.JP Checkout form. Enter your card details securely there.
+              </p>
               {payjpError ? (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
               ) : null}
