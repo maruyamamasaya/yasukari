@@ -1,11 +1,11 @@
-import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 import type { RegistrationData } from "../../../types/registration";
 import type { Reservation } from "../../../lib/reservations";
-import PayjpPortal from "../../../components/PayjpPortal";
+import PayjpCheckout from "../../../components/PayjpCheckout";
 
 const formatDateLabel = (dateString: string, fallback: string) => {
   const parsed = new Date(dateString);
@@ -271,7 +271,7 @@ export default function ReserveFlowStep3() {
     totalAmount,
   ]);
 
-  const handleSubmitPayment = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmitPayment = useCallback((event: Event) => {
     event.preventDefault();
     setPayjpError("");
 
@@ -293,7 +293,15 @@ export default function ReserveFlowStep3() {
       tokenInput.value = "";
     }
     void handlePaymentWithToken(token);
-  };
+  }, [handlePaymentWithToken]);
+
+  const handlePayjpLoaded = useCallback(() => {
+    setPayjpError("");
+  }, []);
+
+  const handlePayjpLoadError = useCallback(() => {
+    setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。");
+  }, []);
 
   const handleBack = () => {
     const params = new URLSearchParams({
@@ -402,26 +410,19 @@ export default function ReserveFlowStep3() {
                 >
                   戻る
                 </button>
-                <PayjpPortal>
-                  <form ref={payjpFormRef} onSubmit={handleSubmitPayment}>
-                    <script
-                      src="https://checkout.pay.jp/"
-                      className="payjp-button"
-                      data-key={payJpPublicKey}
-                      data-locale="ja"
-                      data-name="Yasukari"
-                      data-description={`${store} ${modelName} ${managementNumber}`}
-                      data-amount={totalAmount}
-                      data-currency="jpy"
-                      data-email={sessionUser?.email ?? ""}
-                      data-token-name="payjp-token"
-                      data-label={isSavingReservation ? "決済中…" : "決済する"}
-                      data-submit-text="決済する"
-                      onLoad={() => setPayjpError("")}
-                      onError={() => setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。")}
-                    ></script>
-                  </form>
-                </PayjpPortal>
+                <PayjpCheckout
+                  formRef={payjpFormRef}
+                  onSubmit={handleSubmitPayment}
+                  onLoad={handlePayjpLoaded}
+                  onError={handlePayjpLoadError}
+                  locale="ja"
+                  publicKey={payJpPublicKey}
+                  description={`${store} ${modelName} ${managementNumber}`}
+                  amount={totalAmount}
+                  email={sessionUser?.email ?? ""}
+                  label={isSavingReservation ? "決済中…" : "決済する"}
+                  submitText="決済する"
+                />
               </div>
               {statusMessage ? (
                 <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">{statusMessage}</p>
