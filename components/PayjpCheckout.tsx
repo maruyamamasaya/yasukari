@@ -41,7 +41,7 @@ const createCheckoutScript = ({
   script.src = CHECKOUT_SCRIPT_SRC;
   script.className = "payjp-button";
 
-  // datasetは append 前に必ずセット
+  // ✅ append前に必ずdatasetセット
   script.dataset.key = publicKey;
   script.dataset.locale = locale;
   script.dataset.name = "Yasukari";
@@ -57,17 +57,11 @@ const createCheckoutScript = ({
 };
 
 /**
- * container 内を毎回初期化して安全な状態に戻す
- * (PayJPが生成する #payjp_checkout_box なども全部消す)
+ * 既存scriptやboxを破壊せずに「このcontainerだけ」を初期化
+ * ✅ PayJPは古いDOMを残すと不安定になるので container内だけは確実に消す
  */
-const resetContainer = (container: HTMLElement) => {
+const resetContainerInside = (container: HTMLElement) => {
   container.innerHTML = "";
-};
-
-const removeStaleScripts = () => {
-  document
-    .querySelectorAll<HTMLScriptElement>('script.payjp-button, script[src="https://checkout.pay.jp/"]')
-    .forEach((script) => script.remove());
 };
 
 export default function PayjpCheckout({
@@ -84,7 +78,6 @@ export default function PayjpCheckout({
   label,
   submitText,
 }: PayjpCheckoutProps) {
-  // Reactの再レンダリングで handler が変わっても listener を張り替えなくて済むように ref 化
   const submitHandlerRef = useRef(onSubmit);
   const loadHandlerRef = useRef(onLoad);
   const errorHandlerRef = useRef(onError);
@@ -102,15 +95,13 @@ export default function PayjpCheckout({
   }, [onError]);
 
   useEffect(() => {
-    removeStaleScripts();
-
     const portalRoot = document.getElementById(PORTAL_ROOT_ID);
     if (!portalRoot) {
       console.error(`[PayjpCheckout] #${PORTAL_ROOT_ID} not found`);
       return;
     }
 
-    // ✅ container を 1つだけ作って固定
+    // ✅ containerは常に1つ
     let container = portalRoot.querySelector<HTMLElement>(`#${CHECKOUT_CONTAINER_ID}`);
     if (!container) {
       container = document.createElement("div");
@@ -119,14 +110,20 @@ export default function PayjpCheckout({
       portalRoot.appendChild(container);
     }
 
-    // ✅ 重要：毎回 container を初期化してから作り直す
-    resetContainer(container);
+    // ✅ placeholder があれば container ごと移動（form構造を壊さない）
+    const placeholder = placeholderRef.current;
+    if (placeholder && container.parentElement !== placeholder) {
+      placeholder.appendChild(container);
+    }
+
+    // ✅ containerの中身だけを初期化（container自体は保持）
+    resetContainerInside(container);
 
     // ✅ form作成
     const form = document.createElement("form");
     form.dataset.payjpCheckout = "true";
 
-    // ✅ script作成（必ず append前にdatasetセット済）
+    // ✅ script作成（append前にdatasetセット済）
     const script = createCheckoutScript({
       publicKey,
       locale,
@@ -137,29 +134,24 @@ export default function PayjpCheckout({
       submitText,
     });
 
-    // ✅ append（この瞬間に PayJP が初期化される）
+    // ✅ append（この瞬間にPayJPが初期化される）
     form.appendChild(script);
     container.appendChild(form);
 
-    // ✅ formRef を更新（token取得に使う）
+    // ✅ formRefをセット（token参照に使う）
     formRef.current = form;
 
     // ✅ submit handler
     const handleSubmit = (event: Event) => submitHandlerRef.current(event);
     form.addEventListener("submit", handleSubmit);
 
-    // ✅ PayJPが #payjp_checkout_box を生成したら onLoad を呼ぶ
-    let alreadyReady = false;
+    // ✅ PayJPが box を作ったら onLoad
+    let ready = false;
     const observer = new MutationObserver(() => {
-      if (alreadyReady) return;
+      if (ready) return;
       const box = container.querySelector("#payjp_checkout_box");
       if (box) {
-        alreadyReady = true;
-        if (placeholderRef.current) {
-          placeholderRef.current.appendChild(box);
-        } else {
-          console.error("[PayjpCheckout] placeholderRef is not available");
-        }
+        ready = true;
         loadHandlerRef.current();
         observer.disconnect();
       }
@@ -167,13 +159,12 @@ export default function PayjpCheckout({
     observer.observe(container, { childList: true, subtree: true });
 
     const handleError = () => {
-      if (!alreadyReady) {
+      if (!ready) {
         errorHandlerRef.current();
       }
       observer.disconnect();
     };
 
-    // script load は PayJP 内部処理完了とは別なので error のみ監視
     script.addEventListener("error", handleError);
 
     return () => {
@@ -182,16 +173,11 @@ export default function PayjpCheckout({
       form.removeEventListener("submit", handleSubmit);
       formRef.current = null;
 
-      // ✅ cleanup：rootごと消さない。containerの中身だけ消す
-      resetContainer(container);
-      const placeholder = placeholderRef.current;
-      const existingBox = placeholder?.querySelector("#payjp_checkout_box");
-      if (existingBox) {
-        existingBox.remove();
-      }
+      // ✅ cleanupで container を消すと壊れるので消さない
+      // ✅ 中身だけリセット
+      resetContainerInside(container);
     };
   }, [
-    // ✅ ここが重要：PayJPは props が変わったら再初期化が必要なので deps に含める
     publicKey,
     locale,
     description,
