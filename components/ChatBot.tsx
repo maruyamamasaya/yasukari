@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChatbotFaqCategory } from "../types/chatbotFaq";
-import { FaUser, FaRobot, FaArrowLeft, FaTimes } from "react-icons/fa";
+import { FaRobot, FaArrowLeft, FaTimes, FaPlus, FaPaperPlane } from "react-icons/fa";
+import styles from "../styles/ChatSupport.module.css";
 
 interface Message {
   from: "bot" | "user";
@@ -283,208 +284,209 @@ export default function ChatBot({
     a.click();
     URL.revokeObjectURL(url);
   }
-  const baseSizeClasses = fullScreen
-    ? "h-screen w-full"
-    : "w-full sm:w-[440px] h-[90vh] max-h-[900px]";
-  const avatarWrapperClasses =
-    "flex items-center justify-center w-9 h-9 rounded-full border shadow-sm";
-  const bubbleBaseClasses =
-    "max-w-[88%] px-3.5 py-2.5 rounded-2xl shadow-sm border bg-white/90 backdrop-blur";
-  const optionContainerClasses =
-    "w-full text-left rounded-2xl shadow-sm border border-gray-200 bg-white/80 hover:border-red-200 hover:shadow-md transition-all";
   const visibleCategories = showAllCategories
     ? faqCategories
     : faqCategories.slice(0, 3);
 
   return (
     <div
-      className={`relative flex flex-col ${baseSizeClasses} ${
-        fullScreen ? "pt-16 p-4" : "p-5 sm:p-6"
-      } bg-gradient-to-br from-white via-slate-50 to-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur ${className}`}
+      className={`${styles.chatShell} ${fullScreen ? styles.fullScreen : ""} ${className}`}
     >
-      <div className="sticky top-0 z-10 pb-4 mb-4 bg-gradient-to-b from-white via-white/95 to-transparent border-b border-slate-200/70">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      <div className={styles.safeArea}>
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
             {(selectedCategory || step === "free") && (
               <button
                 onClick={handleBackButton}
-                className="rounded-full border border-slate-200 bg-white p-2 shadow-sm hover:shadow-md transition"
+                className={styles.headerAction}
                 aria-label="前の画面に戻る"
               >
-                <FaArrowLeft className="w-4 h-4" />
+                <FaArrowLeft />
               </button>
             )}
             <div>
-              <p className="text-sm font-semibold text-gray-900 tracking-wide">
-                チャットでご相談
-              </p>
-              <p className="text-[11px] text-gray-500 leading-snug">
-                FAQから探すか、直接お問い合わせください。
+              <p className={styles.headerTitle}>チャットサポート</p>
+              <p className={styles.headerSubtitle}>
+                FAQと予約サポートをご案内します
               </p>
             </div>
           </div>
-          <button
-            onClick={handleCloseButton}
-            className="rounded-full border border-slate-200 bg-white p-2 shadow-sm hover:shadow-md transition"
-            aria-label="チャットを閉じる"
-          >
-            <FaTimes className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+          <div className={styles.headerRight}>
+            <span className={styles.headerBadge}>オンライン</span>
+            <button
+              onClick={handleCloseButton}
+              className={styles.headerAction}
+              aria-label="チャットを閉じる"
+            >
+              <FaTimes />
+            </button>
+          </div>
+        </header>
 
-      <div
-        className="relative flex-1 min-h-0 w-full max-w-[820px] mx-auto overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4 pr-3 rounded-2xl bg-slate-50/80 border border-slate-100 shadow-inner"
-        ref={scrollRef}
-      >
-        {messages.length === 0 && (
-          <div className="flex h-full items-center justify-center px-4 text-sm text-gray-500 text-center">
-            ここに会話が表示されます。カテゴリを選ぶか質問を入力してください。
+        <div className={styles.chatArea} ref={scrollRef}>
+          {messages.length === 0 && (
+            <div className={styles.messageGroup}>
+              <div className={styles.messageRow}>
+                <div className={styles.avatar}>
+                  <FaRobot />
+                </div>
+                <div className={styles.bubble}>
+                  こんにちは。FAQから探すか、予約サポートについてご相談いただけます。
+                  <div className={styles.timestamp}>09:30</div>
+                </div>
+              </div>
+            </div>
+          )}
+          {messages.map((m, idx) => (
+            <div key={idx} className={styles.messageGroup}>
+              <div className={`${styles.messageRow} ${m.from === "user" ? styles.messageRowUser : ""}`}>
+                {m.from === "bot" && (
+                  <div className={styles.avatar}>
+                    <FaRobot />
+                  </div>
+                )}
+                <div className={`${styles.bubble} ${m.from === "user" ? styles.bubbleUser : ""}`}>
+                  {m.text}
+                  <div className={styles.timestamp}>{m.time}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+          {isSubmitting && (
+            <div className={styles.messageGroup}>
+              <div className={styles.messageRow}>
+                <div className={styles.avatar}>
+                  <FaRobot />
+                </div>
+                <div className={styles.bubble}>
+                  <div className={styles.typing}>
+                    <span className={styles.typingDot} />
+                    <span className={styles.typingDot} />
+                    <span className={styles.typingDot} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {showFeedback && (
+          <div className="flex justify-center gap-4 my-2">
+            <button className={styles.chip} onClick={handleYes}>
+              はい👍
+            </button>
+            <button className={styles.chip} onClick={handleNo}>
+              いいえ
+            </button>
           </div>
         )}
-        {messages.map((m, idx) => (
-          <div
-            key={idx}
-            className={`flex items-end gap-2 px-2 ${m.from === "bot" ? "" : "flex-row-reverse"}`}
-          >
-            <div
-              className={`${avatarWrapperClasses} ${
-                m.from === "bot"
-                  ? "bg-red-50/80 border-red-100 text-red-600"
-                  : "bg-red-500/10 border-red-200 text-red-600"
-              }`}
-            >
-              {m.from === "bot" ? (
-                <FaRobot className="w-5 h-5" />
-              ) : (
-                <FaUser className="w-5 h-5" />
-              )}
-            </div>
-            <div
-              className={`${bubbleBaseClasses} ${
-                m.from === "bot"
-                  ? "border-gray-200 text-gray-900"
-                  : "bg-red-500/90 text-white border-red-400"
-              }`}
-            >
-              <p className="text-sm leading-relaxed whitespace-pre-line break-words">
-                {m.text}
-              </p>
-              <span className={`block text-[10px] mt-1 opacity-70 ${m.from === "bot" ? "text-gray-600" : "text-white"}`}>
-                {m.time}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
 
-      {showFeedback && (
-        <div className="flex justify-center gap-4 my-2">
-          <button className="btn-primary px-4" onClick={handleYes}>
-            はい👍
-          </button>
-          <button className="btn-secondary px-4" onClick={handleNo}>
-            いいえ
-          </button>
-        </div>
-      )}
-
-      {step === "survey" && !selectedCategory && (
-        <div className="space-y-3 flex flex-col items-center text-center w-full">
-          <p className="text-sm font-medium text-gray-800">カテゴリを選択してください。</p>
-          {faqLoading && (
-            <p className="text-sm text-gray-600">FAQを読み込み中です…</p>
-          )}
-          {faqError && !faqLoading && (
-            <p className="text-sm text-red-600">{faqError}</p>
-          )}
-          {!faqLoading && !faqError && faqCategories.length === 0 && (
-            <p className="text-sm text-gray-600">表示できるカテゴリがありません。</p>
-          )}
-          {!faqLoading && !faqError && (
-            <div className="grid w-full max-w-[960px] grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {visibleCategories.map((cat) => (
-                <button
-                  key={cat.id}
-                  className={`${optionContainerClasses} p-3 sm:p-3.5 hover:bg-red-50`}
-                  onClick={() => handleCategory(cat)}
-                >
-                  <span className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">{cat.title}</span>
-                </button>
-              ))}
-            </div>
-          )}
-          {!faqLoading &&
-            !faqError &&
-            faqCategories.length > 3 && (
+        {step === "survey" && !selectedCategory && (
+          <div className="space-y-3 flex flex-col items-center text-center w-full">
+            <p className="text-sm font-medium text-gray-800">カテゴリを選択してください。</p>
+            {faqLoading && (
+              <p className="text-sm text-gray-600">FAQを読み込み中です…</p>
+            )}
+            {faqError && !faqLoading && (
+              <p className="text-sm text-red-600">{faqError}</p>
+            )}
+            {!faqLoading && !faqError && faqCategories.length === 0 && (
+              <p className="text-sm text-gray-600">表示できるカテゴリがありません。</p>
+            )}
+            {!faqLoading && !faqError && (
+              <div className={styles.chipRow}>
+                {visibleCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    className={styles.chip}
+                    onClick={() => handleCategory(cat)}
+                  >
+                    {cat.title}
+                  </button>
+                ))}
+              </div>
+            )}
+            {!faqLoading && !faqError && faqCategories.length > 3 && (
               <button
-                className="text-sm text-red-700 hover:underline"
+                className="text-sm text-blue-600 hover:underline"
                 onClick={() => setShowAllCategories((prev) => !prev)}
               >
                 {showAllCategories ? "カテゴリを閉じる" : "さらに表示"}
               </button>
             )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {step === "survey" && selectedCategory && (
-        <div className="space-y-3 flex flex-col items-center">
-          <button
-            onClick={handleBack}
-            className="text-sm text-red-700 hover:underline"
-          >
-            &larr; カテゴリ選択に戻る
-          </button>
-          {selectedCategory.faqs.map((faq, idx) => (
+        {step === "survey" && selectedCategory && (
+          <div className="space-y-3 flex flex-col items-center">
             <button
-              key={idx}
-              className={`${optionContainerClasses} p-3.5 sm:p-4 hover:bg-red-50`}
-              onClick={() => handleQuestion(faq)}
+              onClick={handleBack}
+              className="text-sm text-blue-600 hover:underline"
             >
-              <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">{faq.q}</span>
+              &larr; カテゴリ選択に戻る
             </button>
-          ))}
-          {loopCount >= 2 && (
-            <button
-              className={`${optionContainerClasses} p-3 sm:p-3.5 border bg-gray-100 hover:bg-gray-200 transition`}
-              onClick={handleFreeStart}
-            >
-              <span className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+            <div className={styles.chipRow}>
+              {selectedCategory.faqs.map((faq, idx) => (
+                <button
+                  key={idx}
+                  className={styles.chip}
+                  onClick={() => handleQuestion(faq)}
+                >
+                  {faq.q}
+                </button>
+              ))}
+            </div>
+            {loopCount >= 2 && (
+              <button
+                className={styles.chip}
+                onClick={handleFreeStart}
+              >
                 その他の質問を入力する
-              </span>
-            </button>
-          )}
-        </div>
-      )}
+              </button>
+            )}
+          </div>
+        )}
 
-      {step === "free" && (
-        <div className="space-y-3 flex flex-col items-center">
-          <button
-            onClick={handleBack}
-            className="text-sm text-red-700 hover:underline"
-          >
-            &larr; カテゴリ選択に戻る
-          </button>
-          <form
-            onSubmit={handleFreeSubmit}
-            className="flex gap-2 items-center bg-white/90 border border-gray-200 rounded-full px-2 py-1.5 shadow-sm w-full max-w-[520px]"
-          >
-            <input
-              type="text"
-              name="free"
-              className="flex-1 rounded-full p-2 sm:p-3 px-3 sm:px-4 focus:outline-none text-sm"
-              placeholder="質問を入力してください"
-            />
+        {step === "free" && (
+          <div className="space-y-3 flex flex-col items-center">
             <button
-              type="submit"
-              className="btn-primary rounded-full px-4 py-2 text-sm shadow disabled:opacity-70"
-              disabled={isSubmitting}
+              onClick={handleBack}
+              className="text-sm text-blue-600 hover:underline"
             >
-              送信
+              &larr; カテゴリ選択に戻る
             </button>
-          </form>
-        </div>
-      )}
+          </div>
+        )}
+
+        <form onSubmit={handleFreeSubmit} className={styles.composer}>
+          <button
+            type="button"
+            className={styles.composerButton}
+            aria-label="添付する"
+          >
+            <FaPlus />
+          </button>
+          <input
+            type="text"
+            name="free"
+            className={styles.input}
+            placeholder={
+              step === "free"
+                ? "質問を入力してください"
+                : "チップで選択、または自由入力に切り替え"
+            }
+            disabled={step !== "free"}
+          />
+          <button
+            type="submit"
+            className={`${styles.composerButton} ${styles.sendButton}`}
+            aria-label="送信する"
+            disabled={step !== "free" || isSubmitting}
+          >
+            <FaPaperPlane />
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
