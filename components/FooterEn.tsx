@@ -35,32 +35,37 @@ export default function FooterEn() {
             <h4 className="font-bold mb-2">Site policy</h4>
             <ul className="space-y-1">
               <li>
-                <Link href="/tokusyouhou" className="hover:underline">
+                <Link href="/en/site-policy" className="hover:underline">
+                  Site policy overview
+                </Link>
+              </li>
+              <li>
+                <Link href="/en/tokusyouhou" className="hover:underline">
                   Act on Specified Commercial Transactions
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:underline">
+                <Link href="/en/terms" className="hover:underline">
                   Terms of use
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:underline">
+                <Link href="/en/privacy" className="hover:underline">
                   Privacy policy
                 </Link>
               </li>
               <li>
-                <Link href="/external" className="hover:underline">
+                <Link href="/en/external" className="hover:underline">
                   External data transmission
                 </Link>
               </li>
               <li>
-                <Link href="/company" className="hover:underline">
+                <Link href="/en/company" className="hover:underline">
                   Company information
                 </Link>
               </li>
               <li>
-                <Link href="/support-policy" className="hover:underline">
+                <Link href="/en/support-policy" className="hover:underline">
                   Contact & support policy
                 </Link>
               </li>
