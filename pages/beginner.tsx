@@ -152,51 +152,51 @@ export default function BeginnerGuidePage() {
                   ) : null}
 
                   {step.title.startsWith('03') ? (
-                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6">
+                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white px-3 py-4 sm:px-5 sm:py-6">
                       <h4 className="text-sm font-semibold text-slate-900">
                         走行距離の目安
                       </h4>
                       <p className="mt-2 text-sm text-slate-600">
                         目安以上の距離を走行するためには整備が必要な場合があります。バイクを安全に乗るためには、オイル交換と整備が必要です。目安以上の距離を走行する場合、メンテナンスが必要な際にメンテナンスを怠り車両に故障や損害が発生した場合は、車両の時価額を請求いたします。
                       </p>
-                      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
-                        <table className="w-full text-center text-xs">
+                      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+                        <table className="min-w-[520px] w-full text-center text-[11px] sm:text-xs">
                           <thead className="bg-slate-100 text-slate-600">
                             <tr>
-                              <th className="border border-slate-200 px-2 py-2">クラス</th>
-                              <th className="border border-slate-200 px-2 py-2">1日</th>
-                              <th className="border border-slate-200 px-2 py-2">3日</th>
-                              <th className="border border-slate-200 px-2 py-2">2週間</th>
-                              <th className="border border-slate-200 px-2 py-2">1カ月</th>
+                              <th className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">クラス</th>
+                              <th className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">1日</th>
+                              <th className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">3日</th>
+                              <th className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">2週間</th>
+                              <th className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">1カ月</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white">
                             <tr>
-                              <th className="border border-slate-200 px-2 py-2 text-left font-medium">
+                              <th className="border border-slate-200 px-1.5 py-1.5 text-left font-medium sm:px-2 sm:py-2">
                                 原付
                               </th>
-                              <td className="border border-slate-200 px-2 py-2">200km</td>
-                              <td className="border border-slate-200 px-2 py-2">600km</td>
-                              <td className="border border-slate-200 px-2 py-2">800km</td>
-                              <td className="border border-slate-200 px-2 py-2">一度持ち込みで+800km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">200km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">600km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">800km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">一度持ち込みで+800km</td>
                             </tr>
                             <tr>
-                              <th className="border border-slate-200 px-2 py-2 text-left font-medium">
+                              <th className="border border-slate-200 px-1.5 py-1.5 text-left font-medium sm:px-2 sm:py-2">
                                 125cc以下
                               </th>
-                              <td className="border border-slate-200 px-2 py-2">300km</td>
-                              <td className="border border-slate-200 px-2 py-2">800km</td>
-                              <td className="border border-slate-200 px-2 py-2">1000km</td>
-                              <td className="border border-slate-200 px-2 py-2">一度持ち込みで+1000km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">300km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">800km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">1000km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">一度持ち込みで+1000km</td>
                             </tr>
                             <tr>
-                              <th className="border border-slate-200 px-2 py-2 text-left font-medium">
+                              <th className="border border-slate-200 px-1.5 py-1.5 text-left font-medium sm:px-2 sm:py-2">
                                 126cc~
                               </th>
-                              <td className="border border-slate-200 px-2 py-2">500km</td>
-                              <td className="border border-slate-200 px-2 py-2">1000km</td>
-                              <td className="border border-slate-200 px-2 py-2">1500km</td>
-                              <td className="border border-slate-200 px-2 py-2">-</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">500km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">1000km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">1500km</td>
+                              <td className="border border-slate-200 px-1.5 py-1.5 sm:px-2 sm:py-2">-</td>
                             </tr>
                           </tbody>
                         </table>
