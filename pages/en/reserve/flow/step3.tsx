@@ -346,7 +346,7 @@ export default function ReserveFlowStep3() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-red-500">Step 3 / 3</p>
               <h1 className="text-2xl font-bold text-gray-900">Enter payment details</h1>
-              <p className="text-sm text-gray-600">Complete your payment securely via Pay.JP Checkout.</p>
+              <p className="text-sm text-gray-600">Complete your payment securely through our external payment form.</p>
             </div>
             <Link
               href="/en/products"
@@ -407,10 +407,10 @@ export default function ReserveFlowStep3() {
             <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900">Credit card payment</h3>
-                <span className="text-xs text-gray-500">Pay.JP Checkout</span>
+                <span className="text-xs text-gray-500">Secure payment form</span>
               </div>
               <p className="text-sm text-gray-600">
-                Click the payment button to open the Pay.JP Checkout form. Enter your card details securely there.
+                Click the payment button to open the secure payment form. Enter your card details there.
               </p>
               {payjpError ? (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
