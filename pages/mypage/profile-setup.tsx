@@ -62,7 +62,19 @@ const ProfileSetupPage: NextPage = () => {
           fetch('/api/user/attributes', { credentials: 'include', signal: controller.signal }),
         ]);
 
-        if (sessionRes.status === 401 || attrRes.status === 401) {
+        if (!sessionRes.ok) {
+          throw new Error('ログイン状態の確認に失敗しました。');
+        }
+
+        const sessionData = (await sessionRes.json().catch(() => ({}))) as {
+          user?: { id?: string } | null;
+        };
+        if (!sessionData.user) {
+          await router.replace(applyLocaleToPath('/login'));
+          return;
+        }
+
+        if (attrRes.status === 401) {
           await router.replace(applyLocaleToPath('/login'));
           return;
         }

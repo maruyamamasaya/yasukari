@@ -120,11 +120,13 @@ export default function ProductDetailPageEn({
           credentials: "include",
           signal: controller.signal,
         });
-        if (response.status === 401) {
+        if (!response.ok) {
           setShowAuthModal(true);
           return;
         }
-        if (!response.ok) {
+
+        const data = (await response.json().catch(() => ({}))) as { user?: { id?: string } | null };
+        if (!data.user) {
           setShowAuthModal(true);
         }
       } catch (error) {

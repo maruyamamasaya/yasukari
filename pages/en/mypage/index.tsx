@@ -98,23 +98,21 @@ export default function MyPageEn() {
           signal: controller.signal,
         });
 
-        if (response.status === 401) {
-          await router.replace('/login');
-          return;
-        }
-
         if (!response.ok) {
           throw new Error('failed to load profile');
         }
 
-        const data = (await response.json()) as { user?: SessionUser };
-        if (data.user) {
-          setUser({
-            id: data.user.id,
-            email: data.user.email,
-            username: data.user.username,
-          });
+        const data = (await response.json().catch(() => ({}))) as { user?: SessionUser | null };
+        if (!data.user) {
+          await router.replace('/login');
+          return;
         }
+
+        setUser({
+          id: data.user.id,
+          email: data.user.email,
+          username: data.user.username,
+        });
       } catch (err) {
         if (!controller.signal.aborted) {
           console.error(err);

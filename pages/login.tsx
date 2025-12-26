@@ -23,16 +23,20 @@ export default function LoginPage() {
         });
 
         if (response.ok) {
-          const data = (await response.json()) as { user?: { email?: string; username?: string } };
-          setSessionUser(data.user ?? { email: 'ログイン中' });
+          const data = (await response.json().catch(() => ({}))) as {
+            user?: { email?: string; username?: string } | null;
+          };
+          const user = data.user ?? null;
+          if (user) {
+            setSessionUser(user.email || user.username ? user : { email: 'ログイン中' });
+          } else {
+            setSessionUser(null);
+          }
           return;
         }
 
         setSessionUser(null);
-
-        if (response.status !== 401) {
-          throw new Error('unexpected status');
-        }
+        throw new Error('unexpected status');
       } catch (err) {
         if (!controller.signal.aborted) {
           console.error(err);

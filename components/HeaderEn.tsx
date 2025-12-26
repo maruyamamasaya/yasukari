@@ -26,13 +26,10 @@ export default function HeaderEn() {
           signal: controller.signal,
         });
 
-        if (response.status === 401) {
-          setSessionUser(null);
-          return;
-        }
-
         if (response.ok) {
-          const data = (await response.json()) as { user?: { email?: string; username?: string } };
+          const data = (await response.json().catch(() => ({}))) as {
+            user?: { email?: string; username?: string } | null;
+          };
           setSessionUser(data.user ?? null);
           return;
         }
