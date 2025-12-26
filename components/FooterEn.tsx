@@ -72,8 +72,8 @@ export default function FooterEn() {
             <h4 className="font-bold mb-2">Services</h4>
             <ul className="space-y-1 mb-4">
               <li>
-                <Link href="/popular" className="hover:underline">
-                  Popular categories: mopeds, 250cc, large bikes, EV bikes
+                <Link href="/en/products" className="hover:underline">
+                  Browse all vehicles
                 </Link>
               </li>
               <li>

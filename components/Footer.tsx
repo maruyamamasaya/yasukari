@@ -72,8 +72,8 @@ export default function Footer() {
             <h4 className="font-bold mb-2">サービス案内</h4>
             <ul className="space-y-1 mb-4">
               <li>
-                <Link href="/popular" className="hover:underline">
-                  人気カテゴリ：原付・250cc・大型バイク・EVバイク
+                <Link href="/products" className="hover:underline">
+                  全ての車両一覧
                 </Link>
               </li>
               <li>
