@@ -73,5 +73,12 @@ describe("POST /api/payments/payjp", () => {
       amount: 1200,
       paidAt: new Date(1700000000 * 1000).toISOString(),
     });
+    expect(global.fetch).toHaveBeenCalledWith("https://api.pay.jp/v1/charges", {
+      method: "POST",
+      headers: expect.objectContaining({
+        Authorization: "Basic c2tfdGVzdF9zYW1wbGU6",
+      }),
+      body: expect.any(String),
+    });
   });
 });

@@ -52,6 +52,8 @@ export default async function handler(
   }
 
   try {
+    const basicAuth = Buffer.from(`${secretKey}:`).toString("base64");
+
     const params = new URLSearchParams({
       amount: body.amount.toString(),
       currency: "jpy",
@@ -70,7 +72,7 @@ export default async function handler(
     const response = await fetch("https://api.pay.jp/v1/charges", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${secretKey}`,
+        Authorization: `Basic ${basicAuth}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: params.toString(),
