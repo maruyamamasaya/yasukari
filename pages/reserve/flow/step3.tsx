@@ -349,7 +349,6 @@ export default function ReserveFlowStep3() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-red-500">Step 3 / 3</p>
               <h1 className="text-2xl font-bold text-gray-900">決済情報の入力</h1>
-              <p className="text-sm text-gray-600">Pay.JP Checkout を利用して決済を実行します。</p>
             </div>
             <Link
               href="/products"
