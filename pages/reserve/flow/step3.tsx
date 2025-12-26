@@ -409,10 +409,10 @@ export default function ReserveFlowStep3() {
             <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900">クレジットカード決済</h3>
-                <span className="text-xs text-gray-500">Pay.JP Checkout</span>
+                <span className="text-xs text-gray-500">安全なカード決済フォーム</span>
               </div>
               <p className="text-sm text-gray-600">
-                決済ボタンを押すと Pay.JP のチェックアウト画面が表示されます。カード情報は Pay.JP 側で入力してください。
+                決済ボタンを押すと安全な決済画面が開きます。カード情報はそちらで入力してください。
               </p>
               {payjpError ? (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
