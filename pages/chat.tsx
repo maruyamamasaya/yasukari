@@ -11,10 +11,9 @@ export default function ChatPage() {
         <title>チャットサポート | yasukari</title>
       </Head>
       <main className="min-h-screen bg-gray-50 py-8 flex flex-col items-center">
-        <h1 className="text-center text-xl font-bold mb-6">チャットサポート</h1>
         {isOpen ? (
           <ChatBot
-            className="w-full sm:w-[560px] sm:min-w-[480px] h-[90vh] max-h-[900px]"
+            className="w-[92vw] max-w-[560px] min-w-[320px] h-[720px]"
             onClose={() => setIsOpen(false)}
           />
         ) : (

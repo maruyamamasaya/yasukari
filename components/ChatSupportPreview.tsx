@@ -70,9 +70,6 @@ export default function ChatSupportPreview({ variant, state, title }: PreviewPro
                     <p className={styles.headerSubtitle}>FAQ＋予約サポート</p>
                   </div>
                 </div>
-                <div className={styles.headerRight}>
-                  <span className={styles.headerBadge}>オンライン</span>
-                </div>
               </header>
 
               <div className={styles.chatArea}>
@@ -154,9 +151,6 @@ export default function ChatSupportPreview({ variant, state, title }: PreviewPro
               </div>
 
               <div className={styles.composer}>
-                <button className={styles.composerButton} aria-label="添付する">
-                  +
-                </button>
                 <input
                   className={styles.input}
                   placeholder="質問を入力してください"

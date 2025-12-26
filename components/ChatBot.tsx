@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChatbotFaqCategory } from "../types/chatbotFaq";
-import { FaRobot, FaArrowLeft, FaTimes, FaPlus, FaPaperPlane } from "react-icons/fa";
+import { FaRobot, FaArrowLeft, FaTimes, FaPaperPlane } from "react-icons/fa";
 import styles from "../styles/ChatSupport.module.css";
 
 interface Message {
@@ -312,7 +312,6 @@ export default function ChatBot({
             </div>
           </div>
           <div className={styles.headerRight}>
-            <span className={styles.headerBadge}>オンライン</span>
             <button
               onClick={handleCloseButton}
               className={styles.headerAction}
@@ -459,13 +458,6 @@ export default function ChatBot({
         )}
 
         <form onSubmit={handleFreeSubmit} className={styles.composer}>
-          <button
-            type="button"
-            className={styles.composerButton}
-            aria-label="添付する"
-          >
-            <FaPlus />
-          </button>
           <input
             type="text"
             name="free"
