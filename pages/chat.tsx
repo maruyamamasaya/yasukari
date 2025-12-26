@@ -13,7 +13,10 @@ export default function ChatPage() {
       <main className="min-h-screen bg-gray-50 py-8 flex flex-col items-center">
         <h1 className="text-center text-xl font-bold mb-6">チャットサポート</h1>
         {isOpen ? (
-          <ChatBot className="w-full sm:max-w-xl" onClose={() => setIsOpen(false)} />
+          <ChatBot
+            className="w-full sm:w-[560px] sm:min-w-[480px] h-[90vh] max-h-[900px]"
+            onClose={() => setIsOpen(false)}
+          />
         ) : (
           <button
             className="btn-primary px-5 py-3 rounded-full shadow"

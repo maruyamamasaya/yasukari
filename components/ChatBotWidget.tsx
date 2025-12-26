@@ -22,7 +22,10 @@ export default function ChatBotWidget({ visible = true }: ChatBotWidgetProps) {
           </div>
           {/* Desktop popup */}
           <div className="hidden sm:block relative mb-2 shadow-2xl">
-            <ChatBot className="w-[25rem] sm:w-[32rem]" onClose={() => setOpen(false)} />
+            <ChatBot
+              className="w-[560px] min-w-[480px] h-[90vh] max-h-[900px]"
+              onClose={() => setOpen(false)}
+            />
           </div>
         </div>
       )}
