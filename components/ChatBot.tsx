@@ -84,7 +84,7 @@ export default function ChatBot({
   }, [messages]);
 
   useEffect(() => {
-    fetch("/api/me")
+    fetch("/api/me", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.user?.id) {

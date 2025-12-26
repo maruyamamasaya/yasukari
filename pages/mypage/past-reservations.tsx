@@ -25,16 +25,15 @@ export default function PastReservationsPage() {
           signal: controller.signal,
         });
 
-        if (response.status === 401) {
-          await router.replace('/login');
-          return;
-        }
-
         if (!response.ok) {
           throw new Error('failed to load profile');
         }
 
-        await response.json();
+        const data = (await response.json().catch(() => ({}))) as { user?: { id?: string } | null };
+        if (!data.user) {
+          await router.replace('/login');
+          return;
+        }
       } catch (err) {
         if (!controller.signal.aborted) {
           console.error(err);

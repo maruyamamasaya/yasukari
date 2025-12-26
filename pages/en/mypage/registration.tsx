@@ -159,18 +159,17 @@ const RegistrationPage: NextPage = () => {
     const fetchUser = async () => {
       try {
         const response = await fetch('/api/me', { credentials: 'include', signal: controller.signal });
-        if (response.status === 401) {
-          await router.replace('/login');
-          return;
-        }
         if (!response.ok) {
           throw new Error('failed to load profile');
         }
 
-        const data = (await response.json()) as SessionResponse;
-        if (data.user) {
-          setSessionUser(data.user);
+        const data = (await response.json().catch(() => ({}))) as SessionResponse;
+        if (!data.user) {
+          await router.replace('/login');
+          return;
         }
+
+        setSessionUser(data.user);
       } catch (error) {
         if (!controller.signal.aborted) {
           console.error(error);

@@ -56,20 +56,19 @@ export default function ReserveFlowStep3() {
           signal: controller.signal,
         });
 
-        if (response.status === 401) {
-          await router.replace("/en/login");
-          return;
-        }
-
         if (!response.ok) {
           throw new Error("Failed to verify session");
         }
 
-        const data = (await response.json()) as { user?: { id: string; email?: string; username?: string } };
-        if (data.user) {
-          setSessionUser({ id: data.user.id, email: data.user.email, username: data.user.username });
+        const data = (await response.json().catch(() => ({}))) as {
+          user?: { id: string; email?: string; username?: string } | null;
+        };
+        if (!data.user) {
+          await router.replace("/en/login");
+          return;
         }
 
+        setSessionUser({ id: data.user.id, email: data.user.email, username: data.user.username });
         setAuthChecked(true);
       } catch (error) {
         if (!controller.signal.aborted) {

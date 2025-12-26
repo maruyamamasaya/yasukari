@@ -181,11 +181,13 @@ const RegisterTestPage: NextPage = () => {
 
     const fetchSessionUser = async () => {
       try {
-        const response = await fetch('/api/me');
+        const response = await fetch('/api/me', { credentials: 'include' });
         if (!response.ok) {
           return;
         }
-        const data = (await response.json()) as { user?: { id?: string; email?: string } };
+        const data = (await response.json().catch(() => ({}))) as {
+          user?: { id?: string; email?: string } | null;
+        };
         if (!canceled && data.user?.id) {
           setSessionUser({ id: data.user.id, email: data.user.email });
         }

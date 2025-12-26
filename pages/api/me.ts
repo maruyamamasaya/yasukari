@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const payload = await verifyCognitoIdToken(token);
 
     if (!payload) {
-      return res.status(401).json({ message: 'Not authenticated' });
+      return res.status(200).json({ user: null });
     }
 
     return res.status(200).json({
@@ -28,8 +28,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   } catch (error) {
     console.error('Failed to verify Cognito token', error);
-    const status = error instanceof Error && error.message.includes('required') ? 400 : 401;
-    const message = status === 400 ? 'Invalid authentication configuration.' : 'Not authenticated';
+    const status = error instanceof Error && error.message.includes('required') ? 400 : 503;
+    const message =
+      status === 400 ? 'Invalid authentication configuration.' : 'Authentication unavailable';
     return res.status(status).json({ message });
   }
 }

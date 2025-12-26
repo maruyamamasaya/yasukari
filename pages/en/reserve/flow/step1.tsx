@@ -59,13 +59,17 @@ export default function ReserveFlowStep1() {
           signal: controller.signal,
         });
 
-        if (response.status === 401) {
-          await router.replace("/en/login");
-          return;
-        }
-
         if (!response.ok) {
           throw new Error("Failed to verify session");
+        }
+
+        const data = (await response.json().catch(() => ({}))) as {
+          user?: { id?: string } | null;
+        };
+
+        if (!data.user) {
+          await router.replace("/en/login");
+          return;
         }
 
         setAuthChecked(true);

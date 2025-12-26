@@ -188,13 +188,14 @@ export default function ReserveModelPage({
     setCheckingSession(true);
     try {
       const response = await fetch("/api/me", { credentials: "include" });
-      if (response.status === 401) {
-        await router.push("/en/login");
-        return;
-      }
-
       if (!response.ok) {
         throw new Error("failed to verify session");
+      }
+
+      const data = (await response.json().catch(() => ({}))) as { user?: { id?: string } | null };
+      if (!data.user) {
+        await router.push("/en/login");
+        return;
       }
 
       const params = new URLSearchParams({
