@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
 import { formatDisplayPhoneNumber } from '../../lib/phoneNumber';
+import type { RegistrationData } from '../../types/registration';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -46,6 +47,10 @@ type SessionResponse = {
 
 type RegisterResponse = {
   message?: string;
+};
+
+type RegistrationResponse = {
+  registration?: RegistrationData | null;
 };
 
 type AttributesResponse = {
@@ -148,6 +153,7 @@ const RegistrationPage: NextPage = () => {
   const [userError, setUserError] = useState('');
   const [availablePhones, setAvailablePhones] = useState<string[]>([]);
   const [selectedPhoneOption, setSelectedPhoneOption] = useState('');
+  const [hasPrefilledRegistration, setHasPrefilledRegistration] = useState(false);
 
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [licenseFileName, setLicenseFileName] = useState('');
@@ -215,6 +221,85 @@ const RegistrationPage: NextPage = () => {
     void fetchAttributes();
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (loadingUser || hasPrefilledRegistration) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchRegistration = async () => {
+      try {
+        const response = await fetch('/api/register/user', {
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (response.status === 401) {
+          await router.replace('/login');
+          return;
+        }
+
+        if (response.status === 404) {
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('failed to load registration');
+        }
+
+        const data = (await response.json()) as RegistrationResponse;
+        if (!data.registration) {
+          return;
+        }
+
+        const registration = data.registration;
+
+        setFormData((prev) => ({
+          ...prev,
+          name1: registration.name1 ?? prev.name1,
+          name2: registration.name2 ?? prev.name2,
+          kana1: registration.kana1 ?? prev.kana1,
+          kana2: registration.kana2 ?? prev.kana2,
+          sex: registration.sex === '2' ? '2' : '1',
+          birth: registration.birth ?? prev.birth,
+          zip: registration.zip ?? prev.zip,
+          address1: registration.address1 ?? prev.address1,
+          address2: registration.address2 ?? prev.address2,
+          mobile: registration.mobile ?? prev.mobile,
+          tel: registration.tel ?? prev.tel,
+          license: registration.license ?? prev.license,
+          work_place: registration.work_place ?? prev.work_place,
+          work_address: registration.work_address ?? prev.work_address,
+          work_tel: registration.work_tel ?? prev.work_tel,
+          other_name: registration.other_name ?? prev.other_name,
+          other_address: registration.other_address ?? prev.other_address,
+          other_tel: registration.other_tel ?? prev.other_tel,
+          enquete_purpose: registration.enquete_purpose ?? prev.enquete_purpose,
+          enquete_want: registration.enquete_want ?? prev.enquete_want,
+          enquete_touring: registration.enquete_touring ?? prev.enquete_touring,
+          enquete_magazine: registration.enquete_magazine ?? prev.enquete_magazine,
+          enquete_chance: registration.enquete_chance ?? prev.enquete_chance,
+        }));
+
+        if (registration.mobile) {
+          setSelectedPhoneOption(registration.mobile);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setHasPrefilledRegistration(true);
+        }
+      }
+    };
+
+    void fetchRegistration();
+    return () => controller.abort();
+  }, [hasPrefilledRegistration, loadingUser, router]);
 
   useEffect(() => {
     return () => {
@@ -842,7 +927,7 @@ const RegistrationPage: NextPage = () => {
                   disabled={isSubmitting || loadingUser}
                   className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
                 >
-                  {isSubmitting ? '送信中…' : '本登録を完了する'}
+                  {isSubmitting ? '送信中…' : '完了する'}
                 </button>
               </div>
               <div className="flex justify-center">
@@ -850,7 +935,7 @@ const RegistrationPage: NextPage = () => {
                   href="/mypage"
                   className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition hover:border-gray-300"
                 >
-                  マイページに戻る
+                  戻る
                 </Link>
               </div>
             </form>
