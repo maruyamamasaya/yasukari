@@ -261,20 +261,6 @@ export default function ReserveModelPage({
             <p className="mt-2 text-gray-700">
               {resolvedModelName} の予約リクエストです。店舗と日時を選択してお進みください。
             </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link
-              href={`/reserve/models/${managementNumber}/availability`}
-              className="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-black transition"
-            >
-              車種の空き状況を見る
-            </Link>
-              <Link
-                href={resolvedModelCode ? `/products/${resolvedModelCode}` : "/products"}
-                className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-300 transition"
-              >
-                車種ページに戻る
-              </Link>
-            </div>
           </header>
 
           <section className="bg-white shadow-sm ring-1 ring-gray-100 rounded-2xl p-6 sm:p-8 space-y-6">
@@ -428,6 +414,21 @@ export default function ReserveModelPage({
               >
                 {checkingSession ? "確認中..." : "予約内容を確認する"}
               </button>
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-2 border-t border-gray-100">
+              <Link
+                href={`/reserve/models/${managementNumber}/availability`}
+                className="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-black transition"
+              >
+                車種の空き状況を見る
+              </Link>
+              <Link
+                href={resolvedModelCode ? `/products/${resolvedModelCode}` : "/products"}
+                className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-300 transition"
+              >
+                車種ページに戻る
+              </Link>
             </div>
           </section>
         </div>
