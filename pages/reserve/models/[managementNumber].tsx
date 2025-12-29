@@ -403,7 +403,6 @@ export default function ReserveModelPage({
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-gray-600">
-                フォーム送信後、スタッフが空き状況を確認し、メールにてご連絡いたします。
               </p>
               <button
                 type="button"
