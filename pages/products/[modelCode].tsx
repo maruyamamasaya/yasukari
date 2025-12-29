@@ -78,9 +78,8 @@ export default function ProductDetailPage({
   vehicles,
   priceGuide,
 }: Props) {
-  const [selectedVehicle, setSelectedVehicle] = useState<string>(
-    vehicles[0]?.managementNumber ?? ""
-  );
+  const [selectedVehicle, setSelectedVehicle] = useState<string>("");
+  const [selectedStoreId, setSelectedStoreId] = useState<string>("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showRentalLimitModal, setShowRentalLimitModal] = useState(false);
   const [rentalCheckError, setRentalCheckError] = useState("");
@@ -97,7 +96,21 @@ export default function ProductDetailPage({
     [vehicles]
   );
 
+  const storeOptions = useMemo(() => {
+    const uniqueStores = new Set<string>();
+    vehicles.forEach((vehicle) => {
+      if (vehicle.storeId) uniqueStores.add(vehicle.storeId);
+    });
+    return Array.from(uniqueStores);
+  }, [vehicles]);
+
+  const filteredVehicleOptions = useMemo(() => {
+    if (!selectedStoreId) return [];
+    return vehicleOptions.filter((vehicle) => vehicle.storeId === selectedStoreId);
+  }, [vehicleOptions, selectedStoreId]);
+
   const hasStock = vehicleOptions.length > 0;
+  const hasFilteredStock = filteredVehicleOptions.length > 0;
   const showPrice = Boolean(bike.price24h);
 
   useEffect(() => {
@@ -153,6 +166,10 @@ export default function ProductDetailPage({
     () => vehicleOptions.find((option) => option.value === selectedVehicle)?.storeId,
     [selectedVehicle, vehicleOptions]
   );
+
+  useEffect(() => {
+    setSelectedVehicle("");
+  }, [selectedStoreId]);
 
   const hasActiveRental = (reservations: Reservation[]) =>
     reservations.some((reservation) => {
@@ -286,15 +303,50 @@ export default function ProductDetailPage({
                     <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-semibold text-gray-900">在庫の選択</p>
-                        <span className="text-xs text-gray-500">{vehicles.length}件</span>
+                        <span className="text-xs text-gray-500">
+                          {selectedStoreId ? `${filteredVehicleOptions.length}件` : `${vehicles.length}件`}
+                        </span>
+                      </div>
+                      <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
+                        <p className="text-xs font-semibold text-gray-700">レンタル店舗を選択</p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          まず、店舗を選んでから在庫を選択してください。
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {storeOptions.length === 0 ? (
+                            <span className="text-xs text-gray-500">店舗情報がありません</span>
+                          ) : (
+                            storeOptions.map((storeId) => {
+                              const isSelected = storeId === selectedStoreId;
+                              return (
+                                <button
+                                  key={storeId}
+                                  type="button"
+                                  onClick={() => setSelectedStoreId(storeId)}
+                                  className={`rounded-full px-4 py-2 text-xs font-semibold shadow-sm transition ${
+                                    isSelected
+                                      ? "bg-red-500 text-white"
+                                      : "bg-white text-gray-700 ring-1 ring-gray-200 hover:ring-red-200"
+                                  }`}
+                                >
+                                  {storeId}
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
                       </div>
                       <select
                         value={selectedVehicle}
                         onChange={(e) => setSelectedVehicle(e.target.value)}
                         className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
-                        disabled={vehicleOptions.length === 0}
+                        disabled={!selectedStoreId || filteredVehicleOptions.length === 0}
                       >
-                        {vehicleOptions.length === 0 ? (
+                        {!selectedStoreId ? (
+                          <option value="" disabled>
+                            先に店舗を選択してください
+                          </option>
+                        ) : filteredVehicleOptions.length === 0 ? (
                           <option value="" disabled>
                             在庫がありません
                           </option>
@@ -303,7 +355,7 @@ export default function ProductDetailPage({
                             <option value="" disabled>
                               管理番号を選択してください
                             </option>
-                            {vehicleOptions.map((vehicle) => (
+                            {filteredVehicleOptions.map((vehicle) => (
                               <option key={vehicle.value} value={vehicle.value}>
                                 {vehicle.label}
                               </option>
@@ -320,7 +372,7 @@ export default function ProductDetailPage({
                         <button
                           type="button"
                           onClick={handleReserveClick}
-                          disabled={!selectedVehicle || checkingRental}
+                          disabled={!selectedVehicle || !hasFilteredStock || checkingRental}
                           className="inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-300"
                         >
                           {checkingRental ? "予約状況を確認中…" : "この車種をレンタル予約する"}
