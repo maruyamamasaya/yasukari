@@ -75,7 +75,7 @@ export default function HomePage({ blogSlides, blogTags, bikeModelsAll, bikeClas
     {
       name: "三ノ輪店",
       description: "東京都台東区の国道4号線沿いにあるレンタルバイク店です。",
-      img: "https://lh3.googleusercontent.com/p/AF1QipO9gfqTiOGXc1xWxE90p1a7asvUFDH4smOC7R48=s680-w680-h510-rw",
+      img: "https://yasukari-file.s3.ap-northeast-1.amazonaws.com/PhotoUploads/1767016149538-9b1cfb29-74c6-4fad-b328-2ce52642b64f-unnamed.webp",
       href: "/stores#minowa",
     },
   ];
