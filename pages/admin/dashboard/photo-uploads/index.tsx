@@ -7,6 +7,7 @@ import {
   savePhotoUploads,
   type PhotoUpload,
 } from "../../../../lib/dashboard/photoUploads";
+import { prepareImageForUpload } from "../../../../lib/imageProcessing";
 import formStyles from "../../../../styles/AdminForm.module.css";
 import styles from "../../../../styles/PhotoUploads.module.css";
 
@@ -47,22 +48,6 @@ export default function PhotoUploadListPage() {
     savePhotoUploads(nextUploads);
   };
 
-  const readFileAsBase64 = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result;
-        if (typeof result === "string") {
-          const [, base64] = result.split(",");
-          resolve(base64 ?? "");
-        } else {
-          reject(new Error("Invalid file result"));
-        }
-      };
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
-    });
-
   const formatUploadDate = () => {
     const now = new Date();
     return now.toLocaleString("ja-JP", {
@@ -93,14 +78,14 @@ export default function PhotoUploadListPage() {
 
     setIsSubmitting(true);
     try {
-      const data = await readFileAsBase64(selectedFile);
+      const { base64, fileName, contentType } = await prepareImageForUpload(selectedFile);
       const response = await fetch("/api/admin/photo-uploads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          data,
-          fileName: selectedFile.name,
-          contentType: selectedFile.type,
+          data: base64,
+          fileName,
+          contentType,
         }),
       });
 
