@@ -482,6 +482,7 @@ export default function ReserveFlowStep3() {
                     email={sessionUser?.email ?? ""}
                     label={isSavingReservation ? "決済中…" : "決済する"}
                     submitText="決済する"
+                    enableApplePay
                   />
                 ) : null}
               </div>

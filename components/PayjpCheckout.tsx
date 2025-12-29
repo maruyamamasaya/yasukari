@@ -13,6 +13,7 @@ type PayjpCheckoutProps = {
   email: string;
   label: string;
   submitText: string;
+  enableApplePay?: boolean;
 };
 
 const PORTAL_ROOT_ID = "payjp-root";
@@ -32,9 +33,10 @@ const createCheckoutScript = ({
   email,
   label,
   submitText,
+  enableApplePay,
 }: Pick<
   PayjpCheckoutProps,
-  "publicKey" | "locale" | "description" | "amount" | "email" | "label" | "submitText"
+  "publicKey" | "locale" | "description" | "amount" | "email" | "label" | "submitText" | "enableApplePay"
 >) => {
   const script = document.createElement("script");
   script.id = CHECKOUT_SCRIPT_ID;
@@ -52,6 +54,9 @@ const createCheckoutScript = ({
   script.dataset.tokenName = "payjp-token";
   script.dataset.label = label;
   script.dataset.submitText = submitText;
+  if (enableApplePay) {
+    script.dataset.applePay = "true";
+  }
 
   return script;
 };
@@ -77,6 +82,7 @@ export default function PayjpCheckout({
   email,
   label,
   submitText,
+  enableApplePay = false,
 }: PayjpCheckoutProps) {
   const submitHandlerRef = useRef(onSubmit);
   const loadHandlerRef = useRef(onLoad);
@@ -134,6 +140,7 @@ export default function PayjpCheckout({
       email,
       label,
       submitText,
+      enableApplePay,
     });
 
     // ✅ append（この瞬間にPayJPが初期化される）
@@ -197,6 +204,7 @@ export default function PayjpCheckout({
     email,
     label,
     submitText,
+    enableApplePay,
     formRef,
     placeholderRef,
   ]);
