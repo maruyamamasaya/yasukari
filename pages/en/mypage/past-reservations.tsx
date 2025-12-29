@@ -5,6 +5,21 @@ import { useRouter } from 'next/router';
 
 import type { Reservation } from '../../../lib/reservations';
 
+const statusLabel = (status?: string) => {
+  if (!status) return '-';
+  if (status === '予約完了') return 'Completed';
+  if (status === 'キャンセル') return 'Canceled';
+  return status;
+};
+
+const isCompletedStatus = (status?: string) =>
+  status === '予約完了' || status?.toLowerCase() === 'completed';
+
+const isCanceledStatus = (status?: string) =>
+  status === 'キャンセル' ||
+  status?.toLowerCase() === 'canceled' ||
+  status?.toLowerCase() === 'cancelled';
+
 export default function PastReservationsPage() {
   const paymentInfoUrl = process.env.NEXT_PUBLIC_PAYMENT_INFO_URL ?? '/help#payment-info';
   const rentalContractBaseUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL;
@@ -74,8 +89,8 @@ export default function PastReservationsPage() {
         const allReservations = data.reservations ?? [];
         const pastReservations = allReservations.filter((reservation) => {
           const isCompleted =
-            reservation.reservationCompletedFlag || reservation.status === '予約完了';
-          return isCompleted || reservation.status === 'キャンセル';
+            reservation.reservationCompletedFlag || isCompletedStatus(reservation.status);
+          return isCompleted || isCanceledStatus(reservation.status);
         });
 
         setReservations(pastReservations);
@@ -198,7 +213,7 @@ export default function PastReservationsPage() {
                             </div>
                             <div className="flex flex-col items-end gap-2">
                               <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
-                                {reservation.status}
+                                {statusLabel(reservation.status)}
                               </span>
                               <span
                                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${

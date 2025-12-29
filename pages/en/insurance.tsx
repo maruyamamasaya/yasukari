@@ -8,17 +8,17 @@ export default function InsurancePageEn() {
   ]
 
   const vehicleCoverage = [
-    ['50cc – 125cc', '1,650円', '2,200円', '3,300円', '6,600円'],
-    ['126cc – 250cc', '2,200円', '4,400円', '5,500円', '11,000円'],
-    ['251cc and above', '2,750円', '5,500円', '6,875円', '13,750円'],
+    ['50cc – 125cc', '1,650 JPY', '2,200 JPY', '3,300 JPY', '6,600 JPY'],
+    ['126cc – 250cc', '2,200 JPY', '4,400 JPY', '5,500 JPY', '11,000 JPY'],
+    ['251cc and above', '2,750 JPY', '5,500 JPY', '6,875 JPY', '13,750 JPY'],
   ]
 
   const theftCoverage = [
-    ['50cc scooter, Gyro Canopy', '1,100円', 'Not covered'],
-    ['50cc manual, 125cc', '2,200円', ''],
-    ['Big scooter, 250cc manual', '3,300円', ''],
-    ['256–400cc', '4,400円', ''],
-    ['401cc and above', '5,500円', ''],
+    ['50cc scooter, Gyro Canopy', '1,100 JPY', 'Not covered'],
+    ['50cc manual, 125cc', '2,200 JPY', ''],
+    ['Big scooter, 250cc manual', '3,300 JPY', ''],
+    ['256–400cc', '4,400 JPY', ''],
+    ['401cc and above', '5,500 JPY', ''],
   ]
 
   const exclusions = [

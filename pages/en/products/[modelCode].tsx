@@ -48,7 +48,7 @@ type DurationKey = keyof typeof durationDays;
 
 const formatPrice = (price: number | undefined) =>
   typeof price === "number" && Number.isFinite(price)
-    ? `${price.toLocaleString()}円`
+    ? `${price.toLocaleString()} JPY`
     : undefined;
 
 const normalizePrice = (value: unknown): number | undefined => {
