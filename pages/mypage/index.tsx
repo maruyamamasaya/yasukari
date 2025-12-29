@@ -54,6 +54,13 @@ export default function MyPage() {
   const [returnRating, setReturnRating] = useState(0);
   const [returnSurvey, setReturnSurvey] = useState('');
   const [returnSubmitting, setReturnSubmitting] = useState(false);
+  const [mobileSectionsOpen, setMobileSectionsOpen] = useState({
+    reservations: true,
+    profile: false,
+    registration: false,
+    logout: false,
+    links: false,
+  });
   const router = useRouter();
 
   const readFileAsBase64 = (file: File) =>
@@ -89,6 +96,13 @@ export default function MyPage() {
     setReturnRating(0);
     setReturnSurvey('');
     setReturnSubmitting(false);
+  };
+
+  const toggleMobileSection = (key: keyof typeof mobileSectionsOpen) => {
+    setMobileSectionsOpen((prevState) => ({
+      ...prevState,
+      [key]: !prevState[key],
+    }));
   };
 
   useEffect(() => {
@@ -566,11 +580,28 @@ export default function MyPage() {
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
-                  <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  aria-expanded={mobileSectionsOpen.reservations}
+                  onClick={() => toggleMobileSection('reservations')}
+                  className="group flex flex-1 items-start justify-between gap-3 text-left md:pointer-events-none md:cursor-default"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
+                    <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
+                  </div>
+                  <span
+                    aria-hidden
+                    className={`ml-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600 transition-transform md:hidden ${
+                      mobileSectionsOpen.reservations ? 'rotate-180' : ''
+                    }`}
+                  >
+                    ▼
+                  </span>
+                </button>
+                <div
+                  className={`${mobileSectionsOpen.reservations ? 'flex' : 'hidden'} flex-wrap items-center gap-2 md:flex`}
+                >
                   <Link
                     href="/mypage/past-reservations"
                     target="_blank"
@@ -589,47 +620,44 @@ export default function MyPage() {
                   ) : null}
                 </div>
               </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
-                >
-                  レンタル延長
-                </button>
-                <Link
-                  href={unmannedRentalGuideUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100"
-                >
-                  無人店舗でのレンタルについて
-                </Link>
-                <Link
-                  href={unlockQrUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 sm:hidden"
-                >
-                  解錠用のQRを表示
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleReturnOpen}
-                  disabled={!activeReturnReservation}
-                  className="inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-emerald-50 disabled:text-black/60 disabled:ring-emerald-50"
-                >
-                  返却
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAccidentOpen}
-                  className="inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-200"
-                >
-                  事故・転倒
-                </button>
-              </div>
+              <div className={`${mobileSectionsOpen.reservations ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
+                  >
+                    レンタル延長
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100"
+                  >
+                    無人店舗でのレンタルについて
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 sm:hidden"
+                  >
+                    解錠用のQRを表示
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReturnOpen}
+                    disabled={!activeReturnReservation}
+                    className="inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-emerald-50 disabled:text-black/60 disabled:ring-emerald-50"
+                  >
+                    返却
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAccidentOpen}
+                    className="inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-200"
+                  >
+                    事故・転倒
+                  </button>
+                </div>
 
-              <div className="mt-4 space-y-3 text-sm text-gray-700">
+                <div className="mt-4 space-y-3 text-sm text-gray-700">
                 {reservationsError ? (
                   <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">{reservationsError}</p>
                 ) : loadingReservations ? (
@@ -761,76 +789,106 @@ export default function MyPage() {
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
+                <button
+                  type="button"
+                  aria-expanded={mobileSectionsOpen.profile}
+                  onClick={() => toggleMobileSection('profile')}
+                  className="group flex flex-1 items-center justify-between gap-3 text-left md:pointer-events-none md:cursor-default"
+                >
                   <h2 className="text-lg font-semibold text-gray-900">プロフィール情報</h2>
-                </div>
+                  <span
+                    aria-hidden
+                    className={`ml-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600 transition-transform md:hidden ${
+                      mobileSectionsOpen.profile ? 'rotate-180' : ''
+                    }`}
+                  >
+                    ▼
+                  </span>
+                </button>
                 <Link
                   href="/mypage/profile-setup"
-                  className="inline-flex items-center rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:text-red-800"
+                  className={`${mobileSectionsOpen.profile ? 'inline-flex' : 'hidden'} items-center rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:text-red-800 md:inline-flex`}
                 >
                   基本情報を編集
                 </Link>
               </div>
 
-              {attributesError ? (
-                <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{attributesError}</p>
-              ) : null}
+              <div className={`${mobileSectionsOpen.profile ? 'mt-3 block' : 'hidden'} md:mt-3 md:block`}>
+                {attributesError ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{attributesError}</p>
+                ) : null}
 
-              {loadingAttributes ? (
-                <p className="mt-3 text-sm text-gray-700">属性を取得しています…</p>
-              ) : attributes ? (
-                <dl className="mt-4 grid gap-4 text-sm text-gray-700 md:grid-cols-2">
-                  <div>
-                    <dt className="font-medium text-gray-600">電話番号</dt>
-                    <dd className="mt-1 text-gray-800">{formatPhoneLabel(attributes.phone_number)}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-600">ハンドルネーム</dt>
-                    <dd className="mt-1 text-gray-800">{attributes['custom:handle'] ?? '未設定'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-600">ロケーション / 言語</dt>
-                    <dd className="mt-1 text-gray-800">{localeLabel(attributes['custom:locale'])}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-600">ニックネーム</dt>
-                    <dd className="mt-1 text-gray-800">{attributes.name ?? '未設定'}</dd>
-                  </div>
-                </dl>
-              ) : (
-                <p className="mt-3 text-sm text-gray-700">プロフィール情報を取得できませんでした。</p>
-              )}
+                {loadingAttributes ? (
+                  <p className="mt-3 text-sm text-gray-700">属性を取得しています…</p>
+                ) : attributes ? (
+                  <dl className="mt-4 grid gap-4 text-sm text-gray-700 md:grid-cols-2">
+                    <div>
+                      <dt className="font-medium text-gray-600">電話番号</dt>
+                      <dd className="mt-1 text-gray-800">{formatPhoneLabel(attributes.phone_number)}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-gray-600">ハンドルネーム</dt>
+                      <dd className="mt-1 text-gray-800">{attributes['custom:handle'] ?? '未設定'}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-gray-600">ロケーション / 言語</dt>
+                      <dd className="mt-1 text-gray-800">{localeLabel(attributes['custom:locale'])}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-gray-600">ニックネーム</dt>
+                      <dd className="mt-1 text-gray-800">{attributes.name ?? '未設定'}</dd>
+                    </div>
+                  </dl>
+                ) : (
+                  <p className="mt-3 text-sm text-gray-700">プロフィール情報を取得できませんでした。</p>
+                )}
+              </div>
             </section>
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">本登録</h2>
-                  <p className="mt-1 text-sm text-gray-600">レンタルに必要な基本情報を入力するフォームです。</p>
-                  {loadingRegistration ? null : registration ? (
-                    isRegistrationComplete ? (
-                      <p className="mt-2 inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-200">
-                        本登録済み
-                      </p>
+                <button
+                  type="button"
+                  aria-expanded={mobileSectionsOpen.registration}
+                  onClick={() => toggleMobileSection('registration')}
+                  className="group flex flex-1 items-start justify-between gap-3 text-left md:pointer-events-none md:cursor-default"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">本登録</h2>
+                    <p className="mt-1 text-sm text-gray-600">レンタルに必要な基本情報を入力するフォームです。</p>
+                    {loadingRegistration ? null : registration ? (
+                      isRegistrationComplete ? (
+                        <p className="mt-2 inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-200">
+                          本登録済み
+                        </p>
+                      ) : (
+                        <p className="mt-2 inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
+                          本登録が未完了です
+                        </p>
+                      )
                     ) : (
-                      <p className="mt-2 inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
-                        本登録が未完了です
+                      <p className="mt-2 inline-flex items-center rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-200">
+                        本登録がまだ保存されていません
                       </p>
-                    )
-                  ) : (
-                    <p className="mt-2 inline-flex items-center rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-200">
-                      本登録がまだ保存されていません
-                    </p>
-                  )}
-                </div>
+                    )}
+                  </div>
+                  <span
+                    aria-hidden
+                    className={`ml-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600 transition-transform md:hidden ${
+                      mobileSectionsOpen.registration ? 'rotate-180' : ''
+                    }`}
+                  >
+                    ▼
+                  </span>
+                </button>
                 <Link
                   href="/mypage/registration"
-                  className="inline-flex items-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                  className={`${mobileSectionsOpen.registration ? 'inline-flex' : 'hidden'} items-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 md:inline-flex`}
                 >
                   本登録フォームへ進む
                 </Link>
               </div>
-              <div className="mt-4 space-y-3 text-sm text-gray-700">
+              <div className={`${mobileSectionsOpen.registration ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
                 {registrationError ? (
                   <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">{registrationError}</p>
                 ) : null}
@@ -882,36 +940,72 @@ export default function MyPage() {
             
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900">ログアウト</h2>
-              <p className="mt-2 text-sm text-gray-600">
-                ログアウトすると再度ログインするまでマイページを表示できません。
-              </p>
               <button
                 type="button"
-                onClick={handleLogout}
-                className="mt-4 inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
-                disabled={!user || loggingOut}
+                aria-expanded={mobileSectionsOpen.logout}
+                onClick={() => toggleMobileSection('logout')}
+                className="group flex w-full items-start justify-between gap-3 text-left md:pointer-events-none md:cursor-default"
               >
-                {loggingOut ? '処理中…' : 'ログアウトする'}
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">ログアウト</h2>
+                  <p className="mt-2 text-sm text-gray-600">
+                    ログアウトすると再度ログインするまでマイページを表示できません。
+                  </p>
+                </div>
+                <span
+                  aria-hidden
+                  className={`ml-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600 transition-transform md:hidden ${
+                    mobileSectionsOpen.logout ? 'rotate-180' : ''
+                  }`}
+                >
+                  ▼
+                </span>
               </button>
+              <div className={`${mobileSectionsOpen.logout ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+                  disabled={!user || loggingOut}
+                >
+                  {loggingOut ? '処理中…' : 'ログアウトする'}
+                </button>
+              </div>
             </section>
           </>
         )}
 
         <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">連携リンク</h2>
-          <ul className="mt-3 space-y-2 text-sm text-gray-700">
-            <li>
-              <Link className="text-red-600 hover:underline" href="/pricing">
-                料金表を見る
-              </Link>
-            </li>
-            <li>
-              <Link className="text-red-600 hover:underline" href="/help">
-                ヘルプセンター
-              </Link>
-            </li>
-          </ul>
+          <button
+            type="button"
+            aria-expanded={mobileSectionsOpen.links}
+            onClick={() => toggleMobileSection('links')}
+            className="group flex w-full items-center justify-between gap-3 text-left md:pointer-events-none md:cursor-default"
+          >
+            <h2 className="text-lg font-semibold text-gray-900">連携リンク</h2>
+            <span
+              aria-hidden
+              className={`ml-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600 transition-transform md:hidden ${
+                mobileSectionsOpen.links ? 'rotate-180' : ''
+              }`}
+            >
+              ▼
+            </span>
+          </button>
+          <div className={`${mobileSectionsOpen.links ? 'mt-3 block' : 'hidden'} md:mt-3 md:block`}>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li>
+                <Link className="text-red-600 hover:underline" href="/pricing">
+                  料金表を見る
+                </Link>
+              </li>
+              <li>
+                <Link className="text-red-600 hover:underline" href="/help">
+                  ヘルプセンター
+                </Link>
+              </li>
+            </ul>
+          </div>
         </section>
       </main>
       {showCancelNotice ? (
