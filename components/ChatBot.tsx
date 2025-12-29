@@ -457,27 +457,31 @@ export default function ChatBot({
           </div>
         )}
 
-        <form onSubmit={handleFreeSubmit} className={styles.composer}>
-          <input
-            type="text"
-            name="free"
-            className={styles.input}
-            placeholder={
-              step === "free"
-                ? "質問を入力してください"
-                : "チップで選択、または自由入力に切り替え"
-            }
-            disabled={step !== "free"}
-          />
-          <button
-            type="submit"
-            className={`${styles.composerButton} ${styles.sendButton}`}
-            aria-label="送信する"
-            disabled={step !== "free" || isSubmitting}
-          >
-            <FaPaperPlane />
-          </button>
-        </form>
+        {step === "free" ? (
+          <form onSubmit={handleFreeSubmit} className={styles.composer}>
+            <input
+              type="text"
+              name="free"
+              className={styles.input}
+              placeholder="質問を入力してください"
+              disabled={isSubmitting}
+            />
+            <button
+              type="submit"
+              className={`${styles.composerButton} ${styles.sendButton}`}
+              aria-label="送信する"
+              disabled={isSubmitting}
+            >
+              <FaPaperPlane />
+            </button>
+          </form>
+        ) : (
+          <div className={styles.composerHidden}>
+            <div className={styles.composerHiddenLabel}>
+              「その他の質問を入力する」を選択すると入力欄が開きます
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
