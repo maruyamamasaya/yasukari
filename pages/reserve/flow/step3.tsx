@@ -437,26 +437,28 @@ export default function ReserveFlowStep3() {
               {payjpError ? (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
               ) : null}
-              <div className="flex flex-wrap items-center gap-3">
-                <div ref={payjpSlotRef} />
-                {canRenderPayment ? (
-                  <PayjpCheckout
-                    formRef={payjpFormRef}
-                    placeholderRef={payjpSlotRef}
-                    onSubmit={handleSubmitPayment}
-                    onLoad={handlePayjpLoaded}
-                    onError={handlePayjpLoadError}
-                    locale="ja"
-                    publicKey={payJpPublicKey}
-                    description={`${store} ${modelName} ${managementNumber}`}
-                    amount={totalAmount}
-                    email={sessionUser?.email ?? ""}
-                    label={isSavingReservation ? "決済中…" : "決済する"}
-                    submitText="決済する"
-                    enableApplePay
-                  />
-                ) : null}
-              </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div ref={payjpSlotRef} />
+                  {canRenderPayment ? (
+                    <PayjpCheckout
+                      formRef={payjpFormRef}
+                      placeholderRef={payjpSlotRef}
+                      onSubmit={handleSubmitPayment}
+                      onLoad={handlePayjpLoaded}
+                      onError={handlePayjpLoadError}
+                      locale="ja"
+                      publicKey={payJpPublicKey}
+                      description={`${store} ${modelName} ${managementNumber}`}
+                      amount={totalAmount}
+                      email={sessionUser?.email ?? ""}
+                      label={isSavingReservation ? "決済中…" : "決済する"}
+                      submitText="決済する"
+                      enableApplePay
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-500">決済フォームを準備しています…</p>
+                  )}
+                </div>
               {statusMessage ? (
                 <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">{statusMessage}</p>
               ) : null}

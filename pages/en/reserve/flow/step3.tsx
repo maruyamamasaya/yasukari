@@ -482,7 +482,9 @@ export default function ReserveFlowStep3() {
                     submitText="Submit payment"
                     enableApplePay
                   />
-                ) : null}
+                ) : (
+                  <p className="text-sm text-gray-500">Preparing the payment form…</p>
+                )}
               </div>
               {statusMessage ? (
                 <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">{statusMessage}</p>
