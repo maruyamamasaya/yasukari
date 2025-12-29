@@ -13,6 +13,7 @@ import {
 } from "../../lib/bikes";
 import { readVehicleRentalPrices } from "../../lib/server/vehicleRentalPrices";
 import RecentlyViewed from "../../components/RecentlyViewed";
+import type { Reservation } from "../../lib/reservations";
 
 interface Props {
   bike: BikeModel;
@@ -81,6 +82,9 @@ export default function ProductDetailPage({
     vehicles[0]?.managementNumber ?? ""
   );
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showRentalLimitModal, setShowRentalLimitModal] = useState(false);
+  const [rentalCheckError, setRentalCheckError] = useState("");
+  const [checkingRental, setCheckingRental] = useState(false);
   const router = useRouter();
 
   const vehicleOptions = useMemo(
@@ -149,6 +153,50 @@ export default function ProductDetailPage({
     () => vehicleOptions.find((option) => option.value === selectedVehicle)?.storeId,
     [selectedVehicle, vehicleOptions]
   );
+
+  const hasActiveRental = (reservations: Reservation[]) =>
+    reservations.some((reservation) => {
+      const isCompleted =
+        reservation.reservationCompletedFlag || reservation.status === "予約完了";
+      return !isCompleted && reservation.status !== "キャンセル";
+    });
+
+  const handleReserveClick = async () => {
+    if (!selectedVehicle || checkingRental) return;
+    setCheckingRental(true);
+    setRentalCheckError("");
+
+    try {
+      const response = await fetch("/api/reservations/me", {
+        credentials: "include",
+      });
+
+      if (response.status === 401) {
+        setShowAuthModal(true);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("failed to load reservations");
+      }
+
+      const data = (await response.json()) as { reservations?: Reservation[] };
+      const reservations = data.reservations ?? [];
+
+      if (hasActiveRental(reservations)) {
+        setShowRentalLimitModal(true);
+        return;
+      }
+
+      await router.push(`/reserve/models/${selectedVehicle}`);
+    } catch (error) {
+      console.error("Failed to verify rental status", error);
+      setRentalCheckError("予約状況の確認に失敗しました。時間をおいて再度お試しください。");
+      setShowRentalLimitModal(true);
+    } finally {
+      setCheckingRental(false);
+    }
+  };
 
   return (
     <>
@@ -269,12 +317,14 @@ export default function ProductDetailPage({
                         </p>
                       ) : null}
                       {hasStock ? (
-                        <Link
-                          href={`/reserve/models/${selectedVehicle}`}
-                          className="inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 transition"
+                        <button
+                          type="button"
+                          onClick={handleReserveClick}
+                          disabled={!selectedVehicle || checkingRental}
+                          className="inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-300"
                         >
-                          この車種をレンタル予約する
-                        </Link>
+                          {checkingRental ? "予約状況を確認中…" : "この車種をレンタル予約する"}
+                        </button>
                       ) : (
                         <button
                           className="inline-flex w-full items-center justify-center rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-500 shadow cursor-not-allowed"
@@ -455,6 +505,49 @@ export default function ProductDetailPage({
                   onClick={() => setShowAuthModal(false)}
                 >
                   今は閉じる
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {showRentalLimitModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="bg-emerald-600 px-6 py-4 text-white">
+              <p className="text-sm font-semibold uppercase tracking-wide">Rental Notice</p>
+              <h2 className="mt-1 text-xl font-bold">レンタル中のバイクを返却してください</h2>
+            </div>
+            <div className="space-y-4 px-6 py-5 text-gray-700">
+              {rentalCheckError ? (
+                <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {rentalCheckError}
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm leading-relaxed">
+                    現在ご利用中のレンタルがあるため、新しい予約はできません。
+                  </p>
+                  <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    「マイページ」→「予約状況」→「直近の予約や利用状況をここに表示します。」で
+                    返却ステータスをご確認ください。
+                  </div>
+                </>
+              )}
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-700 transition"
+                  onClick={() => router.push("/mypage")}
+                >
+                  マイページの予約状況へ
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:border-gray-300"
+                  onClick={() => setShowRentalLimitModal(false)}
+                >
+                  閉じる
                 </button>
               </div>
             </div>
