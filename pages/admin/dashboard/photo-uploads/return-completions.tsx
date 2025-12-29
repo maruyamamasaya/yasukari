@@ -18,6 +18,7 @@ export default function ReturnCompletionListPage() {
   const [reports, setReports] = useState<ReturnCompletion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<ReturnCompletion | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -52,6 +53,21 @@ export default function ReturnCompletionListPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!selectedReport) {
+      return;
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedReport(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedReport]);
+
   return (
     <>
       <Head>
@@ -82,7 +98,13 @@ export default function ReturnCompletionListPage() {
             ) : (
               <div className={styles.photoGrid}>
                 {reports.map((report) => (
-                  <div key={report.id} className={styles.photoCard}>
+                  <button
+                    key={report.id}
+                    type="button"
+                    className={styles.photoCard}
+                    onClick={() => setSelectedReport(report)}
+                    aria-label={`${report.userName}の返却完了写真の詳細を表示`}
+                  >
                     <img
                       src={report.imageUrl}
                       alt={`${report.userName}の返却完了写真`}
@@ -94,13 +116,81 @@ export default function ReturnCompletionListPage() {
                       <span className={styles.photoSubtext}>{report.email}</span>
                       <span className={styles.photoSubtext}>{report.phone}</span>
                       <span className={styles.photoSubtext}>{report.uploadedAt}</span>
+                      <span className={styles.photoDetailHint}>クリックで詳細</span>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
           </section>
         </div>
+        {selectedReport ? (
+          <div
+            className={styles.modalOverlay}
+            role="presentation"
+            onClick={() => setSelectedReport(null)}
+          >
+            <div
+              className={styles.modalCard}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${selectedReport.userName}の返却完了詳細`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <header className={styles.modalHeader}>
+                <div>
+                  <p className={styles.modalTitle}>返却完了の詳細</p>
+                  <p className={styles.modalSubtitle}>{selectedReport.userName}</p>
+                </div>
+                <button
+                  type="button"
+                  className={styles.modalCloseButton}
+                  onClick={() => setSelectedReport(null)}
+                >
+                  閉じる
+                </button>
+              </header>
+              <div className={styles.modalContent}>
+                <img
+                  src={selectedReport.imageUrl}
+                  alt={`${selectedReport.userName}の返却完了写真の拡大表示`}
+                  className={styles.modalImage}
+                />
+                <dl className={styles.modalMeta}>
+                  <div>
+                    <dt>ユーザーID</dt>
+                    <dd>{selectedReport.userId}</dd>
+                  </div>
+                  <div>
+                    <dt>メール</dt>
+                    <dd>{selectedReport.email}</dd>
+                  </div>
+                  <div>
+                    <dt>電話番号</dt>
+                    <dd>{selectedReport.phone}</dd>
+                  </div>
+                  <div>
+                    <dt>送信日時</dt>
+                    <dd>{selectedReport.uploadedAt}</dd>
+                  </div>
+                  <div>
+                    <dt>画像URL</dt>
+                    <dd>
+                      <a
+                        href={selectedReport.imageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.modalLink}
+                      >
+                        画像を新しいタブで開く
+                      </a>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </DashboardLayout>
     </>
   );
