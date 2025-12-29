@@ -161,7 +161,7 @@ export default function HeaderEn() {
               <Link href="/en/help">
                 <NavItem label="Help" />
               </Link>
-              <Link href="/notifications" aria-label="Notifications">
+              <Link href="/en/notifications" aria-label="Notifications">
                 <span className="flex items-center text-gray-700 hover:text-red-600 transition-colors">
                   <FaBell />
                 </span>
@@ -233,7 +233,7 @@ export default function HeaderEn() {
                 </Link>
               </li>
               <li>
-                <Link href="/notifications">
+                <Link href="/en/notifications">
                   <NavItem icon={<FaBell />} label="Notifications" />
                 </Link>
               </li>
