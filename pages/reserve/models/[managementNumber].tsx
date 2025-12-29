@@ -327,8 +327,8 @@ export default function ReserveModelPage({
               <div className="space-y-4">
                 <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 shadow-sm">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <p className="text-sm font-semibold text-gray-900">カレンダーから選択</p>
-                    <div className="flex gap-2 text-xs">
+                    <p className="text-xs font-semibold text-gray-900">カレンダーから選択</p>
+                    <div className="flex gap-2 text-[11px]">
                       <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-red-700">
                         <span className="h-2 w-2 rounded-full bg-red-500" />出発日
                       </span>
@@ -339,24 +339,6 @@ export default function ReserveModelPage({
                         <span className="h-2 w-2 rounded-full bg-green-500" />レンタル期間
                       </span>
                     </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 text-sm">
-                    <button
-                      type="button"
-                      className={`rounded-full px-3 py-1 font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeSelection === "pickup" ? "bg-red-500 text-white focus:ring-red-500" : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-100 focus:ring-gray-300"}`}
-                      onClick={() => setActiveSelection("pickup")}
-                    >
-                      出発日を選択
-                    </button>
-                    <button
-                      type="button"
-                      className={`rounded-full px-3 py-1 font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeSelection === "return" ? "bg-blue-500 text-white focus:ring-blue-500" : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-100 focus:ring-gray-300"}`}
-                      onClick={() => setActiveSelection("return")}
-                      disabled={!pickup}
-                    >
-                      返却予定日を選択
-                    </button>
                   </div>
 
                   <Calendar
@@ -384,6 +366,23 @@ export default function ReserveModelPage({
                       }
                     }}
                   />
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                    <button
+                      type="button"
+                      className={`rounded-full px-3 py-1 font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeSelection === "pickup" ? "bg-red-500 text-white focus:ring-red-500" : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-100 focus:ring-gray-300"}`}
+                      onClick={() => setActiveSelection("pickup")}
+                    >
+                      出発日を選択
+                    </button>
+                    <button
+                      type="button"
+                      className={`rounded-full px-3 py-1 font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${activeSelection === "return" ? "bg-blue-500 text-white focus:ring-blue-500" : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-100 focus:ring-gray-300"}`}
+                      onClick={() => setActiveSelection("return")}
+                      disabled={!pickup}
+                    >
+                      返却予定日を選択
+                    </button>
+                  </div>
                   <p className="mt-3 text-xs text-gray-600">
                     {activeSelection === "pickup"
                       ? "明日以降の日付から出発日を選択してください"
