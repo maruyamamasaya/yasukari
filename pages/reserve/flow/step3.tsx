@@ -378,18 +378,21 @@ export default function ReserveFlowStep3() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">貸出・返却日時</p>
-                  <h2 className="text-lg font-bold text-gray-900">
+                  <h2 className="text-base font-bold text-gray-900">
                     {pickupLabel} {pickupTime} → {returnLabel} {returnTime}
                   </h2>
                 </div>
                 <div className="flex flex-col items-end gap-1 text-right">
                   <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{store}</span>
-                  <span className="text-xs text-gray-500">{modelName} / {managementNumber}</span>
+                  <p className="text-xs text-gray-500">{modelName} / {managementNumber}</p>
                 </div>
               </div>
               <div className="rounded-xl bg-gray-50 p-4">
                 <div className="flex items-center justify-between text-lg font-bold text-gray-900">
-                  <span>合計（税込）</span>
+                  <span className="flex flex-col leading-tight">
+                    <span>レンタル料金</span>
+                    <span>合計（税込）</span>
+                  </span>
                   <span>{totalAmount.toLocaleString()}円</span>
                 </div>
                 <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
@@ -408,10 +411,6 @@ export default function ReserveFlowStep3() {
                     <dd className="font-semibold text-gray-900">
                       {rentalDurationHours ? `${rentalDurationHours} 時間` : "算出不可"}
                     </dd>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-gray-100">
-                    <dt>完了フラグ</dt>
-                    <dd className="font-semibold text-gray-900">未完了</dd>
                   </div>
                 </dl>
               </div>
