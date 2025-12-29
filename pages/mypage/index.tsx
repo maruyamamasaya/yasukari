@@ -797,6 +797,7 @@ export default function MyPage() {
                   </ul>
                 )}
               </div>
+            </div>
             </section>
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
