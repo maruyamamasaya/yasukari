@@ -8,6 +8,7 @@ import {
   FaMotorcycle,
   FaClipboardList,
   FaBars,
+  FaBell,
 } from 'react-icons/fa';
 import AnnouncementBar from './AnnouncementBar';
 
@@ -173,6 +174,11 @@ export default function Header() {
               <Link href="/help">
                 <NavItem label="ヘルプ" />
               </Link>
+              <Link href="/notifications" aria-label="通知">
+                <span className="flex items-center text-gray-700 hover:text-red-600 transition-colors">
+                  <FaBell />
+                </span>
+              </Link>
               <div className="flex items-center rounded-full border border-red-500 bg-red-50/70 shadow-sm text-xs font-semibold text-gray-800">
                 <button
                   type="button"
@@ -237,6 +243,11 @@ export default function Header() {
               <li>
                 <Link href="/help">
                   <NavItem label="ヘルプ" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/notifications">
+                  <NavItem icon={<FaBell />} label="通知" />
                 </Link>
               </li>
               <li className="w-full pt-4">
