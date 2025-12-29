@@ -47,6 +47,7 @@ export default function MyPage() {
   const [accidentUploading, setAccidentUploading] = useState(false);
   const [accidentSubmitted, setAccidentSubmitted] = useState(false);
   const [showReturnModal, setShowReturnModal] = useState(false);
+  const [showReturnExpiredModal, setShowReturnExpiredModal] = useState(false);
   const [returnFile, setReturnFile] = useState<File | null>(null);
   const [returnError, setReturnError] = useState('');
   const [returnUploading, setReturnUploading] = useState(false);
@@ -433,14 +434,25 @@ export default function MyPage() {
   const activeReturnReservation =
     reservations.find((reservation) => !reservation.reservationCompletedFlag) ?? null;
   const hasActiveReservation = reservations.length > 0;
+  const isReturnOverdue = useMemo(() => {
+    if (!activeReturnReservation?.returnAt) return false;
+    const returnDate = new Date(activeReturnReservation.returnAt);
+    if (Number.isNaN(returnDate.getTime())) return false;
+    return Date.now() > returnDate.getTime();
+  }, [activeReturnReservation]);
 
   const handleReturnOpen = () => {
     resetReturnModal();
+    if (isReturnOverdue) {
+      setShowReturnExpiredModal(true);
+      return;
+    }
     setShowReturnModal(true);
   };
 
   const handleReturnClose = () => {
     setShowReturnModal(false);
+    setShowReturnExpiredModal(false);
     resetReturnModal();
   };
 
@@ -1219,6 +1231,38 @@ export default function MyPage() {
                 </button>
               </div>
             ) : null}
+          </div>
+        </div>
+      ) : null}
+      {showReturnExpiredModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl border-2 border-rose-200 bg-white p-6 shadow-2xl ring-1 ring-rose-100">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">【返却期限のご案内】</h2>
+                <div className="mt-3 space-y-2 text-sm text-gray-600">
+                  <p>期限が過ぎております。</p>
+                  <p>返却については、yasukariにお問い合わせください。</p>
+                  <p>レンタルを延長される場合は、レンタル延長のボタンを押してください。</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleReturnClose}
+                className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800"
+              >
+                閉じる
+              </button>
+            </div>
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleReturnClose}
+                className="inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+              >
+                閉じる
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
