@@ -596,6 +596,18 @@ export default function MyPage() {
                 </button>
                 <button
                   type="button"
+                  className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100"
+                >
+                  無人店舗でのレンタルについて
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 sm:hidden"
+                >
+                  解錠用のQRを表示
+                </button>
+                <button
+                  type="button"
                   onClick={handleReturnOpen}
                   disabled={!activeReturnReservation}
                   className="inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-emerald-50 disabled:text-black/60 disabled:ring-emerald-50"
