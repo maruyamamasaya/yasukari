@@ -69,7 +69,7 @@ export default function HomePage({ blogSlides, blogTags, bikeModelsAll, bikeClas
     {
       name: "足立小台本店",
       description: "足立区にある格安バイク屋です。",
-      img: "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nqVQEu7iamQVzNqnomQOvgsiEUR7DIW3ZdaAHEnxWggYWnC73HV5doQ1TwHabb2CW_mPNIfW1bbR8gKFCRrVYybhzd5kZ7iuU0cOLGuamr8lRc_onfgLsFbYbPWL0AaoCn9v30=s680-w680-h510-rw",
+      img: "https://yasukari-file.s3.ap-northeast-1.amazonaws.com/PhotoUploads/1767016698698-e05e0c34-bdeb-456b-b53f-7528025b3ed9-images.jpeg",
       href: "/stores#adachi",
     },
     {
