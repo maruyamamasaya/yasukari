@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient } from "../../lib/dynamodb";
 import { CouponRule } from "../../lib/dashboard/types";
@@ -218,6 +218,39 @@ async function handlePut(
   }
 }
 
+async function handleDelete(
+  request: NextApiRequest,
+  response: NextApiResponse<CouponRuleResponse>
+) {
+  try {
+    const couponCodeParam = request.query.couponCode;
+    const couponCode = Array.isArray(couponCodeParam) ? couponCodeParam[0] : couponCodeParam;
+
+    if (typeof couponCode !== "string" || !couponCode.trim()) {
+      response.status(400).json({ message: "クーポンコードを指定してください。" });
+      return;
+    }
+
+    const client = getDocumentClient();
+
+    await client.send(
+      new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { coupon_code: couponCode.trim() },
+        ConditionExpression: "attribute_exists(coupon_code)",
+      })
+    );
+
+    response.status(200).json({ message: "クーポンを削除しました。" });
+  } catch (error) {
+    console.error("Failed to delete coupon rule", error);
+    response.status(400).json({
+      message:
+        error instanceof Error ? error.message : "クーポンの削除に失敗しました。",
+    });
+  }
+}
+
 export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse<CouponRuleResponse>
@@ -232,8 +265,11 @@ export default async function handler(
     case "PUT":
       await handlePut(request, response);
       break;
+    case "DELETE":
+      await handleDelete(request, response);
+      break;
     default:
-      response.setHeader("Allow", ["GET", "POST", "PUT"]);
+      response.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
       response.status(405).json({ message: "Method Not Allowed" });
   }
 }

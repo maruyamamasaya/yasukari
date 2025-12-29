@@ -35,6 +35,7 @@ const formatDiscount = (coupon: CouponRule): string => {
 export default function CouponRuleListPage() {
   const [coupons, setCoupons] = useState<CouponRule[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [deletingCoupon, setDeletingCoupon] = useState<string | null>(null);
 
   useEffect(() => {
     const loadCoupons = async () => {
@@ -60,6 +61,42 @@ export default function CouponRuleListPage() {
   const sortedCoupons = useMemo(() => {
     return [...coupons].sort((a, b) => a.coupon_code.localeCompare(b.coupon_code));
   }, [coupons]);
+
+  const handleDelete = async (coupon: CouponRule) => {
+    if (deletingCoupon) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `クーポン「${coupon.title}（${coupon.coupon_code}）」を削除しますか？`
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingCoupon(coupon.coupon_code);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/coupon-rules?couponCode=${encodeURIComponent(coupon.coupon_code)}`,
+        { method: "DELETE" }
+      );
+
+      if (!response.ok) {
+        const data = (await response.json()) as { message?: string };
+        setError(data.message ?? "クーポンの削除に失敗しました。");
+        return;
+      }
+
+      setCoupons((prev) => prev.filter((item) => item.coupon_code !== coupon.coupon_code));
+    } catch (deleteError) {
+      console.error("Failed to delete coupon", deleteError);
+      setError("クーポンの削除に失敗しました。");
+    } finally {
+      setDeletingCoupon(null);
+    }
+  };
 
   return (
     <>
@@ -119,6 +156,14 @@ export default function CouponRuleListPage() {
                           >
                             編集
                           </Link>
+                          <button
+                            type="button"
+                            className={tableStyles.dangerButton}
+                            onClick={() => void handleDelete(coupon)}
+                            disabled={deletingCoupon === coupon.coupon_code}
+                          >
+                            {deletingCoupon === coupon.coupon_code ? "削除中..." : "削除"}
+                          </button>
                         </div>
                       </td>
                     </tr>
