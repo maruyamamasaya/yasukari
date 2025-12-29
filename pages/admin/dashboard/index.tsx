@@ -254,12 +254,15 @@ export default function DashboardTopPage() {
             reservations?: Reservation[];
           };
           const reservations = data.reservations ?? [];
+          const isReservationCompleted = (reservation: Reservation) =>
+            reservation.reservationCompletedFlag ||
+            reservation.status === "予約完了";
           setReservationCounts({
             current: reservations.filter(
-              (reservation) => !reservation.reservationCompletedFlag
+              (reservation) => !isReservationCompleted(reservation)
             ).length,
             completed: reservations.filter(
-              (reservation) => reservation.reservationCompletedFlag
+              (reservation) => isReservationCompleted(reservation)
             ).length,
             isLoading: false,
             error: false,
