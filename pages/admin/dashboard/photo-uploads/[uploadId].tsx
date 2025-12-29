@@ -100,7 +100,7 @@ export default function PhotoUploadDetailPage() {
                 <div className={styles.detailMetaRow}>
                   <span className={styles.detailMetaLabel}>アップロード者</span>
                   <span className={styles.detailMetaValue}>
-                    {upload.uploaderName}
+                    {upload.uploaderName ?? "未設定"}
                   </span>
                 </div>
                 <div className={styles.detailMetaRow}>

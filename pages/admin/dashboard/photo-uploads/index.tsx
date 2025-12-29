@@ -119,6 +119,7 @@ export default function PhotoUploadListPage() {
         uploadedAt: formatUploadDate(),
         status: "登録済み",
         s3Url: result.url,
+        uploaderName: "管理者",
         notes: notes.trim() ? notes.trim() : undefined,
       };
 
