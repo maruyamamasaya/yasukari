@@ -420,7 +420,7 @@ export default function ReserveFlowStep3() {
               </div>
               <div className="rounded-xl bg-gray-50 p-4">
                 <div className="flex items-center justify-between text-lg font-bold text-gray-900">
-                  <span>レンタル料金 合計（税込）</span>
+                  <span>合計（税込）</span>
                   <span>{totalAmount.toLocaleString()}円</span>
                 </div>
                 <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
