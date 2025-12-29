@@ -7,6 +7,7 @@ import type { RegistrationData } from '../../types/registration';
 import { REQUIRED_REGISTRATION_FIELDS } from '../../types/registration';
 import type { Reservation } from '../../lib/reservations';
 import { formatDisplayPhoneNumber } from '../../lib/phoneNumber';
+import { prepareImageForUpload } from '../../lib/imageProcessing';
 
 type SessionUser = {
   id: string;
@@ -64,24 +65,6 @@ export default function MyPage() {
   });
   const router = useRouter();
   const sectionActionClass = 'inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold';
-
-  const readFileAsBase64 = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result;
-        if (typeof result === 'string') {
-          const base64 = result.split(',')[1] ?? '';
-          resolve(base64);
-        } else {
-          reject(new Error('Invalid file data'));
-        }
-      };
-      reader.onerror = () => {
-        reject(new Error('Failed to read file'));
-      };
-      reader.readAsDataURL(file);
-    });
 
   const resetAccidentModal = () => {
     setAccidentFile(null);
@@ -407,14 +390,14 @@ export default function MyPage() {
     setAccidentUploading(true);
 
     try {
-      const data = await readFileAsBase64(accidentFile);
+      const { base64, fileName, contentType } = await prepareImageForUpload(accidentFile);
       const response = await fetch('/api/accident-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          data,
-          fileName: accidentFile.name,
-          contentType: accidentFile.type,
+          data: base64,
+          fileName,
+          contentType,
         }),
       });
 
@@ -482,14 +465,14 @@ export default function MyPage() {
     setReturnUploading(true);
 
     try {
-      const data = await readFileAsBase64(returnFile);
+      const { base64, fileName, contentType } = await prepareImageForUpload(returnFile);
       const response = await fetch('/api/return-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          data,
-          fileName: returnFile.name,
-          contentType: returnFile.type,
+          data: base64,
+          fileName,
+          contentType,
         }),
       });
 
