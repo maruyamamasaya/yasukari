@@ -476,7 +476,6 @@ export default function ReserveFlowStep2() {
                     >
                       <div className="space-y-1">
                         <p className="text-sm font-semibold text-gray-900">{option.label}</p>
-                        <p className="text-xs text-gray-600">あり / なし を切り替えできます</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold text-gray-900">
