@@ -16,6 +16,7 @@ import {
 } from "../../../../lib/dashboard/types";
 import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
 import { buildMaintenanceAvailability, formatDateKey } from "../../../../lib/dashboard/utils";
+import type { Reservation } from "../../../../lib/reservations";
 
 const STATUS_LABELS: Record<RentalAvailabilityStatus, string> = {
   AVAILABLE: "レンタル可",
@@ -66,6 +67,42 @@ const buildCalendarGrid = (month: Date): CalendarCell[][] => {
   }
 
   return weeks;
+};
+
+const buildReservationAvailability = (reservations: Reservation[]): RentalAvailabilityMap => {
+  const map: RentalAvailabilityMap = {};
+
+  reservations.forEach((reservation) => {
+    const isPaid = Boolean(reservation.paymentDate || reservation.paymentId);
+    const isExcludedStatus =
+      reservation.status === "キャンセル" || reservation.status === "入金待ち";
+
+    if (!isPaid || isExcludedStatus) {
+      return;
+    }
+
+    const startDate = new Date(reservation.pickupAt);
+    const endDate = new Date(reservation.returnAt);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return;
+    }
+
+    const renterName = reservation.memberName?.trim() || "名前未登録";
+    const cursor = new Date(startDate);
+    while (cursor <= endDate) {
+      const key = formatDateKey(cursor);
+      const existingNote = map[key]?.note;
+      const note =
+        existingNote && existingNote !== renterName
+          ? Array.from(new Set([existingNote, renterName])).join(" / ")
+          : renterName;
+
+      map[key] = { status: "RENTED", note };
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  });
+
+  return map;
 };
 
 const normalizeAvailabilityMap = (value: unknown): RentalAvailabilityMap => {
@@ -136,6 +173,8 @@ export default function BikeScheduleDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [availabilityMap, setAvailabilityMap] = useState<RentalAvailabilityMap>({});
+  const [reservationAvailabilityMap, setReservationAvailabilityMap] =
+    useState<RentalAvailabilityMap>({});
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [activeStatus, setActiveStatus] = useState<RentalAvailabilityStatus>("AVAILABLE");
   const [activeNote, setActiveNote] = useState("");
@@ -206,6 +245,7 @@ export default function BikeScheduleDetailPage() {
       setAvailabilityMap({});
       setMaintenanceStartDate(formatDateKey(new Date()));
     }
+    setReservationAvailabilityMap({});
     setActiveDate(null);
     setActiveNote("");
     setActiveStatus("AVAILABLE");
@@ -214,10 +254,45 @@ export default function BikeScheduleDetailPage() {
     setSaveError(null);
   }, [selectedVehicle]);
 
+  useEffect(() => {
+    if (!selectedVehicle) {
+      return;
+    }
+
+    const fetchReservations = async () => {
+      try {
+        const response = await fetch("/api/reservations");
+        if (!response.ok) {
+          throw new Error("failed to load reservations");
+        }
+
+        const data = (await response.json()) as { reservations?: Reservation[] };
+        const reservations = data.reservations ?? [];
+        const matchedReservations = reservations.filter(
+          (reservation) => reservation.vehicleCode === selectedVehicle.managementNumber
+        );
+        setReservationAvailabilityMap(buildReservationAvailability(matchedReservations));
+      } catch (error) {
+        console.error("Failed to load reservations for rental status", error);
+        setReservationAvailabilityMap({});
+      }
+    };
+
+    void fetchReservations();
+  }, [selectedVehicle]);
+
   const displayMonth = useMemo(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth() + calendarMonthOffset, 1);
   }, [calendarMonthOffset]);
+
+  const mergedAvailabilityMap = useMemo(
+    () => ({
+      ...availabilityMap,
+      ...reservationAvailabilityMap,
+    }),
+    [availabilityMap, reservationAvailabilityMap]
+  );
 
   const calendarWeeks = useMemo(
     () => buildCalendarGrid(displayMonth),
@@ -226,7 +301,7 @@ export default function BikeScheduleDetailPage() {
 
   const handleSelectDate = (date: string) => {
     setActiveDate(date);
-    const entry = availabilityMap[date];
+    const entry = mergedAvailabilityMap[date];
     setActiveStatus(entry?.status ?? "AVAILABLE");
     setActiveNote(entry?.note ?? "");
     setFormError(null);
@@ -352,7 +427,7 @@ export default function BikeScheduleDetailPage() {
       storeId: selectedVehicle.storeId,
       publishStatus: selectedVehicle.publishStatus,
       tags: selectedVehicle.tags ?? [],
-      rentalAvailability: availabilityMap,
+      rentalAvailability: mergedAvailabilityMap,
       policyNumber1: selectedVehicle.policyNumber1,
       policyBranchNumber1: selectedVehicle.policyBranchNumber1,
       policyNumber2: selectedVehicle.policyNumber2,
@@ -594,7 +669,7 @@ export default function BikeScheduleDetailPage() {
                             {calendarWeeks.map((week, weekIndex) => (
                               <tr key={`week-${weekIndex}`}>
                                 {week.map((cell, dayIndex) => {
-                                  const entry = availabilityMap[cell.key];
+                                  const entry = mergedAvailabilityMap[cell.key];
                                   const isSelected = activeDate === cell.key;
                                   const muted = !cell.isCurrentMonth;
                                   return (
@@ -615,7 +690,9 @@ export default function BikeScheduleDetailPage() {
                                               color: STATUS_COLORS[entry.status],
                                             }}
                                           >
-                                            {STATUS_LABELS[entry.status]}
+                                            {entry.status === "RENTED" && entry.note
+                                              ? `${STATUS_LABELS[entry.status]}（${entry.note}）`
+                                              : STATUS_LABELS[entry.status]}
                                           </span>
                                         )}
                                       </div>
