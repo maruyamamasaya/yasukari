@@ -24,6 +24,8 @@ type UserAttributes = {
 export default function MyPage() {
   const paymentInfoUrl = process.env.NEXT_PUBLIC_PAYMENT_INFO_URL ?? '/help#payment-info';
   const rentalContractBaseUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL;
+  const unmannedRentalGuideUrl = '/blog_for_custmor/2025-09-10-minowa-unmanned';
+  const unlockQrUrl = '/rental-status';
 
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -594,18 +596,22 @@ export default function MyPage() {
                 >
                   レンタル延長
                 </button>
-                <button
-                  type="button"
+                <Link
+                  href={unmannedRentalGuideUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100"
                 >
                   無人店舗でのレンタルについて
-                </button>
-                <button
-                  type="button"
+                </Link>
+                <Link
+                  href={unlockQrUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 sm:hidden"
                 >
                   解錠用のQRを表示
-                </button>
+                </Link>
                 <button
                   type="button"
                   onClick={handleReturnOpen}
