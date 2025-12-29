@@ -514,9 +514,9 @@ export default function ProductDetailPage({
       {showRentalLimitModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="bg-emerald-700 px-6 py-4 text-white">
-              <p className="text-sm font-semibold uppercase tracking-wide">Rental Notice</p>
-              <h2 className="mt-1 text-xl font-bold">レンタル中のバイクを返却してください</h2>
+            <div className="border-b border-emerald-100 bg-emerald-50 px-6 py-4 text-gray-900">
+              <p className="text-sm font-semibold uppercase tracking-wide text-gray-900">Rental Notice</p>
+              <h2 className="mt-1 text-xl font-bold text-red-600">レンタル中のバイクを返却してください</h2>
             </div>
             <div className="space-y-4 px-6 py-5 text-gray-700">
               {rentalCheckError ? (
