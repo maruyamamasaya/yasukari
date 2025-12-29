@@ -4,6 +4,7 @@ export type PhotoUpload = {
   uploadedAt: string;
   status: "登録済み" | "確認済み";
   s3Url: string;
+  uploaderName?: string;
   notes?: string;
 };
 
