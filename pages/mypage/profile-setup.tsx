@@ -370,13 +370,13 @@ const ProfileSetupPage: NextPage = () => {
                       disabled={saving}
                       className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {saving ? '保存中…' : '保存してマイページへ'}
+                      {saving ? '保存中…' : '登録する'}
                     </button>
                     <Link
                       href={applyLocaleToPath('/mypage')}
                       className="text-sm font-semibold text-gray-700 underline underline-offset-4 hover:text-gray-900"
                     >
-                      キャンセルして戻る
+                      戻る
                     </Link>
                   </div>
                 </form>
