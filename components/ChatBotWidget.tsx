@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaComments } from "react-icons/fa";
 import ChatBot from "./ChatBot";
+import styles from "../styles/ChatSupport.module.css";
 
 type ChatBotWidgetProps = {
   visible?: boolean;
@@ -18,12 +19,16 @@ export default function ChatBotWidget({ visible = true }: ChatBotWidgetProps) {
         <div>
           {/* Mobile full-screen overlay */}
           <div className="fixed inset-0 bg-white z-50 flex flex-col sm:hidden">
-            <ChatBot className="flex-1" fullScreen onClose={() => setOpen(false)} />
+            <ChatBot
+              className={`${styles.mobileVariant} flex-1`}
+              fullScreen
+              onClose={() => setOpen(false)}
+            />
           </div>
           {/* Desktop popup */}
           <div className="hidden sm:block relative mb-2 shadow-2xl">
             <ChatBot
-              className="w-[560px] min-w-[480px] h-[90vh] max-h-[900px]"
+              className={`${styles.desktopVariant} ${styles.chatPopup}`}
               onClose={() => setOpen(false)}
             />
           </div>
