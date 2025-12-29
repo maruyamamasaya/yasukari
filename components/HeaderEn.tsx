@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FaUser, FaQuestionCircle, FaClipboardList, FaBars } from 'react-icons/fa';
+import { FaUser, FaQuestionCircle, FaClipboardList, FaBars, FaBell } from 'react-icons/fa';
 import AnnouncementBar from './AnnouncementBar';
 
 export default function HeaderEn() {
@@ -161,6 +161,11 @@ export default function HeaderEn() {
               <Link href="/en/help">
                 <NavItem label="Help" />
               </Link>
+              <Link href="/notifications" aria-label="Notifications">
+                <span className="flex items-center text-gray-700 hover:text-red-600 transition-colors">
+                  <FaBell />
+                </span>
+              </Link>
               <div className="flex items-center rounded-full border border-red-500 bg-red-50/70 shadow-sm text-xs font-semibold text-gray-800">
                 <button
                   type="button"
@@ -225,6 +230,11 @@ export default function HeaderEn() {
               <li>
                 <Link href="/en/help">
                   <NavItem label="Help" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/notifications">
+                  <NavItem icon={<FaBell />} label="Notifications" />
                 </Link>
               </li>
               <li className="w-full pt-4">
