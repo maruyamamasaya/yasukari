@@ -289,7 +289,7 @@ export default function MyPage() {
       } catch (err) {
         if (!controller.signal.aborted) {
           console.error(err);
-          setReservationsError('予約状況の取得に失敗しました。時間をおいて再度お試しください。');
+          setReservationsError('レンタル中のバイク情報の取得に失敗しました。時間をおいて再度お試しください。');
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -434,6 +434,16 @@ export default function MyPage() {
   const activeReturnReservation =
     reservations.find((reservation) => !reservation.reservationCompletedFlag) ?? null;
   const hasActiveReservation = reservations.length > 0;
+  const isRentalActive = useMemo(() => {
+    if (!activeReturnReservation) return false;
+    const pickupDate = new Date(activeReturnReservation.pickupAt);
+    const returnDate = new Date(activeReturnReservation.returnAt);
+    if (Number.isNaN(pickupDate.getTime()) || Number.isNaN(returnDate.getTime())) {
+      return true;
+    }
+    const now = Date.now();
+    return now >= pickupDate.getTime() && now <= returnDate.getTime();
+  }, [activeReturnReservation]);
   const isReturnOverdue = useMemo(() => {
     if (!activeReturnReservation?.returnAt) return false;
     const returnDate = new Date(activeReturnReservation.returnAt);
@@ -599,8 +609,8 @@ export default function MyPage() {
                   className="group flex flex-1 items-start justify-between gap-3 text-left md:pointer-events-none md:cursor-default"
                 >
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">予約状況</h2>
-                    <p className="mt-1 text-sm text-gray-600">直近の予約や利用状況をここに表示します。</p>
+                    <h2 className="text-lg font-semibold text-gray-900">レンタル中のバイク</h2>
+                    <p className="mt-1 text-sm text-gray-600">現在レンタル中のバイク情報を表示します。</p>
                   </div>
                   <span
                     aria-hidden
@@ -633,41 +643,43 @@ export default function MyPage() {
                 </div>
               </div>
               <div className={`${mobileSectionsOpen.reservations ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
-                  >
-                    レンタル延長
-                  </button>
-                  <Link
-                    href="/blog_for_custmor/2025-09-01-minowa-procedures"
-                    className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100"
-                  >
-                    無人店舗でのレンタルについて
-                  </Link>
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 sm:hidden"
-                  >
-                    解錠用のQRを表示
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleReturnOpen}
-                    disabled={!activeReturnReservation}
-                    className="inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-emerald-50 disabled:text-black/60 disabled:ring-emerald-50"
-                  >
-                    返却
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleAccidentOpen}
-                    className="inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-200"
-                  >
-                    事故・転倒
-                  </button>
-                </div>
+                {isRentalActive ? (
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
+                    >
+                      レンタル延長
+                    </button>
+                    <Link
+                      href="/blog_for_custmor/2025-09-01-minowa-procedures"
+                      className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100"
+                    >
+                      無人店舗でのレンタルについて
+                    </Link>
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 sm:hidden"
+                    >
+                      解錠用のQRを表示
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleReturnOpen}
+                      disabled={!activeReturnReservation}
+                      className="inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-emerald-50 disabled:text-black/60 disabled:ring-emerald-50"
+                    >
+                      返却
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAccidentOpen}
+                      className="inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-200"
+                    >
+                      事故・転倒
+                    </button>
+                  </div>
+                ) : null}
 
                 <div className="mt-4 space-y-3 text-sm text-gray-700">
                 {reservationsError ? (
@@ -1237,7 +1249,7 @@ export default function MyPage() {
             {returnStep === 'done' ? (
               <div className="mt-4 space-y-3 text-sm text-gray-700">
                 <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-800">
-                  ご協力ありがとうございました。予約状況を更新しました。
+                  ご協力ありがとうございました。レンタル中のバイク情報を更新しました。
                 </p>
                 <button
                   type="button"
