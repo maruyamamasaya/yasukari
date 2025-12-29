@@ -637,7 +637,7 @@ export default function ReserveFlowStep2() {
                 </dl>
                 <div className="border-t border-gray-100 pt-4">
                   <div className="flex items-center justify-between text-lg font-bold text-gray-900">
-                    <span>レンタル料金合計（税込）</span>
+                    <span>合計（税込）</span>
                     <span>{totalAmount.toLocaleString()}円</span>
                   </div>
                 </div>
