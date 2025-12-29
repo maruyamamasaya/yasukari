@@ -78,7 +78,7 @@ export default function BeginnerGuidePage() {
           <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-indigo-600">
             Beginner Guide
           </span>
-          <h1 className="mt-4 text-3xl font-bold text-slate-900 sm:text-4xl">
+          <h1 className="mt-4 text-2xl font-bold text-slate-900">
             はじめてガイド
           </h1>
           <p className="mt-3 max-w-xl text-sm text-slate-600 sm:text-base">
@@ -123,7 +123,7 @@ export default function BeginnerGuidePage() {
               <p className="text-xs font-semibold uppercase tracking-widest text-amber-500">
                 Steps
               </p>
-              <h2 className="mt-2 text-2xl font-bold text-slate-900">ご利用の流れ</h2>
+              <h2 className="mt-2 text-xl font-bold text-slate-900">ご利用の流れ</h2>
             </div>
             <p className="text-sm text-slate-500">初めての方でも安心して進められます。</p>
           </div>
@@ -223,7 +223,7 @@ export default function BeginnerGuidePage() {
               <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">
                 Contact
               </p>
-              <h2 className="mt-2 text-2xl font-bold">ご不明点はお気軽に</h2>
+              <h2 className="mt-2 text-xl font-bold">ご不明点はお気軽に</h2>
               <p className="mt-2 text-sm text-white/80 sm:max-w-md">
                 予約やご利用に関するご相談はスタッフが丁寧にサポートします。
               </p>
