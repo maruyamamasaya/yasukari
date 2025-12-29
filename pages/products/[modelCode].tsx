@@ -514,7 +514,7 @@ export default function ProductDetailPage({
       {showRentalLimitModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="bg-emerald-600 px-6 py-4 text-white">
+            <div className="bg-emerald-700 px-6 py-4 text-white">
               <p className="text-sm font-semibold uppercase tracking-wide">Rental Notice</p>
               <h2 className="mt-1 text-xl font-bold">レンタル中のバイクを返却してください</h2>
             </div>
@@ -537,7 +537,7 @@ export default function ProductDetailPage({
               <div className="flex flex-col gap-2 pt-2">
                 <button
                   type="button"
-                  className="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-700 transition"
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow transition hover:bg-red-700"
                   onClick={() => router.push("/mypage")}
                 >
                   マイページの予約状況へ
