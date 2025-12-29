@@ -22,6 +22,8 @@
 }
 
 .photoCard {
+  appearance: none;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
@@ -30,8 +32,15 @@
   border: 1px solid rgba(226, 232, 240, 0.9);
   background: #ffffff;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  text-align: left;
   transition: transform 0.15s ease, box-shadow 0.15s ease,
     border-color 0.15s ease;
+  width: 100%;
+}
+
+.photoCard:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline-offset: 2px;
 }
 
 .photoCard:hover,
@@ -73,6 +82,133 @@
 .photoSubtext {
   font-size: 0.82rem;
   color: rgba(100, 116, 139, 0.9);
+}
+
+.photoDetailHint {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(37, 99, 235, 0.9);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 50;
+}
+
+.modalCard {
+  background: #ffffff;
+  border-radius: 1rem;
+  max-width: 960px;
+  width: min(960px, 100%);
+  max-height: 90vh;
+  padding: 1.5rem;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modalTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.9);
+  margin: 0;
+}
+
+.modalSubtitle {
+  font-size: 0.9rem;
+  color: rgba(71, 85, 105, 0.9);
+  margin: 0.2rem 0 0;
+}
+
+.modalCloseButton {
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(51, 65, 85, 0.9);
+  cursor: pointer;
+}
+
+.modalCloseButton:hover,
+.modalCloseButton:focus-visible {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(239, 246, 255, 0.9);
+}
+
+.modalContent {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+.modalImage {
+  width: 100%;
+  height: auto;
+  border-radius: 0.85rem;
+  object-fit: cover;
+  background: #f8fafc;
+  max-height: 60vh;
+}
+
+.modalMeta {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.modalMeta div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.modalMeta dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(100, 116, 139, 0.9);
+}
+
+.modalMeta dd {
+  font-size: 0.9rem;
+  color: rgba(30, 41, 59, 0.95);
+  margin: 0;
+  word-break: break-all;
+}
+
+.modalLink {
+  color: rgba(37, 99, 235, 0.9);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.modalLink:hover,
+.modalLink:focus-visible {
+  text-decoration: underline;
+}
+
+@media (max-width: 960px) {
+  .modalContent {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .uploadForm {
