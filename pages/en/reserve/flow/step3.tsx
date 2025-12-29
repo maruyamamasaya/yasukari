@@ -480,6 +480,7 @@ export default function ReserveFlowStep3() {
                     email={sessionUser?.email ?? ""}
                     label={isSavingReservation ? "Processing..." : "Submit payment"}
                     submitText="Submit payment"
+                    enableApplePay
                   />
                 ) : null}
               </div>
