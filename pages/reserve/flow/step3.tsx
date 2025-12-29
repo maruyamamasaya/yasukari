@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 
 import type { RegistrationData } from "../../../types/registration";
@@ -348,30 +347,6 @@ export default function ReserveFlowStep3() {
     setPayjpError("Pay.JP の読み込みに失敗しました。時間をおいて再度お試しください。");
   }, []);
 
-  const handleBack = () => {
-    if (queryError) {
-      void router.push("/reserve/flow/step1");
-      return;
-    }
-
-    const params = new URLSearchParams({
-      store,
-      modelName,
-      managementNumber,
-      pickupDate,
-      returnDate,
-      pickupTime,
-      returnTime,
-      couponCode,
-      couponDiscount: couponDiscount.toString(),
-      accessoryTotal: accessoryTotal.toString(),
-      protectionTotal: protectionTotal.toString(),
-      totalAmount: totalAmount.toString(),
-    });
-
-    void router.push(`/reserve/flow/step2?${params.toString()}`);
-  };
-
   const canRenderPayment = authChecked && !authError && queryReady && !queryError;
 
   return (
@@ -386,12 +361,6 @@ export default function ReserveFlowStep3() {
               <p className="text-xs font-semibold uppercase tracking-wide text-red-500">Step 3 / 3</p>
               <h1 className="text-2xl font-bold text-gray-900">決済情報の入力</h1>
             </div>
-            <Link
-              href="/products"
-              className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300"
-            >
-              車種一覧に戻る
-            </Link>
           </header>
 
           {authError ? (
@@ -456,6 +425,9 @@ export default function ReserveFlowStep3() {
               <p className="text-sm text-gray-600">
                 決済ボタンを押すと安全な決済画面が開きます。カード情報はそちらで入力してください。
               </p>
+              <p className="text-sm font-semibold text-red-600">
+                決済中は更新ボタンや戻るボタンを押さないようにしてください。
+              </p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
                 <span className="rounded-full border border-gray-200 bg-white px-3 py-1 font-semibold text-gray-700">
                   Apple Pay 対応
@@ -466,13 +438,6 @@ export default function ReserveFlowStep3() {
                 <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{payjpError}</p>
               ) : null}
               <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300"
-                >
-                  戻る
-                </button>
                 <div ref={payjpSlotRef} />
                 {canRenderPayment ? (
                   <PayjpCheckout
