@@ -1,24 +1,24 @@
 @media (max-width: 640px) {
   body {
-    font-size: 14px;
+    font-size: 13px;
   }
   .layout-shell {
-    gap: 2.5rem;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 1.5rem;
+    gap: 2.1rem;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 1.25rem;
   }
   .section-padding {
-    padding: 1.5rem 10px;
+    padding: 1.25rem 8px;
   }
   .section-heading__eyebrow {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
   }
   .section-heading__title {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
   }
   .section-heading__description {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   .section-surface {
     border: none;
@@ -59,45 +59,45 @@
     width: max-content;
   }
   .lineup-marquee__button {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
   .card-title {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
   .recently-viewed-card__image {
     aspect-ratio: 4 / 3;
     height: auto;
   }
   .recently-viewed-card__body {
-    padding: 0.75rem 0.75rem 0.85rem;
-    gap: 0.5rem;
+    padding: 0.65rem 0.65rem 0.75rem;
+    gap: 0.4rem;
   }
   .bike-lineup-card__image {
     aspect-ratio: 4 / 3;
     height: auto;
   }
   .bike-lineup-card__body {
-    padding: 0.85rem 0.85rem 1rem;
-    gap: 0.6rem;
+    padding: 0.75rem 0.75rem 0.9rem;
+    gap: 0.5rem;
   }
   .bike-model-carousel__image {
     aspect-ratio: 4 / 3;
     height: auto;
   }
   .bike-model-carousel__body {
-    padding: 0.85rem 0.85rem 1rem;
-    gap: 0.6rem;
+    padding: 0.75rem 0.75rem 0.9rem;
+    gap: 0.5rem;
   }
   .feature-highlight-card {
-    padding: 1rem;
-    gap: 0.75rem;
+    padding: 0.85rem;
+    gap: 0.6rem;
   }
   .feature-highlight-card__icon {
-    height: 48px;
-    width: 48px;
+    height: 44px;
+    width: 44px;
   }
   .feature-highlight-card__text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 }
 
@@ -110,20 +110,20 @@
   justify-content: space-around;
   background: #fff;
   border-top: 1px solid #e5e5e5;
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   z-index: 40;
 }
 .mobile-nav a {
   color: #555;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 .mobile-nav a:hover {
   color: var(--primary-color);
 }
 
 .mobile-nav svg {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
 }
 
 .scroll-row {
