@@ -820,7 +820,7 @@ export default function MyPage() {
                 </button>
                 <Link
                   href="/mypage/profile-setup"
-                  className={`${mobileSectionsOpen.profile ? 'inline-flex' : 'hidden'} items-center rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:text-red-800 md:inline-flex`}
+                  className="hidden items-center rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:text-red-800 md:inline-flex"
                 >
                   基本情報を編集
                 </Link>
@@ -855,6 +855,14 @@ export default function MyPage() {
                 ) : (
                   <p className="mt-3 text-sm text-gray-700">プロフィール情報を取得できませんでした。</p>
                 )}
+              </div>
+              <div className={`${mobileSectionsOpen.profile ? 'mt-4 flex' : 'hidden'} justify-center md:hidden`}>
+                <Link
+                  href="/mypage/profile-setup"
+                  className="inline-flex items-center rounded-full border border-red-200 px-6 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:text-red-800"
+                >
+                  基本情報を編集
+                </Link>
               </div>
             </section>
 
@@ -896,7 +904,7 @@ export default function MyPage() {
                 </button>
                 <Link
                   href="/mypage/registration"
-                  className={`${mobileSectionsOpen.registration ? 'inline-flex' : 'hidden'} items-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 md:inline-flex`}
+                  className="hidden items-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 md:inline-flex"
                 >
                   本登録フォームへ進む
                 </Link>
@@ -947,6 +955,14 @@ export default function MyPage() {
                     本登録情報がまだありません。フォームから登録を進めてください。
                   </p>
                 )}
+              </div>
+              <div className={`${mobileSectionsOpen.registration ? 'mt-4 flex' : 'hidden'} justify-center md:hidden`}>
+                <Link
+                  href="/mypage/registration"
+                  className="inline-flex items-center rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                >
+                  本登録フォームへ進む
+                </Link>
               </div>
             </section>
 
