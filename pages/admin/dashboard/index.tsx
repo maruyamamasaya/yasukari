@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import { HOLIDAY_MANAGER_STORES } from "../../../lib/dashboard/holidayStores";
+import type { Member } from "../../../lib/members";
+import type { Reservation } from "../../../lib/reservations";
 import styles from "../../../styles/Dashboard.module.css";
 
 const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
@@ -179,14 +181,29 @@ export default function DashboardTopPage() {
     isLoading: true,
     error: false,
   });
+  const [memberCounts, setMemberCounts] = useState({
+    provisional: 0,
+    verified: 0,
+    isLoading: true,
+    error: false,
+  });
+  const [reservationCounts, setReservationCounts] = useState({
+    current: 0,
+    completed: 0,
+    isLoading: true,
+    error: false,
+  });
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [modelsResponse, vehiclesResponse] = await Promise.all([
-          fetch("/api/bike-models"),
-          fetch("/api/vehicles"),
-        ]);
+        const [modelsResponse, vehiclesResponse, membersResponse, reservationsResponse] =
+          await Promise.all([
+            fetch("/api/bike-models"),
+            fetch("/api/vehicles"),
+            fetch("/api/admin/members"),
+            fetch("/api/reservations"),
+          ]);
 
         if (modelsResponse.ok) {
           const models: BikeModel[] = await modelsResponse.json();
@@ -218,10 +235,44 @@ export default function DashboardTopPage() {
             error: true,
           }));
         }
+
+        if (membersResponse.ok) {
+          const data = (await membersResponse.json()) as { members?: Member[] };
+          const members = data.members ?? [];
+          setMemberCounts({
+            provisional: members.filter((member) => member.status === "未認証").length,
+            verified: members.filter((member) => member.status === "認証済").length,
+            isLoading: false,
+            error: false,
+          });
+        } else {
+          setMemberCounts((prev) => ({ ...prev, isLoading: false, error: true }));
+        }
+
+        if (reservationsResponse.ok) {
+          const data = (await reservationsResponse.json()) as {
+            reservations?: Reservation[];
+          };
+          const reservations = data.reservations ?? [];
+          setReservationCounts({
+            current: reservations.filter(
+              (reservation) => !reservation.reservationCompletedFlag
+            ).length,
+            completed: reservations.filter(
+              (reservation) => reservation.reservationCompletedFlag
+            ).length,
+            isLoading: false,
+            error: false,
+          });
+        } else {
+          setReservationCounts((prev) => ({ ...prev, isLoading: false, error: true }));
+        }
       } catch (error) {
         console.error("Failed to fetch dashboard stats", error);
         setModelCounts((prev) => ({ ...prev, isLoading: false, error: true }));
         setVehicleCounts((prev) => ({ ...prev, isLoading: false, error: true }));
+        setMemberCounts((prev) => ({ ...prev, isLoading: false, error: true }));
+        setReservationCounts((prev) => ({ ...prev, isLoading: false, error: true }));
       }
     };
 
@@ -245,20 +296,47 @@ export default function DashboardTopPage() {
     return `${counts.total.toLocaleString()} (${counts.published.toLocaleString()})`;
   };
 
+  const formatDualCount = (counts: {
+    primary: number;
+    secondary: number;
+    isLoading: boolean;
+    error: boolean;
+  }) => {
+    if (counts.isLoading) {
+      return "計測中...";
+    }
+
+    if (counts.error) {
+      return "取得に失敗しました";
+    }
+
+    return `${counts.primary.toLocaleString()} / ${counts.secondary.toLocaleString()}`;
+  };
+
   const stats = useMemo(
     () => [
       {
         key: "members",
-        label: "会員数 (認証済)",
-        value: "一旦ダミーで",
-        note: "準備中のため仮表示です。",
+        label: "会員数 (仮登録 / 本登録)",
+        value: formatDualCount({
+          primary: memberCounts.provisional,
+          secondary: memberCounts.verified,
+          isLoading: memberCounts.isLoading,
+          error: memberCounts.error,
+        }),
+        note: "未認証 / 認証済",
         href: `${ANALYTICS_ROOT}/members`,
       },
       {
         key: "reservations",
-        label: "予約数 (予約受付完了)",
-        value: "一旦ダミーで",
-        note: "準備中のため仮表示です。",
+        label: "予約数 (現在 / 完了)",
+        value: formatDualCount({
+          primary: reservationCounts.current,
+          secondary: reservationCounts.completed,
+          isLoading: reservationCounts.isLoading,
+          error: reservationCounts.error,
+        }),
+        note: "未完了 / 完了",
         href: `${ANALYTICS_ROOT}/reservations`,
       },
       {
@@ -276,7 +354,7 @@ export default function DashboardTopPage() {
         href: `${ANALYTICS_ROOT}/vehicles`,
       },
     ],
-    [modelCounts, vehicleCounts]
+    [memberCounts, modelCounts, reservationCounts, vehicleCounts]
   );
 
   return (
