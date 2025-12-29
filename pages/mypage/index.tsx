@@ -451,6 +451,11 @@ export default function MyPage() {
     if (Number.isNaN(returnDate.getTime())) return false;
     return Date.now() > returnDate.getTime();
   }, [activeReturnReservation]);
+  const shouldShowRentalActions = useMemo(() => {
+    if (!activeReturnReservation) return false;
+    if (activeReturnReservation.status === '予約受付完了') return true;
+    return isRentalActive;
+  }, [activeReturnReservation, isRentalActive]);
 
   const handleReturnOpen = () => {
     resetReturnModal();
@@ -624,7 +629,7 @@ export default function MyPage() {
                 </button>
               </div>
               <div className={`${mobileSectionsOpen.reservations ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
-                {isRentalActive ? (
+                {shouldShowRentalActions ? (
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
@@ -657,7 +662,7 @@ export default function MyPage() {
                       onClick={handleAccidentOpen}
                       className="inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-200"
                     >
-                      事故・転倒
+                      事故・連絡
                     </button>
                   </div>
                 ) : null}
