@@ -427,7 +427,7 @@ export default function BikeScheduleDetailPage() {
       storeId: selectedVehicle.storeId,
       publishStatus: selectedVehicle.publishStatus,
       tags: selectedVehicle.tags ?? [],
-      rentalAvailability: availabilityMap,
+      rentalAvailability: mergedAvailabilityMap,
       policyNumber1: selectedVehicle.policyNumber1,
       policyBranchNumber1: selectedVehicle.policyBranchNumber1,
       policyNumber2: selectedVehicle.policyNumber2,
