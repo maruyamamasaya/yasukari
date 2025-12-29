@@ -26,6 +26,8 @@ export default function ReserveFlowStep3() {
   const [sessionUser, setSessionUser] = useState<{ id: string; email?: string; username?: string } | null>(null);
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
   const [registrationError, setRegistrationError] = useState("");
+  const [queryError, setQueryError] = useState("");
+  const [queryReady, setQueryReady] = useState(false);
 
   const [statusMessage, setStatusMessage] = useState("");
   const [isSavingReservation, setIsSavingReservation] = useState(false);
@@ -87,6 +89,21 @@ export default function ReserveFlowStep3() {
     if (!router.isReady) return;
 
     const params = router.query;
+    const requiredParams = [
+      "store",
+      "modelName",
+      "managementNumber",
+      "pickupDate",
+      "returnDate",
+      "pickupTime",
+      "returnTime",
+      "totalAmount",
+    ] as const;
+    const missingParams = requiredParams.filter((key) => {
+      const value = params[key];
+      return typeof value !== "string" || value.trim() === "";
+    });
+
     if (typeof params.store === "string" && params.store) setStore(params.store);
     if (typeof params.modelName === "string" && params.modelName) setModelName(params.modelName);
     if (typeof params.managementNumber === "string" && params.managementNumber)
@@ -97,11 +114,23 @@ export default function ReserveFlowStep3() {
     if (typeof params.returnTime === "string" && params.returnTime) setReturnTime(params.returnTime);
     if (typeof params.totalAmount === "string") {
       const parsed = Number(params.totalAmount);
-      if (!Number.isNaN(parsed)) setTotalAmount(parsed);
+      if (!Number.isNaN(parsed)) {
+        setTotalAmount(parsed);
+      } else if (!missingParams.includes("totalAmount")) {
+        missingParams.push("totalAmount");
+      }
     }
     if (typeof params.couponCode === "string") setCouponCode(params.couponCode);
     if (typeof params.accessoryTotal === "string") setAccessoryTotal(Number(params.accessoryTotal));
     if (typeof params.protectionTotal === "string") setProtectionTotal(Number(params.protectionTotal));
+
+    if (missingParams.length > 0) {
+      setQueryError("We could not restore your reservation details after refresh. Please start again.");
+      setQueryReady(false);
+    } else {
+      setQueryError("");
+      setQueryReady(true);
+    }
   }, [router.isReady, router.query]);
 
   useEffect(() => {
@@ -318,6 +347,11 @@ export default function ReserveFlowStep3() {
   }, []);
 
   const handleBack = () => {
+    if (queryError) {
+      void router.push("/en/reserve/flow/step1");
+      return;
+    }
+
     const params = new URLSearchParams({
       store,
       modelName,
@@ -334,6 +368,8 @@ export default function ReserveFlowStep3() {
 
     void router.push(`/en/reserve/flow/step2?${params.toString()}`);
   };
+
+  const canRenderPayment = authChecked && !authError && queryReady && !queryError;
 
   return (
     <>
@@ -358,6 +394,12 @@ export default function ReserveFlowStep3() {
 
           {authError ? (
             <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</p>
+          ) : null}
+          {queryError ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <p>{queryError}</p>
+              <p className="mt-1">Please restart from the first step.</p>
+            </div>
           ) : null}
 
           <section className="space-y-6">
@@ -424,20 +466,22 @@ export default function ReserveFlowStep3() {
                   Back
                 </button>
                 <div ref={payjpSlotRef} />
-                <PayjpCheckout
-                  formRef={payjpFormRef}
-                  placeholderRef={payjpSlotRef}
-                  onSubmit={handleSubmitPayment}
-                  onLoad={handlePayjpLoaded}
-                  onError={handlePayjpLoadError}
-                  locale="en"
-                  publicKey={payJpPublicKey}
-                  description={`${store} ${modelName} ${managementNumber}`}
-                  amount={totalAmount}
-                  email={sessionUser?.email ?? ""}
-                  label={isSavingReservation ? "Processing..." : "Submit payment"}
-                  submitText="Submit payment"
-                />
+                {canRenderPayment ? (
+                  <PayjpCheckout
+                    formRef={payjpFormRef}
+                    placeholderRef={payjpSlotRef}
+                    onSubmit={handleSubmitPayment}
+                    onLoad={handlePayjpLoaded}
+                    onError={handlePayjpLoadError}
+                    locale="en"
+                    publicKey={payJpPublicKey}
+                    description={`${store} ${modelName} ${managementNumber}`}
+                    amount={totalAmount}
+                    email={sessionUser?.email ?? ""}
+                    label={isSavingReservation ? "Processing..." : "Submit payment"}
+                    submitText="Submit payment"
+                  />
+                ) : null}
               </div>
               {statusMessage ? (
                 <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">{statusMessage}</p>

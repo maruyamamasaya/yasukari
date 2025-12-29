@@ -102,7 +102,7 @@ export default function PayjpCheckout({
     }
 
     // ✅ containerは常に1つ
-    let container = portalRoot.querySelector<HTMLElement>(`#${CHECKOUT_CONTAINER_ID}`);
+    let container = document.getElementById(CHECKOUT_CONTAINER_ID) as HTMLElement | null;
     if (!container) {
       container = document.createElement("div");
       container.id = CHECKOUT_CONTAINER_ID;
@@ -114,6 +114,8 @@ export default function PayjpCheckout({
     const placeholder = placeholderRef.current;
     if (placeholder && container.parentElement !== placeholder) {
       placeholder.appendChild(container);
+    } else if (!placeholder && container.parentElement !== portalRoot) {
+      portalRoot.appendChild(container);
     }
 
     // ✅ containerの中身だけを初期化（container自体は保持）
