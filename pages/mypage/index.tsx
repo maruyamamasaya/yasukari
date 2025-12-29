@@ -63,6 +63,7 @@ export default function MyPage() {
     links: false,
   });
   const router = useRouter();
+  const sectionActionClass = 'inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold';
 
   const readFileAsBase64 = (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -621,26 +622,6 @@ export default function MyPage() {
                     ▼
                   </span>
                 </button>
-                <div
-                  className={`${mobileSectionsOpen.reservations ? 'flex' : 'hidden'} flex-wrap items-center gap-2 md:flex`}
-                >
-                  <Link
-                    href="/mypage/past-reservations"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
-                  >
-                    過去の予約
-                  </Link>
-                  {hasActiveReservation ? (
-                    <button
-                      type="button"
-                      className="inline-flex items-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200"
-                    >
-                      予約詳細
-                    </button>
-                  ) : null}
-                </div>
               </div>
               <div className={`${mobileSectionsOpen.reservations ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
                 {isRentalActive ? (
@@ -809,6 +790,26 @@ export default function MyPage() {
                   </ul>
                 )}
               </div>
+              <div
+                className={`${mobileSectionsOpen.reservations ? 'mt-4 flex' : 'hidden'} flex-wrap items-center justify-end gap-2 md:mt-6 md:flex`}
+              >
+                <Link
+                  href="/mypage/past-reservations"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`${sectionActionClass} border border-gray-200 bg-white text-gray-700 transition hover:border-gray-300 hover:bg-gray-50`}
+                >
+                  過去の予約
+                </Link>
+                {hasActiveReservation ? (
+                  <button
+                    type="button"
+                    className={`${sectionActionClass} bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200`}
+                  >
+                    予約詳細
+                  </button>
+                ) : null}
+              </div>
             </div>
             </section>
 
@@ -832,7 +833,7 @@ export default function MyPage() {
                 </button>
                 <Link
                   href="/mypage/profile-setup"
-                  className="hidden items-center rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:text-red-800 md:inline-flex"
+                  className={`${sectionActionClass} hidden border border-red-200 text-red-700 transition hover:border-red-300 hover:text-red-800 md:inline-flex`}
                 >
                   基本情報を編集
                 </Link>
@@ -871,7 +872,7 @@ export default function MyPage() {
               <div className={`${mobileSectionsOpen.profile ? 'mt-4 flex' : 'hidden'} justify-center md:hidden`}>
                 <Link
                   href="/mypage/profile-setup"
-                  className="inline-flex items-center rounded-full border border-red-200 px-6 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:text-red-800"
+                  className={`${sectionActionClass} border border-red-200 text-red-700 transition hover:border-red-300 hover:text-red-800`}
                 >
                   基本情報を編集
                 </Link>
@@ -916,7 +917,7 @@ export default function MyPage() {
                 </button>
                 <Link
                   href="/mypage/registration"
-                  className="hidden items-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 md:inline-flex"
+                  className={`${sectionActionClass} hidden bg-red-600 text-white transition hover:bg-red-700 md:inline-flex`}
                 >
                   本登録フォームへ進む
                 </Link>
@@ -971,7 +972,7 @@ export default function MyPage() {
               <div className={`${mobileSectionsOpen.registration ? 'mt-4 flex' : 'hidden'} justify-center md:hidden`}>
                 <Link
                   href="/mypage/registration"
-                  className="inline-flex items-center rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                  className={`${sectionActionClass} bg-red-600 text-white transition hover:bg-red-700`}
                 >
                   本登録フォームへ進む
                 </Link>
@@ -1006,7 +1007,7 @@ export default function MyPage() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+                  className={`${sectionActionClass} bg-red-600 text-white transition hover:bg-red-700`}
                   disabled={!user || loggingOut}
                 >
                   {loggingOut ? '処理中…' : 'ログアウトする'}
