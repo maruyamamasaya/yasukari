@@ -33,28 +33,6 @@ const defaultFees = {
 };
 
 const formatAccessoryPrice = (price?: number) => `${(price ?? 0).toLocaleString()}円`;
-const formatAccessoryTablePrice = (price?: number) =>
-  typeof price === "number" ? `${price.toLocaleString()}円` : "—";
-
-const accessoryTableColumns = [
-  { label: "1日", keys: ["1d", "24h"] },
-  { label: "3日", keys: ["3d", "2d", "4d"] },
-  { label: "1週間", keys: ["1w"] },
-  { label: "2週間", keys: ["2w"] },
-  { label: "1ヶ月", keys: ["1m"] },
-  { label: "遅延1日につき", keys: ["late", "late_1d"] },
-] as const;
-
-const getAccessoryTablePrice = (
-  prices: Accessory["prices"],
-  keys: readonly string[]
-) => {
-  const priceMap = prices as Record<string, number | undefined>;
-  return keys
-    .map((key) => priceMap[key])
-    .find((value) => typeof value === "number");
-};
-
 const getHelmetSelectedTotal = (selection: Record<string, number>) =>
   Array.from(HELMET_ACCESSORY_KEYS).reduce(
     (total, key) => total + (selection[key] ?? 0),
@@ -522,14 +500,14 @@ export default function ReserveFlowStep2() {
                 <p className="text-xs text-gray-500">
                   オプション：1種類あたり2個まで / ヘルメット合計2個まで
                 </p>
-                <a
-                  href="https://yasukari.com/options"
+                <Link
+                  href="/options"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center text-xs font-semibold text-red-600 hover:text-red-700"
                 >
                   用品オプションの説明はこちら
-                </a>
+                </Link>
                 {accessoryError ? (
                   <p className="text-xs text-red-600">{accessoryError}</p>
                 ) : null}
@@ -595,56 +573,6 @@ export default function ReserveFlowStep2() {
                       </div>
                     </label>
                   ))}
-                </div>
-                <div className="space-y-4 border-t border-gray-100 pt-4">
-                  <img
-                    src="https://yasukari-file.s3.ap-northeast-1.amazonaws.com/PhotoUploads/1767026374539-623432f1-b568-4baa-ac07-b18b108d8751-rentalitem.jpg"
-                    alt="用品オプションの説明"
-                    className="w-full rounded-xl border border-gray-100 object-cover"
-                  />
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-gray-900">用品一覧</h4>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs text-gray-700">
-                        <thead className="border-b border-gray-200 text-[11px] font-semibold text-gray-500">
-                          <tr>
-                            <th className="px-3 py-2">レンタルオプション</th>
-                            {accessoryTableColumns.map((column) => (
-                              <th key={column.label} className="px-3 py-2">
-                                {column.label}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {accessories.map((accessory) => (
-                            <tr key={accessory.accessory_id}>
-                              <td className="px-3 py-2 font-semibold text-gray-900">
-                                {accessory.name}
-                              </td>
-                              {accessoryTableColumns.map((column) => (
-                                <td key={column.label} className="px-3 py-2">
-                                  {formatAccessoryTablePrice(
-                                    getAccessoryTablePrice(accessory.prices, column.keys)
-                                  )}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                          {accessories.length === 0 ? (
-                            <tr>
-                              <td
-                                colSpan={accessoryTableColumns.length + 1}
-                                className="px-3 py-3 text-center text-gray-500"
-                              >
-                                用品一覧のデータがありません。
-                              </td>
-                            </tr>
-                          ) : null}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
                 </div>
               </div>
 
