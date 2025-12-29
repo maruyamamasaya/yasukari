@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import formStyles from "../../../../styles/AdminForm.module.css";
@@ -82,7 +83,11 @@ export default function AccidentReportListPage() {
             ) : (
               <div className={styles.photoGrid}>
                 {reports.map((report) => (
-                  <div key={report.id} className={styles.photoCard}>
+                  <Link
+                    key={report.id}
+                    href={`/admin/dashboard/photo-uploads/accident-reports/${report.id}`}
+                    className={`${styles.photoCard} ${styles.photoLink}`}
+                  >
                     <img
                       src={report.imageUrl}
                       alt={`${report.userName}の事故・転倒報告写真`}
@@ -95,7 +100,7 @@ export default function AccidentReportListPage() {
                       <span className={styles.photoSubtext}>{report.phone}</span>
                       <span className={styles.photoSubtext}>{report.uploadedAt}</span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
