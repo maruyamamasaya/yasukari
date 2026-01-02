@@ -135,6 +135,10 @@ const NAV_ITEMS: NavItem[] = [
     label: "メルマガ配信設定",
     href: `${ADMIN_DASHBOARD_ROOT}/newsletter-settings`,
   },
+  {
+    label: "テストメール",
+    href: `${ADMIN_DASHBOARD_ROOT}/test-mail`,
+  },
 ];
 
 const isActivePath = (pathname: string, href?: string): boolean => {
