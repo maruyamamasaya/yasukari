@@ -33,7 +33,8 @@ let jwksCache: { keys: JwksKey[]; fetchedAt: number } | null = null;
 const base64UrlToBuffer = (value: string): Uint8Array => {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
   const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
-  return Uint8Array.from(Buffer.from(padded, 'base64'));
+  const buffer = Buffer.from(padded, 'base64');
+  return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
 };
 
 async function getJwks(): Promise<JwksKey[]> {
