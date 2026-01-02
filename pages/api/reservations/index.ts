@@ -1,7 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { verifyCognitoIdToken, COGNITO_ID_TOKEN_COOKIE } from "../../../lib/cognitoServer";
-import { createReservation, fetchAllReservations, Reservation } from "../../../lib/reservations";
+import {
+  createReservation,
+  fetchAllReservations,
+  fetchReservationById,
+  Reservation,
+} from "../../../lib/reservations";
 import { sendReservationCompletionEmail } from "../../../lib/reservationCompletionEmail";
 
 type ReservationListResponse = {
@@ -67,6 +72,11 @@ export default async function handler(
       const missingField = requiredFields.find((field) => !body[field]);
       if (missingField) {
         return res.status(400).json({ error: `${missingField} is required` });
+      }
+
+      const existingReservation = await fetchReservationById(body.paymentId!);
+      if (existingReservation) {
+        return res.status(200).json({ reservations: [existingReservation] });
       }
 
       const reservation = await createReservation({
