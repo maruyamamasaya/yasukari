@@ -1,4 +1,4 @@
-:root {
+:global(:root) {
   --primary-red: #d62828;
   --primary-red-strong: #c1121f;
   --surface: #fff5f5;
