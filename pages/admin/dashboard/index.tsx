@@ -9,6 +9,7 @@ import styles from "../../../styles/Dashboard.module.css";
 
 const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
 const ANALYTICS_ROOT = `${ADMIN_DASHBOARD_ROOT}/analytics`;
+const SITE_VISIBILITY_PATH = `${ADMIN_DASHBOARD_ROOT}/site-visibility`;
 
 type PublishStatus = "ON" | "OFF";
 
@@ -83,6 +84,18 @@ const menuSections: MenuSection[] = [
   {
     title: "ダッシュボード",
     description: "管理メニューのトップページです。",
+  },
+  {
+    title: "サイト表示切替",
+    description:
+      "サイト全体を工事中ページへ切り替えます。赤いページから切替・解除を行ってください。",
+    links: [
+      {
+        label: "サイト表示切替ページへ",
+        href: SITE_VISIBILITY_PATH,
+        actions: [{ label: "開く", href: SITE_VISIBILITY_PATH }],
+      },
+    ],
   },
   {
     title: "新着情報管理",

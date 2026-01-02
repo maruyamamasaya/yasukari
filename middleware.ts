@@ -87,24 +87,25 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const isAdminDashboardPath =
+    pathname === '/admin/dashboard' || pathname.startsWith('/admin/dashboard/');
+
   let isMaintenanceMode = false;
-  if (!pathname.startsWith('/admin')) {
-    try {
-      const response = await fetch(new URL('/api/maintenance', req.url));
-      if (response.ok) {
-        const data = (await response.json()) as { enabled?: boolean };
-        isMaintenanceMode = Boolean(data.enabled);
-      }
-    } catch (error) {
-      console.error('Failed to check maintenance status', error);
+  try {
+    const response = await fetch(new URL('/api/maintenance', req.url));
+    if (response.ok) {
+      const data = (await response.json()) as { enabled?: boolean };
+      isMaintenanceMode = Boolean(data.enabled);
     }
+  } catch (error) {
+    console.error('Failed to check maintenance status', error);
   }
 
   if (
     isMaintenanceMode &&
     pathname !== '/maintenance' &&
     pathname !== '/en/maintenance' &&
-    !pathname.startsWith('/admin')
+    !isAdminDashboardPath
   ) {
     const maintenancePath = pathname.startsWith('/en')
       ? '/en/maintenance'

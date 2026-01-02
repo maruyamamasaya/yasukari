@@ -1,0 +1,194 @@
+:root {
+  --primary-red: #d62828;
+  --primary-red-strong: #c1121f;
+  --surface: #fff5f5;
+  --text-main: #2c2c2c;
+  --text-muted: #5a5a5a;
+  --border-color: rgba(0, 0, 0, 0.08);
+}
+
+.hero {
+  background: linear-gradient(135deg, #fff5f5, #ffe3e3);
+  border: 1px solid rgba(214, 40, 40, 0.2);
+  border-radius: 20px;
+  padding: clamp(1.5rem, 3vw, 2.4rem);
+  box-shadow: 0 14px 40px rgba(214, 40, 40, 0.15);
+}
+
+.heroContent {
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: var(--text-main);
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(214, 40, 40, 0.15);
+  color: var(--primary-red-strong);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  width: fit-content;
+}
+
+.pageTitle {
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  margin: 0;
+  color: #1b1b1b;
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+.statusRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  font-weight: 800;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+}
+
+.statusBadgeActive {
+  background: var(--primary-red);
+  color: #fff;
+  border-color: var(--primary-red-strong);
+}
+
+.statusBadgeInactive {
+  background: #ffffff;
+  color: var(--text-main);
+}
+
+.statusDescription {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.errorMessage {
+  color: var(--primary-red-strong);
+  background: #fff0f0;
+  border: 1px solid rgba(214, 40, 40, 0.25);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.previewButton,
+.toggleButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.4rem;
+  border-radius: 12px;
+  font-weight: 800;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.previewButton {
+  background: #ffffff;
+  color: var(--primary-red-strong);
+  border: 1px solid rgba(214, 40, 40, 0.35);
+  box-shadow: 0 8px 25px rgba(214, 40, 40, 0.12);
+}
+
+.previewButton:hover {
+  transform: translateY(-1px);
+}
+
+.toggleButton {
+  background: var(--primary-red);
+  color: #ffffff;
+  border: 1px solid var(--primary-red-strong);
+  box-shadow: 0 10px 30px rgba(214, 40, 40, 0.2);
+}
+
+.toggleButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.helperText {
+  margin: 0;
+  color: #8a2b2b;
+  font-weight: 700;
+}
+
+.infoSection {
+  margin-top: 2rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  padding: clamp(1.2rem, 2vw, 1.8rem);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.sectionTitle {
+  margin: 0 0 1rem;
+  font-size: 1.4rem;
+  color: #1f1f1f;
+}
+
+.infoGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.infoCard {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--surface);
+  color: var(--text-main);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.infoCard h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--primary-red-strong);
+}
+
+.infoCard p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .previewButton,
+  .toggleButton {
+    width: 100%;
+  }
+}
