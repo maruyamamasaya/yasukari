@@ -83,6 +83,10 @@ const NAV_ITEMS: NavItem[] = [
     children: [{ label: "予約一覧", href: `${ADMIN_DASHBOARD_ROOT}/reservations` }],
   },
   {
+    label: "KEYBOX実行ログ",
+    href: `${ADMIN_DASHBOARD_ROOT}/keybox-logs`,
+  },
+  {
     label: "メール送信履歴",
     href: `${ADMIN_DASHBOARD_ROOT}/mail-history`,
   },

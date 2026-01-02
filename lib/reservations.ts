@@ -40,6 +40,15 @@ export type Reservation = {
   };
   notes: string;
   refundNote?: string;
+  keyboxPinCode?: string;
+  keyboxPinId?: string;
+  keyboxQrCode?: string;
+  keyboxQrImageUrl?: string;
+  keyboxUnitId?: string;
+  keyboxWindowStart?: string;
+  keyboxWindowEnd?: string;
+  keyboxTargetName?: string;
+  keyboxSignUsed?: string;
 };
 
 type ReservationRecord = {
@@ -99,6 +108,24 @@ type ReservationRecord = {
   notes?: string;
   refund_note?: string;
   refundNote?: string;
+  keybox_pin_code?: string;
+  keyboxPinCode?: string;
+  keybox_pin_id?: string;
+  keyboxPinId?: string;
+  keybox_qr_code?: string;
+  keyboxQrCode?: string;
+  keybox_qr_image_url?: string;
+  keyboxQrImageUrl?: string;
+  keybox_unit_id?: string;
+  keyboxUnitId?: string;
+  keybox_window_start?: string | number;
+  keyboxWindowStart?: string | number;
+  keybox_window_end?: string | number;
+  keyboxWindowEnd?: string | number;
+  keybox_target_name?: string;
+  keyboxTargetName?: string;
+  keybox_sign_used?: string;
+  keyboxSignUsed?: string;
   [key: string]: unknown;
 };
 
@@ -198,6 +225,15 @@ const normalizeReservation = (record: ReservationRecord): Reservation => {
     },
     notes: stringFrom(record, ["notes"], ""),
     refundNote: stringFrom(record, ["refund_note", "refundNote"], ""),
+    keyboxPinCode: stringFrom(record, ["keybox_pin_code", "keyboxPinCode"], ""),
+    keyboxPinId: stringFrom(record, ["keybox_pin_id", "keyboxPinId"], ""),
+    keyboxQrCode: stringFrom(record, ["keybox_qr_code", "keyboxQrCode"], ""),
+    keyboxQrImageUrl: stringFrom(record, ["keybox_qr_image_url", "keyboxQrImageUrl"], ""),
+    keyboxUnitId: stringFrom(record, ["keybox_unit_id", "keyboxUnitId"], ""),
+    keyboxWindowStart: datetimeFrom(record, ["keybox_window_start", "keyboxWindowStart"]),
+    keyboxWindowEnd: datetimeFrom(record, ["keybox_window_end", "keyboxWindowEnd"]),
+    keyboxTargetName: stringFrom(record, ["keybox_target_name", "keyboxTargetName"], ""),
+    keyboxSignUsed: stringFrom(record, ["keybox_sign_used", "keyboxSignUsed"], ""),
   };
 };
 
@@ -305,6 +341,17 @@ const reservationToRecord = (reservation: Reservation): ReservationRecord => {
     options_theft_coverage: reservation.options?.theftCoverage ?? "",
     notes: reservation.notes ?? "",
     refund_note: reservation.refundNote ?? "",
+    keybox_pin_code: reservation.keyboxPinCode ?? "",
+    keybox_pin_id: reservation.keyboxPinId ?? "",
+    keybox_qr_code: reservation.keyboxQrCode ?? "",
+    keybox_qr_image_url: reservation.keyboxQrImageUrl ?? "",
+    keybox_unit_id: reservation.keyboxUnitId ?? "",
+    keybox_window_start:
+      toIsoStringIfPossible(reservation.keyboxWindowStart) ?? reservation.keyboxWindowStart ?? "",
+    keybox_window_end:
+      toIsoStringIfPossible(reservation.keyboxWindowEnd) ?? reservation.keyboxWindowEnd ?? "",
+    keybox_target_name: reservation.keyboxTargetName ?? "",
+    keybox_sign_used: reservation.keyboxSignUsed ?? "",
   };
 };
 
