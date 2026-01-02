@@ -23,6 +23,8 @@ export default function KeyboxLogsPage() {
   const [logs, setLogs] = useState<KeyboxLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fromFallback, setFromFallback] = useState(false);
+  const [serverMessage, setServerMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -32,8 +34,15 @@ export default function KeyboxLogsPage() {
         if (!response.ok) {
           throw new Error(`ログの取得に失敗しました (${response.status})`);
         }
-        const data = (await response.json()) as { logs?: KeyboxLog[] };
+        const data = (await response.json()) as {
+          logs?: KeyboxLog[];
+          fromFallback?: boolean;
+          errorMessage?: string;
+        };
+
         setLogs(data.logs ?? []);
+        setFromFallback(Boolean(data.fromFallback));
+        setServerMessage(data.errorMessage ?? null);
         setError(null);
       } catch (fetchError) {
         if (!controller.signal.aborted) {
@@ -95,6 +104,13 @@ export default function KeyboxLogsPage() {
               <p className={styles.statHelper}>表示中ログの成功件数</p>
             </div>
           </div>
+
+          {fromFallback || serverMessage ? (
+            <div className={styles.placeholderCard}>
+              <p className="font-semibold text-yellow-800">ログの取得に問題が発生したためキャッシュを表示中です。</p>
+              {serverMessage ? <p className="text-sm text-gray-700">{serverMessage}</p> : null}
+            </div>
+          ) : null}
 
           {isLoading ? (
             <div className={styles.placeholderCard}>
