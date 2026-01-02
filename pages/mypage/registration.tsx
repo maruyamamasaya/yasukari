@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
 import { formatDisplayPhoneNumber } from '../../lib/phoneNumber';
+import { uploadLicenseImage } from '../../lib/licenseUpload';
 import type { RegistrationData } from '../../types/registration';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -157,6 +158,10 @@ const RegistrationPage: NextPage = () => {
 
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [licenseFileName, setLicenseFileName] = useState('');
+  const [licenseImageUrl, setLicenseImageUrl] = useState('');
+  const [licenseUploadedAt, setLicenseUploadedAt] = useState('');
+  const [licenseUploadStatus, setLicenseUploadStatus] = useState<FormStatus>('idle');
+  const [licenseUploadMessage, setLicenseUploadMessage] = useState('');
   const [submitStatus, setSubmitStatus] = useState<FormStatus>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -282,6 +287,15 @@ const RegistrationPage: NextPage = () => {
           enquete_magazine: registration.enquete_magazine ?? prev.enquete_magazine,
           enquete_chance: registration.enquete_chance ?? prev.enquete_chance,
         }));
+        if (registration.license_file_name) {
+          setLicenseFileName(registration.license_file_name);
+        }
+        if (registration.license_image_url) {
+          setLicenseImageUrl(registration.license_image_url);
+          setLicenseUploadedAt(registration.license_uploaded_at ?? '');
+          setLicenseUploadStatus('success');
+          setLicenseUploadMessage('アップロード済みです。');
+        }
 
         if (registration.mobile) {
           setSelectedPhoneOption(registration.mobile);
@@ -345,7 +359,37 @@ const RegistrationPage: NextPage = () => {
 
   const handleFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    setLicenseFileName(file ? file.name : '');
+    if (!file) {
+      setLicenseFileName('');
+      setLicenseImageUrl('');
+      setLicenseUploadedAt('');
+      setLicenseUploadStatus('idle');
+      setLicenseUploadMessage('');
+      return;
+    }
+
+    setLicenseFileName(file.name);
+    setLicenseUploadStatus('loading');
+    setLicenseUploadMessage('アップロード中...');
+
+    uploadLicenseImage(file)
+      .then((result) => {
+        setLicenseFileName(result.fileName);
+        setLicenseImageUrl(result.url);
+        setLicenseUploadedAt(result.uploadedAt);
+        setLicenseUploadStatus('success');
+        setLicenseUploadMessage('アップロードが完了しました。');
+      })
+      .catch((error) => {
+        const message =
+          error instanceof Error
+            ? error.message
+            : '免許証画像のアップロードに失敗しました。';
+        setLicenseImageUrl('');
+        setLicenseUploadedAt('');
+        setLicenseUploadStatus('error');
+        setLicenseUploadMessage(message);
+      });
   }, []);
 
   const handleSubmit = useCallback(
@@ -360,6 +404,18 @@ const RegistrationPage: NextPage = () => {
       if (!sessionUser?.id) {
         setSubmitStatus('error');
         setSubmitMessage('ユーザー情報の取得に失敗しました。ログインし直してから再度お試しください。');
+        return;
+      }
+
+      if (licenseUploadStatus === 'loading') {
+        setSubmitStatus('error');
+        setSubmitMessage('免許証画像のアップロードが完了するまでお待ちください。');
+        return;
+      }
+
+      if (licenseUploadStatus === 'error') {
+        setSubmitStatus('error');
+        setSubmitMessage('免許証画像のアップロードに失敗しています。再度アップロードしてください。');
         return;
       }
 
@@ -390,6 +446,8 @@ const RegistrationPage: NextPage = () => {
             user_id: sessionUser.id,
             email: sessionUser.email,
             license_file_name: licenseFileName,
+            license_image_url: licenseImageUrl,
+            license_uploaded_at: licenseUploadedAt,
             ...formData,
           }),
         });
@@ -415,7 +473,7 @@ const RegistrationPage: NextPage = () => {
         }, 400);
       }
     },
-    [formData, licenseFileName, router, sessionUser],
+    [formData, licenseFileName, licenseImageUrl, licenseUploadedAt, licenseUploadStatus, router, sessionUser],
   );
 
   return (
@@ -704,6 +762,15 @@ const RegistrationPage: NextPage = () => {
                     className="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border file:border-red-600 file:bg-white file:px-4 file:py-2 file:text-sm file:font-semibold file:text-red-600 hover:file:bg-red-50"
                   />
                   {licenseFileName ? <p className="mt-1 text-xs text-gray-500">選択中: {licenseFileName}</p> : null}
+                  {licenseUploadStatus === 'loading' ? (
+                    <p className="mt-1 text-xs text-gray-500">アップロード中...</p>
+                  ) : null}
+                  {licenseUploadStatus === 'success' ? (
+                    <p className="mt-1 text-xs text-green-600">{licenseUploadMessage}</p>
+                  ) : null}
+                  {licenseUploadStatus === 'error' ? (
+                    <p className="mt-1 text-xs text-red-600">{licenseUploadMessage}</p>
+                  ) : null}
                 </div>
               </div>
               <div className="space-y-2 rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-600">

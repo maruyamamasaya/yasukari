@@ -14,6 +14,8 @@ export type RegistrationData = {
   tel?: string;
   license?: string;
   license_file_name?: string;
+  license_image_url?: string;
+  license_uploaded_at?: string;
   work_place?: string;
   work_address?: string;
   work_tel?: string;

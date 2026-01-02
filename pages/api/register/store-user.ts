@@ -50,6 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tel: normalizePhone(body.tel) || undefined,
       license: toTrimmedString(body.license),
       license_file_name: toTrimmedString(body.license_file_name),
+      license_image_url: toTrimmedString(body.license_image_url),
+      license_uploaded_at: toTrimmedString(body.license_uploaded_at),
       work_place: toTrimmedString(body.work_place),
       work_address: toTrimmedString(body.work_address),
       work_tel: normalizePhone(body.work_tel) || undefined,
