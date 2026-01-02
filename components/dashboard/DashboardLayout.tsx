@@ -99,6 +99,10 @@ const NAV_ITEMS: NavItem[] = [
         label: "バイクの返却完了",
         href: `${ADMIN_DASHBOARD_ROOT}/photo-uploads/return-completions`,
       },
+      {
+        label: "免許証画像",
+        href: `${ADMIN_DASHBOARD_ROOT}/photo-uploads/license-uploads`,
+      },
     ],
   },
   {

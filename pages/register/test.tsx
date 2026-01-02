@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
 import verificationPreview from '../../data/registerVerificationMock.json';
+import { uploadLicenseImage } from '../../lib/licenseUpload';
 
 type RegisterFormData = {
   password: string;
@@ -170,6 +171,10 @@ const RegisterTestPage: NextPage = () => {
 
   const [formData, setFormData] = useState<RegisterFormData>(defaultFormData);
   const [licenseFileName, setLicenseFileName] = useState('');
+  const [licenseImageUrl, setLicenseImageUrl] = useState('');
+  const [licenseUploadedAt, setLicenseUploadedAt] = useState('');
+  const [licenseUploadStatus, setLicenseUploadStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [licenseUploadMessage, setLicenseUploadMessage] = useState('');
   const [submitMessage, setSubmitMessage] = useState('');
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | ''>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -206,6 +211,10 @@ const RegisterTestPage: NextPage = () => {
   useEffect(() => {
     setFormData(defaultFormData);
     setLicenseFileName('');
+    setLicenseImageUrl('');
+    setLicenseUploadedAt('');
+    setLicenseUploadStatus('idle');
+    setLicenseUploadMessage('');
     setSubmitStatus('');
     setSubmitMessage('');
     autofillRef.current = false;
@@ -245,7 +254,37 @@ const RegisterTestPage: NextPage = () => {
 
   const handleFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    setLicenseFileName(file ? file.name : '');
+    if (!file) {
+      setLicenseFileName('');
+      setLicenseImageUrl('');
+      setLicenseUploadedAt('');
+      setLicenseUploadStatus('idle');
+      setLicenseUploadMessage('');
+      return;
+    }
+
+    setLicenseFileName(file.name);
+    setLicenseUploadStatus('loading');
+    setLicenseUploadMessage('アップロード中...');
+
+    uploadLicenseImage(file)
+      .then((result) => {
+        setLicenseFileName(result.fileName);
+        setLicenseImageUrl(result.url);
+        setLicenseUploadedAt(result.uploadedAt);
+        setLicenseUploadStatus('success');
+        setLicenseUploadMessage('アップロードが完了しました。');
+      })
+      .catch((error) => {
+        const message =
+          error instanceof Error
+            ? error.message
+            : '免許証画像のアップロードに失敗しました。';
+        setLicenseImageUrl('');
+        setLicenseUploadedAt('');
+        setLicenseUploadStatus('error');
+        setLicenseUploadMessage(message);
+      });
   }, []);
 
   const userIdFromQuery = useMemo(
@@ -273,6 +312,18 @@ const RegisterTestPage: NextPage = () => {
         return;
       }
 
+      if (licenseUploadStatus === 'loading') {
+        setSubmitStatus('error');
+        setSubmitMessage('免許証画像のアップロードが完了するまでお待ちください。');
+        return;
+      }
+
+      if (licenseUploadStatus === 'error') {
+        setSubmitStatus('error');
+        setSubmitMessage('免許証画像のアップロードに失敗しています。再度アップロードしてください。');
+        return;
+      }
+
       setIsSubmitting(true);
 
       try {
@@ -285,6 +336,8 @@ const RegisterTestPage: NextPage = () => {
             user_id: resolvedUserId,
             email: displayEmail,
             license_file_name: licenseFileName,
+            license_image_url: licenseImageUrl,
+            license_uploaded_at: licenseUploadedAt,
             ...formData,
           }),
         });
@@ -307,7 +360,7 @@ const RegisterTestPage: NextPage = () => {
         }, 400);
       }
     },
-    [displayEmail, formData, licenseFileName, resolvedUserId],
+    [displayEmail, formData, licenseFileName, licenseImageUrl, licenseUploadedAt, licenseUploadStatus, resolvedUserId],
   );
 
   return (
@@ -649,6 +702,15 @@ const RegisterTestPage: NextPage = () => {
                       onChange={handleFileChange}
                     />
                     <p className="mt-2 text-xs text-gray-500">テストアカウントではファイル選択を省略しても問題ありません。</p>
+                    {licenseUploadStatus === 'loading' ? (
+                      <p className="mt-2 text-xs text-gray-500">アップロード中...</p>
+                    ) : null}
+                    {licenseUploadStatus === 'success' ? (
+                      <p className="mt-2 text-xs text-green-600">{licenseUploadMessage}</p>
+                    ) : null}
+                    {licenseUploadStatus === 'error' ? (
+                      <p className="mt-2 text-xs text-red-600">{licenseUploadMessage}</p>
+                    ) : null}
                   </div>
                 </div>
               </div>

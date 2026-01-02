@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
+import { uploadLicenseImage } from '../../../lib/licenseUpload';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -148,6 +149,10 @@ const RegistrationPage: NextPage = () => {
 
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [licenseFileName, setLicenseFileName] = useState('');
+  const [licenseImageUrl, setLicenseImageUrl] = useState('');
+  const [licenseUploadedAt, setLicenseUploadedAt] = useState('');
+  const [licenseUploadStatus, setLicenseUploadStatus] = useState<FormStatus>('idle');
+  const [licenseUploadMessage, setLicenseUploadMessage] = useState('');
   const [submitStatus, setSubmitStatus] = useState<FormStatus>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -257,7 +262,37 @@ const RegistrationPage: NextPage = () => {
 
   const handleFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    setLicenseFileName(file ? file.name : '');
+    if (!file) {
+      setLicenseFileName('');
+      setLicenseImageUrl('');
+      setLicenseUploadedAt('');
+      setLicenseUploadStatus('idle');
+      setLicenseUploadMessage('');
+      return;
+    }
+
+    setLicenseFileName(file.name);
+    setLicenseUploadStatus('loading');
+    setLicenseUploadMessage('Uploading...');
+
+    uploadLicenseImage(file)
+      .then((result) => {
+        setLicenseFileName(result.fileName);
+        setLicenseImageUrl(result.url);
+        setLicenseUploadedAt(result.uploadedAt);
+        setLicenseUploadStatus('success');
+        setLicenseUploadMessage('Upload completed.');
+      })
+      .catch((error) => {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Failed to upload the license image.';
+        setLicenseImageUrl('');
+        setLicenseUploadedAt('');
+        setLicenseUploadStatus('error');
+        setLicenseUploadMessage(message);
+      });
   }, []);
 
   const handleSubmit = useCallback(
@@ -271,7 +306,19 @@ const RegistrationPage: NextPage = () => {
 
       if (!sessionUser?.id) {
         setSubmitStatus('error');
-      setSubmitMessage('Failed to fetch your user info. Please sign in again and retry.');
+        setSubmitMessage('Failed to fetch your user info. Please sign in again and retry.');
+        return;
+      }
+
+      if (licenseUploadStatus === 'loading') {
+        setSubmitStatus('error');
+        setSubmitMessage('Please wait for the license image upload to finish.');
+        return;
+      }
+
+      if (licenseUploadStatus === 'error') {
+        setSubmitStatus('error');
+        setSubmitMessage('The license image upload failed. Please upload again.');
         return;
       }
 
@@ -287,6 +334,8 @@ const RegistrationPage: NextPage = () => {
             user_id: sessionUser.id,
             email: sessionUser.email,
             license_file_name: licenseFileName,
+            license_image_url: licenseImageUrl,
+            license_uploaded_at: licenseUploadedAt,
             ...formData,
           }),
         });
@@ -312,7 +361,7 @@ const RegistrationPage: NextPage = () => {
         }, 400);
       }
     },
-    [formData, licenseFileName, router, sessionUser],
+    [formData, licenseFileName, licenseImageUrl, licenseUploadedAt, licenseUploadStatus, router, sessionUser],
   );
 
   return (
@@ -606,6 +655,15 @@ const RegistrationPage: NextPage = () => {
                     className="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border file:border-red-600 file:bg-white file:px-4 file:py-2 file:text-sm file:font-semibold file:text-red-600 hover:file:bg-red-50"
                   />
                   {licenseFileName ? <p className="mt-1 text-xs text-gray-500">Selected: {licenseFileName}</p> : null}
+                  {licenseUploadStatus === 'loading' ? (
+                    <p className="mt-1 text-xs text-gray-500">Uploading...</p>
+                  ) : null}
+                  {licenseUploadStatus === 'success' ? (
+                    <p className="mt-1 text-xs text-green-600">{licenseUploadMessage}</p>
+                  ) : null}
+                  {licenseUploadStatus === 'error' ? (
+                    <p className="mt-1 text-xs text-red-600">{licenseUploadMessage}</p>
+                  ) : null}
                 </div>
               </div>
 
