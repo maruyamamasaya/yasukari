@@ -131,44 +131,60 @@ export type KeyboxIssueResult = {
   reservationUpdates?: Partial<Reservation>;
 };
 
-export async function issueKeyboxPinForReservation(
-  reservation: Reservation
-): Promise<KeyboxIssueResult> {
-  const targetName = reservation.memberName || "WEB予約PIN";
-  const unitId = UNIT_ID_OVERRIDE || randomUnitId();
-  const pinCode = randomPinCode();
+type KeyboxIssueParams = {
+  windowStart: Date;
+  windowEnd: Date;
+  targetName?: string;
+  pinCode?: string;
+  unitId?: string;
+  storeName?: string;
+  memberId?: string;
+  reservationId?: string;
+  source?: string;
+};
+
+type KeyboxIssueResponse = {
+  log: KeyboxLog;
+  pinCode: string;
+  pinId?: string;
+  qrCode?: string;
+  qrImageUrl?: string;
+  signUsed?: "A" | "B";
+  unitId: string;
+  windowStart: string;
+  windowEnd: string;
+  targetName: string;
+  success: boolean;
+};
+
+export async function issueKeyboxPin(params: KeyboxIssueParams): Promise<KeyboxIssueResponse> {
+  const targetName = params.targetName || "WEB予約PIN";
+  const unitId = params.unitId || UNIT_ID_OVERRIDE || randomUnitId();
+  const pinCode = params.pinCode || randomPinCode();
 
   if (!API_KEY || !SECRET_KEY) {
     const log = await addKeyboxLog({
-      reservationId: reservation.id,
-      memberId: reservation.memberId,
-      storeName: reservation.storeName,
+      reservationId: params.reservationId,
+      memberId: params.memberId,
+      storeName: params.storeName,
       unitId,
       pinCode,
       success: false,
       message: "KEYBOX API_KEY / SECRET_KEY is not configured",
     });
-    return { log };
-  }
-
-  const pickupAt = new Date(reservation.pickupAt);
-  const returnAt = new Date(reservation.returnAt);
-
-  if (Number.isNaN(pickupAt.getTime()) || Number.isNaN(returnAt.getTime())) {
-    const log = await addKeyboxLog({
-      reservationId: reservation.id,
-      memberId: reservation.memberId,
-      storeName: reservation.storeName,
-      unitId,
+    return {
+      log,
       pinCode,
+      unitId,
+      windowStart: params.windowStart.toISOString(),
+      windowEnd: params.windowEnd.toISOString(),
+      targetName,
       success: false,
-      message: "Failed to parse pickup/return datetime for keybox issuance",
-    });
-    return { log };
+    };
   }
 
-  const startEpoch = toEpochSeconds(new Date(pickupAt.getTime() - BUFFER_MS));
-  const endEpoch = toEpochSeconds(new Date(returnAt.getTime() + BUFFER_MS));
+  const startEpoch = toEpochSeconds(params.windowStart);
+  const endEpoch = toEpochSeconds(params.windowEnd);
 
   const body = {
     unitId,
@@ -179,7 +195,7 @@ export async function issueKeyboxPinForReservation(
   };
 
   let responseBody: Record<string, unknown> = {};
-  let signUsed: "A" | "B" = "A";
+  let signUsed: "A" | "B" | undefined;
   let message = "";
   let success = false;
 
@@ -197,11 +213,16 @@ export async function issueKeyboxPinForReservation(
   const qrCode = (responseBody?.data as { qrCode?: string } | undefined)?.qrCode;
   const pinId = (responseBody?.data as { pinId?: string } | undefined)?.pinId;
   const qrCodeUrl = qrCode ? qrImageUrl(qrCode) : "";
+  const logMessage = message
+    ? params.source
+      ? `${params.source}: ${message}`
+      : message
+    : undefined;
 
   const log = await addKeyboxLog({
-    reservationId: reservation.id,
-    memberId: reservation.memberId,
-    storeName: reservation.storeName,
+    reservationId: params.reservationId,
+    memberId: params.memberId,
+    storeName: params.storeName,
     unitId,
     pinCode,
     pinId,
@@ -214,22 +235,66 @@ export async function issueKeyboxPinForReservation(
     success,
     signUsed,
     targetName,
-    message: message || undefined,
+    message: logMessage,
   });
 
-  const reservationUpdates = success
+  return {
+    log,
+    pinCode,
+    pinId,
+    qrCode,
+    qrImageUrl: qrCodeUrl,
+    signUsed,
+    unitId,
+    windowStart: new Date(startEpoch * 1000).toISOString(),
+    windowEnd: new Date(endEpoch * 1000).toISOString(),
+    targetName,
+    success,
+  };
+}
+
+export async function issueKeyboxPinForReservation(
+  reservation: Reservation
+): Promise<KeyboxIssueResult> {
+  const pickupAt = new Date(reservation.pickupAt);
+  const returnAt = new Date(reservation.returnAt);
+
+  if (Number.isNaN(pickupAt.getTime()) || Number.isNaN(returnAt.getTime())) {
+    const log = await addKeyboxLog({
+      reservationId: reservation.id,
+      memberId: reservation.memberId,
+      storeName: reservation.storeName,
+      unitId: UNIT_ID_OVERRIDE || "",
+      pinCode: "",
+      success: false,
+      message: "Failed to parse pickup/return datetime for keybox issuance",
+    });
+    return { log };
+  }
+
+  const result = await issueKeyboxPin({
+    windowStart: new Date(pickupAt.getTime() - BUFFER_MS),
+    windowEnd: new Date(returnAt.getTime() + BUFFER_MS),
+    targetName: reservation.memberName || "WEB予約PIN",
+    storeName: reservation.storeName,
+    memberId: reservation.memberId,
+    reservationId: reservation.id,
+    source: "reservation",
+  });
+
+  const reservationUpdates = result.success
     ? {
-        keyboxPinCode: pinCode,
-        keyboxPinId: pinId ?? "",
-        keyboxQrCode: qrCode ?? "",
-        keyboxQrImageUrl: qrCodeUrl,
-        keyboxUnitId: unitId,
-        keyboxWindowStart: new Date(startEpoch * 1000).toISOString(),
-        keyboxWindowEnd: new Date(endEpoch * 1000).toISOString(),
-        keyboxTargetName: targetName,
-        keyboxSignUsed: signUsed,
+        keyboxPinCode: result.pinCode,
+        keyboxPinId: result.pinId ?? "",
+        keyboxQrCode: result.qrCode ?? "",
+        keyboxQrImageUrl: result.qrImageUrl ?? "",
+        keyboxUnitId: result.unitId,
+        keyboxWindowStart: result.windowStart,
+        keyboxWindowEnd: result.windowEnd,
+        keyboxTargetName: result.targetName,
+        keyboxSignUsed: result.signUsed,
       }
     : undefined;
 
-  return { log, reservationUpdates };
+  return { log: result.log, reservationUpdates };
 }

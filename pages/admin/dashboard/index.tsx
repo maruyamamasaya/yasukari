@@ -80,6 +80,17 @@ const couponManagementLinks: MenuLink[] = [
   },
 ];
 
+const keyboxLinks: MenuLink[] = [
+  {
+    label: "KEYBOX解錠キーの発行",
+    href: `${ADMIN_DASHBOARD_ROOT}/keybox-issue`,
+  },
+  {
+    label: "KEYBOX実行ログ",
+    href: `${ADMIN_DASHBOARD_ROOT}/keybox-logs`,
+  },
+];
+
 const menuSections: MenuSection[] = [
   {
     title: "ダッシュボード",
@@ -178,6 +189,11 @@ const menuSections: MenuSection[] = [
     description:
       "クーポンの登録・編集や対象クラスの設定を行う管理メニューです。",
     links: couponManagementLinks,
+  },
+  {
+    title: "KEYBOX管理",
+    description: "無人店舗用のPIN発行と実行ログを確認できます。",
+    links: keyboxLinks,
   },
 ];
 
