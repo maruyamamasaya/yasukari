@@ -30,11 +30,11 @@ const clientId = process.env.COGNITO_CLIENT_ID ?? process.env.NEXT_PUBLIC_COGNIT
 
 let jwksCache: { keys: JwksKey[]; fetchedAt: number } | null = null;
 
-const base64UrlToBuffer = (value: string): Uint8Array => {
+const base64UrlToArrayBuffer = (value: string): ArrayBuffer => {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
   const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
   const buffer = Buffer.from(padded, 'base64');
-  return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 };
 
 async function getJwks(): Promise<JwksKey[]> {
@@ -98,7 +98,7 @@ export async function verifyCognitoIdToken(token: string | undefined | null): Pr
 
   const key = await getVerificationKey(header.kid);
   const data = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`);
-  const signature = base64UrlToBuffer(encodedSignature);
+  const signature = base64UrlToArrayBuffer(encodedSignature);
 
   const isValid = await crypto.webcrypto.subtle.verify(
     'RSASSA-PKCS1-v1_5',
