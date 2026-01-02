@@ -21,7 +21,8 @@ export type RentalAvailabilityStatus =
   | "AVAILABLE"
   | "UNAVAILABLE"
   | "MAINTENANCE"
-  | "RENTED";
+  | "RENTED"
+  | "RENTAL_COMPLETED";
 
 export type RentalAvailabilityDay = {
   status: RentalAvailabilityStatus;
