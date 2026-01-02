@@ -2,8 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { clearPendingRegistration, getPendingRegistration } from '../../../lib/pendingRegistrations';
 import { createLightMember, hasLightMemberByEmail } from '../../../lib/mockUserDb';
 import type { LightMember } from '../../../lib/mockUserDb';
+import { deliverProvisionalRegistrationEmail } from '../../../lib/registrationEmails';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -36,6 +37,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       phoneNumber: pendingRegistration.phoneNumber,
       registrationStatus: 'provisional',
     });
+
+    await deliverProvisionalRegistrationEmail(sanitizedEmail);
   } catch (error) {
     const message = error instanceof Error ? error.message : '登録処理に失敗しました。';
     return res.status(400).json({ message });
