@@ -473,14 +473,24 @@ export default function DashboardLayout({
           {maintenanceState.error && (
             <p className={styles.sidebarCardError}>{maintenanceState.error}</p>
           )}
-          <button
-            className={styles.sidebarActionButton}
-            type="button"
-            onClick={handleToggleMaintenance}
-            disabled={maintenanceState.isLoading || maintenanceState.isUpdating}
-          >
-            {maintenanceState.enabled ? "工事中ページを解除" : "工事中ページを表示"}
-          </button>
+          <div className={styles.sidebarCardActions}>
+            <Link
+              href="/maintenance"
+              className={styles.sidebarPreviewButton}
+              target="_blank"
+              rel="noreferrer"
+            >
+              工事中ページを確認
+            </Link>
+            <button
+              className={styles.sidebarActionButton}
+              type="button"
+              onClick={handleToggleMaintenance}
+              disabled={maintenanceState.isLoading || maintenanceState.isUpdating}
+            >
+              {maintenanceState.enabled ? "工事中ページを解除" : "工事中ページを表示"}
+            </button>
+          </div>
         </div>
         {isSidebarResizable && (
           <div
