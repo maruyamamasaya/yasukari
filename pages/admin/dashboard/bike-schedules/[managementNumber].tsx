@@ -23,6 +23,7 @@ const STATUS_LABELS: Record<RentalAvailabilityStatus, string> = {
   UNAVAILABLE: "貸出不可",
   MAINTENANCE: "メンテナンス中",
   RENTED: "レンタル中",
+  RENTAL_COMPLETED: "レンタル完了",
 };
 
 const STATUS_COLORS: Record<RentalAvailabilityStatus, string> = {
@@ -30,6 +31,7 @@ const STATUS_COLORS: Record<RentalAvailabilityStatus, string> = {
   UNAVAILABLE: "#ef4444",
   MAINTENANCE: "#f59e0b",
   RENTED: "#3b82f6",
+  RENTAL_COMPLETED: "#8b5cf6",
 };
 
 type CalendarCell = {
@@ -88,6 +90,8 @@ const buildReservationAvailability = (reservations: Reservation[]): RentalAvaila
     }
 
     const renterName = reservation.memberName?.trim() || "名前未登録";
+    const isRentalCompleted =
+      Boolean(reservation.rentalCompletedAt) || reservation.status === "レンタル完了";
     const cursor = new Date(startDate);
     while (cursor <= endDate) {
       const key = formatDateKey(cursor);
@@ -97,7 +101,7 @@ const buildReservationAvailability = (reservations: Reservation[]): RentalAvaila
           ? Array.from(new Set([existingNote, renterName])).join(" / ")
           : renterName;
 
-      map[key] = { status: "RENTED", note };
+      map[key] = { status: isRentalCompleted ? "RENTAL_COMPLETED" : "RENTED", note };
       cursor.setDate(cursor.getDate() + 1);
     }
   });
@@ -143,7 +147,8 @@ const normalizeAvailabilityMap = (value: unknown): RentalAvailabilityMap => {
           status === "AVAILABLE" ||
           status === "UNAVAILABLE" ||
           status === "MAINTENANCE" ||
-          status === "RENTED";
+          status === "RENTED" ||
+          status === "RENTAL_COMPLETED";
         if (!isValidStatus) {
           return null;
         }
@@ -690,12 +695,14 @@ export default function BikeScheduleDetailPage() {
                                               color: STATUS_COLORS[entry.status],
                                             }}
                                           >
-                                            {entry.status === "RENTED" && entry.note
-                                              ? `${STATUS_LABELS[entry.status]}（${entry.note}）`
-                                              : STATUS_LABELS[entry.status]}
-                                          </span>
-                                        )}
-                                      </div>
+                                        {entry.note &&
+                                        (entry.status === "RENTED" ||
+                                          entry.status === "RENTAL_COMPLETED")
+                                          ? `${STATUS_LABELS[entry.status]}（${entry.note}）`
+                                          : STATUS_LABELS[entry.status]}
+                                      </span>
+                                    )}
+                                  </div>
                                       {!entry && <div className={styles.calendarEmpty}>未設定</div>}
                                       {entry?.note && <div className={styles.calendarNote}>{entry.note}</div>}
                                     </td>
@@ -735,9 +742,7 @@ export default function BikeScheduleDetailPage() {
                                     setActiveStatus(event.target.value as RentalAvailabilityStatus)
                                   }
                                 >
-                                  {(
-                                    ["AVAILABLE", "UNAVAILABLE", "MAINTENANCE", "RENTED"] as RentalAvailabilityStatus[]
-                                  ).map((status) => (
+                                  {(Object.keys(STATUS_LABELS) as RentalAvailabilityStatus[]).map((status) => (
                                     <option key={status} value={status}>
                                       {STATUS_LABELS[status]}
                                     </option>

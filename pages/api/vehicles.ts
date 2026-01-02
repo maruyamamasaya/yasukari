@@ -32,7 +32,8 @@ type RentalAvailabilityStatus =
   | "AVAILABLE"
   | "UNAVAILABLE"
   | "MAINTENANCE"
-  | "RENTED";
+  | "RENTED"
+  | "RENTAL_COMPLETED";
 
 type RentalAvailabilityDay = {
   status: RentalAvailabilityStatus;
@@ -48,7 +49,8 @@ const isValidRentalStatus = (value: unknown): value is RentalAvailabilityStatus 
   value === "AVAILABLE" ||
   value === "UNAVAILABLE" ||
   value === "MAINTENANCE" ||
-  value === "RENTED";
+  value === "RENTED" ||
+  value === "RENTAL_COMPLETED";
 
 const normalizeRentalAvailabilityDay = (
   value: unknown
