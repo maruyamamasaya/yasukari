@@ -1,5 +1,7 @@
 import nodemailer, { Transporter, SentMessageInfo } from 'nodemailer';
 
+import { addMailHistory } from './mailHistory';
+
 const MAX_RETRY_ATTEMPTS = 3;
 const MAIL_FROM = process.env.MAIL_FROM ?? 'ヤスカリ <info@yasukaribike.com>';
 
@@ -9,6 +11,7 @@ export type MailPayload = {
   text: string;
   html?: string;
   replyTo?: string;
+  category?: string;
 };
 
 type QueueItem = MailPayload & {
@@ -71,12 +74,26 @@ async function processQueue(): Promise<void> {
 
     try {
       const info = await sendMailOnce(item);
+      addMailHistory({
+        to: item.to,
+        subject: item.subject,
+        status: 'sent',
+        category: item.category ?? 'その他',
+      });
       item.resolve(info);
     } catch (error) {
       const nextAttempts = item.attempts + 1;
       if (nextAttempts < MAX_RETRY_ATTEMPTS) {
         queue.push({ ...item, attempts: nextAttempts });
       } else {
+        addMailHistory({
+          to: item.to,
+          subject: item.subject,
+          status: 'failed',
+          category: item.category ?? 'その他',
+          errorMessage:
+            error instanceof Error ? error.message : 'メール送信中にエラーが発生しました。',
+        });
         item.reject(error);
       }
     }

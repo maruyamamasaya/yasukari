@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 
 import type { Reservation } from "./reservations";
+import { addMailHistory } from "./mailHistory";
 
 type MailSendResult = {
   simulated: boolean;
@@ -74,6 +75,13 @@ const buildHtmlBody = (reservation: Reservation): string => {
 export async function sendReservationCompletionEmail(reservation: Reservation): Promise<MailSendResult> {
   if (!reservation.memberEmail) {
     console.info("[reservation-email] Skip sending: member email not provided", reservation.id);
+    addMailHistory({
+      category: "予約完了",
+      to: "(メール未入力)",
+      subject: "【ヤスカリ】バイクレンタルのご予約完了",
+      status: "skipped",
+      errorMessage: "会員のメールアドレスが未設定のため送信をスキップしました。",
+    });
     return { simulated: true };
   }
 
@@ -89,6 +97,13 @@ export async function sendReservationCompletionEmail(reservation: Reservation): 
       portProvided: Boolean(port),
       userProvided: Boolean(user),
       passProvided: Boolean(password),
+    });
+    addMailHistory({
+      category: "予約完了",
+      to: reservation.memberEmail,
+      subject: "【ヤスカリ】バイクレンタルのご予約完了",
+      status: "skipped",
+      errorMessage: "SMTP設定不足のため送信できませんでした。",
     });
     return { simulated: true };
   }
@@ -107,13 +122,29 @@ export async function sendReservationCompletionEmail(reservation: Reservation): 
   const text = buildTextBody(reservation);
   const html = buildHtmlBody(reservation);
 
-  await transporter.sendMail({
-    from,
-    to: reservation.memberEmail,
-    subject,
-    text,
-    html,
-  });
-
-  return { simulated: false };
+  try {
+    await transporter.sendMail({
+      from,
+      to: reservation.memberEmail,
+      subject,
+      text,
+      html,
+    });
+    addMailHistory({
+      category: "予約完了",
+      to: reservation.memberEmail,
+      subject,
+      status: "sent",
+    });
+    return { simulated: false };
+  } catch (error) {
+    addMailHistory({
+      category: "予約完了",
+      to: reservation.memberEmail,
+      subject,
+      status: "failed",
+      errorMessage: error instanceof Error ? error.message : "送信中にエラーが発生しました。",
+    });
+    throw error;
+  }
 }

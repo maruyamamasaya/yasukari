@@ -26,6 +26,7 @@ export async function deliverProvisionalRegistrationEmail(email: string) {
     text,
     html,
     replyTo: fromAddress,
+    category: '仮登録',
   });
 
   return { simulated: false } as const;
@@ -46,6 +47,7 @@ export async function deliverFullRegistrationEmail(email: string) {
     text,
     html,
     replyTo: fromAddress,
+    category: '本登録',
   });
 
   return { simulated: false } as const;
