@@ -2,6 +2,12 @@
   --primary-color: #ef4444;
   --primary-color-dark: #b91c1c;
   --primary-color-light: #fca5a5;
+  --primary-red: #d62828;
+  --primary-red-strong: #c1121f;
+  --surface: #fff5f5;
+  --text-main: #2c2c2c;
+  --text-muted: #5a5a5a;
+  --border-color: rgba(0, 0, 0, 0.08);
   --surface-color: rgba(255, 255, 255, 0.82);
   --surface-border: rgba(255, 255, 255, 0.6);
   --text-color: #1f2937;
