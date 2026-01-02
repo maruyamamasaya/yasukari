@@ -33,6 +33,13 @@ type DashboardLayoutProps = {
   showDashboardLink?: boolean;
 };
 
+type MaintenanceState = {
+  enabled: boolean;
+  isLoading: boolean;
+  isUpdating: boolean;
+  error: string | null;
+};
+
 const ADMIN_DASHBOARD_ROOT = "/admin/dashboard";
 
 const DEFAULT_SIDEBAR_WIDTH = 240;
@@ -159,6 +166,12 @@ export default function DashboardLayout({
   const [isSidebarResizable, setIsSidebarResizable] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const resizeCleanupRef = useRef<(() => void) | null>(null);
+  const [maintenanceState, setMaintenanceState] = useState<MaintenanceState>({
+    enabled: false,
+    isLoading: true,
+    isUpdating: false,
+    error: null,
+  });
 
   const activeHref = useMemo(() => {
     const hrefs = NAV_ITEMS.flatMap((item) => [
@@ -218,6 +231,62 @@ export default function DashboardLayout({
     },
     []
   );
+
+  useEffect(() => {
+    const fetchMaintenanceStatus = async () => {
+      try {
+        const response = await fetch("/api/maintenance");
+        if (!response.ok) {
+          throw new Error("ステータスの取得に失敗しました");
+        }
+        const data = (await response.json()) as { enabled?: boolean };
+        setMaintenanceState({
+          enabled: Boolean(data.enabled),
+          isLoading: false,
+          isUpdating: false,
+          error: null,
+        });
+      } catch (error) {
+        setMaintenanceState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: "ステータスの取得に失敗しました",
+        }));
+      }
+    };
+
+    fetchMaintenanceStatus();
+  }, []);
+
+  const handleToggleMaintenance = useCallback(async () => {
+    setMaintenanceState((prev) => ({ ...prev, isUpdating: true, error: null }));
+
+    try {
+      const response = await fetch("/api/maintenance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !maintenanceState.enabled }),
+      });
+
+      if (!response.ok) {
+        throw new Error("更新に失敗しました");
+      }
+
+      const data = (await response.json()) as { enabled?: boolean };
+      setMaintenanceState({
+        enabled: Boolean(data.enabled),
+        isLoading: false,
+        isUpdating: false,
+        error: null,
+      });
+    } catch (error) {
+      setMaintenanceState((prev) => ({
+        ...prev,
+        isUpdating: false,
+        error: "更新に失敗しました。時間をおいて再度お試しください。",
+      }));
+    }
+  }, [maintenanceState.enabled]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -382,6 +451,37 @@ export default function DashboardLayout({
             ))}
           </ul>
         </nav>
+        <div className={styles.sidebarCard}>
+          <div className={styles.sidebarCardHeader}>サイト表示切替</div>
+          <p className={styles.sidebarCardDescription}>
+            サイトを一時的に工事中ページへ切り替えます。年末年始などの一時停止時にご利用ください。
+          </p>
+          <div className={styles.maintenanceStatusRow}>
+            <span
+              className={`${styles.statusBadge} ${
+                maintenanceState.enabled
+                  ? styles.statusBadgeActive
+                  : styles.statusBadgeInactive
+              }`}
+            >
+              {maintenanceState.enabled ? "工事中を表示中" : "通常表示中"}
+            </span>
+            {maintenanceState.isLoading && (
+              <span className={styles.statusHelper}>状態を取得中...</span>
+            )}
+          </div>
+          {maintenanceState.error && (
+            <p className={styles.sidebarCardError}>{maintenanceState.error}</p>
+          )}
+          <button
+            className={styles.sidebarActionButton}
+            type="button"
+            onClick={handleToggleMaintenance}
+            disabled={maintenanceState.isLoading || maintenanceState.isUpdating}
+          >
+            {maintenanceState.enabled ? "工事中ページを解除" : "工事中ページを表示"}
+          </button>
+        </div>
         {isSidebarResizable && (
           <div
             className={`${styles.sidebarResizeHandle} ${

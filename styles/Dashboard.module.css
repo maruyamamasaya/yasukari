@@ -92,6 +92,97 @@
   gap: 0.3rem;
 }
 
+.sidebarCard {
+  padding: 1rem 0.95rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sidebarCardHeader {
+  font-weight: 800;
+  color: rgba(30, 41, 59, 0.95);
+}
+
+.sidebarCardDescription {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(100, 116, 139, 0.95);
+  line-height: 1.6;
+}
+
+.sidebarCardError {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #dc2626;
+}
+
+.maintenanceStatusRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  border: 1px solid transparent;
+}
+
+.statusBadgeActive {
+  background: rgba(248, 113, 113, 0.15);
+  color: #b91c1c;
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.statusBadgeInactive {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.statusHelper {
+  font-size: 0.85rem;
+  color: rgba(100, 116, 139, 0.95);
+}
+
+.sidebarActionButton {
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(59, 130, 246, 0.85));
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.sidebarActionButton:hover,
+.sidebarActionButton:focus-visible {
+  outline: none;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+}
+
+.sidebarActionButton:active {
+  transform: translateY(0);
+}
+
+.sidebarActionButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 
 .sidebarNavLink {
   display: inline-flex;

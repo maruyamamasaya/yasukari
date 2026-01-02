@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkAccess } from './lib/rateLimit';
 import { COGNITO_ID_TOKEN_COOKIE } from './lib/cognitoHostedUi';
-
-const MANUAL_BASIC_USER = '0000';
-const MANUAL_BASIC_PASS = '0000';
-const ADMIN_BASIC_USER = 'yasukari';
-const ADMIN_BASIC_PASS = 'yasukari2022';
+import {
+  ADMIN_BASIC_PASS,
+  ADMIN_BASIC_USER,
+  MANUAL_BASIC_PASS,
+  MANUAL_BASIC_USER,
+  isBasicAuthValid,
+} from './lib/basicAuth';
 
 const decodeLocaleFromToken = (token: string | undefined): string | null => {
   if (!token) return null;
@@ -41,9 +43,8 @@ const requireBasicAuth = (
     });
   }
 
-  const [, encoded] = authHeader.split(' ');
-  const [user, pass] = Buffer.from(encoded ?? '', 'base64').toString().split(':');
-  if (user !== expectedUser || pass !== expectedPass) {
+  const isValid = isBasicAuthValid(authHeader, expectedUser, expectedPass);
+  if (!isValid) {
     return new NextResponse('Unauthorized', {
       status: 401,
       headers: { 'WWW-Authenticate': 'Basic realm="Protected"' },
@@ -53,7 +54,7 @@ const requireBasicAuth = (
   return null;
 };
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const ip = req.ip || req.headers.get('x-forwarded-for') || '0.0.0.0';
   if (checkAccess(Array.isArray(ip) ? ip[0] : ip)) {
     return NextResponse.redirect(new URL('/wait', req.url));
@@ -84,6 +85,31 @@ export function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   if (pathname.startsWith('/_next') || pathname.startsWith('/auth')) {
     return NextResponse.next();
+  }
+
+  let isMaintenanceMode = false;
+  if (!pathname.startsWith('/admin')) {
+    try {
+      const response = await fetch(new URL('/api/maintenance', req.url));
+      if (response.ok) {
+        const data = (await response.json()) as { enabled?: boolean };
+        isMaintenanceMode = Boolean(data.enabled);
+      }
+    } catch (error) {
+      console.error('Failed to check maintenance status', error);
+    }
+  }
+
+  if (
+    isMaintenanceMode &&
+    pathname !== '/maintenance' &&
+    pathname !== '/en/maintenance' &&
+    !pathname.startsWith('/admin')
+  ) {
+    const maintenancePath = pathname.startsWith('/en')
+      ? '/en/maintenance'
+      : '/maintenance';
+    return NextResponse.redirect(new URL(maintenancePath, req.url));
   }
 
   const idToken = req.cookies.get(COGNITO_ID_TOKEN_COOKIE)?.value;
