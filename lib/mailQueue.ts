@@ -1,6 +1,6 @@
 import nodemailer, { Transporter, SentMessageInfo } from 'nodemailer';
 
-import { addMailHistory } from './mailHistory';
+import { addMailHistory, MailHistoryCategory } from './mailHistory';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const MAX_CONSECUTIVE_FAILURES = 3;
@@ -14,7 +14,7 @@ export type MailPayload = {
   text: string;
   html?: string;
   replyTo?: string;
-  category?: string;
+  category?: MailHistoryCategory;
 };
 
 type QueueItem = MailPayload & {
