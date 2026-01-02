@@ -1,6 +1,7 @@
 import nodemailer, { Transporter, SentMessageInfo } from 'nodemailer';
 
 import { addMailHistory, MailHistoryCategory } from './mailHistory';
+import { recordUserNotification, NotificationChannel } from './userNotifications';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const MAX_CONSECUTIVE_FAILURES = 3;
@@ -15,6 +16,9 @@ export type MailPayload = {
   html?: string;
   replyTo?: string;
   category?: MailHistoryCategory;
+  userIdForNotification?: string;
+  notificationBody?: string;
+  mirrorToSite?: boolean;
 };
 
 type QueueItem = MailPayload & {
@@ -123,6 +127,28 @@ async function sendMailOnce(payload: MailPayload): Promise<SentMessageInfo> {
   });
 }
 
+const mirrorMailToUserNotification = async (payload: QueueItem): Promise<void> => {
+  const userId = payload.userIdForNotification || payload.to;
+  if (!userId) return;
+
+  const channels: NotificationChannel[] =
+    payload.mirrorToSite === false ? ["email"] : ["email", "site"];
+  const bodyForNotification = payload.notificationBody ?? payload.text;
+
+  try {
+    await recordUserNotification({
+      userId,
+      subject: payload.subject,
+      body: bodyForNotification,
+      category: payload.category,
+      channels,
+      recipientEmail: payload.to,
+    });
+  } catch (error) {
+    console.error("[mailQueue] Failed to mirror notification", { error, to: payload.to });
+  }
+};
+
 async function processQueue(): Promise<void> {
   if (processing) return;
   processing = true;
@@ -158,6 +184,7 @@ async function processQueue(): Promise<void> {
         status: 'sent',
         category: item.category ?? 'その他',
       });
+      await mirrorMailToUserNotification(item);
       item.resolve(info);
     } catch (error) {
       recordSendFailure(item.to);

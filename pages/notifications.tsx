@@ -1,56 +1,143 @@
 import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
 import Head from 'next/head';
 import Link from 'next/link';
-import { FaBell, FaCheckCircle, FaEnvelopeOpenText } from 'react-icons/fa';
+import { FaBell, FaCheckCircle, FaEnvelopeOpenText, FaToggleOff, FaToggleOn } from 'react-icons/fa';
 
 import styles from '../styles/Notifications.module.css';
 
-type NotificationItem = {
-  id: string;
-  title: string;
-  body: string;
-  time: string;
-  tag: string;
-  unread?: boolean;
-  actionLabel?: string;
-  actionHref?: string;
-  icon: ReactElement;
+type NotificationChannel = 'email' | 'site';
+
+type NotificationSettings = {
+  receiveEmail: boolean;
+  receiveSite: boolean;
+  updatedAt: string;
 };
 
-const notifications: NotificationItem[] = [
-  {
-    id: 'reservation-complete',
-    title: 'レンタル予約が完了しました',
-    body: '7月20日 10:00〜18:00のご予約を受け付けました。受け取り場所や持ち物をご確認ください。',
-    time: '5分前',
-    tag: '予約',
-    unread: true,
-    actionLabel: '予約詳細を見る',
-    actionHref: '/rental-status',
-    icon: <FaCheckCircle />,
-  },
-  {
-    id: 'operator-message',
-    title: '運営からの個別メッセージ',
-    body: 'ヘルメットの在庫確保が完了しました。当日受付でお名前をお知らせください。',
-    time: '今日 09:30',
-    tag: 'メッセージ',
-    unread: true,
-    actionLabel: 'メッセージを確認',
-    actionHref: '/mypage',
-    icon: <FaEnvelopeOpenText />,
-  },
-  {
-    id: 'return-reminder',
-    title: '返却予定のリマインド',
-    body: '返却予定は7月20日 18:00です。延長をご希望の場合は事前にお知らせください。',
-    time: '昨日',
-    tag: 'お知らせ',
-    icon: <FaBell />,
-  },
-];
+type NotificationItem = {
+  notificationId: string;
+  subject: string;
+  body: string;
+  createdAt: string;
+  category?: string;
+  channels: NotificationChannel[];
+};
+
+type NotificationsResponse = {
+  notifications: NotificationItem[];
+  settings: NotificationSettings;
+};
+
+const AUTH_REQUIRED_MESSAGE = '通知を受け取るには、ログインを完了してください。';
+
+const formatTimestamp = (value: string): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+};
+
+const resolveIcon = (notice: NotificationItem): ReactElement => {
+  if (notice.category?.includes('予約')) return <FaCheckCircle />;
+  if (notice.channels.includes('email')) return <FaEnvelopeOpenText />;
+  return <FaBell />;
+};
+
+const uniqueChannels = (channels: NotificationChannel[]): NotificationChannel[] =>
+  Array.from(new Set(channels));
+
+const describeChannels = (channels: NotificationChannel[]): string => {
+  const unique = uniqueChannels(channels);
+  if (unique.length > 1) return 'メール・サイト';
+  return unique[0] === 'email' ? 'メール' : 'サイト';
+};
 
 export default function NotificationsPage() {
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [settings, setSettings] = useState<NotificationSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [authRequired, setAuthRequired] = useState(false);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true);
+      setError(null);
+      setAuthRequired(false);
+
+      try {
+        const response = await fetch('/api/notifications');
+        if (response.status === 401) {
+          setAuthRequired(true);
+          setError(AUTH_REQUIRED_MESSAGE);
+          return;
+        }
+
+        const data = (await response.json()) as NotificationsResponse;
+        setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
+        setSettings(data.settings ?? null);
+      } catch (fetchError) {
+        console.error('Failed to load notifications', fetchError);
+        setError('通知の取得に失敗しました。時間をおいて再度お試しください。');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchNotifications();
+  }, []);
+
+  const toggleSetting = async (key: keyof NotificationSettings) => {
+    if (!settings) return;
+    const previous = settings;
+    const next = { ...settings, [key]: !settings[key] };
+    setSettings(next);
+    setSavingSettings(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          receiveEmail: next.receiveEmail,
+          receiveSite: next.receiveSite,
+        }),
+      });
+
+      if (response.status === 401) {
+        setAuthRequired(true);
+        setError(AUTH_REQUIRED_MESSAGE);
+        setSettings(previous);
+        return;
+      }
+
+      const data = (await response.json()) as { settings?: NotificationSettings };
+      setSettings(data.settings ?? next);
+    } catch (updateError) {
+      console.error('Failed to update notification settings', updateError);
+      setSettings(previous);
+      setError('通知設定の更新に失敗しました。時間をおいて再度お試しください。');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const siteNotifications = useMemo(
+    () =>
+      notifications
+        .filter((notice) => notice.channels?.includes('site'))
+        .map((notice) => ({ ...notice, channels: uniqueChannels(notice.channels) })),
+    [notifications]
+  );
+
+  const siteNotificationDisabled = settings?.receiveSite === false;
+  const visibleNotifications = siteNotificationDisabled ? [] : siteNotifications;
+  const latestCreatedAt = siteNotifications[0]?.createdAt ?? '';
+  const mirroredEmails = notifications.filter((notice) => notice.channels.includes('email')).length;
+
   return (
     <>
       <Head>
@@ -66,54 +153,132 @@ export default function NotificationsPage() {
             <p className={styles.eyebrow}>Notifications</p>
             <h1 className={styles.title}>通知</h1>
             <p className={styles.lead}>
-              予約完了のお知らせや運営からの個別メッセージをまとめて確認できます。
+              メールで受け取った案内を含め、同じ内容をサイト内でも確認できます。受信チャネルはユーザーごとに設定できます。
             </p>
           </div>
         </header>
 
         <div className={styles.summaryGrid}>
           <div className={styles.summaryCard}>
-            <p className={styles.summaryLabel}>未読</p>
-            <p className={styles.summaryValue}>2件</p>
-            <p className={styles.summaryNote}>重要なお知らせを見逃さないように。</p>
+            <p className={styles.summaryLabel}>サイト通知</p>
+            <p className={styles.summaryValue}>{siteNotifications.length}件</p>
+            <p className={styles.summaryNote}>直近: {latestCreatedAt ? formatTimestamp(latestCreatedAt) : '—'}</p>
           </div>
           <div className={styles.summaryCard}>
-            <p className={styles.summaryLabel}>最新の通知</p>
-            <p className={styles.summaryValue}>5分前</p>
-            <p className={styles.summaryNote}>予約完了のお知らせが届いています。</p>
+            <p className={styles.summaryLabel}>メール連携</p>
+            <p className={styles.summaryValue}>{mirroredEmails}件</p>
+            <p className={styles.summaryNote}>メール送信分も履歴に保存します。</p>
           </div>
           <div className={styles.summaryCard}>
-            <p className={styles.summaryLabel}>サポート</p>
-            <p className={styles.summaryValue}>いつでも</p>
-            <p className={styles.summaryNote}>困ったときはチャットからお問い合わせください。</p>
+            <p className={styles.summaryLabel}>設定</p>
+            <p className={styles.summaryValue}>{settings ? 'オンデマンド' : '読込中'}</p>
+            <p className={styles.summaryNote}>ユーザーごとに通知の受信チャネルを切り替えられます。</p>
           </div>
         </div>
 
-        <div className={styles.list}>
-          {notifications.map((notice) => (
-            <article
-              key={notice.id}
-              className={`${styles.card} ${notice.unread ? styles.unread : ''}`}
-            >
-              <div className={styles.cardIcon}>{notice.icon}</div>
-              <div className={styles.cardBody}>
-                <div className={styles.cardMeta}>
-                  <span className={styles.tag}>{notice.tag}</span>
-                  <span className={styles.time}>{notice.time}</span>
-                </div>
-                <h2 className={styles.cardTitle}>{notice.title}</h2>
-                <p className={styles.cardText}>{notice.body}</p>
-                {notice.actionHref && notice.actionLabel ? (
-                  <div className={styles.cardAction}>
-                    <Link href={notice.actionHref} className={styles.actionLink}>
-                      {notice.actionLabel}
-                    </Link>
-                  </div>
-                ) : null}
+        <div className={styles.settingsGrid}>
+          <div className={styles.settingsCard}>
+            <div className={styles.settingsHeader}>
+              <div>
+                <p className={styles.settingsLabel}>受信設定</p>
+                <h2 className={styles.settingsTitle}>メールとサイト通知の受信先</h2>
+                <p className={styles.settingsNote}>
+                  メールで送信した内容をそのまま通知欄に表示します。必要に応じてサイト通知の配信をオン・オフできます。
+                </p>
               </div>
-            </article>
-          ))}
+              <span className={styles.statusPill}>{savingSettings ? '保存中…' : '最新状態'}</span>
+            </div>
+
+            <div className={styles.toggleList}>
+              <button
+                type="button"
+                onClick={() => toggleSetting('receiveSite')}
+                className={styles.toggleRow}
+                disabled={!settings || savingSettings}
+                aria-pressed={settings?.receiveSite ?? false}
+              >
+                <div>
+                  <p className={styles.toggleLabel}>サイト全体の通知</p>
+                  <p className={styles.toggleDescription}>ログイン中に通知ページへ同じ内容を表示します。</p>
+                </div>
+                <span className={styles.toggleIcon} aria-hidden="true">
+                  {settings?.receiveSite ? <FaToggleOn /> : <FaToggleOff />}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => toggleSetting('receiveEmail')}
+                className={styles.toggleRow}
+                disabled={!settings || savingSettings}
+                aria-pressed={settings?.receiveEmail ?? false}
+              >
+                <div>
+                  <p className={styles.toggleLabel}>メール通知</p>
+                  <p className={styles.toggleDescription}>メール送信と同時に履歴へ保存します。</p>
+                </div>
+                <span className={styles.toggleIcon} aria-hidden="true">
+                  {settings?.receiveEmail ? <FaToggleOn /> : <FaToggleOff />}
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
+
+        {error ? <div className={styles.alert}>{error}</div> : null}
+
+        {authRequired ? (
+          <div className={styles.emptyState}>
+            <p className={styles.emptyTitle}>{AUTH_REQUIRED_MESSAGE}</p>
+            <p className={styles.emptyDescription}>ログイン後に、メールと同じ内容の通知をまとめて確認できます。</p>
+            <Link href="/login" className={styles.actionLink}>
+              ログインする
+            </Link>
+          </div>
+        ) : loading ? (
+          <div className={styles.emptyState}>
+            <p className={styles.emptyTitle}>通知を読み込み中です…</p>
+            <p className={styles.emptyDescription}>最新の履歴を取得しています。</p>
+          </div>
+        ) : visibleNotifications.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p className={styles.emptyTitle}>
+              {siteNotificationDisabled ? 'サイト通知がオフになっています' : 'まだ通知はありません'}
+            </p>
+            <p className={styles.emptyDescription}>
+              {siteNotificationDisabled
+                ? 'サイト全体での通知を再開すると、メールと同じ内容をここで確認できます。'
+                : '予約やお知らせを受信すると、ここに表示されます。'}
+            </p>
+            {siteNotificationDisabled ? (
+              <button
+                type="button"
+                className={styles.actionLink}
+                onClick={() => toggleSetting('receiveSite')}
+                disabled={savingSettings}
+              >
+                サイト通知をオンにする
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <div className={styles.list}>
+            {visibleNotifications.map((notice) => (
+              <article key={notice.notificationId} className={styles.card}>
+                <div className={styles.cardIcon}>{resolveIcon(notice)}</div>
+                <div className={styles.cardBody}>
+                  <div className={styles.cardMeta}>
+                    <span className={styles.tag}>{notice.category ?? 'お知らせ'}</span>
+                    <span className={styles.time}>{formatTimestamp(notice.createdAt)}</span>
+                    <span className={styles.channelBadge}>{describeChannels(notice.channels)}</span>
+                  </div>
+                  <h2 className={styles.cardTitle}>{notice.subject}</h2>
+                  <p className={styles.cardText}>{notice.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </>
   );

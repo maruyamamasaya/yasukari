@@ -27,6 +27,9 @@ export async function deliverProvisionalRegistrationEmail(email: string) {
     html,
     replyTo: fromAddress,
     category: '仮登録',
+    userIdForNotification: email,
+    notificationBody: text,
+    mirrorToSite: true,
   });
 
   return { simulated: false } as const;
@@ -48,6 +51,9 @@ export async function deliverFullRegistrationEmail(email: string) {
     html,
     replyTo: fromAddress,
     category: '本登録',
+    userIdForNotification: email,
+    notificationBody: text,
+    mirrorToSite: true,
   });
 
   return { simulated: false } as const;

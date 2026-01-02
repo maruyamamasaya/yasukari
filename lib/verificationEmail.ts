@@ -58,6 +58,9 @@ export async function deliverVerificationEmail({
     text: textBody,
     html: htmlBody,
     replyTo: fromAddress,
+    userIdForNotification: email,
+    notificationBody: textBody,
+    mirrorToSite: true,
   });
 
   return { simulated: false };

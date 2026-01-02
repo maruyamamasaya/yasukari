@@ -116,6 +116,9 @@ export async function sendReservationCompletionEmail(reservation: Reservation): 
       text,
       html,
       category: "予約完了",
+      userIdForNotification: reservation.memberId || reservation.memberEmail,
+      notificationBody: text,
+      mirrorToSite: true,
     });
     return { simulated: false };
   } catch (error) {

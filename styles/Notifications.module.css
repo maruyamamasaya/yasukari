@@ -165,10 +165,151 @@
   color: var(--primary-color-dark);
   font-weight: 600;
   font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .actionLink:hover {
   background: rgba(248, 113, 113, 0.2);
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.settingsCard {
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #fff;
+  box-shadow: 0 18px 30px -26px rgba(15, 23, 42, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.settingsHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.settingsLabel {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+  color: rgba(100, 116, 139, 0.9);
+}
+
+.settingsTitle {
+  margin: 0 0 0.4rem;
+  font-size: 1.1rem;
+}
+
+.settingsNote {
+  margin: 0;
+  color: rgba(51, 65, 85, 0.78);
+}
+
+.statusPill {
+  align-self: flex-start;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--primary-color-dark);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.toggleList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.toggleRow {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.toggleRow:hover:not(:disabled) {
+  border-color: rgba(248, 113, 113, 0.4);
+  box-shadow: 0 16px 28px -26px rgba(248, 113, 113, 0.35);
+}
+
+.toggleRow:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.toggleLabel {
+  margin: 0 0 0.2rem;
+  font-weight: 700;
+}
+
+.toggleDescription {
+  margin: 0;
+  color: rgba(71, 85, 105, 0.8);
+}
+
+.toggleIcon {
+  font-size: 1.6rem;
+  color: var(--primary-color-dark);
+  display: inline-flex;
+}
+
+.channelBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.7rem;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #4338ca;
+  font-weight: 600;
+}
+
+.alert {
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.12);
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.emptyState {
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px dashed rgba(203, 213, 225, 0.9);
+  background: #fff;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.emptyDescription {
+  margin: 0;
+  color: rgba(71, 85, 105, 0.85);
 }
 
 @media (max-width: 640px) {
