@@ -1,0 +1,119 @@
+import nodemailer from "nodemailer";
+
+import type { Reservation } from "./reservations";
+
+type MailSendResult = {
+  simulated: boolean;
+};
+
+const formatDateTime = (value: string): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value || "-";
+  }
+
+  return date.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+};
+
+const buildTextBody = (reservation: Reservation): string => {
+  const pickup = reservation.pickupAt ? formatDateTime(reservation.pickupAt) : "-";
+  const dropoff = reservation.returnAt ? formatDateTime(reservation.returnAt) : "-";
+
+  return [
+    "この度はヤスカリバイクレンタルをご利用いただきありがとうございます。",
+    "ご予約と決済が完了しました。下記内容をご確認ください。",
+    "",
+    "■ご予約内容",
+    `店舗: ${reservation.storeName}`,
+    `車両: ${reservation.vehicleModel} (${reservation.vehiclePlate || reservation.vehicleCode})`,
+    `お受け取り: ${pickup}`,
+    `ご返却: ${dropoff}`,
+    `お支払い金額: ${reservation.paymentAmount}円`,
+    reservation.paymentId ? `決済ID: ${reservation.paymentId}` : undefined,
+    "",
+    "■お客様情報",
+    reservation.memberName ? `お名前: ${reservation.memberName}` : undefined,
+    reservation.memberPhone ? `電話番号: ${reservation.memberPhone}` : undefined,
+    reservation.memberEmail ? `メール: ${reservation.memberEmail}` : undefined,
+    "",
+    "ご不明点がございましたら本メールにご返信ください。",
+    "ヤスカリ バイクレンタル",
+  ]
+    .filter(Boolean)
+    .join("\n");
+};
+
+const buildHtmlBody = (reservation: Reservation): string => {
+  const pickup = reservation.pickupAt ? formatDateTime(reservation.pickupAt) : "-";
+  const dropoff = reservation.returnAt ? formatDateTime(reservation.returnAt) : "-";
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+  <body>
+    <p>この度はヤスカリバイクレンタルをご利用いただきありがとうございます。<br />ご予約と決済が完了しました。下記内容をご確認ください。</p>
+    <h3>ご予約内容</h3>
+    <ul>
+      <li>店舗: ${reservation.storeName}</li>
+      <li>車両: ${reservation.vehicleModel} (${reservation.vehiclePlate || reservation.vehicleCode})</li>
+      <li>お受け取り: ${pickup}</li>
+      <li>ご返却: ${dropoff}</li>
+      <li>お支払い金額: ${reservation.paymentAmount}円</li>
+      ${reservation.paymentId ? `<li>決済ID: ${reservation.paymentId}</li>` : ""}
+    </ul>
+    <h3>お客様情報</h3>
+    <ul>
+      ${reservation.memberName ? `<li>お名前: ${reservation.memberName}</li>` : ""}
+      ${reservation.memberPhone ? `<li>電話番号: ${reservation.memberPhone}</li>` : ""}
+      ${reservation.memberEmail ? `<li>メール: ${reservation.memberEmail}</li>` : ""}
+    </ul>
+    <p>ご不明点がございましたら本メールにご返信ください。<br />ヤスカリ バイクレンタル</p>
+  </body>
+</html>`;
+};
+
+export async function sendReservationCompletionEmail(reservation: Reservation): Promise<MailSendResult> {
+  if (!reservation.memberEmail) {
+    console.info("[reservation-email] Skip sending: member email not provided", reservation.id);
+    return { simulated: true };
+  }
+
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || "");
+  const user = process.env.SMTP_USER;
+  const password = process.env.SMTP_PASS;
+  const from = process.env.MAIL_FROM ?? "info@yasukaribike.com";
+
+  if (!host || !port || !user || !password) {
+    console.info("[reservation-email] SMTP configuration is incomplete. Email not sent.", {
+      hostProvided: Boolean(host),
+      portProvided: Boolean(port),
+      userProvided: Boolean(user),
+      passProvided: Boolean(password),
+    });
+    return { simulated: true };
+  }
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user,
+      pass: password,
+    },
+  });
+
+  const subject = "【ヤスカリ】バイクレンタルのご予約完了";
+  const text = buildTextBody(reservation);
+  const html = buildHtmlBody(reservation);
+
+  await transporter.sendMail({
+    from,
+    to: reservation.memberEmail,
+    subject,
+    text,
+    html,
+  });
+
+  return { simulated: false };
+}

@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { verifyCognitoIdToken, COGNITO_ID_TOKEN_COOKIE } from "../../../lib/cognitoServer";
 import { createReservation, fetchAllReservations, Reservation } from "../../../lib/reservations";
+import { sendReservationCompletionEmail } from "../../../lib/reservationCompletionEmail";
 
 type ReservationListResponse = {
   reservations: Reservation[];
@@ -94,6 +95,12 @@ export default async function handler(
         },
         notes: body.notes,
       });
+
+      try {
+        await sendReservationCompletionEmail(reservation);
+      } catch (emailError) {
+        console.error("Failed to send reservation completion email", emailError);
+      }
 
       return res.status(201).json({ reservations: [reservation] });
     } catch (error) {
