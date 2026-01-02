@@ -10,12 +10,14 @@ export default function MaintenancePage() {
       <main className={styles.main}>
         <section className={styles.card}>
           <div className={styles.badge}>現在サイト工事中です</div>
-          <h1 className={styles.title}>年末年始のため、サイト一次工事中です。</h1>
+          <h1 className={styles.title}>ただいまページを準備中です。</h1>
           <p className={styles.message}>
-            サイトをご利用いただきありがとうございます。ただいま年末年始のため、一時的にメンテナンス作業を行っております。ご不便をおかけいたしますが、再開まで今しばらくお待ちください。
+            年末年始休業のため、1/5まで休業中となります。
+            <br />
+            1/6より順次対応いたします。
           </p>
           <p className={styles.subMessage}>
-            お急ぎのご連絡やご予約に関するお問い合わせは、お電話または公式LINEよりお願いいたします。
+            お急ぎの場合は、恐れ入りますが 営業再開後にお問い合わせください。
           </p>
         </section>
       </main>
