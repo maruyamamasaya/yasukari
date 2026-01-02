@@ -3,6 +3,9 @@ import nodemailer, { Transporter, SentMessageInfo } from 'nodemailer';
 import { addMailHistory } from './mailHistory';
 
 const MAX_RETRY_ATTEMPTS = 3;
+const MAX_CONSECUTIVE_FAILURES = 3;
+const MAX_EMAILS_PER_SECOND = 5;
+const MIN_INTERVAL_PER_RECIPIENT_MS = 10_000;
 const MAIL_FROM = process.env.MAIL_FROM ?? 'ヤスカリ <info@yasukaribike.com>';
 
 export type MailPayload = {
@@ -23,6 +26,62 @@ type QueueItem = MailPayload & {
 let transporterPromise: Promise<Transporter> | null = null;
 const queue: QueueItem[] = [];
 let processing = false;
+const sendTimestamps: number[] = [];
+const lastSentAtByRecipient = new Map<string, number>();
+const consecutiveFailuresByRecipient = new Map<string, number>();
+const blockedRecipients = new Set<string>();
+
+const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+const normalizeRecipient = (recipient: string): string => recipient.trim().toLowerCase();
+
+const getGlobalRateDelayMs = (): number => {
+  const now = Date.now();
+  while (sendTimestamps.length > 0 && sendTimestamps[0] <= now - 1000) {
+    sendTimestamps.shift();
+  }
+
+  if (sendTimestamps.length < MAX_EMAILS_PER_SECOND) {
+    return 0;
+  }
+
+  const earliest = sendTimestamps[0] ?? now;
+  return Math.max(0, earliest + 1000 - now);
+};
+
+const getRecipientDelayMs = (recipient: string): number => {
+  const normalized = normalizeRecipient(recipient);
+  const lastSentAt = lastSentAtByRecipient.get(normalized);
+  if (!lastSentAt) {
+    return 0;
+  }
+
+  const elapsed = Date.now() - lastSentAt;
+  return elapsed >= MIN_INTERVAL_PER_RECIPIENT_MS ? 0 : MIN_INTERVAL_PER_RECIPIENT_MS - elapsed;
+};
+
+const recordSendAttempt = (): void => {
+  sendTimestamps.push(Date.now());
+};
+
+const recordSendSuccess = (recipient: string): void => {
+  const normalized = normalizeRecipient(recipient);
+  lastSentAtByRecipient.set(normalized, Date.now());
+  consecutiveFailuresByRecipient.set(normalized, 0);
+  blockedRecipients.delete(normalized);
+};
+
+const recordSendFailure = (recipient: string): void => {
+  const normalized = normalizeRecipient(recipient);
+  const nextCount = (consecutiveFailuresByRecipient.get(normalized) ?? 0) + 1;
+  consecutiveFailuresByRecipient.set(normalized, nextCount);
+  if (nextCount >= MAX_CONSECUTIVE_FAILURES) {
+    blockedRecipients.add(normalized);
+  }
+};
 
 function buildTransporter(): Transporter {
   const host = process.env.SMTP_HOST;
@@ -73,7 +132,26 @@ async function processQueue(): Promise<void> {
     if (!item) break;
 
     try {
+      const recipientKey = normalizeRecipient(item.to);
+      if (blockedRecipients.has(recipientKey)) {
+        addMailHistory({
+          to: item.to,
+          subject: item.subject,
+          status: 'skipped',
+          category: item.category ?? 'その他',
+          errorMessage: '送信失敗が続いたため、この宛先への送信を停止しました。',
+        });
+        item.reject(new Error('メール送信を停止中の宛先です。'));
+        continue;
+      }
+
+      const delayMs = Math.max(getGlobalRateDelayMs(), getRecipientDelayMs(item.to));
+      if (delayMs > 0) {
+        await wait(delayMs);
+      }
+      recordSendAttempt();
       const info = await sendMailOnce(item);
+      recordSendSuccess(item.to);
       addMailHistory({
         to: item.to,
         subject: item.subject,
@@ -82,6 +160,7 @@ async function processQueue(): Promise<void> {
       });
       item.resolve(info);
     } catch (error) {
+      recordSendFailure(item.to);
       const nextAttempts = item.attempts + 1;
       if (nextAttempts < MAX_RETRY_ATTEMPTS) {
         queue.push({ ...item, attempts: nextAttempts });
