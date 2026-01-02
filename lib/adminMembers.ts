@@ -311,23 +311,28 @@ const mapUserFromAdmin = (response: AdminGetUserResponse): CognitoUserInfo => {
 };
 
 const fetchCognitoUsers = async (): Promise<CognitoUserInfo[]> => {
-  const users: CognitoUserInfo[] = [];
-  let paginationToken: string | undefined;
+  try {
+    const users: CognitoUserInfo[] = [];
+    let paginationToken: string | undefined;
 
-  do {
-    const response = await callCognito<ListUsersResponse>(
-      "AWSCognitoIdentityProviderService.ListUsers",
-      {
-        UserPoolId: userPoolId,
-        PaginationToken: paginationToken,
-      }
-    );
+    do {
+      const response = await callCognito<ListUsersResponse>(
+        "AWSCognitoIdentityProviderService.ListUsers",
+        {
+          UserPoolId: userPoolId,
+          PaginationToken: paginationToken,
+        }
+      );
 
-    users.push(...(response.Users ?? []).map(mapUserFromList));
-    paginationToken = response.PaginationToken;
-  } while (paginationToken);
+      users.push(...(response.Users ?? []).map(mapUserFromList));
+      paginationToken = response.PaginationToken;
+    } while (paginationToken);
 
-  return users;
+    return users;
+  } catch (error) {
+    console.error("Failed to fetch Cognito users", error);
+    return [];
+  }
 };
 
 const fetchRegistrations = async (): Promise<RegistrationData[]> => {
@@ -365,19 +370,25 @@ const fetchCognitoUserById = async (
     if (message.includes("ResourceNotFoundException")) {
       return undefined;
     }
+    console.error("Failed to fetch Cognito user by AdminGetUser", error);
   }
 
-  const response = await callCognito<ListUsersResponse>(
-    "AWSCognitoIdentityProviderService.ListUsers",
-    {
-      UserPoolId: userPoolId,
-      Filter: `sub = \"${memberId}\"`,
-      Limit: 1,
-    }
-  );
+  try {
+    const response = await callCognito<ListUsersResponse>(
+      "AWSCognitoIdentityProviderService.ListUsers",
+      {
+        UserPoolId: userPoolId,
+        Filter: `sub = \"${memberId}\"`,
+        Limit: 1,
+      }
+    );
 
-  const user = response.Users?.[0];
-  return user ? mapUserFromList(user) : undefined;
+    const user = response.Users?.[0];
+    return user ? mapUserFromList(user) : undefined;
+  } catch (error) {
+    console.error("Failed to fetch Cognito user by ListUsers", error);
+    return undefined;
+  }
 };
 
 export const fetchMembers = async (): Promise<Member[]> => {
