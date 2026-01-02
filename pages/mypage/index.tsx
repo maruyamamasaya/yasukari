@@ -325,6 +325,12 @@ export default function MyPage() {
 
   const reservationCompletionLabel = (flag: boolean) => (flag ? '予約完了' : '利用中');
 
+  const formatKeyboxWindow = (start?: string, end?: string) => {
+    const startLabel = start ? formatReservationDatetime(start) : '-';
+    const endLabel = end ? formatReservationDatetime(end) : '-';
+    return `${startLabel} → ${endLabel}`;
+  };
+
   const markVehicleChangeSeen = async (reservationId: string) => {
     try {
       await fetch(`/api/reservations/${reservationId}`, {
@@ -744,6 +750,62 @@ export default function MyPage() {
                             </dd>
                           </div>
                         </dl>
+                        {reservation.keyboxPinCode ? (
+                          <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50 p-3">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold text-sky-900">無人店舗の解錠情報</p>
+                                <p className="text-xs text-sky-800">
+                                  三ノ輪店での受け取りに使えるPINを発行しました。受け取り時間の前後1時間を自動でバッファしています。
+                                </p>
+                              </div>
+                              <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-sky-800 ring-1 ring-sky-200">
+                                PIN発行済み
+                              </span>
+                            </div>
+                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                              <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
+                                <dt className="text-xs text-gray-600">PINコード</dt>
+                                <dd className="font-mono text-lg font-semibold text-gray-900">{reservation.keyboxPinCode}</dd>
+                                <p className="mt-1 text-xs text-gray-500">
+                                  pinId: {reservation.keyboxPinId || '-'} / unitId: {reservation.keyboxUnitId || '-'}
+                                </p>
+                              </div>
+                              <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
+                                <dt className="text-xs text-gray-600">利用可能時間</dt>
+                                <dd className="text-sm font-semibold text-gray-900">
+                                  {formatKeyboxWindow(reservation.keyboxWindowStart, reservation.keyboxWindowEnd)}
+                                </dd>
+                                <p className="mt-1 text-xs text-gray-500">
+                                  名義: {reservation.keyboxTargetName || reservation.memberName || '-'} / 署名方式:{' '}
+                                  {reservation.keyboxSignUsed || '-'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="mt-3 flex flex-wrap items-center gap-3">
+                              {reservation.keyboxQrImageUrl ? (
+                                <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
+                                  <img
+                                    src={reservation.keyboxQrImageUrl}
+                                    alt="解錠用QRコード"
+                                    className="h-20 w-20 rounded border border-gray-200 object-contain"
+                                  />
+                                  <div className="text-xs text-gray-600">鍵ボックスのリーダーにかざして解錠してください。</div>
+                                </div>
+                              ) : null}
+                              {reservation.keyboxQrCode ? (
+                                <div className="rounded-lg bg-white px-3 py-2 text-xs text-gray-700 shadow-sm">
+                                  <div className="font-semibold text-gray-900">QRコード文字列</div>
+                                  <div className="font-mono break-all">{reservation.keyboxQrCode}</div>
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        ) : reservation.storeName === '三ノ輪店' ? (
+                          <p className="mt-3 rounded-lg border border-sky-100 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-800">
+                            鍵ボックスの解錠情報を準備しています。しばらくしてから再度ご確認ください。
+                          </p>
+                        ) : null}
                         <div className="mt-4 flex flex-wrap gap-2">
                           {manualVideoUrl ? (
                             <Link

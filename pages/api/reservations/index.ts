@@ -6,7 +6,9 @@ import {
   fetchAllReservations,
   fetchReservationById,
   Reservation,
+  updateReservation,
 } from "../../../lib/reservations";
+import { issueKeyboxPinForReservation } from "../../../lib/keybox";
 import { sendReservationCompletionEmail } from "../../../lib/reservationCompletionEmail";
 
 type ReservationListResponse = {
@@ -79,7 +81,7 @@ export default async function handler(
         return res.status(200).json({ reservations: [existingReservation] });
       }
 
-      const reservation = await createReservation({
+      let reservation = await createReservation({
         storeName: body.storeName!,
         vehicleModel: body.vehicleModel!,
         vehicleCode: body.vehicleCode!,
@@ -105,6 +107,17 @@ export default async function handler(
         },
         notes: body.notes,
       });
+
+      if (reservation.storeName === "三ノ輪店") {
+        try {
+          const { reservationUpdates } = await issueKeyboxPinForReservation(reservation);
+          if (reservationUpdates) {
+            reservation = await updateReservation(reservation.id, reservationUpdates);
+          }
+        } catch (keyboxError) {
+          console.error("Failed to issue keybox PIN", keyboxError);
+        }
+      }
 
       try {
         await sendReservationCompletionEmail(reservation);
