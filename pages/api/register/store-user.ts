@@ -3,6 +3,7 @@ import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { getDocumentClient } from '../../../lib/dynamodb';
 import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from '../../../lib/cognitoServer';
 import { RegistrationData, REQUIRED_REGISTRATION_FIELDS } from '../../../types/registration';
+import { deliverFullRegistrationEmail } from '../../../lib/registrationEmails';
 
 const TABLE_NAME = 'yasukariUserMain';
 
@@ -79,6 +80,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       })
     );
+
+    await deliverFullRegistrationEmail(payload.email);
 
     return res.status(200).json({ message: 'ユーザー情報を保存しした。' });
   } catch (error) {

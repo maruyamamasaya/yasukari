@@ -3,12 +3,13 @@ import { createLightMember, findLightMemberByEmail, hasLightMemberByEmail } from
 import type { LightMember } from '../../../lib/mockUserDb';
 import { verifyVerificationCode } from '../../../lib/verificationCodeService';
 import { clearPendingRegistration, getPendingRegistration } from '../../../lib/pendingRegistrations';
+import { deliverProvisionalRegistrationEmail } from '../../../lib/registrationEmails';
 
 const TEST_EMAIL = 'test@test.com';
 const TEST_VERIFICATION_CODE = '0000';
 const TEST_USERNAME = 'テスト';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -90,18 +91,27 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
   res.setHeader('Set-Cookie', `auth=${member.id}; Path=/; HttpOnly; Max-Age=${60 * 60 * 24}; SameSite=Lax`);
 
-  return res.status(200).json({
-    message: pendingRegistration
-      ? '仮登録が完了しました。続きの本登録はマイページから行えます。'
-      : '本登録が完了しました。マイページからご利用を開始できます。',
-    member: {
-      id: member.id,
-      email: member.email,
-      username: member.username,
-      plan: member.plan,
-      createdAt: member.createdAt,
-      phoneNumber: member.phoneNumber,
-      registrationStatus: member.registrationStatus,
-    },
-  });
+  try {
+    if (member.registrationStatus === 'provisional') {
+      await deliverProvisionalRegistrationEmail(sanitizedEmail);
+    }
+
+    return res.status(200).json({
+      message: pendingRegistration
+        ? '仮登録が完了しました。続きの本登録はマイページから行えます。'
+        : '本登録が完了しました。マイページからご利用を開始できます。',
+      member: {
+        id: member.id,
+        email: member.email,
+        username: member.username,
+        plan: member.plan,
+        createdAt: member.createdAt,
+        phoneNumber: member.phoneNumber,
+        registrationStatus: member.registrationStatus,
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '登録に失敗しました。';
+    return res.status(500).json({ message });
+  }
 }
