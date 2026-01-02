@@ -1,7 +1,6 @@
-import nodemailer from "nodemailer";
-
 import type { Reservation } from "./reservations";
 import { addMailHistory } from "./mailHistory";
+import { enqueueEmail } from "./mailQueue";
 
 type MailSendResult = {
   simulated: boolean;
@@ -89,8 +88,6 @@ export async function sendReservationCompletionEmail(reservation: Reservation): 
   const port = Number(process.env.SMTP_PORT || "");
   const user = process.env.SMTP_USER;
   const password = process.env.SMTP_PASS;
-  const from = process.env.MAIL_FROM ?? "info@yasukaribike.com";
-
   if (!host || !port || !user || !password) {
     console.info("[reservation-email] SMTP configuration is incomplete. Email not sent.", {
       hostProvided: Boolean(host),
@@ -108,43 +105,20 @@ export async function sendReservationCompletionEmail(reservation: Reservation): 
     return { simulated: true };
   }
 
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: {
-      user,
-      pass: password,
-    },
-  });
-
   const subject = "【ヤスカリ】バイクレンタルのご予約完了";
   const text = buildTextBody(reservation);
   const html = buildHtmlBody(reservation);
 
   try {
-    await transporter.sendMail({
-      from,
+    await enqueueEmail({
       to: reservation.memberEmail,
       subject,
       text,
       html,
-    });
-    addMailHistory({
       category: "予約完了",
-      to: reservation.memberEmail,
-      subject,
-      status: "sent",
     });
     return { simulated: false };
   } catch (error) {
-    addMailHistory({
-      category: "予約完了",
-      to: reservation.memberEmail,
-      subject,
-      status: "failed",
-      errorMessage: error instanceof Error ? error.message : "送信中にエラーが発生しました。",
-    });
     throw error;
   }
 }
