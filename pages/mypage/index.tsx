@@ -643,12 +643,6 @@ export default function MyPage() {
                         レンタル延長
                       </button>
                     )}
-                    <Link
-                      href="/blog_for_custmor/2025-09-01-minowa-procedures"
-                      className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100"
-                    >
-                      無人店舗でのレンタルについて
-                    </Link>
                     <button
                       type="button"
                       onClick={() => activeKeyboxQrImageUrl && setShowUnlockQrModal(true)}
@@ -672,6 +666,14 @@ export default function MyPage() {
                     >
                       事故・連絡
                     </button>
+                  </div>
+                  <div className="mt-2 text-sm text-gray-700">
+                    <Link
+                      href="/blog_for_custmor/2025-09-01-minowa-procedures"
+                      className="text-sky-700 underline underline-offset-2 transition hover:text-sky-800"
+                    >
+                      無人店舗でのレンタルについて
+                    </Link>
                   </div>
                 ) : null}
 
