@@ -1,5 +1,6 @@
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
+import { getBikeModels } from "./bikes";
 import { getDocumentClient, scanAllItems } from "./dynamodb";
 
 export type ReservationStatus =
@@ -246,11 +247,40 @@ export async function fetchAllReservations(): Promise<Reservation[]> {
 
 export async function fetchReservationsByMember(memberId: string): Promise<Reservation[]> {
   const items = await scanAllItems<ReservationRecord>({ TableName: RESERVATIONS_TABLE });
-
-  return items
+  const reservations = items
     .map(normalizeReservation)
     .filter((reservation) => reservation.memberId === memberId)
     .sort((a, b) => (a.pickupAt || "") > (b.pickupAt || "") ? -1 : 1);
+
+  if (reservations.every((reservation) => reservation.vehicleThumbnailUrl)) {
+    return reservations;
+  }
+
+  try {
+    const models = await getBikeModels();
+    const modelImageMap = new Map(
+      models.map((model) => [model.modelName.trim(), model.img])
+    );
+
+    return reservations.map((reservation) => {
+      if (reservation.vehicleThumbnailUrl) {
+        return reservation;
+      }
+
+      const resolvedImage = modelImageMap.get(reservation.vehicleModel.trim());
+      if (!resolvedImage) {
+        return reservation;
+      }
+
+      return {
+        ...reservation,
+        vehicleThumbnailUrl: resolvedImage,
+      };
+    });
+  } catch (error) {
+    console.error("Failed to resolve reservation thumbnails", error);
+    return reservations;
+  }
 }
 
 export async function fetchReservationById(reservationId: string): Promise<Reservation | null> {
