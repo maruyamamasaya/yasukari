@@ -1,6 +1,6 @@
 import { enqueueEmail } from './mailQueue';
 
-const DEFAULT_SOURCE_EMAIL = 'ヤスカリ <info@yasukaribike.com>';
+const DEFAULT_SOURCE_EMAIL = '格安レンタルバイクならヤスカリ <info@yasukaribike.com>';
 
 function formatExpiration(expiresAt: number): string {
   return new Date(expiresAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
