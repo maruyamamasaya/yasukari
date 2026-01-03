@@ -87,6 +87,10 @@ const NAV_ITEMS: NavItem[] = [
     href: `${ADMIN_DASHBOARD_ROOT}/keybox-logs`,
   },
   {
+    label: "KEYBOX再発行",
+    href: `${ADMIN_DASHBOARD_ROOT}/keybox-reissue`,
+  },
+  {
     label: "メール送信履歴",
     href: `${ADMIN_DASHBOARD_ROOT}/mail-history`,
   },
