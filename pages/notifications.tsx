@@ -152,9 +152,6 @@ export default function NotificationsPage() {
           <div>
             <p className={styles.eyebrow}>Notifications</p>
             <h1 className={styles.title}>通知</h1>
-            <p className={styles.lead}>
-              メールで受け取った案内を含め、同じ内容をサイト内でも確認できます。受信チャネルはユーザーごとに設定できます。
-            </p>
           </div>
         </header>
 
