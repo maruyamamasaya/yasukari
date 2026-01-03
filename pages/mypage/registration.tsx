@@ -483,15 +483,6 @@ const RegistrationPage: NextPage = () => {
         <meta name="description" content="マイページから本登録用の基本情報を入力できます。" />
       </Head>
       <div className="min-h-screen bg-gray-50 text-gray-900">
-        <header className="border-b border-gray-100 bg-white">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-            <Link href="/" className="flex items-center gap-3">
-              <img src="/static/images/logo/250x50.png" alt="ヤスカリ" width={200} height={40} className="hidden md:block" />
-              <span className="text-base font-semibold text-gray-800 md:hidden">レンタルバイクのヤスカリ</span>
-            </Link>
-          </div>
-        </header>
-
         <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
           <nav aria-label="breadcrumb" className="mb-6">
             <ol className="flex items-center space-x-2 text-sm text-gray-500">
