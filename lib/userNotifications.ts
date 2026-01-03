@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 
-import { GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient } from "./dynamodb";
 
@@ -145,4 +145,28 @@ export async function saveUserNotificationSettings(
   );
 
   return toSettings(nextSettings);
+}
+
+export async function markUserNotificationRead(
+  userId: string,
+  notificationId: string,
+  createdAt: string
+): Promise<string> {
+  const client = getDocumentClient();
+  const readAt = new Date().toISOString();
+  const sortKey = `NOTIFICATION#${createdAt}#${notificationId}`;
+
+  await client.send(
+    new UpdateCommand({
+      TableName: TABLE_NAME,
+      Key: { userId, sortKey },
+      UpdateExpression: "SET readAt = :readAt",
+      ExpressionAttributeValues: {
+        ":readAt": readAt,
+      },
+      ConditionExpression: "attribute_exists(notificationId)",
+    })
+  );
+
+  return readAt;
 }
