@@ -139,6 +139,15 @@ export default function ReservationDetailPage() {
     event.preventDefault();
     if (!reservation || typeof reservationId !== "string") return;
 
+    if (
+      selectedVehicleCode !== reservation.vehicleCode &&
+      !window.confirm(
+        "ここを変更するときに、お客様が予約した車両が変更になりますが、良いですか？"
+      )
+    ) {
+      return;
+    }
+
     setVehicleChangeMessage("");
     setVehicleChangeError("");
     setIsUpdatingVehicle(true);
