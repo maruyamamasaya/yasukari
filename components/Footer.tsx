@@ -18,7 +18,7 @@ export default function Footer() {
             <h4 className="font-bold mb-2">yasukari（リバイクル）</h4>
             <p className="mb-3">
               バイクのレンタル・サブスク専門サイトです。原付から大型・EVバイクまで豊富なラインナップをご用意。
-              1日からレンタルでき、月額プランや法人向けサービスも充実しています。
+              月額プランや法人向けサービスも充実しています。
             </p>
             <div className="space-y-1">
               <Link href="/" className="text-red-600 hover:underline block">
