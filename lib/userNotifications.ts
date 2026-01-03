@@ -44,7 +44,7 @@ const toSettings = (item: Partial<SettingsItem> | undefined): NotificationSettin
 });
 
 const normalizeChannels = (channels?: NotificationChannel[]): NotificationChannel[] => {
-  const base = channels?.length ? channels : ["email", "site"];
+  const base: NotificationChannel[] = channels?.length ? channels : ["email", "site"];
   return Array.from(new Set(base));
 };
 
