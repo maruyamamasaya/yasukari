@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
 import tableStyles from "../../../../styles/AdminTable.module.css";
@@ -9,6 +10,7 @@ import { Vehicle, BikeModel } from "../../../../lib/dashboard/types";
 import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
 
 export default function BikeScheduleManagementPage() {
+  const router = useRouter();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +69,9 @@ export default function BikeScheduleManagementPage() {
                     <th>ID</th>
                     <th>車両名</th>
                     <th>店舗</th>
-                    <th>スケジュール設定</th>
+                    <th>自賠責満了日</th>
+                    <th>車検満了日</th>
+                    <th className={tableStyles.centerCell}>スケジュール設定</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -75,14 +79,30 @@ export default function BikeScheduleManagementPage() {
                     const modelName =
                       bikeModels.find((model) => model.modelId === vehicle.modelId)?.modelName ??
                       "-";
+                    const schedulePath = `/admin/dashboard/bike-schedules/${vehicle.managementNumber}`;
                     return (
-                      <tr key={vehicle.managementNumber}>
+                      <tr
+                        key={vehicle.managementNumber}
+                        tabIndex={0}
+                        className={tableStyles.clickableRow}
+                        onClick={() => {
+                          void router.push(schedulePath);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            void router.push(schedulePath);
+                          }
+                        }}
+                      >
                         <td>{vehicle.managementNumber}</td>
                         <td>{modelName}</td>
                         <td>{getStoreLabel(vehicle.storeId)}</td>
-                        <td>
+                        <td>{vehicle.liabilityInsuranceExpiryDate ?? "-"}</td>
+                        <td>{vehicle.inspectionExpiryDate ?? "-"}</td>
+                        <td className={tableStyles.centerCell}>
                           <Link
-                            href={`/admin/dashboard/bike-schedules/${vehicle.managementNumber}`}
+                            href={schedulePath}
                             className={formStyles.submitButton}
                           >
                             詳細を開く
