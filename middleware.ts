@@ -92,7 +92,9 @@ export async function middleware(req: NextRequest) {
 
   let isMaintenanceMode = false;
   try {
-    const response = await fetch(new URL('/api/maintenance', req.url));
+    const response = await fetch(new URL('/api/maintenance', req.url), {
+      cache: 'no-store',
+    });
     if (response.ok) {
       const data = (await response.json()) as { enabled?: boolean };
       isMaintenanceMode = Boolean(data.enabled);
