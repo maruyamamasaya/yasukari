@@ -15,7 +15,7 @@ type RegisterFormData = {
   name2: string;
   kana1: string;
   kana2: string;
-  sex: '1' | '2';
+  sex: '' | '1' | '2' | '3';
   birth: string;
   zip: string;
   address1: string;
@@ -126,7 +126,7 @@ const initialFormData: RegisterFormData = {
   name2: '',
   kana1: '',
   kana2: '',
-  sex: '1',
+  sex: '',
   birth: '',
   zip: '',
   address1: '',
@@ -419,6 +419,12 @@ const RegistrationPage: NextPage = () => {
         return;
       }
 
+      if (!licenseImageUrl || !licenseFileName) {
+        setSubmitStatus('error');
+        setSubmitMessage('免許証画像ファイルをアップロードしてください。');
+        return;
+      }
+
       const normalizedOtherName = formData.other_name.replace(/\s+/g, '');
       const normalizedUserName = `${formData.name1}${formData.name2}`.replace(/\s+/g, '');
       const isRepeatedName = normalizedOtherName.length > 1 && [...normalizedOtherName].every((char) => char === normalizedOtherName[0]);
@@ -602,10 +608,13 @@ const RegistrationPage: NextPage = () => {
                     name="sex"
                     value={formData.sex}
                     onChange={handleChange}
+                    required
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-700 focus:border-red-500 focus:outline-none"
                   >
+                    <option value="">性別を選択してください。</option>
                     <option value="1">男性</option>
                     <option value="2">女性</option>
+                    <option value="3">どちらでもない</option>
                   </select>
                 </div>
                 <div>
@@ -750,6 +759,7 @@ const RegistrationPage: NextPage = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
+                    required={!licenseImageUrl}
                     className="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border file:border-red-600 file:bg-white file:px-4 file:py-2 file:text-sm file:font-semibold file:text-red-600 hover:file:bg-red-50"
                   />
                   {licenseFileName ? <p className="mt-1 text-xs text-gray-500">選択中: {licenseFileName}</p> : null}

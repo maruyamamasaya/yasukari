@@ -46,6 +46,8 @@ export const REQUIRED_REGISTRATION_FIELDS: (keyof RegistrationData)[] = [
   'zip',
   'address1',
   'address2',
+  'license_file_name',
+  'license_image_url',
   'enquete_purpose',
   'enquete_want',
   'enquete_touring',
