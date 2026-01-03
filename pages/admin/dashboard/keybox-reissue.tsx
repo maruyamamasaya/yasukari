@@ -40,6 +40,12 @@ const defaultEnd = () => {
   return toLocalInputValue(end);
 };
 
+const appendTokyoOffset = (value: string) => {
+  if (!value) return value;
+  if (/([zZ]|[+-]\d{2}:?\d{2})$/.test(value)) return value;
+  return `${value}:00+09:00`;
+};
+
 type ReissueResponse = {
   success: boolean;
   pinCode: string;
@@ -107,8 +113,8 @@ export default function KeyboxReissuePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          windowStart,
-          windowEnd,
+          windowStart: appendTokyoOffset(windowStart),
+          windowEnd: appendTokyoOffset(windowEnd),
           pinCode: pinCode || undefined,
           targetName: targetName || undefined,
           unitId: unitId || undefined,
