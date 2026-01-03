@@ -82,6 +82,7 @@ export default function ProductDetailPage({
   const [selectedStoreId, setSelectedStoreId] = useState<string>("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showRentalLimitModal, setShowRentalLimitModal] = useState(false);
+  const [showStoreRequiredModal, setShowStoreRequiredModal] = useState(false);
   const [rentalCheckError, setRentalCheckError] = useState("");
   const [checkingRental, setCheckingRental] = useState(false);
   const router = useRouter();
@@ -179,6 +180,10 @@ export default function ProductDetailPage({
     });
 
   const handleReserveClick = async () => {
+    if (!selectedStoreId) {
+      setShowStoreRequiredModal(true);
+      return;
+    }
     if (!selectedVehicle || checkingRental) return;
     setCheckingRental(true);
     setRentalCheckError("");
@@ -336,33 +341,48 @@ export default function ProductDetailPage({
                           )}
                         </div>
                       </div>
-                      <select
-                        value={selectedVehicle}
-                        onChange={(e) => setSelectedVehicle(e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
-                        disabled={!selectedStoreId || filteredVehicleOptions.length === 0}
+                      <div
+                        onMouseDown={() => {
+                          if (!selectedStoreId) setShowStoreRequiredModal(true);
+                        }}
+                        onFocus={() => {
+                          if (!selectedStoreId) setShowStoreRequiredModal(true);
+                        }}
                       >
-                        {!selectedStoreId ? (
-                          <option value="" disabled>
-                            先に店舗を選択してください
-                          </option>
-                        ) : filteredVehicleOptions.length === 0 ? (
-                          <option value="" disabled>
-                            在庫がありません
-                          </option>
-                        ) : (
-                          <>
+                        <select
+                          value={selectedVehicle}
+                          onChange={(e) => {
+                            if (!selectedStoreId) {
+                              setShowStoreRequiredModal(true);
+                              return;
+                            }
+                            setSelectedVehicle(e.target.value);
+                          }}
+                          className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm focus:border-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
+                          disabled={selectedStoreId ? filteredVehicleOptions.length === 0 : false}
+                        >
+                          {!selectedStoreId ? (
                             <option value="" disabled>
-                              管理番号を選択してください
+                              先に店舗を選択してください
                             </option>
-                            {filteredVehicleOptions.map((vehicle) => (
-                              <option key={vehicle.value} value={vehicle.value}>
-                                {vehicle.label}
+                          ) : filteredVehicleOptions.length === 0 ? (
+                            <option value="" disabled>
+                              在庫がありません
+                            </option>
+                          ) : (
+                            <>
+                              <option value="" disabled>
+                                管理番号を選択してください
                               </option>
-                            ))}
-                          </>
-                        )}
-                      </select>
+                              {filteredVehicleOptions.map((vehicle) => (
+                                <option key={vehicle.value} value={vehicle.value}>
+                                  {vehicle.label}
+                                </option>
+                              ))}
+                            </>
+                          )}
+                        </select>
+                      </div>
                       {selectedVehicleStore ? (
                         <p className="text-xs text-gray-600">
                           紐づく店舗ID: <span className="font-semibold">{selectedVehicleStore}</span>
@@ -372,7 +392,11 @@ export default function ProductDetailPage({
                         <button
                           type="button"
                           onClick={handleReserveClick}
-                          disabled={!selectedVehicle || !hasFilteredStock || checkingRental}
+                          disabled={
+                            selectedStoreId
+                              ? !selectedVehicle || !hasFilteredStock || checkingRental
+                              : false
+                          }
                           className="inline-flex w-full items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-300"
                         >
                           {checkingRental ? "予約状況を確認中…" : "この車種をレンタル予約する"}
@@ -600,6 +624,30 @@ export default function ProductDetailPage({
                   onClick={() => setShowRentalLimitModal(false)}
                 >
                   閉じる
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {showStoreRequiredModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="border-b border-amber-100 bg-amber-50 px-6 py-4 text-gray-900">
+              <p className="text-sm font-semibold uppercase tracking-wide text-gray-900">Store Notice</p>
+              <h2 className="mt-1 text-xl font-bold text-amber-700">レンタル店舗を選択してください</h2>
+            </div>
+            <div className="space-y-4 px-6 py-5 text-gray-700">
+              <p className="text-sm leading-relaxed">
+                先にレンタル店舗のボタンを選択してから、在庫や予約ボタンをご利用ください。
+              </p>
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-amber-500 px-4 py-3 text-sm font-semibold text-white shadow transition hover:bg-amber-600"
+                  onClick={() => setShowStoreRequiredModal(false)}
+                >
+                  OK
                 </button>
               </div>
             </div>
