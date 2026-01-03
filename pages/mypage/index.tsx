@@ -468,6 +468,53 @@ export default function MyPage() {
     resetReturnModal();
   };
 
+  useEffect(() => {
+    if (!isReturnOverdue || !activeReturnReservation) return;
+
+    setShowReturnExpiredModal(true);
+
+    if (typeof window === 'undefined') return;
+
+    const storageKey = 'yasukari-return-overdue-ids';
+    let seenIds: string[] = [];
+
+    try {
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored) as unknown;
+        if (Array.isArray(parsed)) {
+          seenIds = parsed.filter((value): value is string => typeof value === 'string');
+        }
+      }
+    } catch (storageError) {
+      console.warn('Failed to parse overdue return cache', storageError);
+    }
+
+    const reservationId = activeReturnReservation.id;
+    if (seenIds.includes(reservationId)) return;
+
+    const notifyOverdue = async () => {
+      try {
+        await fetch('/api/notifications/overdue-return', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reservationId,
+            returnAt: activeReturnReservation.returnAt,
+            vehicleModel: activeReturnReservation.vehicleModel,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to notify overdue return', error);
+      }
+    };
+
+    void notifyOverdue();
+
+    const mergedIds = Array.from(new Set([...seenIds, reservationId]));
+    window.localStorage.setItem(storageKey, JSON.stringify(mergedIds));
+  }, [activeReturnReservation, isReturnOverdue]);
+
   const handleReturnComplete = async () => {
     if (!returnFile) {
       setReturnError('写真をアップロードしてください。');
@@ -1345,29 +1392,39 @@ export default function MyPage() {
       ) : null}
       {showReturnExpiredModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-md rounded-2xl border-2 border-rose-200 bg-white p-6 shadow-2xl ring-1 ring-rose-100">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">【返却期限のご案内】</h2>
-                <div className="mt-3 space-y-2 text-sm text-gray-600">
-                  <p>期限が過ぎております。</p>
-                  <p>返却については、yasukariにお問い合わせください。</p>
-                  <p>レンタルを延長される場合は、レンタル延長のボタンを押してください。</p>
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border-2 border-rose-500 bg-white shadow-2xl ring-4 ring-rose-100">
+            <div className="flex items-start gap-3 bg-rose-50 px-5 py-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-rose-600 shadow-inner">
+                <span className="text-xl font-bold">!</span>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-rose-900">【返却期限のご案内】</h2>
+                <div className="mt-2 space-y-1 text-sm text-rose-800">
+                  <p className="font-semibold">返却期限を過ぎています。</p>
+                  <p>返却や延長についてはサポートまでご連絡ください。</p>
+                  <p>同じ内容を通知にも掲載していますので、確認をお願いします。</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleReturnClose}
-                className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800"
+                className="rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-50"
               >
                 閉じる
               </button>
             </div>
-            <div className="mt-4">
+            <div className="bg-white px-6 pb-6 pt-4">
+              <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                <ul className="list-disc space-y-2 pl-4">
+                  <li>返却が完了するまで車両を安全な場所で保管してください。</li>
+                  <li>延長を希望される場合は「レンタル延長」からお手続きください。</li>
+                  <li>ご不明点はチャットサポートまたはお電話でお問い合わせください。</li>
+                </ul>
+              </div>
               <button
                 type="button"
                 onClick={handleReturnClose}
-                className="inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700"
               >
                 閉じる
               </button>
