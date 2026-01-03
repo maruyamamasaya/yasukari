@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { Fragment, KeyboardEvent, useEffect, useState } from "react";
+import { Fragment, KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
@@ -25,6 +25,10 @@ export default function MemberListPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const pageSize = 100;
 
   const openMemberDetail = (memberId: string) => {
     router.push(`/admin/dashboard/members/${memberId}`);
@@ -73,6 +77,37 @@ export default function MemberListPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const filteredMembers = useMemo(() => {
+    const normalizedTerm = searchTerm.trim().toLowerCase();
+    if (!normalizedTerm) {
+      return members;
+    }
+    return members.filter((member) => {
+      const searchableValues = [
+        member.memberNumber,
+        member.email,
+        member.name,
+        member.role,
+        member.status,
+      ];
+      return searchableValues.some((value) =>
+        value?.toLowerCase().includes(normalizedTerm)
+      );
+    });
+  }, [members, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const pagedMembers = filteredMembers.slice(startIndex, startIndex + pageSize);
+
   return (
     <>
       <Head>
@@ -95,6 +130,23 @@ export default function MemberListPage() {
               <p className={styles.sectionDescription}>{errorMessage}</p>
             )}
           </div>
+          <div className={styles.tableToolbar}>
+            <div className={styles.tableToolbarGroup}>
+              <input
+                type="search"
+                className={styles.tableSearchInput}
+                placeholder="会員番号・メールアドレス・氏名で検索"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                aria-label="会員一覧を検索"
+              />
+            </div>
+            <div className={styles.tableToolbarGroup}>
+              <span className={styles.tableSelectionCount}>
+                該当: {filteredMembers.length}件
+              </span>
+            </div>
+          </div>
 
           <div className={`${tableStyles.wrapper} ${tableStyles.tableWrapper}`}>
             <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
@@ -110,12 +162,12 @@ export default function MemberListPage() {
                 </tr>
               </thead>
               <tbody>
-                {!isLoading && members.length === 0 ? (
+                {!isLoading && filteredMembers.length === 0 ? (
                   <tr>
                     <td colSpan={7}>該当する会員が見つかりませんでした。</td>
                   </tr>
                 ) : (
-                  members.map((member) => (
+                  pagedMembers.map((member) => (
                     <Fragment key={member.id}>
                       <tr
                         className={tableStyles.clickableRow}
@@ -141,6 +193,43 @@ export default function MemberListPage() {
                 )}
               </tbody>
             </table>
+          </div>
+          <div className={styles.tableToolbar}>
+            <div className={styles.tableToolbarGroup}>
+              <span className={styles.tableSelectionCount}>
+                {filteredMembers.length === 0
+                  ? "0件"
+                  : `${startIndex + 1}-${Math.min(
+                      startIndex + pageSize,
+                      filteredMembers.length
+                    )}件 / 全${filteredMembers.length}件`}
+              </span>
+            </div>
+            <div className={styles.tableToolbarGroup}>
+              <button
+                type="button"
+                className={styles.tableToolbarButton}
+                onClick={() =>
+                  setCurrentPage((page) => Math.max(1, page - 1))
+                }
+                disabled={safeCurrentPage === 1}
+              >
+                前へ
+              </button>
+              <span className={styles.tableSelectionCount}>
+                {safeCurrentPage} / {totalPages}ページ
+              </span>
+              <button
+                type="button"
+                className={styles.tableToolbarButton}
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
+                disabled={safeCurrentPage === totalPages}
+              >
+                次へ
+              </button>
+            </div>
           </div>
         </section>
       </DashboardLayout>
