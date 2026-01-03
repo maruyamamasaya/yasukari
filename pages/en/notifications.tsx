@@ -1,7 +1,7 @@
-import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { FaBell, FaCheckCircle, FaEnvelopeOpenText } from 'react-icons/fa';
+import { FaBell } from 'react-icons/fa';
 
 import styles from '../../styles/Notifications.module.css';
 
@@ -14,7 +14,6 @@ type NotificationItem = {
   unread?: boolean;
   actionLabel?: string;
   actionHref?: string;
-  icon: ReactElement;
 };
 
 const notifications: NotificationItem[] = [
@@ -28,7 +27,6 @@ const notifications: NotificationItem[] = [
     unread: true,
     actionLabel: 'View reservation details',
     actionHref: '/rental-status',
-    icon: <FaCheckCircle />,
   },
   {
     id: 'operator-message',
@@ -39,7 +37,6 @@ const notifications: NotificationItem[] = [
     unread: true,
     actionLabel: 'Go to messages',
     actionHref: '/en/mypage',
-    icon: <FaEnvelopeOpenText />,
   },
   {
     id: 'return-reminder',
@@ -47,11 +44,17 @@ const notifications: NotificationItem[] = [
     body: 'Your scheduled return time is July 20th at 18:00. Contact us in advance to extend.',
     time: 'Yesterday',
     tag: 'Notice',
-    icon: <FaBell />,
   },
 ];
 
 export default function NotificationsPage() {
+  const [activeId, setActiveId] = useState(notifications[0]?.id ?? null);
+  const activeNotification = useMemo(
+    () => notifications.find((notice) => notice.id === activeId) ?? notifications[0] ?? null,
+    [activeId]
+  );
+  const unreadCount = notifications.filter((notice) => notice.unread).length;
+
   return (
     <>
       <Head>
@@ -75,12 +78,12 @@ export default function NotificationsPage() {
         <div className={styles.summaryGrid}>
           <div className={styles.summaryCard}>
             <p className={styles.summaryLabel}>Unread</p>
-            <p className={styles.summaryValue}>2</p>
+            <p className={styles.summaryValue}>{unreadCount}</p>
             <p className={styles.summaryNote}>Stay on top of important updates.</p>
           </div>
           <div className={styles.summaryCard}>
             <p className={styles.summaryLabel}>Latest update</p>
-            <p className={styles.summaryValue}>5 min ago</p>
+            <p className={styles.summaryValue}>{notifications[0]?.time ?? '—'}</p>
             <p className={styles.summaryNote}>Your reservation confirmation just arrived.</p>
           </div>
           <div className={styles.summaryCard}>
@@ -90,30 +93,70 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        <div className={styles.list}>
-          {notifications.map((notice) => (
-            <article
-              key={notice.id}
-              className={`${styles.card} ${notice.unread ? styles.unread : ''}`}
-            >
-              <div className={styles.cardIcon}>{notice.icon}</div>
-              <div className={styles.cardBody}>
-                <div className={styles.cardMeta}>
-                  <span className={styles.tag}>{notice.tag}</span>
-                  <span className={styles.time}>{notice.time}</span>
+        <div className={styles.threadLayout}>
+          <div className={styles.threadList} role="tablist" aria-label="Notifications list">
+            {notifications.map((notice) => {
+              const isActive = notice.id === activeNotification?.id;
+              return (
+                <button
+                  key={notice.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  className={`${styles.threadItem} ${isActive ? styles.threadItemActive : ''} ${
+                    notice.unread ? styles.threadItemUnread : ''
+                  }`}
+                  onClick={() => setActiveId(notice.id)}
+                >
+                  <div className={styles.threadItemHeader}>
+                    <p className={styles.threadItemTitle}>{notice.title}</p>
+                    <span className={styles.threadItemStatus}>
+                      {notice.unread ? (
+                        <>
+                          <span className={styles.unreadDot} aria-hidden="true" />
+                          Unread
+                        </>
+                      ) : (
+                        'Read'
+                      )}
+                    </span>
+                  </div>
+                  <p className={styles.threadItemMeta}>{notice.time}</p>
+                </button>
+              );
+            })}
+          </div>
+          <div className={styles.threadDetail} role="tabpanel">
+            {activeNotification ? (
+              <>
+                <div className={styles.detailHeader}>
+                  <div>
+                    <p className={styles.detailEyebrow}>{activeNotification.tag}</p>
+                    <h2 className={styles.detailTitle}>{activeNotification.title}</h2>
+                  </div>
+                  <span className={styles.detailStatus}>
+                    {activeNotification.unread ? 'Unread' : 'Read'}
+                  </span>
                 </div>
-                <h2 className={styles.cardTitle}>{notice.title}</h2>
-                <p className={styles.cardText}>{notice.body}</p>
-                {notice.actionHref && notice.actionLabel ? (
+                <div className={styles.detailMeta}>
+                  <span className={styles.detailTime}>{activeNotification.time}</span>
+                </div>
+                <div className={styles.detailBody}>{activeNotification.body}</div>
+                {activeNotification.actionHref && activeNotification.actionLabel ? (
                   <div className={styles.cardAction}>
-                    <Link href={notice.actionHref} className={styles.actionLink}>
-                      {notice.actionLabel}
+                    <Link href={activeNotification.actionHref} className={styles.actionLink}>
+                      {activeNotification.actionLabel}
                     </Link>
                   </div>
                 ) : null}
+              </>
+            ) : (
+              <div className={styles.detailEmpty}>
+                <p className={styles.emptyTitle}>Select a notification</p>
+                <p className={styles.emptyDescription}>Choose a notification to see details.</p>
               </div>
-            </article>
-          ))}
+            )}
+          </div>
         </div>
       </section>
     </>

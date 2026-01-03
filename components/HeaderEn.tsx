@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FaUser, FaQuestionCircle, FaClipboardList, FaBars, FaBell } from 'react-icons/fa';
+import { FaUser, FaQuestionCircle, FaClipboardList, FaBars } from 'react-icons/fa';
 import AnnouncementBar from './AnnouncementBar';
+import NotificationBellIcon from './NotificationBellIcon';
+import useNotificationBadge from '../lib/useNotificationBadge';
 
 export default function HeaderEn() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -13,6 +15,7 @@ export default function HeaderEn() {
   const menuRef = useRef<HTMLUListElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
+  const unreadCount = useNotificationBadge(Boolean(sessionUser));
   const isReservationPaymentFlow = /^(\/en)?\/reserve\/(models|flow)/.test(router.pathname);
   const languageSwitchDisabled = updatingLocale || isReservationPaymentFlow;
 
@@ -163,7 +166,7 @@ export default function HeaderEn() {
               </Link>
               <Link href="/en/notifications" aria-label="Notifications">
                 <span className="flex items-center text-gray-700 hover:text-red-600 transition-colors">
-                  <FaBell />
+                  <NotificationBellIcon count={unreadCount} />
                 </span>
               </Link>
               <div className="flex items-center rounded-full border border-red-500 bg-red-50/70 shadow-sm text-xs font-semibold text-gray-800">
@@ -234,7 +237,7 @@ export default function HeaderEn() {
               </li>
               <li>
                 <Link href="/en/notifications">
-                  <NavItem icon={<FaBell />} label="Notifications" />
+                  <NavItem icon={<NotificationBellIcon count={unreadCount} />} label="Notifications" />
                 </Link>
               </li>
               <li className="w-full pt-4">

@@ -4,6 +4,7 @@ import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from "../../../lib/cogn
 import {
   fetchUserNotifications,
   getUserNotificationSettings,
+  markUserNotificationRead,
   saveUserNotificationSettings,
 } from "../../../lib/userNotifications";
 
@@ -66,6 +67,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  res.setHeader("Allow", ["GET", "PUT"]);
+  if (req.method === "PATCH") {
+    const { notificationId, createdAt } = (req.body ?? {}) as {
+      notificationId?: unknown;
+      createdAt?: unknown;
+    };
+
+    if (!notificationId || typeof notificationId !== "string") {
+      return res.status(400).json({ message: "notificationId is required" });
+    }
+    if (!createdAt || typeof createdAt !== "string") {
+      return res.status(400).json({ message: "createdAt is required" });
+    }
+
+    try {
+      const readAt = await markUserNotificationRead(userId, notificationId, createdAt);
+      return res.status(200).json({ readAt });
+    } catch (error) {
+      console.error("Failed to mark notification as read", error);
+      return res.status(500).json({ message: "通知の既読処理に失敗しました。" });
+    }
+  }
+
+  res.setHeader("Allow", ["GET", "PUT", "PATCH"]);
   return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
 }

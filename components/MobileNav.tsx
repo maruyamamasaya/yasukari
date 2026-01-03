@@ -1,11 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
-import { FaHome, FaUser, FaBell } from 'react-icons/fa';
+import { FaHome, FaUser } from 'react-icons/fa';
+import NotificationBellIcon from './NotificationBellIcon';
+import useNotificationBadge from '../lib/useNotificationBadge';
 
 export default function MobileNav() {
+  const unreadCount = useNotificationBadge(true);
   const items = [
     { href: '/', label: 'ホーム', icon: <FaHome /> },
-    { href: '/notifications', label: '通知', icon: <FaBell /> },
+    { href: '/notifications', label: '通知', icon: <NotificationBellIcon count={unreadCount} /> },
     { href: '/mypage', label: 'マイページ', icon: <FaUser /> },
   ];
 

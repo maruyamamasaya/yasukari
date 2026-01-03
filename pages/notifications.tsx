@@ -1,9 +1,8 @@
-import type { ReactElement } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
 import Head from 'next/head';
 import Link from 'next/link';
-import { FaBell, FaCheckCircle, FaEnvelopeOpenText, FaToggleOff, FaToggleOn } from 'react-icons/fa';
+import { FaBell, FaToggleOff, FaToggleOn } from 'react-icons/fa';
 
 import styles from '../styles/Notifications.module.css';
 
@@ -22,6 +21,7 @@ type NotificationItem = {
   createdAt: string;
   category?: string;
   channels: NotificationChannel[];
+  readAt?: string;
 };
 
 type NotificationsResponse = {
@@ -36,12 +36,6 @@ const formatTimestamp = (value: string): string => {
   if (Number.isNaN(date.getTime())) return value;
 
   return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
-};
-
-const resolveIcon = (notice: NotificationItem): ReactElement => {
-  if (notice.category?.includes('予約')) return <FaCheckCircle />;
-  if (notice.channels.includes('email')) return <FaEnvelopeOpenText />;
-  return <FaBell />;
 };
 
 const uniqueChannels = (channels: NotificationChannel[]): NotificationChannel[] =>
@@ -60,6 +54,7 @@ export default function NotificationsPage() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authRequired, setAuthRequired] = useState(false);
+  const [activeNotificationId, setActiveNotificationId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -135,8 +130,81 @@ export default function NotificationsPage() {
 
   const siteNotificationDisabled = settings?.receiveSite === false;
   const visibleNotifications = siteNotificationDisabled ? [] : siteNotifications;
+  const unreadCount = visibleNotifications.filter((notice) => !notice.readAt).length;
   const latestCreatedAt = siteNotifications[0]?.createdAt ?? '';
   const mirroredEmails = notifications.filter((notice) => notice.channels.includes('email')).length;
+  const activeNotification =
+    visibleNotifications.find((notice) => notice.notificationId === activeNotificationId) ??
+    visibleNotifications[0] ??
+    null;
+
+  useEffect(() => {
+    if (!activeNotification && visibleNotifications.length) {
+      setActiveNotificationId(visibleNotifications[0].notificationId);
+    }
+  }, [activeNotification, visibleNotifications]);
+
+  const notifyBadgeRefresh = () => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new Event('notifications:refresh'));
+  };
+
+  const handleSelectNotification = async (notice: NotificationItem) => {
+    setActiveNotificationId(notice.notificationId);
+    if (notice.readAt) return;
+
+    const optimisticReadAt = new Date().toISOString();
+    setNotifications((prev) =>
+      prev.map((item) =>
+        item.notificationId === notice.notificationId ? { ...item, readAt: optimisticReadAt } : item
+      )
+    );
+    notifyBadgeRefresh();
+
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notificationId: notice.notificationId,
+          createdAt: notice.createdAt,
+        }),
+      });
+
+      if (response.status === 401) {
+        setAuthRequired(true);
+        setError(AUTH_REQUIRED_MESSAGE);
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item.notificationId === notice.notificationId ? { ...item, readAt: undefined } : item
+          )
+        );
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to mark as read');
+      }
+
+      const data = (await response.json()) as { readAt?: string };
+      setNotifications((prev) =>
+        prev.map((item) =>
+          item.notificationId === notice.notificationId
+            ? { ...item, readAt: data.readAt ?? optimisticReadAt }
+            : item
+        )
+      );
+      notifyBadgeRefresh();
+    } catch (updateError) {
+      console.error('Failed to mark notification read', updateError);
+      setNotifications((prev) =>
+        prev.map((item) =>
+          item.notificationId === notice.notificationId ? { ...item, readAt: undefined } : item
+        )
+      );
+      setError('通知の既読処理に失敗しました。時間をおいて再度お試しください。');
+    }
+  };
 
   return (
     <>
@@ -157,7 +225,12 @@ export default function NotificationsPage() {
 
         <div className={styles.summaryGrid}>
           <div className={styles.summaryCard}>
-            <p className={styles.summaryLabel}>サイト通知</p>
+            <p className={styles.summaryLabel}>未読</p>
+            <p className={styles.summaryValue}>{unreadCount}件</p>
+            <p className={styles.summaryNote}>新着の通知をチェックしましょう。</p>
+          </div>
+          <div className={styles.summaryCard}>
+            <p className={styles.summaryLabel}>通知件数</p>
             <p className={styles.summaryValue}>{siteNotifications.length}件</p>
             <p className={styles.summaryNote}>直近: {latestCreatedAt ? formatTimestamp(latestCreatedAt) : '—'}</p>
           </div>
@@ -165,11 +238,6 @@ export default function NotificationsPage() {
             <p className={styles.summaryLabel}>メール連携</p>
             <p className={styles.summaryValue}>{mirroredEmails}件</p>
             <p className={styles.summaryNote}>メール送信分も履歴に保存します。</p>
-          </div>
-          <div className={styles.summaryCard}>
-            <p className={styles.summaryLabel}>設定</p>
-            <p className={styles.summaryValue}>{settings ? 'オンデマンド' : '読込中'}</p>
-            <p className={styles.summaryNote}>ユーザーごとに通知の受信チャネルを切り替えられます。</p>
           </div>
         </div>
 
@@ -259,21 +327,64 @@ export default function NotificationsPage() {
             ) : null}
           </div>
         ) : (
-          <div className={styles.list}>
-            {visibleNotifications.map((notice) => (
-              <article key={notice.notificationId} className={styles.card}>
-                <div className={styles.cardIcon}>{resolveIcon(notice)}</div>
-                <div className={styles.cardBody}>
-                  <div className={styles.cardMeta}>
-                    <span className={styles.tag}>{notice.category ?? 'お知らせ'}</span>
-                    <span className={styles.time}>{formatTimestamp(notice.createdAt)}</span>
-                    <span className={styles.channelBadge}>{describeChannels(notice.channels)}</span>
+          <div className={styles.threadLayout}>
+            <div className={styles.threadList} role="tablist" aria-label="通知一覧">
+              {visibleNotifications.map((notice) => {
+                const isActive = notice.notificationId === activeNotification?.notificationId;
+                return (
+                  <button
+                    key={notice.notificationId}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    className={`${styles.threadItem} ${isActive ? styles.threadItemActive : ''} ${
+                      notice.readAt ? '' : styles.threadItemUnread
+                    }`}
+                    onClick={() => void handleSelectNotification(notice)}
+                  >
+                    <div className={styles.threadItemHeader}>
+                      <p className={styles.threadItemTitle}>{notice.subject}</p>
+                      <span className={styles.threadItemStatus}>
+                        {notice.readAt ? (
+                          '既読'
+                        ) : (
+                          <>
+                            <span className={styles.unreadDot} aria-hidden="true" />
+                            未読
+                          </>
+                        )}
+                      </span>
+                    </div>
+                    <p className={styles.threadItemMeta}>{formatTimestamp(notice.createdAt)}</p>
+                  </button>
+                );
+              })}
+            </div>
+            <div className={styles.threadDetail} role="tabpanel">
+              {activeNotification ? (
+                <>
+                  <div className={styles.detailHeader}>
+                    <div>
+                      <p className={styles.detailEyebrow}>{activeNotification.category ?? 'お知らせ'}</p>
+                      <h2 className={styles.detailTitle}>{activeNotification.subject}</h2>
+                    </div>
+                    <span className={styles.detailStatus}>
+                      {activeNotification.readAt ? '既読' : '未読'}
+                    </span>
                   </div>
-                  <h2 className={styles.cardTitle}>{notice.subject}</h2>
-                  <p className={styles.cardText}>{notice.body}</p>
+                  <div className={styles.detailMeta}>
+                    <span className={styles.detailTime}>{formatTimestamp(activeNotification.createdAt)}</span>
+                    <span className={styles.channelBadge}>{describeChannels(activeNotification.channels)}</span>
+                  </div>
+                  <div className={styles.detailBody}>{activeNotification.body}</div>
+                </>
+              ) : (
+                <div className={styles.detailEmpty}>
+                  <p className={styles.emptyTitle}>通知を選択してください</p>
+                  <p className={styles.emptyDescription}>一覧から通知を選ぶと詳細が表示されます。</p>
                 </div>
-              </article>
-            ))}
+              )}
+            </div>
           </div>
         )}
       </section>

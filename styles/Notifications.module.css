@@ -85,6 +85,154 @@
   gap: 1.5rem;
 }
 
+.threadLayout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.threadList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.threadItem {
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #fff;
+  padding: 0.9rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.threadItem:hover {
+  border-color: rgba(248, 113, 113, 0.4);
+  box-shadow: 0 16px 28px -26px rgba(248, 113, 113, 0.35);
+  transform: translateY(-1px);
+}
+
+.threadItem:focus-visible {
+  outline: 2px solid rgba(248, 113, 113, 0.7);
+  outline-offset: 2px;
+}
+
+.threadItemActive {
+  border-color: rgba(248, 113, 113, 0.55);
+  box-shadow: 0 24px 36px -28px rgba(248, 113, 113, 0.45);
+}
+
+.threadItemUnread {
+  background: rgba(254, 242, 242, 0.6);
+}
+
+.threadItemHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.threadItemTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.92);
+  flex: 1;
+}
+
+.threadItemStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(100, 116, 139, 0.9);
+  white-space: nowrap;
+}
+
+.threadItemMeta {
+  margin: 0.45rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(100, 116, 139, 0.85);
+}
+
+.unreadDot {
+  height: 8px;
+  width: 8px;
+  border-radius: 9999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2);
+}
+
+.threadDetail {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #fff;
+  padding: clamp(1.5rem, 2vw + 1rem, 2rem);
+  box-shadow: 0 24px 40px -30px rgba(15, 23, 42, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 260px;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.detailEyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(100, 116, 139, 0.75);
+  font-weight: 600;
+}
+
+.detailTitle {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.1vw + 1rem, 1.7rem);
+}
+
+.detailStatus {
+  align-self: flex-start;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--primary-color-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.detailMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(100, 116, 139, 0.85);
+}
+
+.detailTime {
+  font-weight: 600;
+}
+
+.detailBody {
+  font-size: 0.95rem;
+  color: rgba(30, 41, 59, 0.85);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.detailEmpty {
+  padding: 1rem 0;
+}
+
 .card {
   display: flex;
   gap: 1.25rem;
@@ -316,6 +464,10 @@
   .header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .threadLayout {
+    grid-template-columns: 1fr;
   }
 
   .summaryGrid {
