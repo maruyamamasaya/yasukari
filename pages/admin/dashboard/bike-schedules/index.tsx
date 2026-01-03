@@ -15,6 +15,35 @@ export default function BikeScheduleManagementPage() {
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const today = new Date();
+  const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const getExpiryStatus = (expiryDate?: string | null) => {
+    if (!expiryDate) {
+      return null;
+    }
+    const parsed = new Date(expiryDate);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+    const normalizedExpiry = new Date(
+      parsed.getFullYear(),
+      parsed.getMonth(),
+      parsed.getDate(),
+    );
+
+    if (normalizedExpiry < normalizedToday) {
+      return "expired";
+    }
+
+    const warningStart = new Date(normalizedExpiry);
+    warningStart.setMonth(warningStart.getMonth() - 1);
+    if (normalizedToday >= warningStart) {
+      return "warning";
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -80,6 +109,10 @@ export default function BikeScheduleManagementPage() {
                       bikeModels.find((model) => model.modelId === vehicle.modelId)?.modelName ??
                       "-";
                     const schedulePath = `/admin/dashboard/bike-schedules/${vehicle.managementNumber}`;
+                    const liabilityStatus = getExpiryStatus(
+                      vehicle.liabilityInsuranceExpiryDate,
+                    );
+                    const inspectionStatus = getExpiryStatus(vehicle.inspectionExpiryDate);
                     return (
                       <tr
                         key={vehicle.managementNumber}
@@ -98,8 +131,28 @@ export default function BikeScheduleManagementPage() {
                         <td>{vehicle.managementNumber}</td>
                         <td>{modelName}</td>
                         <td>{getStoreLabel(vehicle.storeId)}</td>
-                        <td>{vehicle.liabilityInsuranceExpiryDate ?? "-"}</td>
-                        <td>{vehicle.inspectionExpiryDate ?? "-"}</td>
+                        <td
+                          className={
+                            liabilityStatus === "expired"
+                              ? tableStyles.expiredCell
+                              : liabilityStatus === "warning"
+                                ? tableStyles.warningCell
+                                : undefined
+                          }
+                        >
+                          {vehicle.liabilityInsuranceExpiryDate ?? "-"}
+                        </td>
+                        <td
+                          className={
+                            inspectionStatus === "expired"
+                              ? tableStyles.expiredCell
+                              : inspectionStatus === "warning"
+                                ? tableStyles.warningCell
+                                : undefined
+                          }
+                        >
+                          {vehicle.inspectionExpiryDate ?? "-"}
+                        </td>
                         <td className={tableStyles.centerCell}>
                           <Link
                             href={schedulePath}
@@ -113,6 +166,9 @@ export default function BikeScheduleManagementPage() {
                   })}
                 </tbody>
               </table>
+              <p className={styles.menuGroupNote}>
+                自賠責満了日・車検満了日のセルは、満了日まで1か月以内で黄色、満了日が過ぎている場合は薄い赤色で表示されます。
+              </p>
               {isLoading && <p className={styles.menuGroupNote}>読み込み中です...</p>}
             </div>
           </div>

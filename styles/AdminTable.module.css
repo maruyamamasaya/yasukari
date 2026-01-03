@@ -66,6 +66,14 @@
   transition: background-color 0.15s ease;
 }
 
+.warningCell {
+  background: rgba(250, 204, 21, 0.25) !important;
+}
+
+.expiredCell {
+  background: rgba(248, 113, 113, 0.22) !important;
+}
+
 .selectedRow {
   background: rgba(248, 113, 113, 0.15) !important;
 }
