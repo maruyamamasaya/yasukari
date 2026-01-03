@@ -46,6 +46,10 @@
   background: #fff;
 }
 
+.centerCell {
+  text-align: center;
+}
+
 .dataTable th,
 .dataTable td {
   white-space: nowrap;
