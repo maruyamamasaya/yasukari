@@ -845,15 +845,21 @@ export default function MyPage() {
                           <div className="mt-3 flex flex-wrap items-center gap-3">
                             {reservation.keyboxQrImageUrl ? (
                               <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
-                                <img
+                                <button
+                                  type="button"
+                                  onClick={() => setShowUnlockQrModal(true)}
+                                  className="group rounded border border-transparent focus:outline-none focus:ring-2 focus:ring-sky-300"
+                                >
+                                  <img
                                     src={reservation.keyboxQrImageUrl}
                                     alt="解錠用QRコード"
-                                    className="h-20 w-20 rounded border border-gray-200 object-contain"
+                                    className="h-20 w-20 rounded border border-gray-200 object-contain transition group-hover:scale-105"
                                   />
-                                  <div className="text-xs text-gray-600">鍵ボックスのリーダーにかざして解錠してください。</div>
-                                </div>
-                              ) : null}
-                            </div>
+                                </button>
+                                <div className="text-xs text-gray-600">鍵ボックスのリーダーにかざして解錠してください。</div>
+                              </div>
+                            ) : null}
+                          </div>
                           </div>
                         ) : reservation.storeName === '三ノ輪店' ? (
                           <p className="mt-3 rounded-lg border border-sky-100 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-800">
