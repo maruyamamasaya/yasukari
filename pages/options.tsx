@@ -37,8 +37,12 @@ export default function OptionsPage() {
         if (!response.ok) {
           throw new Error("Failed to load accessories");
         }
-        const data = (await response.json()) as { accessories?: Accessory[] };
-        setAccessories(data.accessories ?? []);
+        const data = (await response.json()) as Accessory[] | { accessories?: Accessory[] };
+        if (Array.isArray(data)) {
+          setAccessories(data);
+        } else {
+          setAccessories(data.accessories ?? []);
+        }
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
           return;
