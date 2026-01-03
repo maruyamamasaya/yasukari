@@ -39,12 +39,20 @@ export default function MemberDetailPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSavingNote, setIsSavingNote] = useState(false);
+  const [noteError, setNoteError] = useState<string | null>(null);
+  const [noteSuccess, setNoteSuccess] = useState<string | null>(null);
 
   const [noteEdit, setNoteEdit] = useState(member?.notes ?? "");
 
   useEffect(() => {
     setNoteEdit(member?.notes ?? "");
   }, [member]);
+
+  useEffect(() => {
+    setNoteError(null);
+    setNoteSuccess(null);
+  }, [noteEdit]);
 
   useEffect(() => {
     if (!memberId) return;
@@ -88,6 +96,36 @@ export default function MemberDetailPage() {
 
   const handleBackToList = () => {
     router.push("/admin/dashboard/members");
+  };
+
+  const handleSaveNote = async () => {
+    if (!memberId || !member) return;
+    setIsSavingNote(true);
+    setNoteError(null);
+    setNoteSuccess(null);
+
+    try {
+      const response = await fetch(`/api/admin/members/${memberId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: noteEdit }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { message?: string } | null;
+        throw new Error(data?.message ?? "備考の保存に失敗しました。");
+      }
+
+      const data = (await response.json()) as { notes: string };
+      setMember((prev) => (prev ? { ...prev, notes: data.notes } : prev));
+      setNoteSuccess("備考を保存しました。");
+    } catch (error) {
+      console.error("Failed to save notes", error);
+      const message = error instanceof Error ? error.message : "備考の保存に失敗しました。";
+      setNoteError(message);
+    } finally {
+      setIsSavingNote(false);
+    }
   };
 
   if (isLoading) {
@@ -248,8 +286,27 @@ export default function MemberDetailPage() {
                 aria-label={`${member.name} の備考`}
                 placeholder="備考を編集"
               />
+              <div className={memberStyles.noteActions}>
+                <button
+                  type="button"
+                  className={memberStyles.saveButton}
+                  onClick={handleSaveNote}
+                  disabled={isSavingNote || noteEdit === (member.notes ?? "")}
+                >
+                  {isSavingNote ? "保存中..." : "備考を保存"}
+                </button>
+                {(noteError || noteSuccess) && (
+                  <p
+                    className={
+                      noteError ? memberStyles.noteError : memberStyles.noteSuccess
+                    }
+                  >
+                    {noteError ?? noteSuccess}
+                  </p>
+                )}
+              </div>
               <p className={memberStyles.sectionHelper}>
-                ここは編集できる感じのダミーUIです。保存の挙動はまだありません。
+                備考を編集して保存できます。
               </p>
             </div>
 
