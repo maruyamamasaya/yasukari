@@ -4,8 +4,8 @@ import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient, scanAllItems } from "./dynamodb";
 import { fetchReservationsByMember, Reservation } from "./reservations";
-import { Member, MemberRole, MemberStatus } from "./members";
-import type { RegistrationData } from "../types/registration";
+import { Member, MemberRegistrationStatus, MemberRole, MemberStatus } from "./members";
+import { REQUIRED_REGISTRATION_FIELDS, type RegistrationData } from "../types/registration";
 
 type CognitoUserInfo = {
   id: string;
@@ -224,6 +224,21 @@ const mapStatus = (user?: CognitoUserInfo): MemberStatus => {
   return "未認証";
 };
 
+const hasAllRequiredRegistrationFields = (registration?: RegistrationData): boolean => {
+  if (!registration) return false;
+  return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(registration[field]));
+};
+
+const mapRegistrationStatus = (
+  user: CognitoUserInfo | undefined,
+  registration: RegistrationData | undefined
+): MemberRegistrationStatus => {
+  if (!user && !registration) return "メールのみ";
+  if (!user && registration) return "仮登録済";
+  if (user && !registration) return "管理者追加済";
+  return hasAllRequiredRegistrationFields(registration) ? "本登録済" : "仮登録済";
+};
+
 const mapInternational = (attributes: Record<string, string>): boolean => {
   const locale = attributes.locale ?? attributes["custom:locale"] ?? "";
   const country = attributes["custom:country"] ?? attributes.country ?? "";
@@ -255,6 +270,7 @@ const mapMember = (
     role: mapRole(attributes["custom:role"] ?? attributes.role),
     email: email || "-",
     status: mapStatus(user),
+    registrationStatus: mapRegistrationStatus(user, registration),
     isInternational: mapInternational(attributes),
     updatedAt: formatDateTime(updatedAt),
     mobilePhone: mobilePhone || "-",

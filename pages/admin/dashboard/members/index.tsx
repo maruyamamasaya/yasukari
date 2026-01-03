@@ -8,12 +8,12 @@ import styles from "../../../../styles/Dashboard.module.css";
 import tableStyles from "../../../../styles/AdminTable.module.css";
 import memberStyles from "../../../../styles/AdminMember.module.css";
 
-const statusBadgeClassName = (status: Member["status"]): string => {
-  if (status === "認証済") {
+const statusBadgeClassName = (status: Member["registrationStatus"]): string => {
+  if (status === "本登録済") {
     return `${memberStyles.statusBadge} ${memberStyles.statusBadgeOn}`;
   }
 
-  if (status === "未認証") {
+  if (status === "仮登録済" || status === "管理者追加済") {
     return `${memberStyles.statusBadge} ${memberStyles.statusBadgePending}`;
   }
 
@@ -88,11 +88,10 @@ export default function MemberListPage() {
     }
     return members.filter((member) => {
       const searchableValues = [
-        member.memberNumber,
         member.email,
         member.name,
         member.role,
-        member.status,
+        member.registrationStatus,
       ];
       return searchableValues.some((value) =>
         value?.toLowerCase().includes(normalizedTerm)
@@ -135,7 +134,7 @@ export default function MemberListPage() {
               <input
                 type="search"
                 className={styles.tableSearchInput}
-                placeholder="会員番号・メールアドレス・氏名で検索"
+                placeholder="メールアドレス・氏名・権限・ステータスで検索"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 aria-label="会員一覧を検索"
@@ -152,7 +151,6 @@ export default function MemberListPage() {
             <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
               <thead>
                 <tr>
-                  <th scope="col" aria-label="会員番号"></th>
                   <th scope="col">メールアドレス</th>
                   <th scope="col">会員名</th>
                   <th scope="col">権限</th>
@@ -164,7 +162,7 @@ export default function MemberListPage() {
               <tbody>
                 {!isLoading && filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>該当する会員が見つかりませんでした。</td>
+                    <td colSpan={6}>該当する会員が見つかりませんでした。</td>
                   </tr>
                 ) : (
                   pagedMembers.map((member) => (
@@ -176,14 +174,13 @@ export default function MemberListPage() {
                         tabIndex={0}
                         aria-label={`${member.name} の詳細を開く`}
                       >
-                        <td className={tableStyles.monospace}>{member.memberNumber}</td>
                         <td>{member.email}</td>
                         <td>{member.name}</td>
                         <td>{member.role}</td>
                         <td>{member.isInternational ? "海外利用あり" : "国内のみ"}</td>
                         <td>
-                          <span className={statusBadgeClassName(member.status)}>
-                            {member.status}
+                          <span className={statusBadgeClassName(member.registrationStatus)}>
+                            {member.registrationStatus}
                           </span>
                         </td>
                         <td>{member.updatedAt}</td>
