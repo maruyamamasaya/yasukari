@@ -24,6 +24,7 @@ export default function Document() {
           rel="stylesheet"
           href="https://unpkg.com/swiper@10/swiper-bundle.min.css"
         />
+        <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js" />
         <script dangerouslySetInnerHTML={{ __html: "var RentioApp = { env: 'production' };" }} />
       </Head>
       <body>
