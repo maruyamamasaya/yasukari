@@ -6,7 +6,9 @@ import { Reservation } from "./reservations";
 const BASE_URL = process.env.KEYBOX_BASE_URL ?? "https://eco.blockchainlock.io";
 const API_KEY = process.env.KEYBOX_API_KEY ?? process.env.API_KEY ?? "";
 const SECRET_KEY = process.env.KEYBOX_SECRET_KEY ?? process.env.SECRET_KEY ?? "";
-const UNIT_ID_OVERRIDE = process.env.KEYBOX_UNIT_ID_OVERRIDE ?? process.env.UNIT_ID_OVERRIDE ?? "";
+const DEFAULT_UNIT_ID = "65ba13340cc4545240154f6c";
+const UNIT_ID_OVERRIDE =
+  process.env.KEYBOX_UNIT_ID_OVERRIDE ?? process.env.UNIT_ID_OVERRIDE ?? DEFAULT_UNIT_ID;
 
 type SignType = "A" | "B";
 
