@@ -31,6 +31,7 @@ export type RegistrationData = {
   accident_report_uploaded_at?: string;
   return_report_url?: string;
   return_report_uploaded_at?: string;
+  notes?: string;
 };
 
 export const REQUIRED_REGISTRATION_FIELDS: (keyof RegistrationData)[] = [

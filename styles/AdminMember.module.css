@@ -64,6 +64,46 @@
   gap: 0.5rem;
 }
 
+.noteActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.saveButton {
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.3rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.saveButton:disabled {
+  cursor: not-allowed;
+  background: rgba(148, 163, 184, 0.8);
+}
+
+.saveButton:hover:not(:disabled),
+.saveButton:focus-visible:not(:disabled) {
+  background: #0284c7;
+  outline: none;
+  box-shadow: 0 12px 24px -16px rgba(2, 132, 199, 0.55);
+}
+
+.noteSuccess {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.noteError {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
 .noteTextarea {
   width: 100%;
   min-height: 96px;

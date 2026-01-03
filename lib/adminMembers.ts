@@ -1,6 +1,6 @@
 import { createHmac, createHash } from "crypto";
 
-import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient, scanAllItems } from "./dynamodb";
 import { fetchReservationsByMember, Reservation } from "./reservations";
@@ -270,7 +270,7 @@ const mapMember = (
     otherContactAddress: registration?.other_address ?? "-",
     otherContactPhone: registration?.other_tel ?? "-",
     registeredAt: formatDateTime(createdAt),
-    notes: "",
+    notes: registration?.notes ?? "",
   };
 };
 
@@ -442,4 +442,26 @@ export const fetchMemberDetail = async (memberId: string): Promise<MemberDetail>
     member: cognitoUser || registration ? mapMember(cognitoUser, registration) : null,
     reservations,
   };
+};
+
+export const updateMemberNotes = async (memberId: string, notes: string): Promise<void> => {
+  const registration = await fetchRegistrationById(memberId);
+  if (!registration) {
+    throw new Error("登録情報が見つかりませんでした。");
+  }
+
+  const client = getDocumentClient();
+  await client.send(
+    new UpdateCommand({
+      TableName: USER_TABLE,
+      Key: { user_id: memberId },
+      UpdateExpression: "SET #notes = :notes",
+      ExpressionAttributeNames: {
+        "#notes": "notes",
+      },
+      ExpressionAttributeValues: {
+        ":notes": notes,
+      },
+    })
+  );
 };
