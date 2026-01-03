@@ -15,10 +15,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {/* ブランド紹介と問い合わせ */}
           <div>
-            <h4 className="font-bold mb-2">yasukari（リバイクル）</h4>
+            <h4 className="font-bold mb-2">yasukari</h4>
             <p className="mb-3">
               バイクのレンタル・サブスク専門サイトです。原付から大型・EVバイクまで豊富なラインナップをご用意。
-              月額プランや法人向けサービスも充実しています。
             </p>
             <div className="space-y-1">
               <Link href="/" className="text-red-600 hover:underline block">
