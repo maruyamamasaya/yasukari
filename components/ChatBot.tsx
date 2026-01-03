@@ -36,6 +36,7 @@ export default function ChatBot({
   const [faqLoading, setFaqLoading] = useState(true);
   const [faqError, setFaqError] = useState<string | null>(null);
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const storageKey = "chatbot_saved_messages";
 
   useEffect(() => {
@@ -162,6 +163,10 @@ export default function ChatBot({
 
   async function handleFreeSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!userId) {
+      setShowLoginPrompt(true);
+      return;
+    }
     const form = e.target as HTMLFormElement;
     const input = form.elements.namedItem("free") as HTMLInputElement;
     const text = input.value.trim();
@@ -214,6 +219,14 @@ export default function ChatBot({
       );
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  function handleInputRequireLogin(event: React.SyntheticEvent) {
+    if (!userId) {
+      event.preventDefault();
+      event.stopPropagation();
+      setShowLoginPrompt(true);
     }
   }
 
@@ -465,12 +478,17 @@ export default function ChatBot({
               className={styles.input}
               placeholder="質問を入力してください"
               disabled={isSubmitting}
+              readOnly={!userId}
+              aria-readonly={!userId}
+              onFocus={handleInputRequireLogin}
+              onClick={handleInputRequireLogin}
             />
             <button
               type="submit"
               className={`${styles.composerButton} ${styles.sendButton}`}
               aria-label="送信する"
               disabled={isSubmitting}
+              onClick={handleInputRequireLogin}
             >
               <FaPaperPlane />
             </button>
@@ -479,6 +497,28 @@ export default function ChatBot({
           <div className={styles.composerHidden}>
             <div className={styles.composerHiddenLabel}>
               「その他の質問を入力する」を選択すると入力欄が開きます
+            </div>
+          </div>
+        )}
+        {showLoginPrompt && (
+          <div className={styles.loginPromptOverlay} role="presentation">
+            <div className={styles.loginPromptCard} role="dialog" aria-modal="true">
+              <h2 className={styles.loginPromptTitle}>ログインが必要です</h2>
+              <p className={styles.loginPromptBody}>
+                その他の質問を入力するにはログインが必要です。ログイン後に再度お試しください。
+              </p>
+              <div className={styles.loginPromptActions}>
+                <button
+                  type="button"
+                  className={styles.loginPromptSecondary}
+                  onClick={() => setShowLoginPrompt(false)}
+                >
+                  閉じる
+                </button>
+                <a className={styles.loginPromptPrimary} href="/login">
+                  ログインする
+                </a>
+              </div>
             </div>
           </div>
         )}

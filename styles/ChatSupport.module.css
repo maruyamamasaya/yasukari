@@ -57,6 +57,7 @@
   overflow: hidden;
   height: 100%;
   width: 100%;
+  position: relative;
 }
 
 .chatShell.fullScreen {
@@ -372,6 +373,71 @@
   font-size: var(--chat-secondary-font);
   color: #991b1b;
   text-align: center;
+  font-weight: 600;
+}
+
+.loginPromptOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 5;
+}
+
+.loginPromptCard {
+  width: min(320px, 100%);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loginPromptTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--chat-text);
+}
+
+.loginPromptBody {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--chat-secondary);
+  margin: 0;
+}
+
+.loginPromptActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.loginPromptPrimary {
+  height: 40px;
+  border-radius: 12px;
+  background: var(--chat-accent);
+  color: #ffffff;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.loginPromptSecondary {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: #ffffff;
+  color: var(--chat-text);
   font-weight: 600;
 }
 
