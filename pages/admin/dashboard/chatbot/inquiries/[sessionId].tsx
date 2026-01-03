@@ -319,7 +319,7 @@ export default function ChatbotInquiryDetailPage() {
                   </span>
                 </div>
 
-                <ol className={styles.chatMessageList}>
+                <ol className={styles.chatMessageList} aria-label="チャット履歴">
                   {sortedMessages.map((message) => {
                     const isAssistant = message.role === "assistant";
                     const roleClassName = `${tableStyles.badge} ${isAssistant ? tableStyles.badgeOn : tableStyles.badgeOff}`;
@@ -366,7 +366,7 @@ export default function ChatbotInquiryDetailPage() {
                 {storedHistory.length === 0 ? (
                   <p className={styles.sectionDescription}>保存された履歴がありません。</p>
                 ) : (
-                  <ol className={styles.chatMessageList}>
+                  <ol className={styles.chatMessageList} aria-label="保存済みのチャット履歴">
                     {storedHistory.map((entry, index) => {
                       const isAssistant = entry.role === "assistant";
                       const badgeClassName = `${tableStyles.badge} ${isAssistant ? tableStyles.badgeOn : tableStyles.badgeOff}`;
