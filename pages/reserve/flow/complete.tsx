@@ -151,7 +151,7 @@ export default function ReservationCompletePage() {
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">予約ID</p>
-                  <p className="font-mono text-lg font-semibold text-gray-900">{reservationIdDisplay}</p>
+                  <p className="font-mono text-lg font-semibold text-gray-900 break-words">{reservationIdDisplay}</p>
                 </div>
                 <div className="flex flex-wrap gap-2 justify-center sm:justify-end">
                   <Link
