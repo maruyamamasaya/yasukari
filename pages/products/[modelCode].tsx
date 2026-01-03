@@ -644,7 +644,7 @@ export default function ProductDetailPage({
               <div className="flex flex-col gap-2 pt-2">
                 <button
                   type="button"
-                  className="inline-flex w-full items-center justify-center rounded-lg bg-amber-500 px-4 py-3 text-sm font-semibold text-white shadow transition hover:bg-amber-600"
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow transition hover:bg-red-700"
                   onClick={() => setShowStoreRequiredModal(false)}
                 >
                   OK
