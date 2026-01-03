@@ -5,6 +5,7 @@ import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import type { Member } from "../../../lib/members";
 import styles from "../../../styles/Dashboard.module.css";
 import tableStyles from "../../../styles/AdminTable.module.css";
+import reissueStyles from "../../../styles/KeyboxReissue.module.css";
 
 const formatDateTime = (value?: string) => {
   if (!value) return "-";
@@ -150,105 +151,142 @@ export default function KeyboxReissuePage() {
             </div>
           </div>
 
-          <form className={styles.formCard} onSubmit={handleSubmit}>
-            <div className={styles.formGridTwoCols}>
-              <label className={styles.formField}>
-                <span className={styles.formLabel}>有効開始</span>
-                <input
-                  type="datetime-local"
-                  required
-                  value={windowStart}
-                  onChange={(event) => setWindowStart(event.target.value)}
-                  step={3600}
-                  className={styles.input}
-                />
-              </label>
-              <label className={styles.formField}>
-                <span className={styles.formLabel}>有効終了</span>
-                <input
-                  type="datetime-local"
-                  required
-                  value={windowEnd}
-                  onChange={(event) => setWindowEnd(event.target.value)}
-                  step={3600}
-                  className={styles.input}
-                />
-              </label>
-            </div>
-            <div className={styles.formGridTwoCols}>
-              <label className={styles.formField}>
-                <span className={styles.formLabel}>PINコード (任意)</span>
-                <input
-                  type="text"
-                  placeholder="未入力の場合は自動生成"
-                  value={pinCode}
-                  onChange={(event) => setPinCode(event.target.value)}
-                  className={styles.input}
-                />
-              </label>
-              <label className={styles.formField}>
-                <span className={styles.formLabel}>ターゲット名 (任意)</span>
-                <input
-                  type="text"
-                  placeholder="再発行PIN"
-                  value={targetName}
-                  onChange={(event) => setTargetName(event.target.value)}
-                  className={styles.input}
-                />
-              </label>
-            </div>
-            <div className={styles.formGridTwoCols}>
-              <label className={styles.formField}>
-                <span className={styles.formLabel}>ユニットID (任意)</span>
-                <input
-                  type="text"
-                  placeholder="未入力の場合は自動生成"
-                  value={unitId}
-                  onChange={(event) => setUnitId(event.target.value)}
-                  className={styles.input}
-                />
-              </label>
-              <label className={styles.formField}>
-                <span className={styles.formLabel}>店舗名・備考 (任意)</span>
-                <input
-                  type="text"
-                  placeholder="三ノ輪店"
-                  value={storeName}
-                  onChange={(event) => setStoreName(event.target.value)}
-                  className={styles.input}
-                />
-              </label>
-            </div>
-            <label className={styles.formField}>
-              <span className={styles.formLabel}>ユーザー割り当て (任意)</span>
-              <select
-                value={memberId}
-                onChange={(event) => setMemberId(event.target.value)}
-                className={styles.input}
-              >
-                <option value="">未指定</option>
-                {members.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name} ({member.email})
-                  </option>
-                ))}
-              </select>
-              {membersError ? (
-                <p className={styles.errorText}>会員一覧を読み込めませんでした: {membersError}</p>
-              ) : null}
-              <p className={styles.mutedText}>
-                会員を指定すると、利用中の予約にPIN・QRを反映します。店舗名は予約情報を優先します。
-              </p>
-            </label>
+          <div className={styles.splitLayout}>
+            <form className={styles.formCard} onSubmit={handleSubmit}>
+              <div className={reissueStyles.formSections}>
+                <fieldset className={reissueStyles.fieldset}>
+                  <legend className={reissueStyles.fieldsetLegend}>解錠ウィンドウ</legend>
+                  <p className={styles.inlineNotice}>
+                    予約に合わせて2時間幅を指定してください。入力が空の場合は丸めた最短時刻で自動採番します。
+                  </p>
+                  <div className={styles.formGridTwoCols}>
+                    <label className={styles.formField}>
+                      <span className={styles.formLabel}>有効開始</span>
+                      <input
+                        type="datetime-local"
+                        required
+                        value={windowStart}
+                        onChange={(event) => setWindowStart(event.target.value)}
+                        step={3600}
+                        className={styles.input}
+                      />
+                    </label>
+                    <label className={styles.formField}>
+                      <span className={styles.formLabel}>有効終了</span>
+                      <input
+                        type="datetime-local"
+                        required
+                        value={windowEnd}
+                        onChange={(event) => setWindowEnd(event.target.value)}
+                        step={3600}
+                        className={styles.input}
+                      />
+                    </label>
+                  </div>
+                </fieldset>
 
-            {submitError ? <p className={styles.errorText}>{submitError}</p> : null}
+                <fieldset className={reissueStyles.fieldset}>
+                  <legend className={reissueStyles.fieldsetLegend}>PINとラベル</legend>
+                  <div className={styles.formGridTwoCols}>
+                    <label className={styles.formField}>
+                      <span className={styles.formLabel}>PINコード (任意)</span>
+                      <input
+                        type="text"
+                        placeholder="未入力の場合は自動生成"
+                        value={pinCode}
+                        onChange={(event) => setPinCode(event.target.value)}
+                        className={styles.input}
+                      />
+                    </label>
+                    <label className={styles.formField}>
+                      <span className={styles.formLabel}>ターゲット名 (任意)</span>
+                      <input
+                        type="text"
+                        placeholder="再発行PIN"
+                        value={targetName}
+                        onChange={(event) => setTargetName(event.target.value)}
+                        className={styles.input}
+                      />
+                    </label>
+                  </div>
+                </fieldset>
 
-            <div className={styles.formActions}>
-              <button type="submit" className={styles.primaryButton} disabled={isSubmitting}>
-                {isSubmitting ? "再発行中..." : "再発行する"}
-              </button>
-            </div>
-          </form>
+                <fieldset className={reissueStyles.fieldset}>
+                  <legend className={reissueStyles.fieldsetLegend}>ユニットと店舗</legend>
+                  <div className={styles.formGridTwoCols}>
+                    <label className={styles.formField}>
+                      <span className={styles.formLabel}>ユニットID (任意)</span>
+                      <input
+                        type="text"
+                        placeholder="未入力の場合は自動生成"
+                        value={unitId}
+                        onChange={(event) => setUnitId(event.target.value)}
+                        className={styles.input}
+                      />
+                    </label>
+                    <label className={styles.formField}>
+                      <span className={styles.formLabel}>店舗名・備考 (任意)</span>
+                      <input
+                        type="text"
+                        placeholder="三ノ輪店"
+                        value={storeName}
+                        onChange={(event) => setStoreName(event.target.value)}
+                        className={styles.input}
+                      />
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset className={reissueStyles.fieldset}>
+                  <legend className={reissueStyles.fieldsetLegend}>会員への割り当て</legend>
+                  <label className={styles.formField}>
+                    <span className={styles.formLabel}>ユーザー割り当て (任意)</span>
+                    <select
+                      value={memberId}
+                      onChange={(event) => setMemberId(event.target.value)}
+                      className={styles.input}
+                    >
+                      <option value="">未指定</option>
+                      {members.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name} ({member.email})
+                        </option>
+                      ))}
+                    </select>
+                    {membersError ? (
+                      <p className={styles.errorText}>会員一覧を読み込めませんでした: {membersError}</p>
+                    ) : null}
+                    <p className={styles.mutedText}>
+                      会員を指定すると、利用中の予約にPIN・QRを反映します。店舗名は予約情報を優先します。
+                    </p>
+                  </label>
+                </fieldset>
+
+                {submitError ? <p className={styles.errorText}>{submitError}</p> : null}
+
+                <div className={styles.formActions}>
+                  <button type="submit" className={styles.primaryButton} disabled={isSubmitting}>
+                    {isSubmitting ? "再発行中..." : "再発行する"}
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <aside className={reissueStyles.helperPanel}>
+              <p className={reissueStyles.helperKicker}>手順メモ</p>
+              <h3 className={reissueStyles.helperTitle}>他ページと統一した2ステップ</h3>
+              <ul className={reissueStyles.helperList}>
+                <li>予約時間に合わせてウィンドウを設定し、必要に応じてPINやユニットIDを上書き。</li>
+                <li>会員を紐づけておくとマイページと予約へ即時反映されます。</li>
+                <li>未入力の項目は安全な値で自動採番されます。</li>
+              </ul>
+              <div className={reissueStyles.helperBadges}>
+                <span className={reissueStyles.helperBadge}>自動採番</span>
+                <span className={reissueStyles.helperBadge}>予約連携</span>
+                <span className={reissueStyles.helperBadge}>QR即時生成</span>
+              </div>
+            </aside>
+          </div>
 
           {result ? (
             <div className={styles.card}>
@@ -257,6 +295,30 @@ export default function KeyboxReissuePage() {
                   <h3 className={styles.sectionTitle}>再発行結果</h3>
                   <p className={styles.sectionDescription}>
                     再発行したPIN・QRと割り当て結果を確認できます。
+                  </p>
+                </div>
+              </div>
+              <div className={reissueStyles.resultGrid}>
+                <div className={reissueStyles.resultTile}>
+                  <p className={reissueStyles.resultLabel}>ステータス</p>
+                  <p className={reissueStyles.resultValue}>{result.success ? "成功" : "失敗"}</p>
+                </div>
+                <div className={reissueStyles.resultTile}>
+                  <p className={reissueStyles.resultLabel}>PIN / pinId</p>
+                  <p className={reissueStyles.resultValue}>{result.pinCode}</p>
+                  <p className={reissueStyles.resultMeta}>{result.pinId || "pinId未発行"}</p>
+                </div>
+                <div className={reissueStyles.resultTile}>
+                  <p className={reissueStyles.resultLabel}>有効時間</p>
+                  <p className={reissueStyles.resultValue}>
+                    {formatDateTime(result.windowStart)}
+                  </p>
+                  <p className={reissueStyles.resultMeta}>〜 {formatDateTime(result.windowEnd)}</p>
+                </div>
+                <div className={reissueStyles.resultTile}>
+                  <p className={reissueStyles.resultLabel}>割り当て</p>
+                  <p className={reissueStyles.resultValue}>
+                    {result.reservationId ? `予約ID: ${result.reservationId}` : "未割り当て"}
                   </p>
                 </div>
               </div>
