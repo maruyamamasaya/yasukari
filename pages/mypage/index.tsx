@@ -671,60 +671,62 @@ export default function MyPage() {
                   </span>
                 </button>
               </div>
-              <div className={`${mobileSectionsOpen.reservations ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
-                {shouldShowRentalActions ? (
-                  <div className="flex flex-wrap gap-2">
-                    {extensionTargetReservationId ? (
-                      <Link
-                        href={`/mypage/rentals/extend/${extensionTargetReservationId}`}
-                        className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
-                      >
-                        レンタル延長
-                      </Link>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled
-                        className="inline-flex items-center justify-center rounded-full bg-sky-50 px-4 py-2 text-xs font-semibold text-black/60 shadow-md ring-2 ring-inset ring-sky-100 ring-offset-1 ring-offset-white"
-                      >
-                        レンタル延長
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => activeKeyboxQrImageUrl && setShowUnlockQrModal(true)}
-                      className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 sm:hidden"
-                      disabled={!activeKeyboxQrImageUrl}
-                    >
-                      解錠用のQRを表示
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleReturnOpen}
-                      disabled={!activeReturnReservation}
-                      className="inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-emerald-50 disabled:text-black/60 disabled:ring-emerald-50"
-                    >
-                      返却
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleAccidentOpen}
-                      className="inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-200"
-                    >
-                      事故・連絡
-                    </button>
-                  </div>
-                  <div className="mt-2 text-sm text-gray-700">
-                    <Link
-                      href="/blog_for_custmor/2025-09-01-minowa-procedures"
-                      className="text-sky-700 underline underline-offset-2 transition hover:text-sky-800"
-                    >
-                      無人店舗でのレンタルについて
-                    </Link>
-                  </div>
-                ) : null}
+        <div className={`${mobileSectionsOpen.reservations ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
+          {shouldShowRentalActions ? (
+            <>
+              <div className="flex flex-wrap gap-2">
+                {extensionTargetReservationId ? (
+                  <Link
+                    href={`/mypage/rentals/extend/${extensionTargetReservationId}`}
+                    className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
+                  >
+                    レンタル延長
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="inline-flex items-center justify-center rounded-full bg-sky-50 px-4 py-2 text-xs font-semibold text-black/60 shadow-md ring-2 ring-inset ring-sky-100 ring-offset-1 ring-offset-white"
+                  >
+                    レンタル延長
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => activeKeyboxQrImageUrl && setShowUnlockQrModal(true)}
+                  className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 sm:hidden"
+                  disabled={!activeKeyboxQrImageUrl}
+                >
+                  解錠用のQRを表示
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReturnOpen}
+                  disabled={!activeReturnReservation}
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-emerald-200 ring-offset-1 ring-offset-white transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-emerald-50 disabled:text-black/60 disabled:ring-emerald-50"
+                >
+                  返却
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAccidentOpen}
+                  className="inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-rose-200 ring-offset-1 ring-offset-white transition hover:bg-rose-200"
+                >
+                  事故・連絡
+                </button>
+              </div>
+              <div className="mt-2 text-sm text-gray-700">
+                <Link
+                  href="/blog_for_custmor/2025-09-01-minowa-procedures"
+                  className="text-sky-700 underline underline-offset-2 transition hover:text-sky-800"
+                >
+                  無人店舗でのレンタルについて
+                </Link>
+              </div>
+            </>
+          ) : null}
 
-                <div className="mt-4 space-y-3 text-sm text-gray-700">
+          <div className="mt-4 space-y-3 text-sm text-gray-700">
                 {reservationsError ? (
                   <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">{reservationsError}</p>
                 ) : loadingReservations ? (
