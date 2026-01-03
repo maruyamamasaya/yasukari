@@ -19,6 +19,11 @@ export default function MaintenancePage() {
             メンテナンスは <strong>1/5</strong> までを予定しております。再開まで今しばらく
             お待ちください。
           </p>
+          <p className={styles.message}>
+            現在レンタル中の方は、以下のURLよりご予約状況をご確認ください。
+            <br />
+            <a href="https://yasukari.com/my">マイページ（旧）</a>
+          </p>
         </section>
       </main>
     </>
