@@ -681,6 +681,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
     acc[record.days] = record.price;
     return acc;
   }, {});
+  const base24hPrice =
+    rentalPriceMap[durationDays["24h"]] ??
+    normalizePrice(classPriceMap["24h"]) ??
+    normalizePrice(bike.price24h);
 
   const priceGuide = (Object.entries(durationDays) as [DurationKey, number][])
     .map(([key, days]) => {
@@ -691,6 +695,12 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
       const classPrice = normalizePrice(classPriceMap[key]);
       if (classPrice != null) {
         return [key, formatPrice(classPrice)] as [DurationKey, string];
+      }
+      if (key === "2d" && typeof base24hPrice === "number") {
+        return [key, formatPrice(base24hPrice * durationDays["2d"])] as [
+          DurationKey,
+          string
+        ];
       }
       return [key, "-"] as [DurationKey, string];
     })
