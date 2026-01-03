@@ -772,19 +772,12 @@ export default function MyPage() {
                               <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
                                 <dt className="text-xs text-gray-600">PINコード</dt>
                                 <dd className="font-mono text-lg font-semibold text-gray-900">{reservation.keyboxPinCode}</dd>
-                                <p className="mt-1 text-xs text-gray-500">
-                                  pinId: {reservation.keyboxPinId || '-'} / unitId: {reservation.keyboxUnitId || '-'}
-                                </p>
                               </div>
                               <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
                                 <dt className="text-xs text-gray-600">利用可能時間</dt>
                                 <dd className="text-sm font-semibold text-gray-900">
                                   {formatKeyboxWindow(reservation.keyboxWindowStart, reservation.keyboxWindowEnd)}
                                 </dd>
-                                <p className="mt-1 text-xs text-gray-500">
-                                  名義: {reservation.keyboxTargetName || reservation.memberName || '-'} / 署名方式:{' '}
-                                  {reservation.keyboxSignUsed || '-'}
-                                </p>
                               </div>
                             </div>
                             <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -796,12 +789,6 @@ export default function MyPage() {
                                     className="h-20 w-20 rounded border border-gray-200 object-contain"
                                   />
                                   <div className="text-xs text-gray-600">鍵ボックスのリーダーにかざして解錠してください。</div>
-                                </div>
-                              ) : null}
-                              {reservation.keyboxQrCode ? (
-                                <div className="rounded-lg bg-white px-3 py-2 text-xs text-gray-700 shadow-sm">
-                                  <div className="font-semibold text-gray-900">QRコード文字列</div>
-                                  <div className="font-mono break-all">{reservation.keyboxQrCode}</div>
                                 </div>
                               ) : null}
                             </div>
