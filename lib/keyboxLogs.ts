@@ -3,6 +3,19 @@ import { PutCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient, scanAllItems } from "./dynamodb";
 
+/**
+ * Detailed information for each signature attempt when calling the Keybox API.
+ */
+export type KeyboxSignAttemptLog = {
+  signType: string;
+  stringToSign: string;
+  digest: string;
+  headers: Record<string, string>;
+  responseBody: unknown;
+  httpStatus: number;
+  success: boolean;
+};
+
 export type KeyboxLog = {
   logId: string;
   reservationId?: string;
@@ -21,6 +34,9 @@ export type KeyboxLog = {
   success: boolean;
   message?: string;
   signUsed?: string;
+  errorType?: string;
+  attempts?: KeyboxSignAttemptLog[];
+  finalAttempt?: string;
   createdAt: string;
 };
 

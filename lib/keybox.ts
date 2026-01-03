@@ -8,6 +8,13 @@ const API_KEY = process.env.KEYBOX_API_KEY ?? process.env.API_KEY ?? "";
 const SECRET_KEY = process.env.KEYBOX_SECRET_KEY ?? process.env.SECRET_KEY ?? "";
 const UNIT_ID_OVERRIDE = process.env.KEYBOX_UNIT_ID_OVERRIDE ?? process.env.UNIT_ID_OVERRIDE ?? "";
 
+type SignType = "A" | "B";
+
+/**
+ * Lock device identifier used by the Keybox service (not a door ID).
+ */
+type LockUnitId = string;
+
 const PATH_CREATE_PIN = "/api/eagle-pms/v1/createLockPin";
 const BUFFER_MS = 60 * 60 * 1000; // 1 hour buffer before/after rental
 
@@ -50,6 +57,7 @@ const signHeadersA = (path: string, body: string) => {
       digest,
       authorization,
     },
+    digest,
     stringToSign,
   };
 };
@@ -71,6 +79,7 @@ const signHeadersB = (path: string, body: string) => {
       digest,
       authorization,
     },
+    digest,
     stringToSign,
   };
 };
@@ -83,36 +92,92 @@ const parseJsonResponse = async (response: Response): Promise<Record<string, unk
   }
 };
 
-const postSignedJson = async (
-  path: string,
-  body: Record<string, unknown>
-): Promise<{
+type SignAttemptLog = {
+  signType: SignType;
+  stringToSign: string;
+  digest: string;
+  headers: Record<string, string>;
+  responseBody: Record<string, unknown>;
+  httpStatus: number;
+  success: boolean;
+};
+
+type SignedPostResult = {
   response: Record<string, unknown>;
-  signUsed: "A" | "B";
-  signString: string;
-}> => {
+  signUsed: SignType;
+  attempts: SignAttemptLog[];
+  finalAttempt: SignAttemptLog;
+};
+
+const maskAuthorization = (authorization?: string): string | undefined => {
+  if (!authorization) return authorization;
+  if (authorization.length <= 5) return authorization;
+  return `${authorization.slice(0, 5)}***`;
+};
+
+const sanitizeHeaders = (headers: Record<string, string>): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(headers).map(([key, value]) =>
+      key.toLowerCase() === "authorization" ? [key, maskAuthorization(value) ?? ""] : [key, value]
+    )
+  );
+
+const postSignedJson = async (path: string, body: Record<string, unknown>): Promise<SignedPostResult> => {
   const url = `${BASE_URL}${path}`;
   const payload = jsonMinified(body);
 
-  const { headers: headersA, stringToSign: stringA } = signHeadersA(path, payload);
+  const attempts: SignAttemptLog[] = [];
+
+  const { headers: headersA, stringToSign: stringA, digest: digestA } = signHeadersA(path, payload);
   const resA = await fetch(url, {
     method: "POST",
     headers: headersA,
     body: payload,
   });
   const objA = await parseJsonResponse(resA);
-  if (okResponse(objA)) {
-    return { response: { ...objA, _sign_used: "A" }, signUsed: "A", signString: stringA };
+  const attemptA: SignAttemptLog = {
+    signType: "A",
+    digest: digestA,
+    stringToSign: stringA,
+    headers: sanitizeHeaders(headersA),
+    responseBody: objA,
+    httpStatus: resA.status,
+    success: okResponse(objA),
+  };
+  attempts.push(attemptA);
+  if (attemptA.success) {
+    return {
+      response: { ...objA, _sign_used: "A" },
+      signUsed: "A",
+      attempts,
+      finalAttempt: attemptA,
+    };
   }
 
-  const { headers: headersB, stringToSign: stringB } = signHeadersB(path, payload);
+  const { headers: headersB, stringToSign: stringB, digest: digestB } = signHeadersB(path, payload);
   const resB = await fetch(url, {
     method: "POST",
     headers: headersB,
     body: payload,
   });
   const objB = await parseJsonResponse(resB);
-  return { response: { ...objB, _sign_used: "B" }, signUsed: "B", signString: stringB };
+  const attemptB: SignAttemptLog = {
+    signType: "B",
+    digest: digestB,
+    stringToSign: stringB,
+    headers: sanitizeHeaders(headersB),
+    responseBody: objB,
+    httpStatus: resB.status,
+    success: okResponse(objB),
+  };
+  attempts.push(attemptB);
+
+  return {
+    response: { ...objB, _sign_used: "B" },
+    signUsed: "B",
+    attempts,
+    finalAttempt: attemptB,
+  };
 };
 
 const toEpochSeconds = (date: Date): number => Math.floor(date.getTime() / 1000);
@@ -136,7 +201,7 @@ type KeyboxIssueParams = {
   windowEnd: Date;
   targetName?: string;
   pinCode?: string;
-  unitId?: string;
+  unitId?: LockUnitId;
   storeName?: string;
   memberId?: string;
   reservationId?: string;
@@ -149,8 +214,8 @@ type KeyboxIssueResponse = {
   pinId?: string;
   qrCode?: string;
   qrImageUrl?: string;
-  signUsed?: "A" | "B";
-  unitId: string;
+  signUsed?: SignType;
+  unitId: LockUnitId;
   windowStart: string;
   windowEnd: string;
   targetName: string;
@@ -159,7 +224,7 @@ type KeyboxIssueResponse = {
 
 export async function issueKeyboxPin(params: KeyboxIssueParams): Promise<KeyboxIssueResponse> {
   const targetName = params.targetName || "WEB予約PIN";
-  const unitId = params.unitId || UNIT_ID_OVERRIDE || randomUnitId();
+  const unitId: LockUnitId = params.unitId || (UNIT_ID_OVERRIDE as LockUnitId) || randomUnitId();
   const pinCode = params.pinCode || randomPinCode();
 
   if (!API_KEY || !SECRET_KEY) {
@@ -187,7 +252,7 @@ export async function issueKeyboxPin(params: KeyboxIssueParams): Promise<KeyboxI
   const endEpoch = toEpochSeconds(params.windowEnd);
 
   const body = {
-    unitId,
+    unitId, // Lock unit (device) ID
     pinCode,
     sTime: String(startEpoch),
     eTime: String(endEpoch),
@@ -195,16 +260,37 @@ export async function issueKeyboxPin(params: KeyboxIssueParams): Promise<KeyboxI
   };
 
   let responseBody: Record<string, unknown> = {};
-  let signUsed: "A" | "B" | undefined;
+  let signUsed: SignType | undefined;
   let message = "";
   let success = false;
+  let errorType: string | undefined;
+  let attempts: SignAttemptLog[] | undefined;
+  let finalAttempt: SignAttemptLog | undefined;
 
   try {
     const result = await postSignedJson(PATH_CREATE_PIN, body);
     responseBody = result.response;
     signUsed = result.signUsed;
+    attempts = result.attempts;
+    finalAttempt = result.finalAttempt;
     success = okResponse(result.response);
-    message = success ? "PIN created" : `API error: ${result.response?.msg ?? "unknown"}`;
+
+    const code = (result.response?.code as string | undefined) ?? "";
+    const msg = (result.response?.msg as string | undefined) ?? "";
+
+    if (success) {
+      message = "PIN created";
+    } else {
+      if (code === "E2000") {
+        errorType = "UNIT_NOT_LINKED";
+        const context = `unitId=${unitId}, store=${params.storeName ?? "unknown"}, reservationId=${
+          params.reservationId ?? "unknown"
+        }`;
+        message = `Lock device is not linked to a door (${context}). msg=${msg || "unknown"}`;
+      } else {
+        message = msg ? `API error: ${msg}` : "API error: unknown";
+      }
+    }
   } catch (error) {
     message = error instanceof Error ? error.message : String(error);
     responseBody = { error: message };
@@ -234,6 +320,9 @@ export async function issueKeyboxPin(params: KeyboxIssueParams): Promise<KeyboxI
     responseBody,
     success,
     signUsed,
+    errorType,
+    attempts,
+    finalAttempt: finalAttempt?.signType,
     targetName,
     message: logMessage,
   });
