@@ -100,7 +100,7 @@ export default function MemberListPage() {
             <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
               <thead>
                 <tr>
-                  <th scope="col">#</th>
+                  <th scope="col" aria-label="会員番号"></th>
                   <th scope="col">メールアドレス</th>
                   <th scope="col">会員名</th>
                   <th scope="col">権限</th>
