@@ -49,6 +49,7 @@ export default function MyPage() {
   const [accidentSubmitted, setAccidentSubmitted] = useState(false);
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showReturnExpiredModal, setShowReturnExpiredModal] = useState(false);
+  const [showUnlockQrModal, setShowUnlockQrModal] = useState(false);
   const [returnFile, setReturnFile] = useState<File | null>(null);
   const [returnError, setReturnError] = useState('');
   const [returnUploading, setReturnUploading] = useState(false);
@@ -330,6 +331,17 @@ export default function MyPage() {
     const endLabel = end ? formatReservationDatetime(end) : '-';
     return `${startLabel} → ${endLabel}`;
   };
+
+  const activeKeyboxQrImageUrl = useMemo(() => {
+    const withQr = reservations.find((reservation) => reservation.keyboxQrImageUrl);
+    return withQr?.keyboxQrImageUrl ?? null;
+  }, [reservations]);
+
+  useEffect(() => {
+    if (!activeKeyboxQrImageUrl) {
+      setShowUnlockQrModal(false);
+    }
+  }, [activeKeyboxQrImageUrl]);
 
   const markVehicleChangeSeen = async (reservationId: string) => {
     try {
@@ -634,7 +646,9 @@ export default function MyPage() {
                     </Link>
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 sm:hidden"
+                      onClick={() => activeKeyboxQrImageUrl && setShowUnlockQrModal(true)}
+                      className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 sm:hidden"
+                      disabled={!activeKeyboxQrImageUrl}
                     >
                       解錠用のQRを表示
                     </button>
@@ -1351,6 +1365,27 @@ export default function MyPage() {
                 閉じる
               </button>
             </div>
+          </div>
+        </div>
+      ) : null}
+      {showUnlockQrModal && activeKeyboxQrImageUrl ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-4 shadow-2xl">
+            <div className="flex justify-center">
+              <img
+                src={activeKeyboxQrImageUrl}
+                alt="解錠用QRコード"
+                className="h-[70vh] w-full max-w-sm rounded-2xl border border-gray-200 bg-white object-contain"
+              />
+            </div>
+            <p className="mt-4 text-center text-sm text-gray-700">鍵ボックスのリーダーにかざしてください。</p>
+            <button
+              type="button"
+              onClick={() => setShowUnlockQrModal(false)}
+              className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
+            >
+              閉じる
+            </button>
           </div>
         </div>
       ) : null}
