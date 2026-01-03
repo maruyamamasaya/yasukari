@@ -16,6 +16,16 @@ export default function MaintenancePage() {
             ページの閲覧を一時的に停止しております。作業完了まで今しばらくお待ち
             ください。
           </p>
+          <p className={styles.notice}>
+            メンテナンスは <strong>1/5</strong> までを予定しております。再開まで今しばらく
+            お待ちください。
+          </p>
+          <p className={styles.notice}>
+            お問い合わせの方は、こちらのメールまでご連絡ください：
+            <a className={styles.link} href="mailto:info@yasukari.com">
+              info@yasukari.com
+            </a>
+          </p>
 
           <div className={styles.infoGrid}>
             <div className={styles.infoCard}>
@@ -31,6 +41,15 @@ export default function MaintenancePage() {
                 ご不便をおかけし申し訳ございません。準備が整い次第、通常のページを再開
                 いたしますので、しばらくお待ちください。
               </p>
+            </div>
+            <div className={styles.infoCard}>
+              <div className={styles.infoLabel}>お問い合わせ</div>
+              <p className={styles.infoText}>
+                ご不明点がある場合は、メールでお気軽にお問い合わせください。
+              </p>
+              <a className={styles.contact} href="mailto:info@yasukari.com">
+                info@yasukari.com
+              </a>
             </div>
           </div>
         </section>
