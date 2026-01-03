@@ -272,10 +272,31 @@
 
 .chipRow {
   display: flex;
+  width: 100%;
+  max-width: 100%;
   gap: var(--chat-chip-gap);
   overflow-x: auto;
   padding-bottom: 4px;
   scroll-snap-type: x mandatory;
+  justify-content: flex-start;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(220, 38, 38, 0.55) rgba(243, 244, 246, 0.9);
+  -webkit-overflow-scrolling: touch;
+}
+
+.chipRow::-webkit-scrollbar {
+  height: 6px;
+}
+
+.chipRow::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.9);
+  border-radius: 999px;
+}
+
+.chipRow::-webkit-scrollbar-thumb {
+  background: rgba(220, 38, 38, 0.55);
+  border-radius: 999px;
 }
 
 .chip {
