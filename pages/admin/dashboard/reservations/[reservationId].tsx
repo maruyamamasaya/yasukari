@@ -39,6 +39,7 @@ export default function ReservationDetailPage() {
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [refundNote, setRefundNote] = useState<string>("");
   const [cancelError, setCancelError] = useState<string>("");
+  const isReservationCompleted = reservation?.status === "予約完了";
 
   useEffect(() => {
     if (!router.isReady || typeof reservationId !== "string") return;
@@ -138,6 +139,7 @@ export default function ReservationDetailPage() {
   const handleVehicleChange = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!reservation || typeof reservationId !== "string") return;
+    if (reservation.status === "予約完了") return;
 
     if (
       selectedVehicleCode !== reservation.vehicleCode &&
@@ -185,6 +187,7 @@ export default function ReservationDetailPage() {
 
   const handleCancelReservation = async () => {
     if (!reservation || typeof reservationId !== "string") return;
+    if (reservation.status === "予約完了") return;
 
     setIsCancelling(true);
     setCancelError("");
@@ -341,6 +344,7 @@ export default function ReservationDetailPage() {
                           className={styles.selectInput}
                           value={selectedVehicleCode}
                           onChange={(event) => setSelectedVehicleCode(event.target.value)}
+                          disabled={isReservationCompleted}
                         >
                           {vehicleOptions.length === 0 ? (
                             <option>候補がありません</option>
@@ -355,7 +359,9 @@ export default function ReservationDetailPage() {
                         <button
                           className={`${styles.detailEditButton} ${styles.detailPrimaryButton}`}
                           type="submit"
-                          disabled={isUpdatingVehicle || vehicleOptions.length === 0}
+                          disabled={
+                            isReservationCompleted || isUpdatingVehicle || vehicleOptions.length === 0
+                          }
                         >
                           {isUpdatingVehicle ? "変更中..." : "車両を変更"}
                         </button>
@@ -449,7 +455,11 @@ export default function ReservationDetailPage() {
                     className={`${styles.iconButton} ${styles.iconButtonDanger}`}
                     type="button"
                     onClick={handleCancelReservation}
-                    disabled={isCancelling || reservation.status === "キャンセル"}
+                    disabled={
+                      isCancelling ||
+                      reservation.status === "キャンセル" ||
+                      reservation.status === "予約完了"
+                    }
                   >
                     {isCancelling ? "キャンセル処理中..." : "予約をキャンセル"}
                   </button>
