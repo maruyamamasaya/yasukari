@@ -326,12 +326,6 @@ export default function MyPage() {
 
   const reservationCompletionLabel = (flag: boolean) => (flag ? '予約完了' : '利用中');
 
-  const formatKeyboxWindow = (start?: string, end?: string) => {
-    const startLabel = start ? formatReservationDatetime(start) : '-';
-    const endLabel = end ? formatReservationDatetime(end) : '-';
-    return `${startLabel} → ${endLabel}`;
-  };
-
   const activeKeyboxQrImageUrl = useMemo(() => {
     const withQr = reservations.find((reservation) => reservation.keyboxQrImageUrl);
     return withQr?.keyboxQrImageUrl ?? null;
@@ -778,26 +772,20 @@ export default function MyPage() {
                                   三ノ輪店での受け取りに使えるPINを発行しました。受け取り時間の前後1時間を自動でバッファしています。
                                 </p>
                               </div>
-                              <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-sky-800 ring-1 ring-sky-200">
-                                PIN発行済み
-                              </span>
+                            <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-sky-800 ring-1 ring-sky-200">
+                              PIN発行済み
+                            </span>
+                          </div>
+                          <div className="mt-3 grid gap-3">
+                            <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
+                              <dt className="text-xs text-gray-600">PINコード</dt>
+                              <dd className="font-mono text-lg font-semibold text-gray-900">{reservation.keyboxPinCode}</dd>
                             </div>
-                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                              <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
-                                <dt className="text-xs text-gray-600">PINコード</dt>
-                                <dd className="font-mono text-lg font-semibold text-gray-900">{reservation.keyboxPinCode}</dd>
-                              </div>
-                              <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
-                                <dt className="text-xs text-gray-600">利用可能時間</dt>
-                                <dd className="text-sm font-semibold text-gray-900">
-                                  {formatKeyboxWindow(reservation.keyboxWindowStart, reservation.keyboxWindowEnd)}
-                                </dd>
-                              </div>
-                            </div>
-                            <div className="mt-3 flex flex-wrap items-center gap-3">
-                              {reservation.keyboxQrImageUrl ? (
-                                <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
-                                  <img
+                          </div>
+                          <div className="mt-3 flex flex-wrap items-center gap-3">
+                            {reservation.keyboxQrImageUrl ? (
+                              <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
+                                <img
                                     src={reservation.keyboxQrImageUrl}
                                     alt="解錠用QRコード"
                                     className="h-20 w-20 rounded border border-gray-200 object-contain"
