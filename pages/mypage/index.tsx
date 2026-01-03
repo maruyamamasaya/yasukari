@@ -451,6 +451,7 @@ export default function MyPage() {
     if (activeReturnReservation.status === '予約受付完了') return true;
     return isRentalActive;
   }, [activeReturnReservation, isRentalActive]);
+  const extensionTargetReservationId = activeReturnReservation?.id ?? '';
 
   const handleReturnOpen = () => {
     resetReturnModal();
@@ -626,12 +627,22 @@ export default function MyPage() {
               <div className={`${mobileSectionsOpen.reservations ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
                 {shouldShowRentalActions ? (
                   <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
-                    >
-                      レンタル延長
-                    </button>
+                    {extensionTargetReservationId ? (
+                      <Link
+                        href={`/mypage/rentals/extend/${extensionTargetReservationId}`}
+                        className="inline-flex items-center justify-center rounded-full bg-sky-100 px-4 py-2 text-xs font-semibold text-black shadow-md ring-2 ring-inset ring-sky-200 ring-offset-1 ring-offset-white transition hover:bg-sky-200"
+                      >
+                        レンタル延長
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className="inline-flex items-center justify-center rounded-full bg-sky-50 px-4 py-2 text-xs font-semibold text-black/60 shadow-md ring-2 ring-inset ring-sky-100 ring-offset-1 ring-offset-white"
+                      >
+                        レンタル延長
+                      </button>
+                    )}
                     <Link
                       href="/blog_for_custmor/2025-09-01-minowa-procedures"
                       className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-md ring-2 ring-inset ring-gray-200 ring-offset-1 ring-offset-white transition hover:bg-gray-100"
@@ -800,16 +811,22 @@ export default function MyPage() {
                             鍵ボックスの解錠情報を準備しています。しばらくしてから再度ご確認ください。
                           </p>
                         ) : null}
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Link
-                            href={`/mypage/rentals/${reservation.id}`}
-                            className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-                          >
-                            詳細を見る
-                          </Link>
-                          {accessLink ? (
-                            <a
-                              href={accessLink}
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <Link
+                              href={`/mypage/rentals/${reservation.id}`}
+                              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                            >
+                              詳細を見る
+                            </Link>
+                            <Link
+                              href={`/mypage/rentals/extend/${reservation.id}`}
+                              className="inline-flex items-center justify-center rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-800 transition hover:border-sky-300 hover:bg-sky-100"
+                            >
+                              レンタル延長
+                            </Link>
+                            {accessLink ? (
+                              <a
+                                href={accessLink}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
