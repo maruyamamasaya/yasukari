@@ -1677,40 +1677,43 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  border-radius: 1.1rem;
+  padding: 1rem 1rem 0.25rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
 .chatMessageList {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0.25rem 0.35rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  height: 800px;
+  gap: 1.05rem;
+  height: 760px;
   overflow-y: auto;
+  scroll-behavior: smooth;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 1rem;
 }
 
 .chatMessage {
-  display: grid;
-  grid-template-columns: 36px 1fr;
+  display: flex;
+  align-items: flex-end;
   gap: 0.75rem;
-  align-items: flex-start;
+  padding: 0 0.25rem;
 }
 
 .chatMessageAssistant {
-  justify-items: start;
+  flex-direction: row;
+  align-self: flex-start;
 }
 
 .chatMessageUser {
-  justify-items: end;
-}
-
-.chatMessageUser .chatAvatar {
-  order: 2;
-}
-
-.chatMessageUser .chatBubbleWrapper {
-  order: 1;
+  flex-direction: row-reverse;
+  align-self: flex-end;
 }
 
 .chatAvatar {
@@ -1723,20 +1726,29 @@
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
 }
 
 .chatBubbleWrapper {
   width: 100%;
-  max-width: 780px;
+  max-width: min(780px, 78vw);
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.chatMessageUser .chatBubbleWrapper {
+  align-items: flex-end;
+  text-align: right;
 }
 
 .chatBubbleHeader {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
+  justify-content: space-between;
 }
 
 .chatTimestamp {
@@ -1747,8 +1759,8 @@
 .chatBubble {
   margin: 0;
   padding: 0.8rem 1rem;
-  border-radius: 0.85rem;
-  background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+  border-radius: 1.05rem;
+  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 100%);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
   color: rgba(30, 41, 59, 0.95);
   line-height: 1.65;
@@ -1756,7 +1768,7 @@
 }
 
 .chatMessageUser .chatBubble {
-  background: linear-gradient(135deg, #dcfce7 0%, #f8fafc 100%);
+  background: linear-gradient(135deg, #dcfce7 0%, #ffffff 100%);
 }
 
 .chatMeta {
@@ -1765,6 +1777,11 @@
   gap: 0.5rem;
   color: rgba(100, 116, 139, 0.9);
   font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.chatMessageUser .chatMeta {
+  justify-content: flex-end;
 }
 
 .replyForm {
