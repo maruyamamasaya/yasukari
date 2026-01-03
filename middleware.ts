@@ -120,9 +120,7 @@ export async function middleware(req: NextRequest) {
   const isHomePath = pathname === '/' || pathname === '/en';
   if (
     FORCE_HOME_MAINTENANCE &&
-    isHomePath &&
-    pathname !== '/maintenance' &&
-    pathname !== '/en/maintenance'
+    isHomePath
   ) {
     const maintenancePath = pathname.startsWith('/en')
       ? '/en/maintenance'
