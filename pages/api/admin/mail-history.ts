@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getMailHistory, MailHistoryEntry } from "../../../lib/mailHistory";
 
-export default function handler(
+export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse<{ history: MailHistoryEntry[] } | { message: string }>
 ) {
@@ -18,6 +18,6 @@ export default function handler(
   const parsedLimit = limitParam ? Number(limitParam) : undefined;
   const limit = parsedLimit && !Number.isNaN(parsedLimit) ? parsedLimit : undefined;
 
-  const history = getMailHistory(limit);
+  const history = await getMailHistory(limit);
   response.status(200).json({ history });
 }

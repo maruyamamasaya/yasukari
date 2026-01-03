@@ -117,7 +117,7 @@ export default async function handler(
   try {
     if (selectedType === "provisional") {
       if (!hasSmtpConfig()) {
-        addMailHistory({
+        await addMailHistory({
           to: normalizedEmail,
           subject: definition.subject,
           status: "skipped",
@@ -137,7 +137,7 @@ export default async function handler(
 
     if (selectedType === "full") {
       if (!hasSmtpConfig()) {
-        addMailHistory({
+        await addMailHistory({
           to: normalizedEmail,
           subject: definition.subject,
           status: "skipped",

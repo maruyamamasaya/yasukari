@@ -160,7 +160,7 @@ async function processQueue(): Promise<void> {
     try {
       const recipientKey = normalizeRecipient(item.to);
       if (blockedRecipients.has(recipientKey)) {
-        addMailHistory({
+        await addMailHistory({
           to: item.to,
           subject: item.subject,
           status: 'skipped',
@@ -178,7 +178,7 @@ async function processQueue(): Promise<void> {
       recordSendAttempt();
       const info = await sendMailOnce(item);
       recordSendSuccess(item.to);
-      addMailHistory({
+      await addMailHistory({
         to: item.to,
         subject: item.subject,
         status: 'sent',
@@ -192,7 +192,7 @@ async function processQueue(): Promise<void> {
       if (nextAttempts < MAX_RETRY_ATTEMPTS) {
         queue.push({ ...item, attempts: nextAttempts });
       } else {
-        addMailHistory({
+        await addMailHistory({
           to: item.to,
           subject: item.subject,
           status: 'failed',

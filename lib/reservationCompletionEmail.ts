@@ -74,7 +74,7 @@ const buildHtmlBody = (reservation: Reservation): string => {
 export async function sendReservationCompletionEmail(reservation: Reservation): Promise<MailSendResult> {
   if (!reservation.memberEmail) {
     console.info("[reservation-email] Skip sending: member email not provided", reservation.id);
-    addMailHistory({
+    await addMailHistory({
       category: "予約完了",
       to: "(メール未入力)",
       subject: "【ヤスカリ】バイクレンタルのご予約完了",
@@ -95,7 +95,7 @@ export async function sendReservationCompletionEmail(reservation: Reservation): 
       userProvided: Boolean(user),
       passProvided: Boolean(password),
     });
-    addMailHistory({
+    await addMailHistory({
       category: "予約完了",
       to: reservation.memberEmail,
       subject: "【ヤスカリ】バイクレンタルのご予約完了",

@@ -1,4 +1,7 @@
+import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
+
+import { getDocumentClient } from "./dynamodb";
 
 export type MailHistoryStatus = "sent" | "failed" | "skipped";
 
@@ -15,7 +18,13 @@ export type MailHistoryEntry = {
 };
 
 const MAX_HISTORY_LENGTH = 500;
-const history: MailHistoryEntry[] = [];
+const TABLE_NAME = process.env.MAIL_HISTORY_TABLE_NAME ?? "usermailHistory";
+const inMemoryHistory: MailHistoryEntry[] = [];
+
+const sortByCreatedAtDesc = (entries: MailHistoryEntry[]): MailHistoryEntry[] =>
+  [...entries].sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
 const toCategory = (value?: string): MailHistoryCategory => {
   if (value === "仮登録" || value === "本登録" || value === "予約完了") {
@@ -25,9 +34,31 @@ const toCategory = (value?: string): MailHistoryCategory => {
   return "その他";
 };
 
-export function addMailHistory(
+async function saveToDynamo(record: MailHistoryEntry): Promise<void> {
+  const client = getDocumentClient();
+  await client.send(
+    new PutCommand({
+      TableName: TABLE_NAME,
+      Item: record,
+    })
+  );
+}
+
+async function fetchHistoryFromDynamo(limit: number): Promise<MailHistoryEntry[]> {
+  const client = getDocumentClient();
+  const response = await client.send(
+    new ScanCommand({
+      TableName: TABLE_NAME,
+    })
+  );
+
+  const entries = sortByCreatedAtDesc((response.Items ?? []) as MailHistoryEntry[]);
+  return entries.slice(0, limit);
+}
+
+export async function addMailHistory(
   entry: Omit<MailHistoryEntry, "id" | "createdAt"> & { createdAt?: string }
-): MailHistoryEntry {
+): Promise<MailHistoryEntry> {
   const record: MailHistoryEntry = {
     ...entry,
     id: randomUUID(),
@@ -35,16 +66,27 @@ export function addMailHistory(
     createdAt: entry.createdAt || new Date().toISOString(),
   };
 
-  history.unshift(record);
+  inMemoryHistory.unshift(record);
 
-  if (history.length > MAX_HISTORY_LENGTH) {
-    history.length = MAX_HISTORY_LENGTH;
+  if (inMemoryHistory.length > MAX_HISTORY_LENGTH) {
+    inMemoryHistory.length = MAX_HISTORY_LENGTH;
+  }
+
+  try {
+    await saveToDynamo(record);
+  } catch (error) {
+    console.error(`[mailHistory] Failed to save mail history to ${TABLE_NAME}`, error);
   }
 
   return record;
 }
 
-export function getMailHistory(limit = 200): MailHistoryEntry[] {
+export async function getMailHistory(limit = 200): Promise<MailHistoryEntry[]> {
   const effectiveLimit = Math.max(1, Math.min(limit, MAX_HISTORY_LENGTH));
-  return history.slice(0, effectiveLimit);
+  try {
+    return await fetchHistoryFromDynamo(effectiveLimit);
+  } catch (error) {
+    console.error(`[mailHistory] Failed to load mail history from ${TABLE_NAME}`, error);
+    return inMemoryHistory.slice(0, effectiveLimit);
+  }
 }
