@@ -669,6 +669,11 @@ export default function MyPage() {
                   <ul className="space-y-3">
                     {reservations.map((reservation) => {
                       const manualVideoUrl = reservation.videoUrl?.trim();
+                      const accessLink = reservation.storeName?.includes('三ノ輪')
+                        ? 'https://yasukaribike.com/stores#minowa'
+                        : reservation.storeName?.includes('足立小台')
+                          ? 'https://yasukaribike.com/stores#adachi'
+                          : null;
 
                       return (
                         <li
@@ -807,6 +812,16 @@ export default function MyPage() {
                           </p>
                         ) : null}
                         <div className="mt-4 flex flex-wrap gap-2">
+                          {accessLink ? (
+                            <a
+                              href={accessLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
+                            >
+                              店舗までのアクセス
+                            </a>
+                          ) : null}
                           {manualVideoUrl ? (
                             <Link
                               href={manualVideoUrl}
