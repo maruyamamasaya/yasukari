@@ -148,11 +148,11 @@ const menuSections: MenuSection[] = [
     ],
   },
   {
-    title: "予約管理",
-    description: "予約一覧を確認し、車両の紐付けや契約書作成の導線を管理できます。",
+    title: "レンタル予約管理",
+    description: "予約内容と車両の紐付けを確認・更新できます。",
     links: [
       {
-        label: "予約一覧",
+        label: "バイクレンタル一覧",
         href: `${ADMIN_DASHBOARD_ROOT}/reservations`,
       },
     ],

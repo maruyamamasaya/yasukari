@@ -313,7 +313,7 @@ export default function MemberDetailPage() {
             <div className={memberStyles.divider} />
 
             <div>
-              <div className={memberStyles.sectionTitle}>予約一覧</div>
+              <div className={memberStyles.sectionTitle}>バイクレンタル一覧</div>
               {reservations.length === 0 ? (
                 <p className={memberStyles.sectionHelper}>まだ予約はありません</p>
               ) : (

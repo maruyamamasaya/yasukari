@@ -225,7 +225,7 @@ export default function ReservationDetailPage() {
           <div className={styles.sectionHeaderRow}>
             <div>
               <p className={styles.breadcrumb}>
-                <Link href="/admin/dashboard/reservations">予約一覧</Link>
+                <Link href="/admin/dashboard/reservations">バイクレンタル一覧</Link>
                 <span aria-hidden> / </span>
                 <span>{(reservationId as string) ?? "詳細"}</span>
               </p>
@@ -259,14 +259,14 @@ export default function ReservationDetailPage() {
             <div className={styles.placeholderCard}>
               <p>{error}</p>
               <Link className={styles.link} href="/admin/dashboard/reservations">
-                予約一覧に戻る
+                バイクレンタル一覧に戻る
               </Link>
             </div>
           ) : !reservation ? (
             <div className={styles.placeholderCard}>
               <p>指定された予約が見つかりませんでした。</p>
               <Link className={styles.link} href="/admin/dashboard/reservations">
-                予約一覧に戻る
+                バイクレンタル一覧に戻る
               </Link>
             </div>
           ) : (

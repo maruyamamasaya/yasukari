@@ -78,9 +78,9 @@ const NAV_ITEMS: NavItem[] = [
     children: [{ label: "会員一覧", href: `${ADMIN_DASHBOARD_ROOT}/members` }],
   },
   {
-    label: "予約管理",
+    label: "レンタル予約管理",
     href: `${ADMIN_DASHBOARD_ROOT}/reservations`,
-    children: [{ label: "予約一覧", href: `${ADMIN_DASHBOARD_ROOT}/reservations` }],
+    children: [{ label: "バイクレンタル一覧", href: `${ADMIN_DASHBOARD_ROOT}/reservations` }],
   },
   {
     label: "KEYBOX実行ログ",
