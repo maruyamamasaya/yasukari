@@ -311,6 +311,17 @@ export default function MyPage() {
     return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(registration[field]));
   }, [registration]);
 
+  useEffect(() => {
+    if (loadingRegistration || !registration || isRegistrationComplete) return;
+    if (typeof window === 'undefined') return;
+
+    const storageKey = 'mypage.registration-incomplete-alert';
+    if (window.sessionStorage.getItem(storageKey)) return;
+
+    window.sessionStorage.setItem(storageKey, 'true');
+    window.alert('本登録が未完了、または更新が必要です。');
+  }, [isRegistrationComplete, loadingRegistration, registration]);
+
   const formatReservationDatetime = (value: string) => {
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return '-';
