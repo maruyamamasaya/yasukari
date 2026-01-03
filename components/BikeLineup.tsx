@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
+import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import Link from "next/link";
@@ -60,11 +60,20 @@ export default function BikeLineup({ bikes, classes }: Props) {
     resolveStartIndex(categories)
   );
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
   const filter = categories[activeIndex]?.value ?? categories[0]?.value ?? 0;
 
   useEffect(() => {
     setActiveIndex(resolveStartIndex(categories));
   }, [categories]);
+
+  useEffect(() => {
+    const updateIsDesktop = () => setIsDesktop(window.innerWidth >= 768);
+    updateIsDesktop();
+    window.addEventListener("resize", updateIsDesktop);
+    return () => window.removeEventListener("resize", updateIsDesktop);
+  }, []);
 
   const filtered = useMemo(
     () =>
@@ -115,8 +124,14 @@ export default function BikeLineup({ bikes, classes }: Props) {
 
       <div className="mt-10">
         <Swiper
-          modules={[Pagination]}
+          modules={[Pagination, Autoplay]}
           pagination={{ clickable: true }}
+          autoplay={
+            isDesktop
+              ? { delay: 3200, disableOnInteraction: false }
+              : undefined
+          }
+          loop={isDesktop}
           spaceBetween={16}
           breakpoints={{
             0: { slidesPerView: 1.1 },
