@@ -87,15 +87,15 @@ export default function ReservationListPage() {
   return (
     <>
       <Head>
-        <title>予約一覧 | 管理ダッシュボード</title>
+        <title>バイクレンタル一覧 | 管理ダッシュボード</title>
       </Head>
       <DashboardLayout
-        title="予約管理"
+        title="レンタル予約管理"
         description="予約内容と車両の紐付けを確認・更新できます。"
       >
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>予約一覧</h2>
+            <h2 className={styles.sectionTitle}>バイクレンタル一覧</h2>
             <p className={styles.sectionDescription}>
               店舗別の予約状況と車両割当を確認できます。行をクリックすると詳細が開きます。
             </p>
