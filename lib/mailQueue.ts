@@ -7,7 +7,7 @@ const MAX_RETRY_ATTEMPTS = 3;
 const MAX_CONSECUTIVE_FAILURES = 3;
 const MAX_EMAILS_PER_SECOND = 5;
 const MIN_INTERVAL_PER_RECIPIENT_MS = 10_000;
-const MAIL_FROM = process.env.MAIL_FROM ?? 'ヤスカリ <info@yasukaribike.com>';
+const MAIL_FROM = process.env.MAIL_FROM ?? '格安レンタルバイクならヤスカリ <info@yasukaribike.com>';
 
 export type MailPayload = {
   to: string;
