@@ -43,6 +43,10 @@ export default function PhotoUploadListPage() {
   };
 
   const handleDelete = (uploadId: string) => {
+    if (!window.confirm("本当に削除しますか？")) {
+      return;
+    }
+
     const nextUploads = uploads.filter((upload) => upload.id !== uploadId);
     setUploads(nextUploads);
     savePhotoUploads(nextUploads);
