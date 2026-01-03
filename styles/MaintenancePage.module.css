@@ -1,16 +1,10 @@
 .main {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  background: radial-gradient(
-      circle at 15% 20%,
-      rgba(239, 68, 68, 0.1),
-      transparent 32%
-    ),
-    radial-gradient(circle at 82% 20%, rgba(244, 63, 94, 0.12), transparent 38%),
-    #fff5f5;
-  padding: clamp(1.5rem, 4vw, 3rem);
+  background: #ffffff;
+  padding: clamp(2.5rem, 6vh, 4.5rem) clamp(1.5rem, 4vw, 3rem);
 }
 
 .card {

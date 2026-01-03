@@ -10,6 +10,8 @@ import {
   isBasicAuthValid,
 } from './lib/basicAuth';
 
+const FORCE_HOME_MAINTENANCE = true;
+
 const decodeLocaleFromToken = (token: string | undefined): string | null => {
   if (!token) return null;
 
@@ -108,6 +110,19 @@ export async function middleware(req: NextRequest) {
     pathname !== '/maintenance' &&
     pathname !== '/en/maintenance' &&
     !isAdminDashboardPath
+  ) {
+    const maintenancePath = pathname.startsWith('/en')
+      ? '/en/maintenance'
+      : '/maintenance';
+    return NextResponse.redirect(new URL(maintenancePath, req.url));
+  }
+
+  const isHomePath = pathname === '/' || pathname === '/en';
+  if (
+    FORCE_HOME_MAINTENANCE &&
+    isHomePath &&
+    pathname !== '/maintenance' &&
+    pathname !== '/en/maintenance'
   ) {
     const maintenancePath = pathname.startsWith('/en')
       ? '/en/maintenance'

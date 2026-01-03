@@ -9,7 +9,6 @@ export default function MaintenancePage() {
       </Head>
       <main className={styles.main}>
         <section className={styles.card}>
-          <div className={styles.badge}>現在サイト工事中です</div>
           <h1 className={styles.title}>サイトを一時的に停止しています</h1>
           <p className={styles.message}>
             サイトをご利用いただきありがとうございます。現在、メンテナンス作業のため
@@ -20,38 +19,6 @@ export default function MaintenancePage() {
             メンテナンスは <strong>1/5</strong> までを予定しております。再開まで今しばらく
             お待ちください。
           </p>
-          <p className={styles.notice}>
-            お問い合わせの方は、こちらのメールまでご連絡ください：
-            <a className={styles.link} href="mailto:info@yasukari.com">
-              info@yasukari.com
-            </a>
-          </p>
-
-          <div className={styles.infoGrid}>
-            <div className={styles.infoCard}>
-              <div className={styles.infoLabel}>メンテナンス状況</div>
-              <p className={styles.infoText}>
-                安定したサービス提供のため、システムのアップデートを実施しています。
-                完了次第、順次公開いたします。
-              </p>
-            </div>
-            <div className={styles.infoCard}>
-              <div className={styles.infoLabel}>ご案内</div>
-              <p className={styles.infoText}>
-                ご不便をおかけし申し訳ございません。準備が整い次第、通常のページを再開
-                いたしますので、しばらくお待ちください。
-              </p>
-            </div>
-            <div className={styles.infoCard}>
-              <div className={styles.infoLabel}>お問い合わせ</div>
-              <p className={styles.infoText}>
-                ご不明点がある場合は、メールでお気軽にお問い合わせください。
-              </p>
-              <a className={styles.contact} href="mailto:info@yasukari.com">
-                info@yasukari.com
-              </a>
-            </div>
-          </div>
         </section>
       </main>
     </>
