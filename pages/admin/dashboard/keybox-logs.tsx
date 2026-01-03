@@ -19,6 +19,19 @@ const statusBadge = (success: boolean) =>
     ? `${tableStyles.badge} ${tableStyles.badgeOn}`
     : `${tableStyles.badge} ${tableStyles.badgeOff}`;
 
+const resolveFailureReason = (log: KeyboxLog) => {
+  if (log.success) return null;
+  if (log.message) return log.message;
+  if (typeof log.responseBody === "string" && log.responseBody.trim()) return log.responseBody;
+  if (log.responseBody && typeof log.responseBody === "object") {
+    const response = log.responseBody as Record<string, unknown>;
+    const candidate =
+      response.message ?? response.error ?? response.detail ?? response.reason ?? response.title ?? response.status;
+    if (typeof candidate === "string" && candidate.trim()) return candidate;
+  }
+  return null;
+};
+
 export default function KeyboxLogsPage() {
   const [logs, setLogs] = useState<KeyboxLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -144,57 +157,66 @@ export default function KeyboxLogsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {logs.map((log) => (
-                      <tr key={log.logId}>
-                        <td>{formatDateTime(log.createdAt)}</td>
-                        <td>
-                          {log.reservationId ? (
-                            <Link href={`/admin/dashboard/reservations/${log.reservationId}`} className={tableStyles.link}>
-                              {log.reservationId}
-                            </Link>
-                          ) : (
-                            "-"
-                          )}
-                          <div className="text-xs text-gray-600">{log.storeName || "-"}</div>
-                        </td>
-                        <td>
-                          <div className="text-sm font-semibold">PIN: {log.pinCode || "-"}</div>
-                          <div className="text-xs text-gray-600">pinId: {log.pinId || "-"}</div>
-                          <div className="text-xs text-gray-600">unit: {log.unitId || "-"}</div>
-                        </td>
-                        <td>
-                          <div className="text-xs">{formatDateTime(log.windowStart)} 〜</div>
-                          <div className="text-xs">{formatDateTime(log.windowEnd)}</div>
-                          <div className="text-xs text-gray-600">署名方式: {log.signUsed || "-"}</div>
-                        </td>
-                        <td>
-                          {log.qrImageUrl ? (
-                            <img
-                              src={log.qrImageUrl}
-                              alt="keybox qr"
-                              className="h-16 w-16 rounded border border-gray-200 object-contain"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <span className="text-xs text-gray-500">-</span>
-                          )}
-                        </td>
-                        <td>
-                          <span className={statusBadge(log.success)}>{log.success ? "成功" : "失敗"}</span>
-                        </td>
-                        <td>
-                          <div className="text-xs text-gray-800">{log.message || "-"}</div>
-                          {log.responseBody ? (
-                            <details className="mt-1 text-xs">
-                              <summary className="cursor-pointer text-gray-600">レスポンス詳細</summary>
-                              <pre className="whitespace-pre-wrap break-words bg-gray-50 p-2 text-gray-800">
-                                {JSON.stringify(log.responseBody, null, 2)}
-                              </pre>
-                            </details>
-                          ) : null}
-                        </td>
-                      </tr>
-                    ))}
+                    {logs.map((log) => {
+                      const failureReason = resolveFailureReason(log);
+                      return (
+                        <tr key={log.logId}>
+                          <td>{formatDateTime(log.createdAt)}</td>
+                          <td>
+                            {log.reservationId ? (
+                              <Link
+                                href={`/admin/dashboard/reservations/${log.reservationId}`}
+                                className={tableStyles.link}
+                              >
+                                {log.reservationId}
+                              </Link>
+                            ) : (
+                              "-"
+                            )}
+                            <div className="text-xs text-gray-600">{log.storeName || "-"}</div>
+                          </td>
+                          <td>
+                            <div className="text-sm font-semibold">PIN: {log.pinCode || "-"}</div>
+                            <div className="text-xs text-gray-600">pinId: {log.pinId || "-"}</div>
+                            <div className="text-xs text-gray-600">unit: {log.unitId || "-"}</div>
+                          </td>
+                          <td>
+                            <div className="text-xs">{formatDateTime(log.windowStart)} 〜</div>
+                            <div className="text-xs">{formatDateTime(log.windowEnd)}</div>
+                            <div className="text-xs text-gray-600">署名方式: {log.signUsed || "-"}</div>
+                          </td>
+                          <td>
+                            {log.qrImageUrl ? (
+                              <img
+                                src={log.qrImageUrl}
+                                alt="keybox qr"
+                                className="h-16 w-16 rounded border border-gray-200 object-contain"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <span className="text-xs text-gray-500">-</span>
+                            )}
+                          </td>
+                          <td>
+                            <span className={statusBadge(log.success)}>{log.success ? "成功" : "失敗"}</span>
+                            {failureReason ? (
+                              <div className="mt-1 text-xs text-gray-600">理由: {failureReason}</div>
+                            ) : null}
+                          </td>
+                          <td>
+                            <div className="text-xs text-gray-800">{log.message || "-"}</div>
+                            {log.responseBody ? (
+                              <details className="mt-1 text-xs">
+                                <summary className="cursor-pointer text-gray-600">レスポンス詳細</summary>
+                                <pre className="whitespace-pre-wrap break-words bg-gray-50 p-2 text-gray-800">
+                                  {JSON.stringify(log.responseBody, null, 2)}
+                                </pre>
+                              </details>
+                            ) : null}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

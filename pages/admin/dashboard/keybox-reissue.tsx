@@ -18,13 +18,23 @@ const toLocalInputValue = (date: Date) => {
   return local.toISOString().slice(0, 16);
 };
 
+const roundUpToHour = (date: Date) => {
+  const rounded = new Date(date);
+  if (rounded.getMinutes() > 0 || rounded.getSeconds() > 0 || rounded.getMilliseconds() > 0) {
+    rounded.setHours(rounded.getHours() + 1);
+  }
+  rounded.setMinutes(0, 0, 0);
+  return rounded;
+};
+
 const defaultStart = () => {
-  const now = new Date();
+  const now = roundUpToHour(new Date());
   return toLocalInputValue(now);
 };
 
 const defaultEnd = () => {
-  const end = new Date();
+  const start = roundUpToHour(new Date());
+  const end = new Date(start);
   end.setHours(end.getHours() + 2);
   return toLocalInputValue(end);
 };
@@ -149,6 +159,7 @@ export default function KeyboxReissuePage() {
                   required
                   value={windowStart}
                   onChange={(event) => setWindowStart(event.target.value)}
+                  step={3600}
                   className={styles.input}
                 />
               </label>
@@ -159,6 +170,7 @@ export default function KeyboxReissuePage() {
                   required
                   value={windowEnd}
                   onChange={(event) => setWindowEnd(event.target.value)}
+                  step={3600}
                   className={styles.input}
                 />
               </label>
