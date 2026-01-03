@@ -24,6 +24,12 @@ const isActiveReservation = (reservation: { status: string; reservationCompleted
   !reservation.reservationCompletedFlag &&
   reservation.status !== "予約完了";
 
+const parseTokyoDateTime = (value: string) => {
+  const hasOffset = /([zZ]|[+-]\d{2}:?\d{2})$/.test(value);
+  const dateString = hasOffset ? value : `${value}+09:00`;
+  return new Date(dateString);
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<KeyboxReissueResponse | { message: string }>
@@ -48,8 +54,8 @@ export default async function handler(
       return res.status(400).json({ message: "windowStart and windowEnd are required" });
     }
 
-    const windowStart = new Date(body.windowStart);
-    const windowEnd = new Date(body.windowEnd);
+    const windowStart = parseTokyoDateTime(body.windowStart);
+    const windowEnd = parseTokyoDateTime(body.windowEnd);
     if (Number.isNaN(windowStart.getTime()) || Number.isNaN(windowEnd.getTime())) {
       return res.status(400).json({ message: "Invalid windowStart or windowEnd" });
     }
