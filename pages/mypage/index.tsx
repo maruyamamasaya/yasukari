@@ -1411,14 +1411,14 @@ export default function MyPage() {
       ) : null}
       {showReturnExpiredModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border-2 border-rose-500 bg-white shadow-2xl ring-4 ring-rose-100">
-            <div className="flex items-start gap-3 bg-rose-50 px-5 py-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-rose-600 shadow-inner">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border-2 border-red-500 bg-yellow-50 shadow-2xl ring-4 ring-yellow-200">
+            <div className="flex items-start gap-3 bg-yellow-100 px-5 py-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-red-600 shadow-inner">
                 <span className="text-xl font-bold">!</span>
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-rose-900">【返却期限のご案内】</h2>
-                <div className="mt-2 space-y-1 text-sm text-rose-800">
+                <h2 className="text-lg font-semibold text-red-900">【返却期限のご案内】</h2>
+                <div className="mt-2 space-y-1 text-sm text-red-900">
                   <p className="font-semibold">返却期限を過ぎています。</p>
                   <p>返却や延長についてはサポートまでご連絡ください。</p>
                   <p>同じ内容を通知にも掲載していますので、確認をお願いします。</p>
@@ -1427,13 +1427,13 @@ export default function MyPage() {
               <button
                 type="button"
                 onClick={handleReturnClose}
-                className="rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-50"
+                className="rounded-full border border-red-500 bg-red-600 px-3 py-1 text-xs font-semibold text-white transition hover:border-red-600 hover:bg-red-700"
               >
                 閉じる
               </button>
             </div>
-            <div className="bg-white px-6 pb-6 pt-4">
-              <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-800">
+            <div className="bg-yellow-50 px-6 pb-6 pt-4">
+              <div className="rounded-xl bg-yellow-100 px-4 py-3 text-sm text-red-900">
                 <ul className="list-disc space-y-2 pl-4">
                   <li>返却が完了するまで車両を安全な場所で保管してください。</li>
                   <li>延長を希望される場合は「レンタル延長」からお手続きください。</li>
@@ -1443,7 +1443,7 @@ export default function MyPage() {
               <button
                 type="button"
                 onClick={handleReturnClose}
-                className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
               >
                 閉じる
               </button>
