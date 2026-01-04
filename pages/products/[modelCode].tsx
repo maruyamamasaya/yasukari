@@ -319,7 +319,9 @@ export default function ProductDetailPage({
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {storeOptions.length === 0 ? (
-                            <span className="text-xs text-gray-500">店舗情報がありません</span>
+                            <span className="text-xs text-gray-500">
+                              ただいま在庫がない、もしくは貸出中です。
+                            </span>
                           ) : (
                             storeOptions.map((storeId) => {
                               const isSelected = storeId === selectedStoreId;
