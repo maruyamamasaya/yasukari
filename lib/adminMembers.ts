@@ -254,7 +254,9 @@ const mapMember = (
   const attributes = user?.attributes ?? {};
   const nameFromRegistration = joinTokens(registration?.name1, registration?.name2);
   const kanaFromRegistration = joinTokens(registration?.kana1, registration?.kana2);
-  const email = registration?.email ?? attributes.email ?? user?.username ?? "";
+  const emailFromUsername =
+    user?.username && user.username.includes("@") ? user.username : "";
+  const email = registration?.email ?? attributes.email ?? emailFromUsername ?? "";
   const mobilePhone = registration?.mobile ?? attributes.phone_number ?? "";
   const phoneNumber = registration?.tel ?? "";
   const address = joinTokens(registration?.address1, registration?.address2);
