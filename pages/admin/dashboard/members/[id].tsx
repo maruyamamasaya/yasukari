@@ -195,7 +195,7 @@ export default function MemberDetailPage() {
               <div>
                 <div className={memberStyles.detailTitle}>会員詳細</div>
                 <div className={memberStyles.metaRow}>
-                  <span>会員番号: {member.memberNumber}</span>
+                  <span>メールアドレス: {member.email}</span>
                   <span>登録日時: {member.registeredAt}</span>
                 </div>
               </div>
