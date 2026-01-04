@@ -24,8 +24,6 @@ import { parseTags } from "../../../../lib/dashboard/utils";
 type VehicleCsvFieldKey =
   | "managementNumber"
   | "modelId"
-  | "modelName"
-  | "className"
   | "storeId"
   | "storeName"
   | "publishStatus"
@@ -51,8 +49,6 @@ const CSV_FIELDS: Array<{
 }> = [
   { key: "managementNumber", label: "管理番号", required: true },
   { key: "modelId", label: "車種ID", required: true },
-  { key: "modelName", label: "車種名", readOnly: true },
-  { key: "className", label: "クラス", readOnly: true },
   { key: "storeId", label: "店舗ID", required: true },
   { key: "storeName", label: "店舗名", readOnly: true },
   { key: "publishStatus", label: "掲載状態", required: true },
@@ -599,10 +595,6 @@ export default function VehicleListPage() {
         switch (field.key) {
           case "modelId":
             return vehicle.modelId;
-          case "modelName":
-            return modelNameMap[vehicle.modelId] ?? "";
-          case "className":
-            return getClassNameByModelId(vehicle.modelId);
           case "storeId":
             return vehicle.storeId ?? "";
           case "storeName":
@@ -642,12 +634,6 @@ export default function VehicleListPage() {
           return "0001";
         case "modelId":
           return bikeModels[0]?.modelId ?? "1";
-        case "modelName":
-          return bikeModels[0]?.modelName ?? "";
-        case "className":
-          return bikeModels[0]
-            ? getClassNameByModelId(bikeModels[0].modelId)
-            : "";
         case "storeId":
           return STORE_OPTIONS[0]?.id ?? "";
         case "storeName":
