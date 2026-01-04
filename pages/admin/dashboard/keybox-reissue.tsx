@@ -80,7 +80,7 @@ export default function KeyboxReissuePage() {
     const controller = new AbortController();
     const fetchMembers = async () => {
       try {
-        const response = await fetch("/api/admin/members", { signal: controller.signal });
+        const response = await fetch("/api/admin/members/active", { signal: controller.signal });
         if (!response.ok) {
           throw new Error(`会員情報の取得に失敗しました (${response.status})`);
         }
@@ -246,7 +246,7 @@ export default function KeyboxReissuePage() {
                 <fieldset className={reissueStyles.fieldset}>
                   <legend className={reissueStyles.fieldsetLegend}>会員への割り当て</legend>
                   <label className={styles.formField}>
-                    <span className={styles.formLabel}>ユーザー割り当て (任意)</span>
+                    <span className={styles.formLabel}>ユーザー割り当て (現在予約中のみ)</span>
                     <select
                       value={memberId}
                       onChange={(event) => setMemberId(event.target.value)}
@@ -263,7 +263,7 @@ export default function KeyboxReissuePage() {
                       <p className={styles.errorText}>会員一覧を読み込めませんでした: {membersError}</p>
                     ) : null}
                     <p className={styles.mutedText}>
-                      会員を指定すると、利用中の予約にPIN・QRを反映します。店舗名は予約情報を優先します。
+                      現在予約中の会員のみ表示しています。選択すると、利用中の予約にPIN・QRを反映します。
                     </p>
                   </label>
                 </fieldset>
@@ -278,20 +278,6 @@ export default function KeyboxReissuePage() {
               </div>
             </form>
 
-            <aside className={reissueStyles.helperPanel}>
-              <p className={reissueStyles.helperKicker}>手順メモ</p>
-              <h3 className={reissueStyles.helperTitle}>他ページと統一した2ステップ</h3>
-              <ul className={reissueStyles.helperList}>
-                <li>予約時間に合わせてウィンドウを設定し、必要に応じてPINやユニットIDを上書き。</li>
-                <li>会員を紐づけておくとマイページと予約へ即時反映されます。</li>
-                <li>未入力の項目は安全な値で自動採番されます。</li>
-              </ul>
-              <div className={reissueStyles.helperBadges}>
-                <span className={reissueStyles.helperBadge}>自動採番</span>
-                <span className={reissueStyles.helperBadge}>予約連携</span>
-                <span className={reissueStyles.helperBadge}>QR即時生成</span>
-              </div>
-            </aside>
           </div>
 
           {result ? (

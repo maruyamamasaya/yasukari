@@ -1,7 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { issueKeyboxPin } from "../../../lib/keybox";
-import { fetchReservationsByMember, updateReservation } from "../../../lib/reservations";
+import {
+  fetchReservationsByMember,
+  isActiveReservation,
+  updateReservation,
+} from "../../../lib/reservations";
 
 type KeyboxReissueResponse = {
   success: boolean;
@@ -18,11 +22,6 @@ type KeyboxReissueResponse = {
   memberId?: string;
   message?: string;
 };
-
-const isActiveReservation = (reservation: { status: string; reservationCompletedFlag: boolean }) =>
-  reservation.status !== "キャンセル" &&
-  !reservation.reservationCompletedFlag &&
-  reservation.status !== "予約完了";
 
 const parseTokyoDateTime = (value: string) => {
   const hasOffset = /([zZ]|[+-]\d{2}:?\d{2})$/.test(value);
