@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 
 import DashboardLayout from "../../../../components/dashboard/DashboardLayout";
@@ -23,6 +23,7 @@ type PricingStatus = {
 const MAX_DAYS = 31;
 
 export default function BikeModelRentalPricingListPage() {
+  const router = useRouter();
   const [bikeClasses, setBikeClasses] = useState<BikeClass[]>([]);
   const [bikeModels, setBikeModels] = useState<BikeModel[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -154,7 +155,7 @@ export default function BikeModelRentalPricingListPage() {
           <div>
             <h1 className={styles.pageTitle}>車種ごとの料金設定</h1>
             <p className={styles.pageDescription}>
-              編集ボタンから各車種の料金設定ページに移動できます。
+              各車種の行をクリックすると、料金設定ページに移動できます。
             </p>
           </div>
         </div>
@@ -171,19 +172,35 @@ export default function BikeModelRentalPricingListPage() {
                   <th scope="col">クラス</th>
                   <th scope="col">掲載状態</th>
                   <th scope="col">料金登録</th>
-                  <th scope="col">操作</th>
                 </tr>
               </thead>
               <tbody>
                 {bikeModels.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className={tableStyles.emptyRow}>
+                    <td colSpan={5} className={tableStyles.emptyRow}>
                       {isLoading ? "読み込み中..." : "登録済みの車種はまだありません。"}
                     </td>
                   </tr>
                 ) : (
                   bikeModels.map((model) => (
-                    <tr key={model.modelId}>
+                    <tr
+                      key={model.modelId}
+                      className={tableStyles.clickableRow}
+                      tabIndex={0}
+                      onClick={() => {
+                        void router.push(
+                          `/admin/dashboard/bike-models/${model.modelId}/rental-pricing`
+                        );
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          void router.push(
+                            `/admin/dashboard/bike-models/${model.modelId}/rental-pricing`
+                          );
+                        }
+                      }}
+                    >
                       <td>{model.modelId}</td>
                       <td>{model.modelName}</td>
                       <td>{classNameMap[model.classId] ?? "-"}</td>
@@ -247,16 +264,6 @@ export default function BikeModelRentalPricingListPage() {
                             </div>
                           );
                         })()}
-                      </td>
-                      <td>
-                        <div className={tableStyles.actions}>
-                          <Link
-                            href={`/admin/dashboard/bike-models/${model.modelId}/rental-pricing`}
-                            className={`${tableStyles.link} ${tableStyles.actionButton}`}
-                          >
-                            編集
-                          </Link>
-                        </div>
                       </td>
                     </tr>
                   ))
