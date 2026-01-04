@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { getDocumentClient } from "../../../lib/dynamodb";
+import { VEHICLES_TABLE_NAME } from "../../../lib/tableNames";
 
-const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+const VEHICLES_TABLE = VEHICLES_TABLE_NAME;
 
 type RentalAvailabilityStatus =
   | "AVAILABLE"

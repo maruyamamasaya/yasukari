@@ -11,6 +11,7 @@ import { getStoreLabel } from "../../../../lib/dashboard/storeOptions";
 import { fetchMonthlyHolidays } from "../../../../lib/dashboard/holidayManager";
 import { findHolidayStoreByLabel } from "../../../../lib/dashboard/holidayStores";
 import { RentalAvailabilityMap } from "../../../../lib/dashboard/types";
+import { VEHICLES_TABLE_NAME } from "../../../../lib/tableNames";
 
 interface VehicleRecord {
   managementNumber: string;
@@ -443,7 +444,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
     return { notFound: true };
   }
 
-  const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+  const VEHICLES_TABLE = VEHICLES_TABLE_NAME;
   const MODELS_TABLE = process.env.BIKE_MODELS_TABLE ?? "BikeModels";
 
   let vehicle: VehicleRecord | null = null;

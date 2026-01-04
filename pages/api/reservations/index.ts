@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { verifyCognitoIdToken, COGNITO_ID_TOKEN_COOKIE } from "../../../lib/cognitoServer";
 import { getDocumentClient } from "../../../lib/dynamodb";
+import { VEHICLES_TABLE_NAME } from "../../../lib/tableNames";
 import { formatDateKey } from "../../../lib/dashboard/utils";
 import {
   createReservation,
@@ -59,7 +60,7 @@ type VehicleRecord = {
   rentalAvailability?: RentalAvailabilityMap;
 };
 
-const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+const VEHICLES_TABLE = VEHICLES_TABLE_NAME;
 
 const isValidRentalStatus = (value: unknown): value is RentalAvailabilityStatus =>
   value === "AVAILABLE" ||

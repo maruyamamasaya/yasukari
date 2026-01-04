@@ -6,6 +6,7 @@ import {
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { getDocumentClient } from "../../lib/dynamodb";
+import { VEHICLES_TABLE_NAME } from "../../lib/tableNames";
 
 type Vehicle = {
   managementNumber: string;
@@ -43,7 +44,7 @@ type RentalAvailabilityDay = {
 
 type RentalAvailabilityMap = Record<string, RentalAvailabilityDay>;
 
-const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+const VEHICLES_TABLE = VEHICLES_TABLE_NAME;
 const MODELS_TABLE = process.env.BIKE_MODELS_TABLE ?? "BikeModels";
 
 const isValidRentalStatus = (value: unknown): value is RentalAvailabilityStatus =>
