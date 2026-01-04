@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { getDocumentClient } from "../../../lib/dynamodb";
+import { VEHICLES_TABLE_NAME } from "../../../lib/tableNames";
 
 type Vehicle = {
   managementNumber: string;
@@ -37,7 +38,7 @@ type RentalAvailabilityDay = {
 
 type RentalAvailabilityMap = Record<string, RentalAvailabilityDay>;
 
-const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+const VEHICLES_TABLE = VEHICLES_TABLE_NAME;
 
 const isValidRentalStatus = (value: unknown): value is RentalAvailabilityStatus =>
   value === "AVAILABLE" ||

@@ -12,6 +12,7 @@ import {
   Reservation,
   updateReservation,
 } from "../../../lib/reservations";
+import { VEHICLES_TABLE_NAME } from "../../../lib/tableNames";
 
 type VehicleRecord = {
   managementNumber: string;
@@ -24,7 +25,7 @@ type ReservationDetailResponse = {
   reservation: Reservation;
 };
 
-const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+const VEHICLES_TABLE = VEHICLES_TABLE_NAME;
 const REFUND_LIMIT_DAYS = 180;
 
 const isValidRentalStatus = (value: unknown): value is RentalAvailabilityStatus =>

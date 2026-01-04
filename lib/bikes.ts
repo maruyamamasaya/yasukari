@@ -2,6 +2,7 @@ import bikesData from "../data/bikes.json";
 import { scanAllItems } from "./dynamodb";
 import { getRequiredLicenseLabel } from "./dashboard/licenseOptions";
 import type { DurationPriceMap } from "./dashboard/types";
+import { VEHICLES_TABLE_NAME } from "./tableNames";
 
 type DynamoBikeModel = {
   modelId: number;
@@ -126,7 +127,7 @@ export async function getBikeModels(): Promise<BikeModel[]> {
 }
 
 export async function getVehiclesByModel(modelId: number): Promise<BikeVehicle[]> {
-  const VEHICLES_TABLE = process.env.VEHICLES_TABLE ?? "Vehicles";
+  const VEHICLES_TABLE = VEHICLES_TABLE_NAME;
 
   try {
     const vehicles = await scanAllItems<DynamoVehicle>({
