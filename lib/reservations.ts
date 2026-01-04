@@ -9,6 +9,14 @@ export type ReservationStatus =
   | "キャンセル"
   | (string & {});
 
+export const isActiveReservation = (reservation: {
+  status: ReservationStatus;
+  reservationCompletedFlag: boolean;
+}): boolean =>
+  reservation.status !== "キャンセル" &&
+  reservation.status !== "予約完了" &&
+  !reservation.reservationCompletedFlag;
+
 export type Reservation = {
   id: string;
   storeName: string;
