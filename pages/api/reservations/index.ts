@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
-import { verifyCognitoIdToken, COGNITO_ID_TOKEN_COOKIE } from "../../../lib/cognitoServer";
+import { getCognitoAuthFromRequest } from "../../../lib/cognitoServer";
 import { getDocumentClient } from "../../../lib/dynamodb";
 import { formatDateKey } from "../../../lib/dashboard/utils";
 import {
@@ -235,10 +235,13 @@ export default async function handler(
 
   if (req.method === "POST") {
     try {
-      const token = req.cookies?.[COGNITO_ID_TOKEN_COOKIE];
-      const payload = await verifyCognitoIdToken(token);
+      const auth = await getCognitoAuthFromRequest({
+        cookies: req.cookies,
+        authorization: req.headers.authorization,
+        setCookie: (cookies) => res.setHeader("Set-Cookie", cookies),
+      });
 
-      if (!payload?.sub) {
+      if (!auth?.payload.sub) {
         return res.status(401).json({ error: "認証が必要です" });
       }
 
@@ -306,9 +309,9 @@ export default async function handler(
         rentalDurationHours: body.rentalDurationHours ?? null,
         rentalCompletedAt: body.rentalCompletedAt,
         reservationCompletedFlag: body.reservationCompletedFlag ?? false,
-        memberId: payload.sub,
-        memberName: body.memberName ?? payload["name"] ?? "",
-        memberEmail: body.memberEmail ?? (payload["email"] as string) ?? "",
+        memberId: auth.payload.sub,
+        memberName: body.memberName ?? auth.payload["name"] ?? "",
+        memberEmail: body.memberEmail ?? (auth.payload["email"] as string) ?? "",
         memberPhone: body.memberPhone ?? "",
         couponCode: body.couponCode,
         couponDiscount: body.couponDiscount,

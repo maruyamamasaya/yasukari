@@ -1,3 +1,17 @@
+const requiredPublicEnv = [
+  "NEXT_PUBLIC_COGNITO_DOMAIN",
+  "NEXT_PUBLIC_COGNITO_CLIENT_ID",
+  "NEXT_PUBLIC_COGNITO_REDIRECT_URI",
+  "NEXT_PUBLIC_COGNITO_LOGOUT_REDIRECT_URI",
+  "NEXT_PUBLIC_COGNITO_REGION",
+  "NEXT_PUBLIC_COGNITO_USER_POOL_ID",
+];
+
+const missingPublicEnv = requiredPublicEnv.filter((key) => !process.env[key]);
+if (missingPublicEnv.length > 0 && process.env.NODE_ENV !== "test") {
+  throw new Error(`Missing required public env vars: ${missingPublicEnv.join(", ")}`);
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,

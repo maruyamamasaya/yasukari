@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { getDocumentClient } from '../../../lib/dynamodb';
-import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from '../../../lib/cognitoServer';
+import { getCognitoAuthFromRequest } from '../../../lib/cognitoServer';
 import { RegistrationData, REQUIRED_REGISTRATION_FIELDS } from '../../../types/registration';
 import { deliverFullRegistrationEmail } from '../../../lib/registrationEmails';
 
@@ -19,14 +19,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const authToken = req.cookies?.[COGNITO_ID_TOKEN_COOKIE];
-    const authPayload = await verifyCognitoIdToken(authToken);
+    const auth = await getCognitoAuthFromRequest({
+      cookies: req.cookies,
+      authorization: req.headers.authorization,
+      setCookie: (cookies) => res.setHeader('Set-Cookie', cookies),
+    });
     const body = req.body ?? {};
 
-    const userIdFromBody = toTrimmedString(body.user_id);
-    const userId = authPayload?.sub ?? userIdFromBody;
+    if (!auth?.payload.sub) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
 
-    if (authPayload && userIdFromBody && authPayload.sub !== userIdFromBody) {
+    const userIdFromBody = toTrimmedString(body.user_id);
+    const userId = auth.payload.sub;
+
+    if (userIdFromBody && userId !== userIdFromBody) {
       return res.status(400).json({ message: 'ユーザーIDが一致しません。' });
     }
 
@@ -36,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const payload: RegistrationData = {
       user_id: userId,
-      email: toTrimmedString(body.email || authPayload?.email).toLowerCase(),
+      email: toTrimmedString(body.email || auth.payload.email).toLowerCase(),
       name1: toTrimmedString(body.name1),
       name2: toTrimmedString(body.name2),
       kana1: toTrimmedString(body.kana1),

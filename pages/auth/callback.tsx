@@ -9,22 +9,11 @@ export default function CognitoCallbackPage() {
 
   useEffect(() => {
     const processCallback = async () => {
-      // 1. ハッシュを取得
-      const rawHash = window.location.hash.replace(/^#/, '');
-
-      // 🔸ハッシュが空 = Hosted UI から戻ってきたわけではなく、
-      //   ユーザーが直接 /auth/callback を開いた or リロードした可能性が高い
-      if (!rawHash) {
-        await router.replace('/login');
-        return;
-      }
-
-      const params = new URLSearchParams(rawHash);
+      const params = new URLSearchParams(window.location.search);
 
       // 認証に関係するパラメータが1つも無い場合も、素直に /login に戻す
       const hasAnyAuthParam =
-        params.has('id_token') ||
-        params.has('access_token') ||
+        params.has('code') ||
         params.has('error') ||
         params.has('state');
 
@@ -53,27 +42,23 @@ export default function CognitoCallbackPage() {
       // state が一致したので、もう不要なため削除
       sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
 
-      // 4. トークン取得
-      const idToken = params.get('id_token');
-      const accessToken = params.get('access_token');
-      const expiresIn = Number(params.get('expires_in') ?? '3600');
-
-      if (!idToken) {
-        setError('認証情報を取得できませんでした。お手数ですが、もう一度ログインからお試しください。');
+      const code = params.get('code');
+      if (!code) {
+        setError('認証コードが見つかりませんでした。もう一度ログインからお試しください。');
         return;
       }
 
       // 5. クッキー保存（HttpOnly かつサーバー側設定でデプロイ後も保持）
       try {
-        const response = await fetch('/api/auth/store-tokens', {
+        const response = await fetch('/api/auth/exchange', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ idToken, accessToken, expiresIn }),
+          body: JSON.stringify({ code }),
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to persist tokens: ${response.status}`);
+          throw new Error(`Failed to exchange tokens: ${response.status}`);
         }
       } catch (err) {
         console.error(err);

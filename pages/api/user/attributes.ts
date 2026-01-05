@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { COGNITO_ACCESS_TOKEN_COOKIE } from '../../../lib/cognitoServer';
+import { getCognitoAuthFromRequest } from '../../../lib/cognitoServer';
 import { hasMailHistoryEntry } from '../../../lib/mailHistory';
 import { COUNTRY_OPTIONS, findCountryByDialCodePrefix } from '../../../lib/phoneNumber';
 import { deliverProvisionalRegistrationEmail } from '../../../lib/registrationEmails';
@@ -121,7 +121,12 @@ const validateUpdate = (payload: UpdatePayload): { attributes: CognitoAttribute[
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const accessToken = req.cookies?.[COGNITO_ACCESS_TOKEN_COOKIE];
+  const auth = await getCognitoAuthFromRequest({
+    cookies: req.cookies,
+    authorization: req.headers.authorization,
+    setCookie: (cookies) => res.setHeader('Set-Cookie', cookies),
+  });
+  const accessToken = auth?.accessToken;
   if (!accessToken) {
     return res.status(401).json({ message: 'Not authenticated' });
   }

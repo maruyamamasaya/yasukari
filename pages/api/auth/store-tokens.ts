@@ -1,11 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { COGNITO_ACCESS_TOKEN_COOKIE, COGNITO_ID_TOKEN_COOKIE } from '../../../lib/cognitoHostedUi';
-
-const formatExpires = (maxAgeSeconds: number): string => {
-  const expires = new Date(Date.now() + maxAgeSeconds * 1000);
-  return expires.toUTCString();
-};
+import { createCognitoAuthCookies } from '../../../lib/cognitoServer';
 
 const parseExpiresIn = (value: unknown): number | null => {
   const asNumber = typeof value === 'number' ? value : Number(value);
@@ -21,20 +16,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  const { idToken, accessToken, expiresIn } = req.body ?? {};
+  const { idToken, accessToken, refreshToken, expiresIn } = req.body ?? {};
 
   if (typeof idToken !== 'string' || !idToken.trim()) {
     return res.status(400).json({ message: 'id_token is required' });
   }
 
   const maxAge = parseExpiresIn(expiresIn) ?? 3600;
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  const cookieBase = `Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}; Expires=${formatExpires(maxAge)}${secure}`;
-
-  const cookies = [`${COGNITO_ID_TOKEN_COOKIE}=${idToken}; ${cookieBase}`];
-  if (typeof accessToken === 'string' && accessToken.trim()) {
-    cookies.push(`${COGNITO_ACCESS_TOKEN_COOKIE}=${accessToken}; ${cookieBase}`);
-  }
+  const cookies = createCognitoAuthCookies({
+    idToken,
+    accessToken: typeof accessToken === 'string' ? accessToken : undefined,
+    refreshToken: typeof refreshToken === 'string' ? refreshToken : undefined,
+    expiresIn: maxAge,
+  });
 
   res.setHeader('Set-Cookie', cookies);
   return res.status(200).json({ message: 'Stored tokens' });

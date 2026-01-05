@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from "../../../lib/cognitoServer";
+import { getCognitoAuthFromRequest } from "../../../lib/cognitoServer";
 import { fetchReservationsByMember, Reservation } from "../../../lib/reservations";
 
 type ReservationListResponse = {
@@ -17,14 +17,17 @@ export default async function handler(
   }
 
   try {
-    const token = req.cookies?.[COGNITO_ID_TOKEN_COOKIE];
-    const payload = await verifyCognitoIdToken(token);
+    const auth = await getCognitoAuthFromRequest({
+      cookies: req.cookies,
+      authorization: req.headers.authorization,
+      setCookie: (cookies) => res.setHeader("Set-Cookie", cookies),
+    });
 
-    if (!payload?.sub) {
+    if (!auth?.payload.sub) {
       return res.status(401).json({ error: "認証が必要です" });
     }
 
-    const reservations = await fetchReservationsByMember(payload.sub);
+    const reservations = await fetchReservationsByMember(auth.payload.sub);
     return res.status(200).json({ reservations });
   } catch (error) {
     console.error("Failed to load member reservations", error);
