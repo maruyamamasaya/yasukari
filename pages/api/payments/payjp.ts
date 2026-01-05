@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from "../../../lib/cognitoServer";
+import { getCognitoAuthFromRequest } from "../../../lib/cognitoServer";
 import { getPayjpSecretKey, getPayjpSecretKeyError } from "../../../lib/payjpServer";
 
 type PayjpChargeRequest = {
@@ -37,9 +37,12 @@ export default async function handler(
     return res.status(405).json({ error: `Method ${req.method ?? "unknown"} Not Allowed` });
   }
 
-  const token = req.cookies?.[COGNITO_ID_TOKEN_COOKIE];
-  const payload = await verifyCognitoIdToken(token);
-  if (!payload?.sub) {
+  const auth = await getCognitoAuthFromRequest({
+    cookies: req.cookies,
+    authorization: req.headers.authorization,
+    setCookie: (cookies) => res.setHeader("Set-Cookie", cookies),
+  });
+  if (!auth?.payload.sub) {
     return res.status(401).json({ error: "認証が必要です" });
   }
 

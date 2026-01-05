@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { COGNITO_ACCESS_TOKEN_COOKIE, COGNITO_ID_TOKEN_COOKIE } from '../../lib/cognitoHostedUi';
+import {
+  COGNITO_ACCESS_TOKEN_COOKIE,
+  COGNITO_ID_TOKEN_COOKIE,
+  COGNITO_REFRESH_TOKEN_COOKIE,
+} from '../../lib/cognitoHostedUi';
 
 function clearCookie(name: string) {
   const secure = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
@@ -14,6 +18,7 @@ export default function LogoutPage() {
   useEffect(() => {
     clearCookie(COGNITO_ID_TOKEN_COOKIE);
     clearCookie(COGNITO_ACCESS_TOKEN_COOKIE);
+    clearCookie(COGNITO_REFRESH_TOKEN_COOKIE);
     if (!router.isReady) return;
 
     const nextPath = typeof router.query.next === 'string' ? router.query.next : '/login';

@@ -5,7 +5,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient } from "../../lib/dynamodb";
-import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from "../../lib/cognitoServer";
+import { getCognitoAuthFromRequest } from "../../lib/cognitoServer";
 
 const bucketName = process.env.ACCIDENT_REPORT_BUCKET ?? "yasukari-file";
 const bucketRegion = process.env.AWS_REGION ?? "ap-northeast-1";
@@ -73,10 +73,13 @@ export default async function handler(
       return;
     }
 
-    const token = request.cookies?.[COGNITO_ID_TOKEN_COOKIE];
-    const payload = await verifyCognitoIdToken(token);
+    const auth = await getCognitoAuthFromRequest({
+      cookies: request.cookies,
+      authorization: request.headers.authorization,
+      setCookie: (cookies) => response.setHeader("Set-Cookie", cookies),
+    });
 
-    if (!payload?.sub) {
+    if (!auth?.payload.sub) {
       response.status(401).json({ message: "Not authenticated" });
       return;
     }
@@ -116,7 +119,7 @@ export default async function handler(
     await client.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
-        Key: { user_id: payload.sub },
+        Key: { user_id: auth.payload.sub },
         UpdateExpression:
           "SET #accident_report_url = :url, #accident_report_uploaded_at = :uploaded_at",
         ExpressionAttributeNames: {

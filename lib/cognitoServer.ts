@@ -23,10 +23,15 @@ type JwksResponse = {
 
 const ID_TOKEN_COOKIE = 'cognito_id_token';
 const ACCESS_TOKEN_COOKIE = 'cognito_access_token';
+const REFRESH_TOKEN_COOKIE = 'cognito_refresh_token';
 
 const region = process.env.COGNITO_REGION ?? process.env.NEXT_PUBLIC_COGNITO_REGION ?? 'ap-northeast-1';
 const userPoolId = process.env.COGNITO_USER_POOL_ID ?? process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID;
 const clientId = process.env.COGNITO_CLIENT_ID ?? process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
+const clientSecret = process.env.COGNITO_CLIENT_SECRET;
+const cognitoDomain = (process.env.COGNITO_DOMAIN ?? process.env.NEXT_PUBLIC_COGNITO_DOMAIN ?? '').replace(/\/$/, '');
+
+const REFRESH_TOKEN_MAX_AGE_SECONDS = Number(process.env.COGNITO_REFRESH_TOKEN_MAX_AGE ?? 60 * 60 * 24 * 30);
 
 let jwksCache: { keys: JwksKey[]; fetchedAt: number } | null = null;
 
@@ -35,6 +40,29 @@ const base64UrlToArrayBuffer = (value: string): ArrayBuffer => {
   const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
   const buffer = Buffer.from(padded, 'base64');
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+};
+
+const decodeJwtPayload = (token: string): CognitoIdTokenPayload | null => {
+  const segments = token.split('.');
+  if (segments.length !== 3) {
+    return null;
+  }
+  const encodedPayload = segments[1] ?? '';
+  try {
+    const payloadJson = Buffer.from(encodedPayload.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+    return JSON.parse(payloadJson) as CognitoIdTokenPayload;
+  } catch (error) {
+    return null;
+  }
+};
+
+const isTokenExpired = (token: string): boolean => {
+  const payload = decodeJwtPayload(token);
+  if (!payload?.exp) {
+    return true;
+  }
+  const now = Math.floor(Date.now() / 1000);
+  return payload.exp <= now;
 };
 
 async function getJwks(): Promise<JwksKey[]> {
@@ -71,6 +99,90 @@ async function getVerificationKey(kid: string): Promise<crypto.webcrypto.CryptoK
     ['verify']
   );
 }
+
+type CognitoTokenResponse = {
+  id_token?: string;
+  access_token?: string;
+  refresh_token?: string;
+  expires_in?: number;
+};
+
+type CognitoAuthResult = {
+  payload: CognitoIdTokenPayload;
+  idToken: string;
+  accessToken?: string;
+  refreshToken?: string;
+};
+
+const formatExpires = (maxAgeSeconds: number): string => {
+  const expires = new Date(Date.now() + maxAgeSeconds * 1000);
+  return expires.toUTCString();
+};
+
+const buildCookie = (name: string, value: string, maxAgeSeconds: number): string => {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}; Expires=${formatExpires(
+    maxAgeSeconds
+  )}${secure}`;
+};
+
+export const createCognitoAuthCookies = (tokens: {
+  idToken?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresIn?: number;
+}): string[] => {
+  const cookies: string[] = [];
+  const maxAge = tokens.expiresIn ?? 3600;
+  if (tokens.idToken) {
+    cookies.push(buildCookie(ID_TOKEN_COOKIE, tokens.idToken, maxAge));
+  }
+  if (tokens.accessToken) {
+    cookies.push(buildCookie(ACCESS_TOKEN_COOKIE, tokens.accessToken, maxAge));
+  }
+  if (tokens.refreshToken) {
+    cookies.push(buildCookie(REFRESH_TOKEN_COOKIE, tokens.refreshToken, REFRESH_TOKEN_MAX_AGE_SECONDS));
+  }
+  return cookies;
+};
+
+const getBearerToken = (authorization?: string): string | undefined => {
+  if (!authorization) {
+    return undefined;
+  }
+  const [type, token] = authorization.split(' ');
+  if (type?.toLowerCase() !== 'bearer' || !token) {
+    return undefined;
+  }
+  return token;
+};
+
+const callTokenEndpoint = async (params: Record<string, string>): Promise<CognitoTokenResponse> => {
+  if (!cognitoDomain) {
+    throw new Error('COGNITO_DOMAIN is required.');
+  }
+  if (!clientId) {
+    throw new Error('COGNITO_CLIENT_ID is required.');
+  }
+  const tokenUrl = `${cognitoDomain}/oauth2/token`;
+  const body = new URLSearchParams({
+    client_id: clientId,
+    ...params,
+    ...(clientSecret ? { client_secret: clientSecret } : {}),
+  });
+
+  const response = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to exchange token (${response.status})`);
+  }
+
+  return (await response.json()) as CognitoTokenResponse;
+};
 
 export async function verifyCognitoIdToken(token: string | undefined | null): Promise<CognitoIdTokenPayload | null> {
   if (!token) {
@@ -132,4 +244,77 @@ export async function verifyCognitoIdToken(token: string | undefined | null): Pr
   return payload;
 }
 
-export { ID_TOKEN_COOKIE as COGNITO_ID_TOKEN_COOKIE, ACCESS_TOKEN_COOKIE as COGNITO_ACCESS_TOKEN_COOKIE };
+export const exchangeCognitoCode = async (code: string, redirectUri: string): Promise<CognitoTokenResponse> => {
+  const response = await callTokenEndpoint({
+    grant_type: 'authorization_code',
+    code,
+    redirect_uri: redirectUri,
+  });
+  return response;
+};
+
+const refreshCognitoTokens = async (refreshToken: string): Promise<CognitoTokenResponse> =>
+  callTokenEndpoint({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+  });
+
+export const getCognitoAuthFromRequest = async ({
+  cookies,
+  authorization,
+  setCookie,
+}: {
+  cookies?: Record<string, string>;
+  authorization?: string;
+  setCookie?: (cookies: string[]) => void;
+}): Promise<CognitoAuthResult | null> => {
+  const idTokenFromHeader = getBearerToken(authorization);
+  const idToken = idTokenFromHeader ?? cookies?.[ID_TOKEN_COOKIE];
+  const accessToken = cookies?.[ACCESS_TOKEN_COOKIE];
+  const refreshToken = cookies?.[REFRESH_TOKEN_COOKIE];
+
+  if (idToken) {
+    const payload = await verifyCognitoIdToken(idToken);
+    if (payload) {
+      return { payload, idToken, accessToken, refreshToken };
+    }
+  }
+
+  if (!refreshToken || (idToken && !isTokenExpired(idToken))) {
+    return null;
+  }
+
+  const refreshed = await refreshCognitoTokens(refreshToken);
+  if (!refreshed.id_token) {
+    return null;
+  }
+
+  const refreshedPayload = await verifyCognitoIdToken(refreshed.id_token);
+  if (!refreshedPayload) {
+    return null;
+  }
+
+  if (setCookie) {
+    const cookiesToSet = createCognitoAuthCookies({
+      idToken: refreshed.id_token,
+      accessToken: refreshed.access_token,
+      expiresIn: refreshed.expires_in ?? 3600,
+    });
+    if (cookiesToSet.length > 0) {
+      setCookie(cookiesToSet);
+    }
+  }
+
+  return {
+    payload: refreshedPayload,
+    idToken: refreshed.id_token,
+    accessToken: refreshed.access_token,
+    refreshToken,
+  };
+};
+
+export {
+  ID_TOKEN_COOKIE as COGNITO_ID_TOKEN_COOKIE,
+  ACCESS_TOKEN_COOKIE as COGNITO_ACCESS_TOKEN_COOKIE,
+  REFRESH_TOKEN_COOKIE as COGNITO_REFRESH_TOKEN_COOKIE,
+};

@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
 
 import { getDocumentClient } from '../../../lib/dynamodb';
-import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from '../../../lib/cognitoServer';
+import { getCognitoAuthFromRequest } from '../../../lib/cognitoServer';
 import type { RegistrationData } from '../../../types/registration';
 
 const TABLE_NAME = 'yasukariUserMain';
@@ -14,10 +14,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const token = req.cookies?.[COGNITO_ID_TOKEN_COOKIE];
-    const payload = await verifyCognitoIdToken(token);
+    const auth = await getCognitoAuthFromRequest({
+      cookies: req.cookies,
+      authorization: req.headers.authorization,
+      setCookie: (cookies) => res.setHeader('Set-Cookie', cookies),
+    });
 
-    if (!payload?.sub) {
+    if (!auth?.payload.sub) {
       return res.status(401).json({ message: 'Not authenticated' });
     }
 
@@ -25,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { Item } = await client.send(
       new GetCommand({
         TableName: TABLE_NAME,
-        Key: { user_id: payload.sub },
+        Key: { user_id: auth.payload.sub },
       })
     );
 

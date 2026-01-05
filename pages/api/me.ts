@@ -1,9 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import {
-  COGNITO_ID_TOKEN_COOKIE,
-  verifyCognitoIdToken,
-} from '../../lib/cognitoServer';
+import { getCognitoAuthFromRequest } from '../../lib/cognitoServer';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -12,18 +9,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const token = req.cookies?.[COGNITO_ID_TOKEN_COOKIE];
-    const payload = await verifyCognitoIdToken(token);
-
-    if (!payload) {
+    const auth = await getCognitoAuthFromRequest({
+      cookies: req.cookies,
+      authorization: req.headers.authorization,
+      setCookie: (cookies) => res.setHeader('Set-Cookie', cookies),
+    });
+    if (!auth) {
       return res.status(200).json({ user: null });
     }
 
     return res.status(200).json({
       user: {
-        id: payload.sub,
-        username: payload['cognito:username'],
-        email: payload.email,
+        id: auth.payload.sub,
+        username: auth.payload['cognito:username'],
+        email: auth.payload.email,
       },
     });
   } catch (error) {

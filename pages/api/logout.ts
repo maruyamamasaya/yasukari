@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { COGNITO_ACCESS_TOKEN_COOKIE, COGNITO_ID_TOKEN_COOKIE } from '../../lib/cognitoHostedUi';
+import {
+  COGNITO_ACCESS_TOKEN_COOKIE,
+  COGNITO_ID_TOKEN_COOKIE,
+  COGNITO_REFRESH_TOKEN_COOKIE,
+} from '../../lib/cognitoHostedUi';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -13,6 +17,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Set-Cookie', [
     `${COGNITO_ID_TOKEN_COOKIE}=; ${base}`,
     `${COGNITO_ACCESS_TOKEN_COOKIE}=; ${base}`,
+    `${COGNITO_REFRESH_TOKEN_COOKIE}=; ${base}`,
   ]);
 
   return res.status(200).json({ message: 'Logged out locally. Redirect to Cognito logout next.' });

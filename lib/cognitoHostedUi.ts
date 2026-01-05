@@ -1,7 +1,6 @@
 const hostedUiDomain = (process.env.NEXT_PUBLIC_COGNITO_DOMAIN ?? '').replace(/\/$/, '');
-const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? 'vicsspgv2q7mtn6m6os2n893j';
-const redirectUri =
-  process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI ?? 'https://yasukaribike.com/auth/callback';
+const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? '';
+const redirectUri = process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI ?? '';
 const redirectUriObject = (() => {
   try {
     return new URL(redirectUri);
@@ -12,7 +11,7 @@ const redirectUriObject = (() => {
 })();
 const logoutRedirectUri =
   process.env.NEXT_PUBLIC_COGNITO_LOGOUT_REDIRECT_URI ??
-  (redirectUriObject ? `${redirectUriObject.origin}/auth/logout` : 'https://yasukaribike.com/auth/logout');
+  (redirectUriObject ? `${redirectUriObject.origin}/auth/logout` : '');
 
 const scopeList = (() => {
   const configured = (process.env.NEXT_PUBLIC_COGNITO_SCOPES ?? '')
@@ -32,6 +31,7 @@ const scopeList = (() => {
 
 export const COGNITO_ID_TOKEN_COOKIE = 'cognito_id_token';
 export const COGNITO_ACCESS_TOKEN_COOKIE = 'cognito_access_token';
+export const COGNITO_REFRESH_TOKEN_COOKIE = 'cognito_refresh_token';
 export const COGNITO_OAUTH_STATE_KEY = 'cognito_oauth_state';
 
 const generateOauthState = () => {
@@ -55,7 +55,7 @@ export const createAndStoreOauthState = () => {
 export const buildAuthorizeUrl = (state: string, options?: { lang?: string }) => {
   const params = new URLSearchParams({
     client_id: clientId,
-    response_type: 'token',
+    response_type: 'code',
     scope: scopeList.join(' '),
     redirect_uri: redirectUri,
     state,
