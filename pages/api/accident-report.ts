@@ -73,8 +73,14 @@ export default async function handler(
       return;
     }
 
+    const cookies = Object.fromEntries(
+      Object.entries(request.cookies).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string"
+      )
+    );
+
     const auth = await getCognitoAuthFromRequest({
-      cookies: request.cookies,
+      cookies,
       authorization: request.headers.authorization,
       setCookie: (cookies) => response.setHeader("Set-Cookie", cookies),
     });
