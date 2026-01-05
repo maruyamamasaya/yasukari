@@ -264,7 +264,7 @@ export const getCognitoAuthFromRequest = async ({
   authorization,
   setCookie,
 }: {
-  cookies?: Record<string, string>;
+  cookies?: Partial<Record<string, string>>;
   authorization?: string;
   setCookie?: (cookies: string[]) => void;
 }): Promise<CognitoAuthResult | null> => {
