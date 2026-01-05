@@ -9,10 +9,16 @@ const requiredPublicEnv = [
 
 const missingPublicEnv = requiredPublicEnv.filter((key) => !process.env[key]);
 if (missingPublicEnv.length > 0 && process.env.NODE_ENV !== "test") {
-  console.warn(
-    `Missing required public env vars: ${missingPublicEnv.join(", ")}. ` +
-      "Build will continue, but authentication features may not work until these are set.",
-  );
+  if (process.env.NODE_ENV === "development") {
+    console.warn(
+      `Missing required public env vars: ${missingPublicEnv.join(", ")}. ` +
+        "Build will continue, but authentication features may not work until these are set.",
+    );
+  } else {
+    throw new Error(
+      `Missing required public env vars: ${missingPublicEnv.join(", ")}`,
+    );
+  }
 }
 
 /** @type {import('next').NextConfig} */
