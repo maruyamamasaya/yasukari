@@ -31,6 +31,7 @@ describe("POST /api/payments/payjp", () => {
     delete process.env.PAYJP_SECRET_KEY;
     delete process.env.PAYJP_SECRET_KEY_TEST;
     global.fetch = originalFetch;
+    jest.useRealTimers();
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -51,6 +52,30 @@ describe("POST /api/payments/payjp", () => {
     await handler(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it("returns 400 before charging when the reservation deadline has passed", async () => {
+    (verifyCognitoIdToken as jest.Mock).mockResolvedValue({ sub: "user" });
+    jest.useFakeTimers().setSystemTime(new Date("2026-03-20T08:00:00.000Z"));
+
+    const req = mockReq({
+      method: "POST",
+      cookies: { cognito_id_token: "token" },
+      body: {
+        token: "tok_test",
+        amount: 1200,
+        metadata: {
+          pickupDate: "2026-03-21",
+          pickupAt: "2026-03-21T01:00:00.000Z",
+        },
+      },
+    });
+    const res = mockRes();
+
+    await handler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it("creates a Pay.JP charge and returns the charge id", async () => {

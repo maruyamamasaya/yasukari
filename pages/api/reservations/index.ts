@@ -13,6 +13,7 @@ import {
 } from "../../../lib/reservations";
 import { issueKeyboxPinForReservation } from "../../../lib/keybox";
 import { sendReservationCompletionEmail } from "../../../lib/reservationCompletionEmail";
+import { hasReservationDeadlinePassed } from "../../../lib/reservationDeadline";
 
 type ReservationListResponse = {
   reservations: Reservation[];
@@ -23,6 +24,7 @@ type CreateReservationRequest = {
   vehicleModel?: string;
   vehicleCode?: string;
   vehiclePlate?: string;
+  pickupDate?: string;
   pickupAt?: string;
   returnAt?: string;
   status?: string;
@@ -264,6 +266,12 @@ export default async function handler(
       const missingField = requiredFields.find((field) => !body[field]);
       if (missingField) {
         return res.status(400).json({ error: `${missingField} is required` });
+      }
+
+      if (hasReservationDeadlinePassed({ pickupDate: body.pickupDate, pickupAt: body.pickupAt })) {
+        return res.status(400).json({
+          error: "予約受付は日本時間でご利用前日の17:00に締め切られます。前日17:00以降は予約できません。",
+        });
       }
 
       const existingReservation = await fetchReservationById(body.paymentId!);
