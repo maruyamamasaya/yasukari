@@ -43,11 +43,11 @@ export default function TokusyouhouEn() {
           </tr>
           <tr>
             <th className="text-left w-40 p-2 border">New reservations</th>
-            <td className="p-2 border">By 5:00 p.m. the day before use (or the previous business day if closed)</td>
+            <td className="p-2 border">By 5:00 p.m. JST on the day before use</td>
           </tr>
           <tr>
             <th className="text-left w-40 p-2 border">Reservation changes</th>
-            <td className="p-2 border">By 5:00 p.m. the day before use (or the previous business day if closed)</td>
+            <td className="p-2 border">By 5:00 p.m. JST on the day before use</td>
           </tr>
           <tr>
             <th className="text-left w-40 p-2 border">Cancellations</th>

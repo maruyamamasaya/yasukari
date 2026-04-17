@@ -6,7 +6,7 @@ export default function GuidePage() {
   const faqs = [
     {
       q: '予約はいつまで可能ですか？',
-      a: 'ご利用予定日の前営業日17時までご予約いただけます。',
+      a: 'ご利用予定日の前日17時までご予約いただけます（日本時間）。',
     },
     {
       q: 'ヘルメットをレンタルできますか？',
@@ -45,7 +45,7 @@ export default function GuidePage() {
         <h2 className="text-lg font-semibold">01. ご予約について</h2>
         <p>各車両ページよりスケジュールを確認しご予約ください。18歳未満のお客様はご利用いただけません。</p>
         <ul className="list-disc list-inside space-y-1">
-          <li>予約可能時間：ご利用予定日90日前から前営業日17時まで</li>
+          <li>予約可能時間：ご利用予定日90日前から前日17時まで（日本時間）</li>
           <li>お支払い方法：クレジットカードのみ</li>
           <li>
             予約内容の変更は<Link href="/contact" className="text-red-600 underline ml-1">お問い合わせ</Link>からご連絡の上、再度ご予約をお願いします。

@@ -29,7 +29,7 @@ export default function BeginnerGuidePageEn() {
         <h2 className="text-lg font-semibold text-slate-900">01. Making a reservation</h2>
         <p>Check availability and book from each vehicle detail page. *Customers under 18 cannot use the service.</p>
         <ul className="list-disc list-inside space-y-1">
-          <li>Booking window: From 90 days before the rental date until 5:00 p.m. on the previous business day</li>
+          <li>Booking window: From 90 days before the rental date until 5:00 p.m. JST on the day before rental</li>
           <li>Payment method: Credit card only</li>
           <li>
             To modify your reservation dates or details, please contact us via

@@ -43,11 +43,11 @@ export default function Tokusyouhou() {
           </tr>
           <tr>
             <th className="text-left w-40 p-2 border">新規予約</th>
-            <td className="p-2 border">ご利用前日の１７時まで（前日が休業日の場合、前営業日の１７時まで)</td>
+            <td className="p-2 border">日本時間でご利用前日の17時まで</td>
           </tr>
           <tr>
             <th className="text-left w-40 p-2 border">予約変更</th>
-            <td className="p-2 border">ご利用前日の１７時まで (前日が休業日の場合、前営業日の１７時まで)</td>
+            <td className="p-2 border">日本時間でご利用前日の17時まで</td>
           </tr>
           <tr>
             <th className="text-left w-40 p-2 border">キャンセルについて</th>

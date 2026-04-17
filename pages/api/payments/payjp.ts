@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from "../../../lib/cognitoServer";
 import { getPayjpSecretKey, getPayjpSecretKeyError } from "../../../lib/payjpServer";
+import { hasReservationDeadlinePassed } from "../../../lib/reservationDeadline";
 
 type PayjpChargeRequest = {
   token?: string;
@@ -46,6 +47,14 @@ export default async function handler(
   const body = req.body as PayjpChargeRequest;
   if (!body.token || !body.amount) {
     return res.status(400).json({ error: "token と amount が必要です。" });
+  }
+
+  const pickupAt = body.metadata?.pickupAt;
+  const pickupDate = body.metadata?.pickupDate;
+  if (hasReservationDeadlinePassed({ pickupDate, pickupAt })) {
+    return res.status(400).json({
+      error: "予約受付は日本時間でご利用前日の17:00に締め切られます。前日17:00以降は予約できません。",
+    });
   }
 
   try {

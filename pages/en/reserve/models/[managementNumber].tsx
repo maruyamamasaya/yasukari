@@ -421,8 +421,8 @@ export default function ReserveModelPage({
                 We may need to change the vehicle on the rental day due to unexpected issues such as breakdowns or accidents.
               </p>
               <p>
-                Reservations close at 5:00 p.m. on the business day before your rental date.
-                (Mondays are closed, so Tuesday rentals must be booked by 5:00 p.m. on the preceding Sunday.)
+                Reservations close at 5:00 p.m. JST on the day before your rental date.
+                Reservations are unavailable after 5:00 p.m. JST on the previous day.
               </p>
               <p>
                 Adachi-Odai store is closed on holidays. If your return date falls on a holiday, please return the bike by the previous day.

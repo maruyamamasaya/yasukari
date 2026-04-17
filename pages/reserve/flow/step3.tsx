@@ -238,6 +238,7 @@ export default function ReserveFlowStep3() {
           description: `${store} ${modelName} ${managementNumber}`,
           email: payjpCustomerEmail,
           metadata: {
+            pickupDate,
             pickupAt,
             returnAt,
             store,
@@ -265,6 +266,7 @@ export default function ReserveFlowStep3() {
           vehicleModel: modelName,
           vehicleCode: managementNumber,
           vehiclePlate: managementNumber,
+          pickupDate,
           pickupAt,
           returnAt,
           paymentAmount: totalAmount,
