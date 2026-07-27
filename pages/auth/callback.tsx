@@ -59,7 +59,8 @@ export default function CognitoCallbackPage() {
       // The validated OAuth state is the authoritative flow marker. Keeping
       // signup intent in the state prevents an unrelated sessionStorage write
       // or stale deployment from turning a signup callback into a login.
-      if (isSignupOauthState(returnedState)) {
+      const isSignupFlow = isSignupOauthState(returnedState);
+      if (isSignupFlow) {
         sessionStorage.setItem(SIGNUP_INTENT_KEY, '1');
       }
 
@@ -97,7 +98,8 @@ export default function CognitoCallbackPage() {
       // URL before Next.js has committed the route change.
       // Account creation is only complete after the user submits their basic
       // information. Keep the signup intent until that submission succeeds.
-      window.location.replace('/mypage/profile-setup?fromLogin=1');
+      const profileSetupQuery = isSignupFlow ? 'fromLogin=1&fromSignup=1' : 'fromLogin=1';
+      window.location.replace(`/mypage/profile-setup?${profileSetupQuery}`);
     };
 
     void processCallback();

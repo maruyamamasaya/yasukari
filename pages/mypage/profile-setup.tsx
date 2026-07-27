@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
 import { completePendingSignup } from '../../lib/conversionTracking';
+import { getCompletedProfileRedirect } from '../../lib/profileSetupRedirect';
 import {
   COUNTRY_OPTIONS,
   findCountryByDialCodePrefix,
@@ -33,6 +34,7 @@ const ProfileSetupPage: NextPage = () => {
   const [showForm, setShowForm] = useState(false);
   const completedProfileRedirectStarted = useRef(false);
   const fromLogin = useMemo(() => router.query.fromLogin === '1', [router.query.fromLogin]);
+  const fromSignup = useMemo(() => router.query.fromSignup === '1', [router.query.fromSignup]);
 
   const normalizedLocale = (attributes['custom:locale'] ?? '').trim().toLowerCase();
 
@@ -109,13 +111,15 @@ const ProfileSetupPage: NextPage = () => {
       const missing = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
       if (missing.length === 0 && !completedProfileRedirectStarted.current) {
         completedProfileRedirectStarted.current = true;
-        const isCompletedSignup = completePendingSignup();
-        window.location.replace(
-          isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'),
-        );
+        const completedPendingSignup = completePendingSignup();
+        const isSignupFlow = fromSignup || completedPendingSignup;
+        window.location.replace(getCompletedProfileRedirect({
+          isSignupFlow,
+          localePath: applyLocaleToPath('/mypage'),
+        }));
       }
     }
-  }, [attributes, fromLogin, loading, router]);
+  }, [attributes, fromLogin, fromSignup, loading, router]);
 
   useEffect(() => {
     if (!loading) {
@@ -183,10 +187,12 @@ const ProfileSetupPage: NextPage = () => {
       setAttributes(nextAttributes);
 
       if (missing.length === 0) {
-        const isCompletedSignup = completePendingSignup();
-        window.location.replace(
-          isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'),
-        );
+        const completedPendingSignup = completePendingSignup();
+        const isSignupFlow = fromSignup || completedPendingSignup;
+        window.location.replace(getCompletedProfileRedirect({
+          isSignupFlow,
+          localePath: applyLocaleToPath('/mypage'),
+        }));
       }
     } catch (err) {
       console.error(err);
