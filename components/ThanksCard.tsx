@@ -14,11 +14,6 @@ export default function ThanksCard({ title, lead, actionLabel, actionHref, detai
   return (
     <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-6 py-12 text-slate-900">
       <section className="w-full max-w-[420px] rounded-[20px] bg-white px-7 py-11 text-center shadow-xl shadow-slate-900/10">
-        <div className="mx-auto mb-5 flex h-[76px] w-[76px] items-center justify-center rounded-full bg-green-100" aria-hidden="true">
-          <svg viewBox="0 0 24 24" className="h-10 w-10 fill-none stroke-green-600 stroke-[3]" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
         <h1 className="mb-2 text-[22px] font-extrabold">{title}</h1>
         <p className="mb-6 text-sm leading-7 text-slate-500">{lead}</p>
         {details?.length ? (
