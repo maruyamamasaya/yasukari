@@ -72,7 +72,10 @@ export const buildAuthorizeUrl = (state: string, options?: { lang?: string }) =>
 export const buildSignupUrl = (state = 'signup', options?: { lang?: string }) => {
   const params = new URLSearchParams({
     client_id: clientId,
-    response_type: 'code',
+    // The callback consumes tokens from the URL fragment. Keep signup on the
+    // same implicit flow as login so Cognito does not return an unhandled
+    // authorization code in the query string.
+    response_type: 'token',
     scope: scopeList.join(' '),
     redirect_uri: redirectUri,
     state,
