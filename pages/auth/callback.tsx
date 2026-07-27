@@ -88,8 +88,14 @@ export default function CognitoCallbackPage() {
       const isSignup = sessionStorage.getItem(SIGNUP_INTENT_KEY) === '1';
       sessionStorage.removeItem(SIGNUP_INTENT_KEY);
       if (isSignup) sessionStorage.setItem(SIGNUP_COMPLETE_KEY, '1');
-      await router.replace(isSignup ? '/account/thanks' : '/mypage/profile-setup?fromLogin=1');
-      window.location.reload();
+
+      // The token cookie is written by the API response above. Use a full-page
+      // navigation so the next request is guaranteed to include that cookie.
+      // Calling reload immediately after router.replace can reload this callback
+      // URL before Next.js has committed the route change.
+      window.location.replace(
+        isSignup ? '/account/thanks' : '/mypage/profile-setup?fromLogin=1'
+      );
     };
 
     void processCallback();

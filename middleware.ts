@@ -130,8 +130,16 @@ export async function middleware(req: NextRequest) {
 
   const idToken = req.cookies.get(COGNITO_ID_TOKEN_COOKIE)?.value;
   const userLocale = decodeLocaleFromToken(idToken);
+  const localeNeutralPaths = new Set([
+    '/account/thanks',
+    '/mypage/registration/thanks',
+  ]);
 
-  if (userLocale === 'en' && !pathname.startsWith('/en')) {
+  if (
+    userLocale === 'en' &&
+    !pathname.startsWith('/en') &&
+    !localeNeutralPaths.has(pathname)
+  ) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = `/en${pathname === '/' ? '' : pathname}`;
     return NextResponse.redirect(redirectUrl);

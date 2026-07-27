@@ -183,7 +183,8 @@ const RegistrationPage: NextPage = () => {
   const [userError, setUserError] = useState('');
   const [availablePhones, setAvailablePhones] = useState<string[]>([]);
   const [selectedPhoneOption, setSelectedPhoneOption] = useState('');
-  const [hasPrefilledRegistration, setHasPrefilledRegistration] = useState(false);
+  const [registrationLoaded, setRegistrationLoaded] = useState(false);
+  const [registrationExists, setRegistrationExists] = useState(false);
 
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [licenseUploads, setLicenseUploads] = useState<LicenseUploadState[]>(initialLicenseUploads);
@@ -253,7 +254,7 @@ const RegistrationPage: NextPage = () => {
   }, []);
 
   useEffect(() => {
-    if (loadingUser || hasPrefilledRegistration) {
+    if (loadingUser || registrationLoaded) {
       return;
     }
 
@@ -285,6 +286,7 @@ const RegistrationPage: NextPage = () => {
         }
 
         const registration = data.registration;
+        setRegistrationExists(true);
 
         setFormData((prev) => ({
           ...prev,
@@ -342,14 +344,14 @@ const RegistrationPage: NextPage = () => {
         }
       } finally {
         if (!controller.signal.aborted) {
-          setHasPrefilledRegistration(true);
+          setRegistrationLoaded(true);
         }
       }
     };
 
     void fetchRegistration();
     return () => controller.abort();
-  }, [hasPrefilledRegistration, loadingUser, router]);
+  }, [loadingUser, registrationLoaded, router]);
 
   useEffect(() => {
     return () => {
@@ -477,6 +479,12 @@ const RegistrationPage: NextPage = () => {
         return;
       }
 
+      if (!registrationLoaded) {
+        setSubmitStatus('error');
+        setSubmitMessage('登録状況を確認しています。少し待ってから再度お試しください。');
+        return;
+      }
+
       const hasLicenseUpload = licenseUploads.some(
         (upload) => upload.imageUrl && upload.fileName,
       );
@@ -545,11 +553,9 @@ const RegistrationPage: NextPage = () => {
 
         setSubmitStatus('success');
         setSubmitMessage(result.message || '登録情報を保存しました。');
-        const isFirstRegistration = !hasPrefilledRegistration;
+        const isFirstRegistration = !registrationExists;
         if (isFirstRegistration) sessionStorage.setItem(REGISTRATION_COMPLETE_KEY, '1');
-        setTimeout(() => {
-          void router.push(isFirstRegistration ? '/mypage/registration/thanks' : '/mypage');
-        }, 600);
+        await router.push(isFirstRegistration ? '/mypage/registration/thanks' : '/mypage');
       } catch (error) {
         const message = error instanceof Error ? error.message : '保存に失敗しました。';
         setSubmitStatus('error');
@@ -560,7 +566,7 @@ const RegistrationPage: NextPage = () => {
         }, 400);
       }
     },
-    [formData, hasPrefilledRegistration, licenseUploads, router, sessionUser],
+    [formData, licenseUploads, registrationExists, registrationLoaded, router, sessionUser],
   );
 
   return (
@@ -1098,7 +1104,7 @@ const RegistrationPage: NextPage = () => {
                 <span />
                 <button
                   type="submit"
-                  disabled={isSubmitting || loadingUser}
+                  disabled={isSubmitting || loadingUser || !registrationLoaded}
                   className="inline-flex items-center justify-center justify-self-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
                 >
                   {isSubmitting ? '送信中…' : '完了する'}
