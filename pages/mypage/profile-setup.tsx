@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -31,6 +31,7 @@ const ProfileSetupPage: NextPage = () => {
   const [success, setSuccess] = useState('');
   const [attributes, setAttributes] = useState<UserAttributes>({});
   const [showForm, setShowForm] = useState(false);
+  const completedProfileRedirectStarted = useRef(false);
   const fromLogin = useMemo(() => router.query.fromLogin === '1', [router.query.fromLogin]);
 
   const normalizedLocale = (attributes['custom:locale'] ?? '').trim().toLowerCase();
@@ -106,8 +107,12 @@ const ProfileSetupPage: NextPage = () => {
   useEffect(() => {
     if (fromLogin && !loading) {
       const missing = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
-      if (missing.length === 0) {
-        void router.replace(applyLocaleToPath('/mypage'));
+      if (missing.length === 0 && !completedProfileRedirectStarted.current) {
+        completedProfileRedirectStarted.current = true;
+        const isCompletedSignup = completePendingSignup();
+        window.location.replace(
+          isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'),
+        );
       }
     }
   }, [attributes, fromLogin, loading, router]);
@@ -167,12 +172,21 @@ const ProfileSetupPage: NextPage = () => {
         'custom:locale': payload.locale,
       };
 
-      setAttributes(nextAttributes);
-
       const missing = REQUIRED_KEYS.filter((key) => !(nextAttributes[key] ?? '').trim());
       if (missing.length === 0) {
+        // Mark the redirect before updating state. Otherwise the fromLogin
+        // effect can observe the completed attributes, consume the already
+        // consumed signup flag, and overwrite /account/thanks with /mypage.
+        completedProfileRedirectStarted.current = true;
+      }
+
+      setAttributes(nextAttributes);
+
+      if (missing.length === 0) {
         const isCompletedSignup = completePendingSignup();
-        await router.replace(isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'));
+        window.location.replace(
+          isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'),
+        );
       }
     } catch (err) {
       console.error(err);

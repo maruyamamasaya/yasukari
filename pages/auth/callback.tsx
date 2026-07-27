@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { COGNITO_OAUTH_STATE_KEY } from '../../lib/cognitoHostedUi';
+import { COGNITO_OAUTH_STATE_KEY, isSignupOauthState } from '../../lib/cognitoHostedUi';
 import { SIGNUP_INTENT_KEY } from '../../lib/conversionTracking';
 
 export default function CognitoCallbackPage() {
@@ -55,6 +55,13 @@ export default function CognitoCallbackPage() {
 
       // state が一致したので、もう不要なため削除
       sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
+
+      // The validated OAuth state is the authoritative flow marker. Keeping
+      // signup intent in the state prevents an unrelated sessionStorage write
+      // or stale deployment from turning a signup callback into a login.
+      if (isSignupOauthState(returnedState)) {
+        sessionStorage.setItem(SIGNUP_INTENT_KEY, '1');
+      }
 
       // 4. トークン取得
       const idToken = params.get('id_token');

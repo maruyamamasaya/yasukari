@@ -33,6 +33,7 @@ const scopeList = (() => {
 export const COGNITO_ID_TOKEN_COOKIE = 'cognito_id_token';
 export const COGNITO_ACCESS_TOKEN_COOKIE = 'cognito_access_token';
 export const COGNITO_OAUTH_STATE_KEY = 'cognito_oauth_state';
+const SIGNUP_STATE_PREFIX = 'signup.';
 
 const generateOauthState = () => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -42,8 +43,9 @@ const generateOauthState = () => {
   return Math.random().toString(36).slice(2);
 };
 
-export const createAndStoreOauthState = () => {
-  const state = generateOauthState();
+export const createAndStoreOauthState = (intent: 'login' | 'signup' = 'login') => {
+  const randomState = generateOauthState();
+  const state = intent === 'signup' ? `${SIGNUP_STATE_PREFIX}${randomState}` : randomState;
 
   if (typeof window !== 'undefined' && window.sessionStorage) {
     window.sessionStorage.setItem(COGNITO_OAUTH_STATE_KEY, state);
@@ -51,6 +53,8 @@ export const createAndStoreOauthState = () => {
 
   return state;
 };
+
+export const isSignupOauthState = (state: string) => state.startsWith(SIGNUP_STATE_PREFIX);
 
 export const buildAuthorizeUrl = (state: string, options?: { lang?: string }) => {
   const params = new URLSearchParams({
