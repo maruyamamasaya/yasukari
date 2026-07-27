@@ -110,7 +110,9 @@ const ProfileSetupPage: NextPage = () => {
       if (missing.length === 0 && !completedProfileRedirectStarted.current) {
         completedProfileRedirectStarted.current = true;
         const isCompletedSignup = completePendingSignup();
-        void router.replace(isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'));
+        window.location.replace(
+          isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'),
+        );
       }
     }
   }, [attributes, fromLogin, loading, router]);
@@ -170,12 +172,21 @@ const ProfileSetupPage: NextPage = () => {
         'custom:locale': payload.locale,
       };
 
-      setAttributes(nextAttributes);
-
       const missing = REQUIRED_KEYS.filter((key) => !(nextAttributes[key] ?? '').trim());
       if (missing.length === 0) {
+        // Mark the redirect before updating state. Otherwise the fromLogin
+        // effect can observe the completed attributes, consume the already
+        // consumed signup flag, and overwrite /account/thanks with /mypage.
+        completedProfileRedirectStarted.current = true;
+      }
+
+      setAttributes(nextAttributes);
+
+      if (missing.length === 0) {
         const isCompletedSignup = completePendingSignup();
-        await router.replace(isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'));
+        window.location.replace(
+          isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'),
+        );
       }
     } catch (err) {
       console.error(err);

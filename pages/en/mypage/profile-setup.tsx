@@ -108,7 +108,9 @@ const ProfileSetupPageEn: NextPage = () => {
       if (missing.length === 0 && !completedProfileRedirectStarted.current) {
         completedProfileRedirectStarted.current = true;
         const isCompletedSignup = completePendingSignup();
-        void router.replace(isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'));
+        window.location.replace(
+          isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'),
+        );
       }
     }
   }, [attributes, fromLogin, loading, router]);
@@ -168,16 +170,19 @@ const ProfileSetupPageEn: NextPage = () => {
         'custom:locale': payload.locale,
       };
 
+      const missing = REQUIRED_KEYS.filter((key) => !(nextAttributes[key] ?? '').trim());
+      if (missing.length === 0) {
+        completedProfileRedirectStarted.current = true;
+      }
+
       setAttributes(nextAttributes);
 
-      const missing = REQUIRED_KEYS.filter((key) => !(nextAttributes[key] ?? '').trim());
       if (missing.length === 0) {
         const isCompletedSignup = completePendingSignup();
         const targetPath = isCompletedSignup
           ? '/account/thanks'
           : applyLocaleToPath('/mypage', payload.locale);
-        await router.replace(targetPath);
-        window.location.reload();
+        window.location.replace(targetPath);
       }
     } catch (err) {
       console.error(err);
