@@ -18,7 +18,7 @@ export default function RegistrationThanksPage() {
         title="本登録が完了しました！"
         lead={<>ご登録ありがとうございます。<br />これでご予約に進めます。そのまま予約を続けましょう。</>}
         actionLabel="予約に進む"
-        actionHref="/reserve/flow/step1"
+        actionHref="/"
       />
     </>
   );
