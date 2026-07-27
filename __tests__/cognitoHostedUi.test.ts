@@ -1,8 +1,21 @@
-import { buildAuthorizeUrl, buildSignupUrl } from '../lib/cognitoHostedUi';
+import {
+  buildAuthorizeUrl,
+  buildSignupUrl,
+  createAndStoreOauthState,
+  isSignupOauthState,
+} from '../lib/cognitoHostedUi';
 
 const parseHostedUiUrl = (value: string) => new URL(value, 'https://cognito.example.com');
 
 describe('Cognito Hosted UI URLs', () => {
+  it('round-trips signup intent in the validated OAuth state', () => {
+    const state = createAndStoreOauthState('signup');
+
+    expect(sessionStorage.getItem('cognito_oauth_state')).toBe(state);
+    expect(isSignupOauthState(state)).toBe(true);
+    expect(isSignupOauthState(createAndStoreOauthState())).toBe(false);
+  });
+
   it('requests fragment tokens for login', () => {
     const url = parseHostedUiUrl(buildAuthorizeUrl('login-state'));
 

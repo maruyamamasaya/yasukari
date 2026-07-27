@@ -100,7 +100,7 @@ export default function LoginPage() {
     setError('');
     setStartingSignup(true);
     try {
-      const state = createAndStoreOauthState();
+      const state = createAndStoreOauthState('signup');
       sessionStorage.setItem(SIGNUP_INTENT_KEY, '1');
       window.location.href = buildSignupUrl(state);
     } catch (err) {
@@ -128,7 +128,7 @@ export default function LoginPage() {
     setError('');
     setStartingSignup(true);
     try {
-      const state = createAndStoreOauthState();
+      const state = createAndStoreOauthState('signup');
       sessionStorage.setItem(SIGNUP_INTENT_KEY, '1');
       window.location.href = buildSignupUrl(state, { lang: 'en' });
     } catch (err) {
