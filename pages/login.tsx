@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { buildAuthorizeUrl, buildSignupUrl, createAndStoreOauthState } from '../lib/cognitoHostedUi';
+import { SIGNUP_INTENT_KEY } from '../lib/conversionTracking';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -68,6 +69,7 @@ export default function LoginPage() {
     setError('');
     setStartingLogin(true);
     try {
+      sessionStorage.removeItem(SIGNUP_INTENT_KEY);
       const state = createAndStoreOauthState();
       window.location.href = buildAuthorizeUrl(state);
     } catch (err) {
@@ -99,6 +101,7 @@ export default function LoginPage() {
     setStartingSignup(true);
     try {
       const state = createAndStoreOauthState();
+      sessionStorage.setItem(SIGNUP_INTENT_KEY, '1');
       window.location.href = buildSignupUrl(state);
     } catch (err) {
       console.error(err);
@@ -111,6 +114,7 @@ export default function LoginPage() {
     setError('');
     setStartingLogin(true);
     try {
+      sessionStorage.removeItem(SIGNUP_INTENT_KEY);
       const state = createAndStoreOauthState();
       window.location.href = buildAuthorizeUrl(state, { lang: 'en' });
     } catch (err) {
@@ -125,6 +129,7 @@ export default function LoginPage() {
     setStartingSignup(true);
     try {
       const state = createAndStoreOauthState();
+      sessionStorage.setItem(SIGNUP_INTENT_KEY, '1');
       window.location.href = buildSignupUrl(state, { lang: 'en' });
     } catch (err) {
       console.error(err);

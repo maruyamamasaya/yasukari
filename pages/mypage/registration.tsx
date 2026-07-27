@@ -7,6 +7,7 @@ import type { NextPage } from 'next';
 import { formatDisplayPhoneNumber } from '../../lib/phoneNumber';
 import { uploadLicenseImage } from '../../lib/licenseUpload';
 import type { RegistrationData } from '../../types/registration';
+import { REGISTRATION_COMPLETE_KEY } from '../../lib/conversionTracking';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -544,8 +545,10 @@ const RegistrationPage: NextPage = () => {
 
         setSubmitStatus('success');
         setSubmitMessage(result.message || '登録情報を保存しました。');
+        const isFirstRegistration = !hasPrefilledRegistration;
+        if (isFirstRegistration) sessionStorage.setItem(REGISTRATION_COMPLETE_KEY, '1');
         setTimeout(() => {
-          void router.push('/mypage');
+          void router.push(isFirstRegistration ? '/mypage/registration/thanks' : '/mypage');
         }, 600);
       } catch (error) {
         const message = error instanceof Error ? error.message : '保存に失敗しました。';
@@ -557,7 +560,7 @@ const RegistrationPage: NextPage = () => {
         }, 400);
       }
     },
-    [formData, licenseUploads, router, sessionUser],
+    [formData, hasPrefilledRegistration, licenseUploads, router, sessionUser],
   );
 
   return (

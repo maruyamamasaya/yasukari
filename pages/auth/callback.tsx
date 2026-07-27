@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { COGNITO_OAUTH_STATE_KEY } from '../../lib/cognitoHostedUi';
+import { SIGNUP_COMPLETE_KEY, SIGNUP_INTENT_KEY } from '../../lib/conversionTracking';
 
 export default function CognitoCallbackPage() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function CognitoCallbackPage() {
       // 2. Cognito からの error があればそれを表示して終了
       const urlError = params.get('error');
       if (urlError) {
+        sessionStorage.removeItem(SIGNUP_INTENT_KEY);
         setError(params.get('error_description') ?? urlError);
         return;
       }
@@ -46,6 +48,7 @@ export default function CognitoCallbackPage() {
 
       if (!returnedState || !expectedState || returnedState !== expectedState) {
         sessionStorage.removeItem(COGNITO_OAUTH_STATE_KEY);
+        sessionStorage.removeItem(SIGNUP_INTENT_KEY);
         setError('認証状態を確認できませんでした。もう一度ログインからお試しください。');
         return;
       }
@@ -81,8 +84,11 @@ export default function CognitoCallbackPage() {
         return;
       }
 
-      // 6. 正常時はマイページへ
-      await router.replace('/mypage/profile-setup?fromLogin=1');
+      // 6. 新規登録導線だけサンクスページへ（intent はここで必ず消費する）
+      const isSignup = sessionStorage.getItem(SIGNUP_INTENT_KEY) === '1';
+      sessionStorage.removeItem(SIGNUP_INTENT_KEY);
+      if (isSignup) sessionStorage.setItem(SIGNUP_COMPLETE_KEY, '1');
+      await router.replace(isSignup ? '/account/thanks' : '/mypage/profile-setup?fromLogin=1');
       window.location.reload();
     };
 

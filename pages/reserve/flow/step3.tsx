@@ -6,6 +6,7 @@ import type { RegistrationData } from "../../../types/registration";
 import type { Reservation } from "../../../lib/reservations";
 import PayjpCheckout from "../../../components/PayjpCheckout";
 import { getPayjpPublicKey, getPayjpPublicKeyError } from "../../../lib/payjp";
+import { PURCHASE_COMPLETE_KEY } from "../../../lib/conversionTracking";
 
 const ACCESSORY_KEYS = ["halfCap", "jetHelmet", "brandHelmet", "glove"] as const;
 const RESERVE_FLOW_STEP3_STORAGE_KEY = "reserve-flow-step3-payload";
@@ -346,8 +347,9 @@ export default function ReserveFlowStep3() {
       );
 
       if (reservation) {
+        sessionStorage.setItem(PURCHASE_COMPLETE_KEY, reservation.id);
         void router.push({
-          pathname: "/reserve/flow/complete",
+          pathname: "/reserve/thanks",
           query: {
             reservationId: reservation.id,
             store,
