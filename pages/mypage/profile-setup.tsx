@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
+import { completePendingSignup } from '../../lib/conversionTracking';
 import {
   COUNTRY_OPTIONS,
   findCountryByDialCodePrefix,
@@ -170,7 +171,8 @@ const ProfileSetupPage: NextPage = () => {
 
       const missing = REQUIRED_KEYS.filter((key) => !(nextAttributes[key] ?? '').trim());
       if (missing.length === 0) {
-        await router.replace(applyLocaleToPath('/mypage'));
+        const isCompletedSignup = completePendingSignup();
+        await router.replace(isCompletedSignup ? '/account/thanks' : applyLocaleToPath('/mypage'));
       }
     } catch (err) {
       console.error(err);
