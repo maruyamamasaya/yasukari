@@ -1,6 +1,9 @@
 import {
+  completePendingSignup,
   consumeSessionFlag,
   pushDataLayerEvent,
+  SIGNUP_COMPLETE_KEY,
+  SIGNUP_INTENT_KEY,
   trackPurchaseOnce,
 } from '../lib/conversionTracking';
 
@@ -20,6 +23,16 @@ describe('conversion tracking', () => {
   it('pushes the exact registration event name', () => {
     pushDataLayerEvent({ event: 'complete_registration' });
     expect(window.dataLayer).toEqual([{ event: 'complete_registration' }]);
+  });
+
+  it('marks signup completion only after a pending signup is completed', () => {
+    expect(completePendingSignup()).toBe(false);
+    expect(sessionStorage.getItem(SIGNUP_COMPLETE_KEY)).toBeNull();
+
+    sessionStorage.setItem(SIGNUP_INTENT_KEY, '1');
+    expect(completePendingSignup()).toBe(true);
+    expect(sessionStorage.getItem(SIGNUP_INTENT_KEY)).toBeNull();
+    expect(sessionStorage.getItem(SIGNUP_COMPLETE_KEY)).toBe('1');
   });
 
   it('deduplicates purchases by transaction id and sends a numeric value', () => {

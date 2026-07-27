@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { COGNITO_OAUTH_STATE_KEY } from '../../lib/cognitoHostedUi';
-import { SIGNUP_COMPLETE_KEY, SIGNUP_INTENT_KEY } from '../../lib/conversionTracking';
+import { SIGNUP_INTENT_KEY } from '../../lib/conversionTracking';
 
 export default function CognitoCallbackPage() {
   const router = useRouter();
@@ -84,18 +84,13 @@ export default function CognitoCallbackPage() {
         return;
       }
 
-      // 6. 新規登録導線だけサンクスページへ（intent はここで必ず消費する）
-      const isSignup = sessionStorage.getItem(SIGNUP_INTENT_KEY) === '1';
-      sessionStorage.removeItem(SIGNUP_INTENT_KEY);
-      if (isSignup) sessionStorage.setItem(SIGNUP_COMPLETE_KEY, '1');
-
       // The token cookie is written by the API response above. Use a full-page
       // navigation so the next request is guaranteed to include that cookie.
       // Calling reload immediately after router.replace can reload this callback
       // URL before Next.js has committed the route change.
-      window.location.replace(
-        isSignup ? '/account/thanks' : '/mypage/profile-setup?fromLogin=1'
-      );
+      // Account creation is only complete after the user submits their basic
+      // information. Keep the signup intent until that submission succeeds.
+      window.location.replace('/mypage/profile-setup?fromLogin=1');
     };
 
     void processCallback();
