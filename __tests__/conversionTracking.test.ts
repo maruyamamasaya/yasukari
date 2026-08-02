@@ -35,6 +35,13 @@ describe('conversion tracking', () => {
     expect(sessionStorage.getItem(SIGNUP_COMPLETE_KEY)).toBe('1');
   });
 
+  it('marks signup completion when the validated callback confirms the signup flow', () => {
+    expect(sessionStorage.getItem(SIGNUP_INTENT_KEY)).toBeNull();
+
+    expect(completePendingSignup(true)).toBe(true);
+    expect(sessionStorage.getItem(SIGNUP_COMPLETE_KEY)).toBe('1');
+  });
+
   it('deduplicates purchases by transaction id and sends a numeric value', () => {
     expect(trackPurchaseOnce('BJ250A-014733', 4480)).toBe(true);
     expect(trackPurchaseOnce('BJ250A-014733', 4480)).toBe(false);

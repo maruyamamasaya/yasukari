@@ -25,8 +25,8 @@ export const consumeSessionFlag = (key: string): boolean => {
   return true;
 };
 
-export const completePendingSignup = (): boolean => {
-  if (sessionStorage.getItem(SIGNUP_INTENT_KEY) !== '1') return false;
+export const completePendingSignup = (confirmedSignupFlow = false): boolean => {
+  if (!confirmedSignupFlow && sessionStorage.getItem(SIGNUP_INTENT_KEY) !== '1') return false;
 
   sessionStorage.removeItem(SIGNUP_INTENT_KEY);
   sessionStorage.setItem(SIGNUP_COMPLETE_KEY, '1');
