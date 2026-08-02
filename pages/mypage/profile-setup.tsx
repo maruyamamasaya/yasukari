@@ -111,7 +111,7 @@ const ProfileSetupPage: NextPage = () => {
       const missing = REQUIRED_KEYS.filter((key) => !(attributes?.[key] ?? '').trim());
       if (missing.length === 0 && !completedProfileRedirectStarted.current) {
         completedProfileRedirectStarted.current = true;
-        const completedPendingSignup = completePendingSignup();
+        const completedPendingSignup = completePendingSignup(fromSignup);
         const isSignupFlow = fromSignup || completedPendingSignup;
         window.location.replace(getCompletedProfileRedirect({
           isSignupFlow,
@@ -187,7 +187,7 @@ const ProfileSetupPage: NextPage = () => {
       setAttributes(nextAttributes);
 
       if (missing.length === 0) {
-        const completedPendingSignup = completePendingSignup();
+        const completedPendingSignup = completePendingSignup(fromSignup);
         const isSignupFlow = fromSignup || completedPendingSignup;
         window.location.replace(getCompletedProfileRedirect({
           isSignupFlow,
