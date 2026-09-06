@@ -27,6 +27,9 @@ type PayjpChargeResponse = {
   paidAt?: string;
 };
 
+const isFiniteNumber = (value: number | undefined): value is number =>
+  typeof value === "number" && Number.isFinite(value);
+
 const buildMetadataParams = (metadata?: Record<string, string>) => {
   const params = new URLSearchParams();
   if (!metadata) return params;
@@ -77,10 +80,10 @@ export default async function handler(
       const multiplier = pricing.priceMultiplier === 2 ? 2 : 1;
       const expectedRentalFee = Math.round(baseRentalPrice * multiplier);
       const components = [pricing.accessoryTotal, pricing.protectionTotal, pricing.highSeasonAndDiscountTotal];
-      if (components.some((value) => typeof value !== "number" || !Number.isFinite(value))) {
+      if (!components.every(isFiniteNumber)) {
         return res.status(400).json({ error: "料金の内訳が不正です。" });
       }
-      const expectedAmount = expectedRentalFee + components.reduce((sum, value) => sum + (value as number), 0);
+      const expectedAmount = expectedRentalFee + components.reduce((sum, value) => sum + value, 0);
       if (pricing.rentalFee !== expectedRentalFee || body.amount !== expectedAmount) {
         return res.status(409).json({ error: "料金が更新されました。お見積りを再確認してください。" });
       }
