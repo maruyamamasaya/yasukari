@@ -1,5 +1,6 @@
 const hostedUiDomain = (process.env.NEXT_PUBLIC_COGNITO_DOMAIN ?? '').replace(/\/$/, '');
-const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? 'vicsspgv2q7mtn6m6os2n893j';
+export const cognitoClientId =
+  process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? 'vicsspgv2q7mtn6m6os2n893j';
 const redirectUri =
   process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI ?? 'https://yasukari.com/auth/callback';
 const redirectUriObject = (() => {
@@ -58,7 +59,7 @@ export const isSignupOauthState = (state: string) => state.startsWith(SIGNUP_STA
 
 export const buildAuthorizeUrl = (state: string, options?: { lang?: string }) => {
   const params = new URLSearchParams({
-    client_id: clientId,
+    client_id: cognitoClientId,
     response_type: 'token',
     scope: scopeList.join(' '),
     redirect_uri: redirectUri,
@@ -75,7 +76,7 @@ export const buildAuthorizeUrl = (state: string, options?: { lang?: string }) =>
 
 export const buildSignupUrl = (state = 'signup', options?: { lang?: string }) => {
   const params = new URLSearchParams({
-    client_id: clientId,
+    client_id: cognitoClientId,
     // The callback consumes tokens from the URL fragment. Keep signup on the
     // same implicit flow as login so Cognito does not return an unhandled
     // authorization code in the query string.
@@ -95,7 +96,7 @@ export const buildSignupUrl = (state = 'signup', options?: { lang?: string }) =>
 
 export const buildLogoutUrl = () => {
   const params = new URLSearchParams({
-    client_id: clientId,
+    client_id: cognitoClientId,
     logout_uri: logoutRedirectUri,
   });
 

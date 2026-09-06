@@ -232,6 +232,15 @@ text: '会員限定クーポンや新着車両をいち早くご案内' }].map(
                   >
                     新規登録へ進む
                   </button>
+                  <p className="mt-4 text-center text-sm text-gray-600">
+                    新規登録後、確認メールが届かない方は
+                    <Link
+                      href="/resend-confirmation"
+                      className="ml-1 font-semibold text-red-600 underline underline-offset-2"
+                    >
+                      確認メールを再送
+                    </Link>
+                  </p>
                 </>
               )}
               <div className="mt-3 text-center text-xs text-gray-500">
