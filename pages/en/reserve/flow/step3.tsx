@@ -6,6 +6,7 @@ import type { RegistrationData } from "../../../../types/registration";
 import type { Reservation } from "../../../../lib/reservations";
 import PayjpCheckout from "../../../../components/PayjpCheckout";
 import { getPayjpPublicKey, getPayjpPublicKeyError } from "../../../../lib/payjp";
+import { japaneseWallTimeToIso } from "../../../../lib/reservationDates";
 
 const ACCESSORY_KEYS = ["halfCap", "jetHelmet", "brandHelmet", "glove"] as const;
 
@@ -222,8 +223,8 @@ export default function ReserveFlowStep3() {
     setIsSavingReservation(true);
     setStatusMessage("Processing payment...");
 
-    const pickupAt = new Date(`${pickupDate}T${pickupTime}:00`).toISOString();
-    const returnAt = new Date(`${returnDate}T${returnTime}:00`).toISOString();
+    const pickupAt = japaneseWallTimeToIso(pickupDate, pickupTime);
+    const returnAt = japaneseWallTimeToIso(returnDate, returnTime);
 
     try {
       const chargeResponse = await fetch("/api/payments/payjp", {
