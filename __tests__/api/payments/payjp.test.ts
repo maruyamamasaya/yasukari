@@ -2,11 +2,23 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import handler from "../../../pages/api/payments/payjp";
 import { verifyCognitoIdToken } from "../../../lib/cognitoServer";
+import { getServerRentalPrice } from "../../../lib/server/rentalPrice";
 
 jest.mock("../../../lib/cognitoServer", () => ({
   verifyCognitoIdToken: jest.fn(),
   COGNITO_ID_TOKEN_COOKIE: "cognito_id_token",
 }));
+jest.mock("../../../lib/server/rentalPrice", () => ({ getServerRentalPrice: jest.fn() }));
+
+const validPricing = {
+  vehicleModelId: 10,
+  rentalDays: 1,
+  rentalFee: 1200,
+  priceMultiplier: 1,
+  accessoryTotal: 0,
+  protectionTotal: 0,
+  highSeasonAndDiscountTotal: 0,
+};
 
 const originalFetch = global.fetch;
 
@@ -25,6 +37,7 @@ describe("POST /api/payments/payjp", () => {
     jest.resetAllMocks();
     process.env.PAYJP_SECRET_KEY = "sk_live_sample";
     process.env.PAYJP_SECRET_KEY_TEST = "sk_test_sample";
+    (getServerRentalPrice as jest.Mock).mockResolvedValue(1200);
   });
 
   afterEach(() => {
@@ -63,7 +76,7 @@ describe("POST /api/payments/payjp", () => {
     const req = mockReq({
       method: "POST",
       cookies: { cognito_id_token: "token" },
-      body: { token: "tok_test", amount: 1200, description: "Test" },
+      body: { token: "tok_test", amount: 1200, description: "Test", pricing: validPricing },
     });
     const res = mockRes();
 
@@ -99,6 +112,7 @@ describe("POST /api/payments/payjp", () => {
         amount: 1200,
         description: "Test",
         email: "info@yasukaribike.com",
+        pricing: validPricing,
       },
     });
     const res = mockRes();
@@ -113,5 +127,21 @@ describe("POST /api/payments/payjp", () => {
       }),
       body: expect.any(String),
     });
+  });
+
+  it("rejects a client amount that differs from server pricing", async () => {
+    (verifyCognitoIdToken as jest.Mock).mockResolvedValue({ sub: "user" });
+    global.fetch = jest.fn() as unknown as typeof fetch;
+    const req = mockReq({
+      method: "POST",
+      cookies: { cognito_id_token: "token" },
+      body: { token: "tok_test", amount: 3980, pricing: { ...validPricing, rentalFee: 3980 } },
+    });
+    const res = mockRes();
+
+    await handler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });

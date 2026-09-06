@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from "../../../lib/cognitoServer";
 import { getPayjpSecretKey, getPayjpSecretKeyError } from "../../../lib/payjpServer";
+import { getServerRentalPrice } from "../../../lib/server/rentalPrice";
 
 type PayjpChargeRequest = {
   token?: string;
@@ -9,6 +10,15 @@ type PayjpChargeRequest = {
   description?: string;
   metadata?: Record<string, string>;
   email?: string;
+  pricing?: {
+    vehicleModelId?: number;
+    rentalDays?: number;
+    rentalFee?: number;
+    priceMultiplier?: number;
+    accessoryTotal?: number;
+    protectionTotal?: number;
+    highSeasonAndDiscountTotal?: number;
+  };
 };
 
 type PayjpChargeResponse = {
@@ -46,6 +56,34 @@ export default async function handler(
   const body = req.body as PayjpChargeRequest;
   if (!body.token || !body.amount) {
     return res.status(400).json({ error: "token と amount が必要です。" });
+  }
+
+  const pricing = body.pricing;
+  const isExtensionCharge = Boolean(body.metadata?.reservationId && body.metadata?.extensionDays);
+  if ((!pricing || !pricing.vehicleModelId || !pricing.rentalDays) && !isExtensionCharge) {
+    return res.status(400).json({ error: "料金情報が不足しています。お見積りからやり直してください。" });
+  }
+
+  if (pricing) {
+    try {
+      const baseRentalPrice = await getServerRentalPrice(pricing.vehicleModelId, pricing.rentalDays);
+      if (baseRentalPrice == null) {
+        return res.status(409).json({ error: "レンタル料金を確認できないため決済できません。" });
+      }
+      const multiplier = pricing.priceMultiplier === 2 ? 2 : 1;
+      const expectedRentalFee = Math.round(baseRentalPrice * multiplier);
+      const components = [pricing.accessoryTotal, pricing.protectionTotal, pricing.highSeasonAndDiscountTotal];
+      if (components.some((value) => typeof value !== "number" || !Number.isFinite(value))) {
+        return res.status(400).json({ error: "料金の内訳が不正です。" });
+      }
+      const expectedAmount = expectedRentalFee + components.reduce((sum, value) => sum + (value as number), 0);
+      if (pricing.rentalFee !== expectedRentalFee || body.amount !== expectedAmount) {
+        return res.status(409).json({ error: "料金が更新されました。お見積りを再確認してください。" });
+      }
+    } catch (error) {
+      console.error("Failed to verify charge amount", error);
+      return res.status(500).json({ error: "料金の検証に失敗しました。" });
+    }
   }
 
   try {

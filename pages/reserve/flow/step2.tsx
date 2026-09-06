@@ -16,6 +16,7 @@ import {
   formatYen,
 } from "../../../lib/pricing";
 import useInternationalPricingMultiplier from "../../../lib/useInternationalPricingMultiplier";
+import { resolveRentalPrice } from "../../../lib/rentalPrice";
 
 type AddOn = {
   key: string;
@@ -39,7 +40,7 @@ const HELMET_ACCESSORY_KEYS = new Set(["halfCap", "jetHelmet", "brandHelmet"]);
 const RESERVE_FLOW_STEP3_STORAGE_KEY = "reserve-flow-step3-payload";
 
 const defaultFees = {
-  rental: 3980,
+  rental: 0,
   couponDiscount: 0,
 };
 
@@ -618,7 +619,7 @@ export default function ReserveFlowStep2() {
         if (controller.signal.aborted) return;
         console.error("Failed to load vehicle", error);
         setVehicleModelId(null);
-        setRentalFee(defaultFees.rental);
+        setRentalFee(0);
         setRentalFeeError("車両情報の取得に失敗しました。");
       }
     };
@@ -635,44 +636,35 @@ export default function ReserveFlowStep2() {
 
     const loadRentalFee = async () => {
       try {
-        const pricesResponse = await fetch(
-          `/api/vehicle-rental-prices?vehicle_type_id=${vehicleModelId}`,
-          { signal: controller.signal }
-        );
+        const [pricesResponse, modelsResponse, classesResponse] = await Promise.all([
+          fetch(`/api/vehicle-rental-prices?vehicle_type_id=${vehicleModelId}`, { signal: controller.signal }),
+          fetch("/api/bike-models", { signal: controller.signal }),
+          fetch("/api/bike-classes", { signal: controller.signal }),
+        ]);
 
-        if (!pricesResponse.ok) {
+        if (!pricesResponse.ok || !modelsResponse.ok || !classesResponse.ok) {
           throw new Error("Failed to load rental prices");
         }
 
-        const prices = (await pricesResponse.json()) as Array<{
-          days: number;
-          price: number;
-        }>;
-        const matched = prices.find((item) => item.days === rentalDays);
+        const prices = (await pricesResponse.json()) as Array<{ days: number; price: number }>;
+        const models = (await modelsResponse.json()) as BikeModel[];
+        const classes = (await classesResponse.json()) as BikeClass[];
+        const model = models.find((item) => item.modelId === vehicleModelId);
+        const bikeClass = classes.find((item) => item.classId === model?.classId);
+        const resolvedPrice = resolveRentalPrice(prices, bikeClass?.base_prices, rentalDays);
 
-        if (matched?.price != null) {
-          setRentalFee(matched.price);
+        if (resolvedPrice != null) {
+          setRentalFee(resolvedPrice);
           setRentalFeeError(null);
           return;
         }
 
-        if (rentalDays > 31) {
-          const monthPrice = prices.find((item) => item.days === 31)?.price;
-          if (monthPrice != null) {
-            const dailyRate = monthPrice / 31;
-            const prorated = Math.round(dailyRate * rentalDays);
-            setRentalFee(prorated);
-            setRentalFeeError(null);
-            return;
-          }
-        }
-
-        setRentalFee(defaultFees.rental);
+        setRentalFee(0);
         setRentalFeeError("レンタル料金が設定されていません。");
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("Failed to load rental fee", error);
-        setRentalFee(defaultFees.rental);
+        setRentalFee(0);
         setRentalFeeError("レンタル料金の取得に失敗しました。");
       }
     };
@@ -753,6 +745,10 @@ export default function ReserveFlowStep2() {
       returnTime,
       couponCode,
       couponDiscount,
+      rentalFee: adjustedRentalFee,
+      vehicleModelId,
+      rentalDays,
+      priceMultiplier,
       accessoryTotal: selectedAccessoryFee,
       protectionTotal: selectedProtectionFee,
       totalAmount,
@@ -1032,7 +1028,7 @@ export default function ReserveFlowStep2() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  disabled={!authChecked}
+                  disabled={!authChecked || Boolean(rentalFeeError) || rentalFee <= 0}
                   className="inline-flex w-full items-center justify-center rounded-full bg-red-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-red-200"
                 >
                   決済情報の入力へ
