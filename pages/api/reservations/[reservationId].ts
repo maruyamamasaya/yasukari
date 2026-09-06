@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getDocumentClient } from "../../../lib/dynamodb";
-import { formatDateKey } from "../../../lib/dashboard/utils";
+import { buildReservationDateKeys } from "../../../lib/reservationDates";
 import type {
   RentalAvailabilityMap,
   RentalAvailabilityStatus,
@@ -67,21 +67,7 @@ const normalizeRentalAvailability = (value: unknown): RentalAvailabilityMap => {
   );
 };
 
-const buildDateKeysInRange = (start: string, end: string): string[] => {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-    return [];
-  }
-
-  const keys: string[] = [];
-  const cursor = new Date(startDate);
-  while (cursor <= endDate) {
-    keys.push(formatDateKey(cursor));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-  return keys;
-};
+const buildDateKeysInRange = buildReservationDateKeys;
 
 const isVehicleAvailableForDateKeys = (
   availability: RentalAvailabilityMap,

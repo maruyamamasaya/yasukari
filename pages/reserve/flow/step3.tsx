@@ -7,6 +7,7 @@ import type { Reservation } from "../../../lib/reservations";
 import PayjpCheckout from "../../../components/PayjpCheckout";
 import { getPayjpPublicKey, getPayjpPublicKeyError } from "../../../lib/payjp";
 import { PURCHASE_COMPLETE_KEY } from "../../../lib/conversionTracking";
+import { japaneseWallTimeToIso } from "../../../lib/reservationDates";
 
 const ACCESSORY_KEYS = ["halfCap", "jetHelmet", "brandHelmet", "glove"] as const;
 const RESERVE_FLOW_STEP3_STORAGE_KEY = "reserve-flow-step3-payload";
@@ -253,8 +254,8 @@ export default function ReserveFlowStep3() {
     setIsSavingReservation(true);
     setStatusMessage("決済処理を実行しています…");
 
-    const pickupAt = new Date(`${pickupDate}T${pickupTime}:00`).toISOString();
-    const returnAt = new Date(`${returnDate}T${returnTime}:00`).toISOString();
+    const pickupAt = japaneseWallTimeToIso(pickupDate, pickupTime);
+    const returnAt = japaneseWallTimeToIso(returnDate, returnTime);
 
     let paymentId: string | null = null;
 

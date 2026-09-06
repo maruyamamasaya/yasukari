@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { verifyCognitoIdToken, COGNITO_ID_TOKEN_COOKIE } from "../../../lib/cognitoServer";
 import { getDocumentClient } from "../../../lib/dynamodb";
-import { formatDateKey } from "../../../lib/dashboard/utils";
+import { buildReservationDateKeys } from "../../../lib/reservationDates";
 import {
   createReservation,
   fetchAllReservations,
@@ -168,24 +168,6 @@ const normalizeRentalAvailability = (
   }, {});
 };
 
-const buildDateKeysInRange = (start: string, end: string): string[] => {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-
-  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-    return [];
-  }
-
-  const keys: string[] = [];
-  const cursor = new Date(startDate);
-  while (cursor <= endDate) {
-    keys.push(formatDateKey(cursor));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  return keys;
-};
-
 const buildRenterNote = (memberName: string): string | undefined => {
   const normalized = memberName.trim();
   return normalized.length > 0 ? normalized : undefined;
@@ -200,31 +182,10 @@ const isReservationRangeAvailable = (
     return false;
   }
 
-  const pickupDateTime = new Date(pickupAt);
-  const returnDateTime = new Date(returnAt);
-  if (
-    Number.isNaN(pickupDateTime.getTime()) ||
-    Number.isNaN(returnDateTime.getTime())
-  ) {
-    return false;
-  }
+  const dateKeys = buildReservationDateKeys(pickupAt, returnAt);
+  if (dateKeys.length === 0) return false;
 
-  const startDate = new Date(
-    pickupDateTime.getFullYear(),
-    pickupDateTime.getMonth(),
-    pickupDateTime.getDate()
-  );
-  const endDate = new Date(
-    returnDateTime.getFullYear(),
-    returnDateTime.getMonth(),
-    returnDateTime.getDate()
-  );
-  if (startDate > endDate) {
-    return false;
-  }
-
-  for (const cursor = new Date(startDate); cursor <= endDate; cursor.setDate(cursor.getDate() + 1)) {
-    const key = formatDateKey(cursor);
+  for (const key of dateKeys) {
     if (availabilityMap[key]?.status !== "AVAILABLE") {
       return false;
     }
@@ -381,7 +342,7 @@ export default async function handler(
         notes: body.notes,
       });
 
-      const reservationDateKeys = buildDateKeysInRange(
+      const reservationDateKeys = buildReservationDateKeys(
         reservation.pickupAt,
         reservation.returnAt
       );
