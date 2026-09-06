@@ -65,6 +65,10 @@ export default async function handler(
   }
 
   if (pricing) {
+    if (typeof pricing.vehicleModelId !== "number" || typeof pricing.rentalDays !== "number") {
+      return res.status(400).json({ error: "料金情報が不足しています。お見積りからやり直してください。" });
+    }
+
     try {
       const baseRentalPrice = await getServerRentalPrice(pricing.vehicleModelId, pricing.rentalDays);
       if (baseRentalPrice == null) {
