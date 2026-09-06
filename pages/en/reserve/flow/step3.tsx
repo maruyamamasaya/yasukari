@@ -47,6 +47,10 @@ export default function ReserveFlowStep3() {
   const [pickupTime, setPickupTime] = useState("10:00");
   const [returnTime, setReturnTime] = useState("10:00");
   const [totalAmount, setTotalAmount] = useState(7830);
+  const [rentalFee, setRentalFee] = useState(0);
+  const [vehicleModelId, setVehicleModelId] = useState(0);
+  const [rentalDays, setRentalDays] = useState(0);
+  const [priceMultiplier, setPriceMultiplier] = useState(2);
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [protectionTotal, setProtectionTotal] = useState(0);
@@ -116,6 +120,10 @@ export default function ReserveFlowStep3() {
     if (typeof params.returnDate === "string" && params.returnDate) setReturnDate(params.returnDate);
     if (typeof params.pickupTime === "string" && params.pickupTime) setPickupTime(params.pickupTime);
     if (typeof params.returnTime === "string" && params.returnTime) setReturnTime(params.returnTime);
+    if (typeof params.rentalFee === "string") setRentalFee(Number(params.rentalFee));
+    if (typeof params.vehicleModelId === "string") setVehicleModelId(Number(params.vehicleModelId));
+    if (typeof params.rentalDays === "string") setRentalDays(Number(params.rentalDays));
+    if (params.priceMultiplier === "1" || params.priceMultiplier === "2") setPriceMultiplier(Number(params.priceMultiplier));
     if (typeof params.totalAmount === "string") {
       const parsed = Number(params.totalAmount);
       if (!Number.isNaN(parsed)) {
@@ -225,6 +233,15 @@ export default function ReserveFlowStep3() {
         body: JSON.stringify({
           token: tokenId,
           amount: totalAmount,
+          pricing: {
+            vehicleModelId,
+            rentalDays,
+            rentalFee,
+            priceMultiplier,
+            accessoryTotal,
+            protectionTotal,
+            highSeasonAndDiscountTotal: totalAmount - rentalFee - accessoryTotal - protectionTotal,
+          },
           description: `${store} ${modelName} ${managementNumber}`,
           email: payjpCustomerEmail,
           metadata: {
@@ -321,6 +338,10 @@ export default function ReserveFlowStep3() {
     pickupTime,
     payjpCustomerEmail,
     registration,
+    rentalDays,
+    rentalFee,
+    priceMultiplier,
+    vehicleModelId,
     rentalDurationHours,
     returnDate,
     returnTime,

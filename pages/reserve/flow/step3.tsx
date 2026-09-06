@@ -49,6 +49,10 @@ export default function ReserveFlowStep3() {
   const [pickupTime, setPickupTime] = useState("10:00");
   const [returnTime, setReturnTime] = useState("10:00");
   const [totalAmount, setTotalAmount] = useState(7830);
+  const [rentalFee, setRentalFee] = useState(0);
+  const [vehicleModelId, setVehicleModelId] = useState(0);
+  const [rentalDays, setRentalDays] = useState(0);
+  const [priceMultiplier, setPriceMultiplier] = useState(1);
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [protectionTotal, setProtectionTotal] = useState(0);
@@ -117,6 +121,10 @@ export default function ReserveFlowStep3() {
         pickupTime?: string;
         returnTime?: string;
         totalAmount?: number;
+        rentalFee?: number;
+        vehicleModelId?: number;
+        rentalDays?: number;
+        priceMultiplier?: number;
         couponCode?: string;
         couponDiscount?: number;
         accessoryTotal?: number;
@@ -134,6 +142,9 @@ export default function ReserveFlowStep3() {
         !payload.pickupTime ||
         !payload.returnTime ||
         typeof payload.totalAmount !== "number"
+        || typeof payload.rentalFee !== "number"
+        || typeof payload.vehicleModelId !== "number"
+        || typeof payload.rentalDays !== "number"
       ) {
         throw new Error("Invalid reservation payload");
       }
@@ -146,6 +157,10 @@ export default function ReserveFlowStep3() {
       setPickupTime(payload.pickupTime);
       setReturnTime(payload.returnTime);
       setTotalAmount(payload.totalAmount);
+      setRentalFee(payload.rentalFee);
+      setVehicleModelId(payload.vehicleModelId);
+      setRentalDays(payload.rentalDays);
+      setPriceMultiplier(payload.priceMultiplier === 2 ? 2 : 1);
       setCouponCode(payload.couponCode ?? "");
       setCouponDiscount(typeof payload.couponDiscount === "number" ? payload.couponDiscount : 0);
       setAccessoryTotal(typeof payload.accessoryTotal === "number" ? payload.accessoryTotal : 0);
@@ -279,6 +294,15 @@ export default function ReserveFlowStep3() {
         body: JSON.stringify({
           token: tokenId,
           amount: totalAmount,
+          pricing: {
+            vehicleModelId,
+            rentalDays,
+            rentalFee,
+            priceMultiplier,
+            accessoryTotal,
+            protectionTotal,
+            highSeasonAndDiscountTotal: totalAmount - rentalFee - accessoryTotal - protectionTotal,
+          },
           description: `${store} ${modelName} ${managementNumber}`,
           email: payjpCustomerEmail,
           metadata: {
@@ -413,6 +437,10 @@ export default function ReserveFlowStep3() {
     pickupTime,
     payjpCustomerEmail,
     registration,
+    rentalDays,
+    rentalFee,
+    priceMultiplier,
+    vehicleModelId,
     rentalDurationHours,
     returnDate,
     returnTime,
