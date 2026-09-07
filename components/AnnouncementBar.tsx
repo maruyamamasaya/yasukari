@@ -96,6 +96,30 @@ export default function AnnouncementBar() {
   const linkHref = banner ? buildLink(banner) : undefined;
   const isExternal = linkHref ? /^https?:\/\//.test(linkHref) : false;
 
+  useEffect(() => {
+    const container = containerRef.current;
+    const content = contentRef.current;
+    if (!container || !content) {
+      return;
+    }
+
+    const update = () => {
+      setShouldScroll(content.scrollWidth > container.clientWidth);
+    };
+
+    update();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(update);
+      observer.observe(container);
+      observer.observe(content);
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [message]);
+
   return (
     <div className="announcement-bar">
       <div className="announcement-bar__container" ref={containerRef}>
