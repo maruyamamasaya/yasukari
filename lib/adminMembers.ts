@@ -300,6 +300,9 @@ const mapMember = (
     fullRegisteredAt: formatDateTime(fullRegistrationRawDate),
     notes: registration?.notes ?? "",
     isBlacklisted: registration?.is_blacklisted === true,
+    signupSource: registration?.signup_source || "-",
+    signupCampaign: registration?.signup_campaign || "-",
+    signupAt: formatDateTime(registration?.signup_at),
   };
 };
 

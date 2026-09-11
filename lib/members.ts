@@ -36,4 +36,7 @@ export type Member = {
   fullRegisteredAt: string;
   notes: string;
   isBlacklisted: boolean;
+  signupSource: string;
+  signupCampaign: string;
+  signupAt: string;
 };
