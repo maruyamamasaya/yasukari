@@ -33,6 +33,7 @@ export default function MemberListPage() {
       | "name"
       | "nameKana"
       | "role"
+      | "signupSource"
       | "isInternational"
       | "registrationStatus"
       | "updatedAt";
@@ -111,6 +112,8 @@ export default function MemberListPage() {
         member.nameKana,
         member.role,
         member.registrationStatus,
+        member.signupSource,
+        member.signupCampaign,
       ];
       return searchableValues.some((value) =>
         value?.toLowerCase().includes(normalizedTerm)
@@ -139,6 +142,7 @@ export default function MemberListPage() {
         case "name":
         case "nameKana":
         case "role":
+        case "signupSource":
         case "registrationStatus":
           return a[sortState.key].localeCompare(b[sortState.key], "ja") * directionMultiplier;
         default:
@@ -170,6 +174,18 @@ export default function MemberListPage() {
   const startIndex = (safeCurrentPage - 1) * pageSize;
   const pagedMembers = sortedMembers.slice(startIndex, startIndex + pageSize);
 
+  const attributionSummary = useMemo(() => {
+    const summary = new Map<string, { provisional: number; full: number }>();
+    members.forEach((member) => {
+      if (!member.signupSource || member.signupSource === "-") return;
+      const current = summary.get(member.signupSource) ?? { provisional: 0, full: 0 };
+      current.provisional += 1;
+      if (member.registrationStatus === "本登録済") current.full += 1;
+      summary.set(member.signupSource, current);
+    });
+    return Array.from(summary.entries()).sort(([a], [b]) => a.localeCompare(b, "ja"));
+  }, [members]);
+
   return (
     <>
       <Head>
@@ -192,12 +208,34 @@ export default function MemberListPage() {
               <p className={styles.sectionDescription}>{errorMessage}</p>
             )}
           </div>
+          {attributionSummary.length > 0 && (
+            <div className={`${tableStyles.wrapper} ${tableStyles.tableWrapper}`}>
+              <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
+                <thead>
+                  <tr>
+                    <th scope="col">流入元</th>
+                    <th scope="col">仮登録数</th>
+                    <th scope="col">本会員化数</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {attributionSummary.map(([source, totals]) => (
+                    <tr key={source}>
+                      <td>{source}</td>
+                      <td>{totals.provisional}</td>
+                      <td>{totals.full}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           <div className={styles.tableToolbar}>
             <div className={styles.tableToolbarGroup}>
               <input
                 type="search"
                 className={styles.tableSearchInput}
-                placeholder="メールアドレス・氏名・権限・ステータスで検索"
+                placeholder="メールアドレス・氏名・権限・ステータス・流入元で検索"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 aria-label="会員一覧を検索"
@@ -221,6 +259,34 @@ export default function MemberListPage() {
             <table className={`${tableStyles.table} ${tableStyles.dataTable}`}>
               <thead>
                 <tr>
+                  <th
+                    scope="col"
+                    aria-sort={
+                      sortState.key === "signupSource"
+                        ? sortState.direction === "asc"
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
+                  >
+                    <button
+                      type="button"
+                      className={tableStyles.sortableHeaderButton}
+                      onClick={() => toggleSort("signupSource")}
+                    >
+                      流入元
+                      <span
+                        className={`${tableStyles.sortIcon} ${
+                          sortState.key === "signupSource"
+                            ? sortState.direction === "asc"
+                              ? tableStyles.sortIconAsc
+                              : tableStyles.sortIconDesc
+                            : ""
+                        }`}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </th>
                   <th
                     scope="col"
                     aria-sort={
@@ -422,7 +488,7 @@ export default function MemberListPage() {
               <tbody>
                 {!isLoading && filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>該当する会員が見つかりませんでした。</td>
+                    <td colSpan={8}>該当する会員が見つかりませんでした。</td>
                   </tr>
                 ) : (
                   pagedMembers.map((member) => (
@@ -434,6 +500,10 @@ export default function MemberListPage() {
                         tabIndex={0}
                         aria-label={`${member.name} の詳細を開く`}
                       >
+                        <td>
+                          {member.signupSource}
+                          {member.signupCampaign !== "-" ? ` / ${member.signupCampaign}` : ""}
+                        </td>
                         <td>{member.email}</td>
                         <td>{member.name}</td>
                         <td>{member.nameKana}</td>

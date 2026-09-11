@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { buildAuthorizeUrl, buildSignupUrl, createAndStoreOauthState } from '../lib/cognitoHostedUi';
 import { SIGNUP_INTENT_KEY } from '../lib/conversionTracking';
+import { storeFirstTouchAttribution } from '../lib/signupAttribution';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -56,6 +57,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!router.isReady) return;
+
+    storeFirstTouchAttribution(new URLSearchParams(window.location.search));
 
     const queryError = router.query.error;
     if (typeof queryError === 'string') {

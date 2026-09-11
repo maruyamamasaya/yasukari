@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { COGNITO_OAUTH_STATE_KEY, isSignupOauthState } from '../../lib/cognitoHostedUi';
 import { SIGNUP_INTENT_KEY } from '../../lib/conversionTracking';
+import { readSignupAttributionCookie } from '../../lib/signupAttribution';
 
 export default function CognitoCallbackPage() {
   const router = useRouter();
@@ -90,6 +91,27 @@ export default function CognitoCallbackPage() {
         console.error(err);
         setError('ログイン情報を保持できませんでした。時間をおいて再度お試しください。');
         return;
+      }
+
+      if (isSignupFlow) {
+        const attribution = readSignupAttributionCookie();
+        if (attribution) {
+          try {
+            const response = await fetch('/api/auth/signup-attribution', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify(attribution),
+            });
+            if (!response.ok) {
+              throw new Error(`Failed to persist signup attribution: ${response.status}`);
+            }
+          } catch (err) {
+            console.error(err);
+            setError('流入元情報を保存できませんでした。ページを再読み込みしてお試しください。');
+            return;
+          }
+        }
       }
 
       // The token cookie is written by the API response above. Use a full-page

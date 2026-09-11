@@ -38,6 +38,12 @@ export type RegistrationData = {
   rental_terms_agreed_at?: string;
   notes?: string;
   is_blacklisted?: boolean;
+  signup_source?: string;
+  signup_campaign?: string;
+  signup_medium?: string;
+  signup_content?: string;
+  signup_term?: string;
+  signup_at?: string;
 };
 
 export const REQUIRED_REGISTRATION_FIELDS: (keyof RegistrationData)[] = [
