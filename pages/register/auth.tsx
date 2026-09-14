@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import type { NextPage } from 'next';
+import { SIGNUP_COMPLETE_KEY } from '../../lib/conversionTracking';
+import { buildProvisionalRegistrationThanksPath } from '../../lib/provisionalRegistrationRedirect';
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
 type LightMember = {
@@ -32,8 +34,6 @@ const maskEmail = (email: string): string => {
   const head = localPart.slice(0, 2);
   return `${head}***@${domain}`;
 };
-
-const REGISTER_COMPLETION_PATH = '/register/test';
 
 const RegisterAuthPage: NextPage = () => {
   const router = useRouter();
@@ -98,18 +98,8 @@ const RegisterAuthPage: NextPage = () => {
         setFeedback(data.message ?? '本登録が完了しました。');
         setCode('');
 
-        const query = new URLSearchParams();
-        if (data.member?.username) {
-          query.set('name', data.member.username);
-        }
-        if (data.member?.id) {
-          query.set('user_id', data.member.id);
-        }
-        const emailForRedirect = data.member?.email ?? normalizedEmail;
-        if (emailForRedirect) {
-          query.set('email', emailForRedirect);
-        }
-        void router.push(`${REGISTER_COMPLETION_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
+        sessionStorage.setItem(SIGNUP_COMPLETE_KEY, '1');
+        void router.push(buildProvisionalRegistrationThanksPath(data.member, normalizedEmail));
       } catch (error) {
         console.error(error);
         setStatus('error');
@@ -153,18 +143,8 @@ const RegisterAuthPage: NextPage = () => {
       setFeedback(data.message ?? '臨時登録が完了しました。');
       setCode('');
 
-      const query = new URLSearchParams();
-      if (data.member?.username) {
-        query.set('name', data.member.username);
-      }
-      if (data.member?.id) {
-        query.set('user_id', data.member.id);
-      }
-      const emailForRedirect = data.member?.email ?? normalizedEmail;
-      if (emailForRedirect) {
-        query.set('email', emailForRedirect);
-      }
-      void router.push(`${REGISTER_COMPLETION_PATH}${query.toString() ? `?${query.toString()}` : ''}`);
+      sessionStorage.setItem(SIGNUP_COMPLETE_KEY, '1');
+      void router.push(buildProvisionalRegistrationThanksPath(data.member, normalizedEmail));
     } catch (error) {
       console.error(error);
       setStatus('error');

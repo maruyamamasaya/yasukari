@@ -133,6 +133,7 @@ export async function middleware(req: NextRequest) {
   const localeNeutralPaths = new Set([
     '/account/thanks',
     '/mypage/registration/thanks',
+    '/register/thanks',
   ]);
 
   if (
