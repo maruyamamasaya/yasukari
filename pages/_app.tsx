@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import Script from 'next/script';
+import { useEffect } from 'react';
 
 import '../styles/global.css';
 import '../styles/desktop.css';
@@ -13,10 +14,17 @@ import FooterEn from '../components/FooterEn';
 import Layout from '../components/Layout';
 import { useRouter } from 'next/router';
 import ChatBotWidget from '../components/ChatBotWidget';
+import { storeFirstTouchAttribution } from '../lib/signupAttribution';
 
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    storeFirstTouchAttribution(new URLSearchParams(window.location.search));
+  }, [router.asPath, router.isReady]);
+
   const isEn = router.pathname.startsWith('/en');
   const isAdminRoute = router.pathname.startsWith('/admin');
   const pathWithoutQuery = router.asPath.split('?')[0];
