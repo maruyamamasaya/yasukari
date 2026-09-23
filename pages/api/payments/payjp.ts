@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from "../../../lib/cognitoServer";
 import { getPayjpSecretKey, getPayjpSecretKeyError } from "../../../lib/payjpServer";
 import { getServerRentalPrice } from "../../../lib/server/rentalPrice";
+import { isBeforeReservationDeadline } from "../../../lib/reservationDeadline";
 
 type PayjpChargeRequest = {
   token?: string;
@@ -63,6 +64,15 @@ export default async function handler(
 
   const pricing = body.pricing;
   const isExtensionCharge = Boolean(body.metadata?.reservationId && body.metadata?.extensionDays);
+  if (!isExtensionCharge) {
+    const pickupAt = body.metadata?.pickupAt;
+    if (!pickupAt || !isBeforeReservationDeadline(pickupAt)) {
+      return res.status(409).json({
+        error: "予約受付はご利用日の前営業日17:00までです。日程を変更してお試しください。",
+      });
+    }
+  }
+
   if ((!pricing || !pricing.vehicleModelId || !pricing.rentalDays) && !isExtensionCharge) {
     return res.status(400).json({ error: "料金情報が不足しています。お見積りからやり直してください。" });
   }

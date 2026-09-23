@@ -13,6 +13,7 @@ import {
 } from "../../../lib/reservations";
 import { issueKeyboxPinForReservation } from "../../../lib/keybox";
 import { sendReservationCompletionEmail } from "../../../lib/reservationCompletionEmail";
+import { isBeforeReservationDeadline } from "../../../lib/reservationDeadline";
 
 type ReservationListResponse = {
   reservations: Reservation[];
@@ -265,6 +266,12 @@ export default async function handler(
       if (!isWithinReservationWindow(body.pickupAt!, body.returnAt!)) {
         return res.status(400).json({
           error: "貸出期間は最大1か月、予約開始日は3か月先まで指定できます。",
+        });
+      }
+
+      if (!isBeforeReservationDeadline(body.pickupAt!)) {
+        return res.status(409).json({
+          error: "予約受付はご利用日の前営業日17:00までです。日程を変更してお試しください。",
         });
       }
 
