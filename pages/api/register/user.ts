@@ -5,7 +5,7 @@ import { getDocumentClient } from '../../../lib/dynamodb';
 import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from '../../../lib/cognitoServer';
 import type { RegistrationData } from '../../../types/registration';
 
-const TABLE_NAME = 'yasukariUserMain';
+const USER_TABLE = process.env.USER_TABLE ?? 'yasukariUserMain';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const client = getDocumentClient();
     const { Item } = await client.send(
       new GetCommand({
-        TableName: TABLE_NAME,
+        TableName: USER_TABLE,
         Key: { user_id: payload.sub },
       })
     );

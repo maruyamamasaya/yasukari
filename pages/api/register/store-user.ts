@@ -5,7 +5,7 @@ import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from '../../../lib/cogn
 import { RegistrationData, REQUIRED_REGISTRATION_FIELDS } from '../../../types/registration';
 import { deliverFullRegistrationEmail } from '../../../lib/registrationEmails';
 
-const TABLE_NAME = 'yasukariUserMain';
+const USER_TABLE = process.env.USER_TABLE ?? 'yasukariUserMain';
 
 // ...（型定義やユーティリティは従来通り）
 const toTrimmedString = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
@@ -78,7 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const existingUser = await client.send(
       new GetCommand({
-        TableName: TABLE_NAME,
+        TableName: USER_TABLE,
         Key: { user_id: userId },
       })
     );
@@ -86,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await client.send(
       new PutCommand({
-        TableName: TABLE_NAME,
+        TableName: USER_TABLE,
         Item: {
           ...existingItem,
           ...payload,
