@@ -1,5 +1,6 @@
 import {
   attributionFromSearchParams,
+  clearSignupAttributionCookie,
   parseSignupAttribution,
 } from '../lib/signupAttribution';
 
@@ -31,5 +32,31 @@ describe('signup attribution', () => {
       content: undefined,
       term: undefined,
     });
+  });
+
+  it('can clear attribution after it is assigned to an authenticated user', () => {
+    const originalDocument = global.document;
+    const originalWindow = global.window;
+    const cookieWrites: string[] = [];
+    Object.defineProperty(global, 'document', {
+      configurable: true,
+      value: {
+        set cookie(value: string) {
+          cookieWrites.push(value);
+        },
+      },
+    });
+    Object.defineProperty(global, 'window', {
+      configurable: true,
+      value: { location: { protocol: 'https:' } },
+    });
+
+    clearSignupAttributionCookie();
+
+    expect(cookieWrites).toEqual([
+      'yasukari_signup_attribution=; Path=/; SameSite=Lax; Max-Age=0; Secure',
+    ]);
+    Object.defineProperty(global, 'document', { configurable: true, value: originalDocument });
+    Object.defineProperty(global, 'window', { configurable: true, value: originalWindow });
   });
 });

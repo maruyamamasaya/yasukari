@@ -60,6 +60,12 @@ export const readSignupAttributionCookie = (): SignupAttribution | null => {
   }
 };
 
+export const clearSignupAttributionCookie = (): void => {
+  if (typeof document === 'undefined') return;
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${SIGNUP_ATTRIBUTION_COOKIE}=; Path=/; SameSite=Lax; Max-Age=0${secure}`;
+};
+
 export const storeFirstTouchAttribution = (params: Pick<URLSearchParams, 'get'>): boolean => {
   if (typeof document === 'undefined' || readSignupAttributionCookie()) return false;
   const attribution = attributionFromSearchParams(params);

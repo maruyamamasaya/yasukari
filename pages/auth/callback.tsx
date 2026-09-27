@@ -3,7 +3,10 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { COGNITO_OAUTH_STATE_KEY, isSignupOauthState } from '../../lib/cognitoHostedUi';
 import { SIGNUP_INTENT_KEY } from '../../lib/conversionTracking';
-import { readSignupAttributionCookie } from '../../lib/signupAttribution';
+import {
+  clearSignupAttributionCookie,
+  readSignupAttributionCookie,
+} from '../../lib/signupAttribution';
 
 export default function CognitoCallbackPage() {
   const router = useRouter();
@@ -93,24 +96,27 @@ export default function CognitoCallbackPage() {
         return;
       }
 
-      if (isSignupFlow) {
-        const attribution = readSignupAttributionCookie();
-        if (attribution) {
-          try {
-            const response = await fetch('/api/auth/signup-attribution', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify(attribution),
-            });
-            if (!response.ok) {
-              throw new Error(`Failed to persist signup attribution: ${response.status}`);
-            }
-          } catch (err) {
-            console.error(err);
-            setError('流入元情報を保存できませんでした。ページを再読み込みしてお試しください。');
-            return;
+      // Cognito のソーシャルプロバイダーは、新規作成された利用者でも通常の
+      // authorize URL に戻る場合がある。state の signup 判定に限定せず、保存済みの
+      // first-touch 情報を認証済みユーザーへ結び付ける。API 側の if_not_exists により、
+      // 既存会員の流入元を後続ログインで上書きすることはない。
+      const attribution = readSignupAttributionCookie();
+      if (attribution) {
+        try {
+          const response = await fetch('/api/auth/signup-attribution', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(attribution),
+          });
+          if (!response.ok) {
+            throw new Error(`Failed to persist signup attribution: ${response.status}`);
           }
+          clearSignupAttributionCookie();
+        } catch (err) {
+          console.error(err);
+          setError('流入元情報を保存できませんでした。ページを再読み込みしてお試しください。');
+          return;
         }
       }
 
