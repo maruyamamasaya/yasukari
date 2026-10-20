@@ -163,11 +163,11 @@ export default function KeyboxReissuePage() {
                 <fieldset className={reissueStyles.fieldset}>
                   <legend className={reissueStyles.fieldsetLegend}>解錠ウィンドウ</legend>
                   <p className={styles.inlineNotice}>
-                    予約に合わせて2時間幅を指定してください。入力が空の場合は丸めた最短時刻で自動採番します。
+                    予約の開始・終了日時を日本時間で入力してください。解錠できる期間は、入力した開始日時の1時間前から終了日時の1時間後までです。
                   </p>
                   <div className={styles.formGridTwoCols}>
                     <label className={styles.formField}>
-                      <span className={styles.formLabel}>有効開始</span>
+                      <span className={styles.formLabel}>開始日時（日本時間）</span>
                       <input
                         type="datetime-local"
                         required
@@ -178,7 +178,7 @@ export default function KeyboxReissuePage() {
                       />
                     </label>
                     <label className={styles.formField}>
-                      <span className={styles.formLabel}>有効終了</span>
+                      <span className={styles.formLabel}>終了日時（日本時間）</span>
                       <input
                         type="datetime-local"
                         required

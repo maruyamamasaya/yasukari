@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { issueKeyboxPin } from "../../../lib/keybox";
+import { getKeyboxWindow, issueKeyboxPin } from "../../../lib/keybox";
 import {
   fetchReservationsByMember,
   isActiveReservation,
@@ -77,8 +77,7 @@ export default async function handler(
     }
 
     const result = await issueKeyboxPin({
-      windowStart,
-      windowEnd,
+      ...getKeyboxWindow(windowStart, windowEnd),
       pinCode: body.pinCode || undefined,
       targetName,
       unitId: body.unitId || undefined,

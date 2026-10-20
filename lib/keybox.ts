@@ -20,6 +20,11 @@ type LockUnitId = string;
 const PATH_CREATE_PIN = "/api/eagle-pms/v1/createLockPin";
 const BUFFER_MS = 60 * 60 * 1000; // 1 hour buffer before/after rental
 
+export const getKeyboxWindow = (start: Date, end: Date) => ({
+  windowStart: new Date(start.getTime() - BUFFER_MS),
+  windowEnd: new Date(end.getTime() + BUFFER_MS),
+});
+
 const jsonMinified = (payload: unknown): string =>
   JSON.stringify(payload, (_key, value) => value ?? undefined);
 
@@ -364,8 +369,7 @@ export async function issueKeyboxPinForReservation(
   }
 
   const result = await issueKeyboxPin({
-    windowStart: new Date(pickupAt.getTime() - BUFFER_MS),
-    windowEnd: new Date(returnAt.getTime() + BUFFER_MS),
+    ...getKeyboxWindow(pickupAt, returnAt),
     targetName: reservation.memberName || "WEB予約PIN",
     storeName: reservation.storeName,
     memberId: reservation.memberId,
