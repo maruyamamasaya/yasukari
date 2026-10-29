@@ -14,6 +14,7 @@ import {
 } from "../../../lib/reservations";
 import { getPayjpSecretKey, getPayjpSecretKeyError } from "../../../lib/payjpServer";
 import { issueKeyboxPinForReservation } from "../../../lib/keybox";
+import { sendKeyboxUpdateEmail } from "../../../lib/keyboxUpdateEmail";
 
 type VehicleRecord = {
   managementNumber: string;
@@ -370,6 +371,11 @@ export default async function handler(
             reservationId,
             keyboxIssueResult.reservationUpdates
           );
+          try {
+            await sendKeyboxUpdateEmail(reservationWithKeybox);
+          } catch (error) {
+            console.error('Failed to send keybox update email', error);
+          }
         } else {
           console.error(`Failed to refresh keybox pin for extended reservation ${reservationId}`);
         }

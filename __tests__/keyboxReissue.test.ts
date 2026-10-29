@@ -1,6 +1,7 @@
 jest.mock('../lib/keyboxLogs', () => ({
   addKeyboxLog: jest.fn(async (log) => log),
 }));
+jest.mock('../lib/keyboxUpdateEmail', () => ({ sendKeyboxUpdateEmail: jest.fn() }));
 jest.mock('../lib/reservations', () => ({
   fetchReservationsByMember: jest.fn(),
   isActiveReservation: jest.fn(() => true),
@@ -42,7 +43,9 @@ describe('KEYBOX manual reissue validity', () => {
     const { default: handler } = require('../pages/api/admin/keybox-reissue');
     const { fetchReservationsByMember, updateReservation } = require('../lib/reservations');
     const { addKeyboxLog } = require('../lib/keyboxLogs');
+    const { sendKeyboxUpdateEmail } = require('../lib/keyboxUpdateEmail');
     fetchReservationsByMember.mockResolvedValue([{ id: 'reservation-1', storeName: '三ノ輪店' }]);
+    updateReservation.mockImplementation(async (id: string, updates: object) => ({ id, ...updates }));
     const response = { status: jest.fn().mockReturnThis(), json: jest.fn(), setHeader: jest.fn() };
 
     await handler({ method: 'POST', body: {
@@ -63,6 +66,32 @@ describe('KEYBOX manual reissue validity', () => {
     }));
     expect(response.status).toHaveBeenCalledWith(200);
     expect(response.json).toHaveBeenCalledWith(expect.objectContaining({ ...window, success: true }));
+    expect(sendKeyboxUpdateEmail).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'reservation-1', keyboxWindowStart: expectedStart, keyboxWindowEnd: expectedEnd,
+    }));
+  });
+
+  it('keeps a successful QR update when notification delivery fails and reports a warning', async () => {
+    const { default: handler } = require('../pages/api/admin/keybox-reissue');
+    const { fetchReservationsByMember, updateReservation } = require('../lib/reservations');
+    const { sendKeyboxUpdateEmail } = require('../lib/keyboxUpdateEmail');
+    fetchReservationsByMember.mockResolvedValue([{ id: 'reservation-1', storeName: '三ノ輪店' }]);
+    updateReservation.mockResolvedValue({ id: 'reservation-1' });
+    sendKeyboxUpdateEmail.mockRejectedValueOnce(new Error('SMTP unavailable'));
+    const errorLog = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const response = { status: jest.fn().mockReturnThis(), json: jest.fn(), setHeader: jest.fn() };
+    try {
+      await handler({ method: 'POST', body: {
+        windowStart: '2026-10-19T11:00', windowEnd: '2026-10-20T11:00', memberId: 'member-1',
+      } }, response);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.json).toHaveBeenCalledWith(expect.objectContaining({
+        success: true, message: expect.stringContaining('更新通知メールを送信できませんでした'),
+      }));
+    } finally {
+      errorLog.mockRestore();
+    }
   });
 
   it('keeps automatic reservation issuance at one hour before and after', async () => {

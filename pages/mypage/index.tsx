@@ -26,7 +26,7 @@ const RETURN_PHOTO_UPLOAD_GRACE_MS = 60 * 60 * 1000;
 
 export default function MyPage() {
   const rentalContractBaseUrl = process.env.NEXT_PUBLIC_RENTAL_CONTRACT_URL;
-  const unmannedRentalGuideUrl = '/blog_for_custmor/2025-09-10-minowa-unmanned';
+  const unmannedRentalGuideUrl = '/blog_for_custmor/2025-09-01-minowa-procedures';
   const unlockQrUrl = '/rental-status';
 
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -1198,6 +1198,9 @@ export default function MyPage() {
               </div>
 
               <div className={`${mobileSectionsOpen.howToUse ? 'mt-4 block' : 'hidden'} md:mt-4 md:block`}>
+                <Link href={unmannedRentalGuideUrl} className="mb-4 inline-flex rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700">
+                  三ノ輪店のお貸出し・ご返却の手順を見る
+                </Link>
                 <ul className="grid gap-3 md:grid-cols-2">
                   {howToUseSteps.map((step) => (
                     <li key={step.title} className="rounded-xl border border-gray-200 bg-gray-50 p-4">

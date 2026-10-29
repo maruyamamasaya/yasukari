@@ -2,6 +2,7 @@ import nodemailer, { Transporter, SentMessageInfo } from 'nodemailer';
 
 import { addMailHistory, MailHistoryCategory } from './mailHistory';
 import { recordUserNotification, NotificationChannel } from './userNotifications';
+import { withMyPageLink } from './mailMyPageLink';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const MAX_CONSECUTIVE_FAILURES = 3;
@@ -212,7 +213,7 @@ async function processQueue(): Promise<void> {
 
 export async function enqueueEmail(payload: MailPayload): Promise<SentMessageInfo> {
   return new Promise<SentMessageInfo>((resolve, reject) => {
-    queue.push({ ...payload, attempts: 0, resolve, reject });
+    queue.push({ ...withMyPageLink(payload), attempts: 0, resolve, reject });
     void processQueue();
   });
 }

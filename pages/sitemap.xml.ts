@@ -12,14 +12,14 @@ const jaPaths = [
   "/contact",
   "/insurance",
   "/privacy",
-  "/terms",
+  "/rental-bike-terms",
   "/tokusyouhou",
   "/products",
   "/blog_for_custmor",
   "/news",
 ];
 
-const enPaths = jaPaths.map((path) => (path === "/" ? "/en" : `/en${path}`));
+const enPaths = jaPaths.map((path) => (path === "/" ? "/en" : `/en${path === "/rental-bike-terms" ? "/terms" : path}`));
 
 type AlternateLink = {
   href: string;

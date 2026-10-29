@@ -76,6 +76,7 @@ const buildTextBody = (reservation: Reservation): string => {
         "■三ノ輪店ご利用時の入庫情報",
         `解除コード: ${reservation.keyboxPinCode || "-"}`,
         `QR URL: ${reservation.keyboxQrImageUrl || "-"}`,
+        `三ノ輪店のご利用案内: ${siteUrl.replace(/\/$/, "")}/blog_for_custmor/2025-09-01-minowa-procedures`,
       ]
     : [];
 
@@ -164,7 +165,8 @@ const buildHtmlBody = (reservation: Reservation): string => {
     <p>
       <strong>■三ノ輪店ご利用時の入庫情報</strong><br />
       解除コード: ${reservation.keyboxPinCode || "-"}<br />
-      QR URL: ${reservation.keyboxQrImageUrl || "-"}
+      QR URL: ${reservation.keyboxQrImageUrl || "-"}<br />
+      <a href="${siteUrl.replace(/\/$/, "")}/blog_for_custmor/2025-09-01-minowa-procedures">三ノ輪店のご利用案内を見る</a>
     </p>
 `
     : "";

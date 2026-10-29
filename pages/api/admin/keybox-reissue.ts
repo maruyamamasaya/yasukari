@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getKeyboxWindow, issueKeyboxPin } from "../../../lib/keybox";
+import { sendKeyboxUpdateEmail } from "../../../lib/keyboxUpdateEmail";
 import {
   fetchReservationsByMember,
   isActiveReservation,
@@ -87,8 +88,9 @@ export default async function handler(
       source: "manual-reissue",
     });
 
+    let notificationWarning: string | undefined;
     if (result.success && reservationId) {
-      await updateReservation(reservationId, {
+      const updatedReservation = await updateReservation(reservationId, {
         keyboxPinCode: result.pinCode,
         keyboxPinId: result.pinId ?? "",
         keyboxQrCode: result.qrCode ?? "",
@@ -99,6 +101,15 @@ export default async function handler(
         keyboxTargetName: result.targetName,
         keyboxSignUsed: result.signUsed,
       });
+      try {
+        const sent = await sendKeyboxUpdateEmail(updatedReservation);
+        if (sent === false) {
+          notificationWarning = 'QRは更新されましたが、メールアドレス未設定のため更新通知を送信していません。';
+        }
+      } catch (error) {
+        console.error('Failed to send keybox update email', error);
+        notificationWarning = 'QRは更新されましたが、更新通知メールを送信できませんでした。お客様へマイページの再確認をご案内ください。';
+      }
     }
 
     return res.status(200).json({
@@ -114,7 +125,7 @@ export default async function handler(
       targetName: result.targetName,
       reservationId,
       memberId: body.memberId || undefined,
-      message: result.log.message,
+      message: notificationWarning ?? result.log.message,
     });
   } catch (error) {
     console.error("Failed to reissue keybox pin", error);

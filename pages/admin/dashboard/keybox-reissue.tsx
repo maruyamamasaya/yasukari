@@ -294,6 +294,7 @@ export default function KeyboxReissuePage() {
                 <div className={reissueStyles.resultTile}>
                   <p className={reissueStyles.resultLabel}>ステータス</p>
                   <p className={reissueStyles.resultValue}>{result.success ? "成功" : "失敗"}</p>
+                  {result.message ? <p role="status" className={reissueStyles.resultMeta}>{result.message}</p> : null}
                 </div>
                 <div className={reissueStyles.resultTile}>
                   <p className={reissueStyles.resultLabel}>PIN / pinId</p>

@@ -33,8 +33,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:underline">
-                  利用規約
+                <Link href="/rental-bike-terms" className="hover:underline">
+                  レンタルバイク利用規約
                 </Link>
               </li>
               <li>
@@ -65,8 +65,8 @@ export default function Footer() {
             <h4 className="font-bold mb-2">サービス案内</h4>
             <ul className="space-y-1 mb-4">
               <li>
-                <Link href="/products" className="hover:underline">
-                  全ての車両一覧
+                <Link href="/pricing" className="hover:underline">
+                  車種・料金一覧
                 </Link>
               </li>
               <li>

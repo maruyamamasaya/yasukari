@@ -255,8 +255,8 @@ export default function SignupPage() {
               </p>
               <p className="mt-4 text-center text-[11px] leading-relaxed text-gray-400">
                 ボタンを押すことで
-                <Link href="/terms" className="mx-1 underline">
-                  利用規約
+                <Link href="/rental-bike-terms" className="mx-1 underline">
+                  レンタルバイク利用規約
                 </Link>
                 と
                 <Link href="/privacy" className="ml-1 underline">
