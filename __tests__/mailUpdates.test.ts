@@ -59,7 +59,7 @@ test('includes the published Minowa procedure article in text and HTML reservati
   try {
     names.forEach(name => { process.env[name] = name === 'SMTP_PORT' ? '587' : 'mock-only'; });
     await sendReservationCompletionEmail({
-      ...reservation, storeName: '三ノ輪店', options: {}, accessories: {},
+      ...reservation, storeName: '三ノ輪店', options: { vehicleCoverage: '', theftCoverage: '' }, accessories: {},
     });
     const mail = (enqueueEmail as jest.Mock).mock.calls[0][0];
     const path = '/blog_for_custmor/2025-09-01-minowa-procedures';

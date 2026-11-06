@@ -31,6 +31,7 @@ describe('verificationCodeService', () => {
 
     const mismatch = verifyVerificationCode(TEST_EMAIL, 'wrong1');
     expect(mismatch.success).toBe(false);
+    if (mismatch.success !== false) throw new Error('Expected verification failure');
     expect(mismatch.reason).toBe('mismatch');
     expect(mismatch.attemptsRemaining).toBe(4);
 
@@ -40,6 +41,7 @@ describe('verificationCodeService', () => {
     const locked = verifyVerificationCode(TEST_EMAIL, 'wrong5');
 
     expect(locked.success).toBe(false);
+    if (locked.success !== false) throw new Error('Expected verification failure');
     expect(locked.reason).toBe('too_many_attempts');
     expect(hasPendingVerification(TEST_EMAIL)).toBe(false);
   });
@@ -56,6 +58,7 @@ describe('verificationCodeService', () => {
     try {
       const result = verifyVerificationCode(TEST_EMAIL, code);
       expect(result.success).toBe(false);
+    if (result.success !== false) throw new Error('Expected verification failure');
       expect(result.reason).toBe('expired');
     } finally {
       Date.now = now;
@@ -65,6 +68,7 @@ describe('verificationCodeService', () => {
   it('handles unknown emails', () => {
     const result = verifyVerificationCode('unknown@example.com', 'ABC123');
     expect(result.success).toBe(false);
+    if (result.success !== false) throw new Error('Expected verification failure');
     expect(result.reason).toBe('not_found');
   });
 
