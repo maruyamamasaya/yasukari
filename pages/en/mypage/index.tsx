@@ -745,6 +745,10 @@ export default function MyPageEn() {
           </nav>
           <h1 className="text-2xl font-semibold text-gray-900">My Page</h1>
           <p className="text-sm text-gray-500">View and manage your current profile details.</p>
+          <section className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700">
+            <h2 className="font-semibold text-gray-900">Protecting your personal information</h2>
+            <p className="mt-2">Our policy is to protect driving licence images through private storage, authentication, viewing permission checks and restrictions on external access. We handle your personal information with care and continually work to strengthen our security safeguards.</p>
+          </section>
           <div className="mt-3 rounded-lg border border-rose-300 bg-gradient-to-r from-rose-50 via-rose-100 to-rose-50 p-4 text-xs text-rose-900 shadow-sm ring-1 ring-rose-200/70">
             <div className="flex items-start gap-3">
               <span
