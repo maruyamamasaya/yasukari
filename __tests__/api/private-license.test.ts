@@ -111,3 +111,16 @@ test('upload stores a user-scoped key and never returns a public S3 URL', async 
   expect(mockS3).toHaveBeenCalledWith(expect.objectContaining({ Key: expect.stringMatching(/^LicenseUploads\/alice\//), CacheControl: 'private, no-store, max-age=0' }));
   expect(res.json).toHaveBeenCalledWith({ url: expect.stringMatching(/^\/api\/license-image\?key=/) });
 });
+test('legacy source URL is read and signed in destination bucket only', async () => {
+  const previous = process.env.LICENSE_UPLOADS_LEGACY_BUCKET;
+  process.env.LICENSE_UPLOADS_LEGACY_BUCKET = 'old-license-source';
+  try {
+    mockDb.mockResolvedValue({ Item: { license_image_url: 'https://old-license-source.s3.ap-northeast-1.amazonaws.com/LicenseUploads/old.jpg' } });
+    await handler(req({ slot: '1' }), response());
+    expect(getSignedUrl).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ Bucket: 'yasukari-file', Key: 'LicenseUploads/old.jpg' }), { expiresIn: 60 });
+    expect(mockS3).not.toHaveBeenCalledWith(expect.objectContaining({ Bucket: 'old-license-source' }));
+  } finally {
+    if (previous === undefined) delete process.env.LICENSE_UPLOADS_LEGACY_BUCKET;
+    else process.env.LICENSE_UPLOADS_LEGACY_BUCKET = previous;
+  }
+});

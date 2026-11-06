@@ -7,12 +7,13 @@ const { S3Client, GetPublicAccessBlockCommand, HeadObjectCommand } = require('@a
 async function main() {
   if (process.argv.includes('--help')) {
     console.log('LICENSE_UPLOADS_BUCKET=... USER_TABLE=... AWS_REGION=ap-northeast-1 node scripts/migrate-license-images.cjs [--apply]');
-    console.log('Default: read-only validation. --apply: conditionally replace legacy license URLs with keys in the same bucket. Back up DynamoDB first.');
+    console.log('Default: read-only validation. --apply: conditionally replace legacy license URLs with keys in the private destination bucket. Set LICENSE_UPLOADS_LEGACY_BUCKET for a copied source bucket. Back up DynamoDB first.');
     return;
   }
   const apply = process.argv.includes('--apply');
   const bucket = process.env.LICENSE_UPLOADS_BUCKET;
   const table = process.env.USER_TABLE;
+  const sourceBucket = process.env.LICENSE_UPLOADS_LEGACY_BUCKET || bucket;
   const region = process.env.AWS_REGION || 'ap-northeast-1';
   const prefix = (process.env.LICENSE_UPLOADS_PREFIX || 'LicenseUploads/').replace(/\/*$/, '/');
   if (!bucket || !table) throw new Error('LICENSE_UPLOADS_BUCKET and USER_TABLE must be explicit');
@@ -36,7 +37,7 @@ async function main() {
         if (!old) continue;
         const url = new URL(old);
         if (url.protocol !== 'https:' || url.username || url.password || url.port || url.search || url.hash ||
-          ![`${bucket}.s3.${region}.amazonaws.com`, `${bucket}.s3.amazonaws.com`].includes(url.hostname)) {
+          ![bucket, sourceBucket].flatMap(b => [`${b}.s3.${region}.amazonaws.com`, `${b}.s3.amazonaws.com`]).includes(url.hostname)) {
           throw new Error('Unexpected legacy URL: stopped without logging personal data');
         }
         const key = decodeURIComponent(url.pathname.slice(1));

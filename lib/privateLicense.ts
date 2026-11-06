@@ -28,7 +28,16 @@ export function isLicenseAdmin(req: NextApiRequest): boolean {
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
-// Accept only keys within the license prefix, or exact legacy URLs for this bucket.
+// Old URLs may name an explicitly configured migration source bucket. Only the
+// key is reused: all reads/signatures still target the private destination.
+export function licenseUrlHosts(): string[] {
+  const buckets = [licenseBucket, process.env.LICENSE_UPLOADS_LEGACY_BUCKET].filter(Boolean);
+  return buckets.flatMap(bucket => [
+    `${bucket}.s3.${licenseRegion}.amazonaws.com`, `${bucket}.s3.amazonaws.com`,
+  ]);
+}
+
+// Accept only license keys and URLs from the explicit current/source allowlist.
 export function licenseKey(value: unknown): string | null {
   if (typeof value !== 'string' || !value) return null;
   let key = value;
@@ -38,7 +47,7 @@ export function licenseKey(value: unknown): string | null {
     try {
       const url = new URL(value);
       if (url.protocol !== 'https:' || url.username || url.password || url.port || url.search || url.hash) return null;
-      if (url.hostname !== `${licenseBucket}.s3.${licenseRegion}.amazonaws.com` && url.hostname !== `${licenseBucket}.s3.amazonaws.com`) return null;
+      if (!licenseUrlHosts().includes(url.hostname)) return null;
       key = decodeURIComponent(url.pathname.slice(1));
     } catch { return null; }
   }

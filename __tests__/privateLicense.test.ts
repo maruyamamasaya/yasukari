@@ -34,3 +34,19 @@ describe('private license boundaries', () => {
     } }) } as any)).resolves.toBeUndefined();
   });
 });
+
+test('migration source must be explicit and cannot authorize arbitrary buckets or paths', () => {
+  const previous = process.env.LICENSE_UPLOADS_LEGACY_BUCKET;
+  try {
+    delete process.env.LICENSE_UPLOADS_LEGACY_BUCKET;
+    const old = 'https://old-license-source.s3.ap-northeast-1.amazonaws.com/LicenseUploads/image.jpg';
+    expect(licenseKey(old)).toBeNull();
+    process.env.LICENSE_UPLOADS_LEGACY_BUCKET = 'old-license-source';
+    expect(licenseKey(old)).toBe('LicenseUploads/image.jpg');
+    expect(licenseKey(old.replace('old-license-source', 'untrusted-source'))).toBeNull();
+    expect(licenseKey(old.replace('/LicenseUploads/', '/public/'))).toBeNull();
+  } finally {
+    if (previous === undefined) delete process.env.LICENSE_UPLOADS_LEGACY_BUCKET;
+    else process.env.LICENSE_UPLOADS_LEGACY_BUCKET = previous;
+  }
+});
