@@ -753,7 +753,7 @@ const RegisterTestPage: NextPage = () => {
                   <div>
                     <span className="block text-sm font-medium text-gray-700">免許画像アップロード（最大2枚）</span>
                     <div className="mt-3 space-y-4">
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700">
+                      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-relaxed text-red-800">
                     <p className="font-semibold">個人情報の保護について</p>
                     <p className="mt-2">お預かりする免許証画像は、本人確認および必要な登録手続きのために取り扱います。お客様の大切な個人情報を適切に保護し、安心してお手続きいただけるよう、安全管理とセキュリティ対策の強化に継続的に取り組んでいます。</p>
                   </div>

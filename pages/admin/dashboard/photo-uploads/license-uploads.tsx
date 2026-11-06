@@ -65,9 +65,9 @@ export default function LicenseUploadListPage() {
         description="本登録でアップロードされた免許証画像を一覧で確認できます。"
       >
         <div className={formStyles.cardStack}>
-          <section className={formStyles.card} aria-label="免許証画像のセキュリティについて">
-            <h2 className={styles.sectionTitle}>免許証画像の保護について</h2>
-            <p className={styles.sectionNote}>免許証画像は大切な個人情報として慎重に取り扱い、安心して管理できるよう、安全管理とセキュリティ対策の強化に継続的に取り組んでいます。個人情報保護のため、画像の外部共有はお控えください。</p>
+          <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-relaxed text-red-800" aria-label="免許証画像のセキュリティについて">
+            <h2 className="text-sm font-semibold">免許証画像の保護について</h2>
+            <p className="mt-2">免許証画像は大切な個人情報として慎重に取り扱い、安心して管理できるよう、安全管理とセキュリティ対策の強化に継続的に取り組んでいます。個人情報保護のため、画像の外部共有はお控えください。</p>
           </section>
           <section className={formStyles.card}>
             <header className={styles.sectionHeader}>

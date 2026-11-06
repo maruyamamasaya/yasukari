@@ -717,7 +717,7 @@ const RegistrationPage: NextPage = () => {
                   <span className="block text-sm font-medium text-gray-700">
                     Upload license images (up to 2 files)
                   </span>
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700">
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-relaxed text-red-800">
                     <p className="font-semibold">Protection of your personal information</p>
                     <p className="mt-2">We handle your driving licence images for identity verification and the necessary registration procedures. We treat your personal information with care and continually strengthen our security safeguards so you can complete these procedures with confidence.</p>
                   </div>
