@@ -5,6 +5,8 @@ import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from '../../../lib/cogn
 import { RegistrationData, REQUIRED_REGISTRATION_FIELDS } from '../../../types/registration';
 import { deliverFullRegistrationEmail } from '../../../lib/registrationEmails';
 
+import { noStore, licenseKey, ownerPrefix, imageRoute } from '../../../lib/privateLicense';
+
 const USER_TABLE = process.env.USER_TABLE ?? 'yasukariUserMain';
 
 // ...（型定義やユーティリティは従来通り）
@@ -13,6 +15,7 @@ const toTrimmedString = (value: unknown): string => (typeof value === 'string' ?
 const normalizePhone = (value: unknown): string => toTrimmedString(value).replace(/\D/g, '');
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  noStore(res);
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -21,7 +24,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const authToken = req.cookies?.[COGNITO_ID_TOKEN_COOKIE];
     const authPayload = await verifyCognitoIdToken(authToken);
+    if (!authPayload?.sub) return res.status(401).json({ message: 'ログインが必要です。' });
     const body = req.body ?? {};
+    const client = getDocumentClient();
+    const existing = await client.send(new GetCommand({ TableName: USER_TABLE, Key: { user_id: authPayload.sub } }));
+    const existingItem = existing.Item ?? {};
+    const keys: Record<string, string> = {};
+    for (const slot of [1, 2]) {
+      const suffix = slot === 1 ? '' : '_2';
+      const supplied = body[`license_image_key${suffix}`] || body[`license_image_url${suffix}`];
+      const previous = licenseKey(existingItem[`license_image_key${suffix}`] || existingItem[`license_image_url${suffix}`]);
+      const key = supplied === imageRoute(authPayload.sub, slot) ? previous : licenseKey(supplied);
+      if (supplied && (!key || (!key.startsWith(ownerPrefix(authPayload.sub)) && key !== previous))) {
+        return res.status(400).json({ message: '画像の所有者が一致しません。' });
+      }
+      keys[`license_image_key${suffix}`] = key ?? '';
+    }
 
     const userIdFromBody = toTrimmedString(body.user_id);
     const userId = authPayload?.sub ?? userIdFromBody;
@@ -50,10 +68,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tel: normalizePhone(body.tel) || undefined,
       license: toTrimmedString(body.license),
       license_file_name: toTrimmedString(body.license_file_name),
-      license_image_url: toTrimmedString(body.license_image_url),
+      license_image_key: keys.license_image_key,
       license_uploaded_at: toTrimmedString(body.license_uploaded_at),
       license_file_name_2: toTrimmedString(body.license_file_name_2),
-      license_image_url_2: toTrimmedString(body.license_image_url_2),
+      license_image_key_2: keys.license_image_key_2,
       license_uploaded_at_2: toTrimmedString(body.license_uploaded_at_2),
       work_place: toTrimmedString(body.work_place),
       work_address: toTrimmedString(body.work_address),
@@ -68,21 +86,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       enquete_chance: toTrimmedString(body.enquete_chance),
     };
 
-    const missing = REQUIRED_REGISTRATION_FIELDS.filter((field) => !payload[field]);
+    const missing = REQUIRED_REGISTRATION_FIELDS.filter((field) => !(field === 'license_image_url' ? payload.license_image_key : payload[field]));
 
     if (missing.length > 0) {
       return res.status(400).json({ message: `${missing.join(', ')} is required.` });
     }
 
-    const client = getDocumentClient();
-
-    const existingUser = await client.send(
-      new GetCommand({
-        TableName: USER_TABLE,
-        Key: { user_id: userId },
-      })
-    );
-    const existingItem = existingUser.Item ?? {};
+    delete existingItem.license_image_url;
+    delete existingItem.license_image_url_2;
 
     await client.send(
       new PutCommand({

@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.525.0",
-    "@aws-sdk/lib-dynamodb": "^3.525.0",
     "@aws-sdk/client-s3": "^3.525.0",
     "@aws-sdk/client-ses": "^3.525.0",
-    "nodemailer": "^6.9.13",
+    "@aws-sdk/lib-dynamodb": "^3.525.0",
+    "@aws-sdk/s3-request-presigner": "^3.525.0",
     "next": "^14.1.0",
     "nodemailer": "^6.9.13",
     "react": "^18.2.0",
@@ -23,11 +23,11 @@
     "swiper": "^10.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.1",
     "@types/jest": "^29.5.4",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^14.1.0"
+    "eslint-config-next": "^14.1.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
   }
 }

@@ -3,22 +3,20 @@ import path from "path";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
+import { COGNITO_ID_TOKEN_COOKIE, verifyCognitoIdToken } from '../../../lib/cognitoServer';
+import { noStore, ownerPrefix, pendingImageRoute, requirePrivateLicenseBucket } from '../../../lib/privateLicense';
+
 const bucketName =
   process.env.LICENSE_UPLOADS_BUCKET ??
   process.env.PHOTO_UPLOADS_BUCKET ??
   "yasukari-file";
 const bucketRegion = process.env.AWS_REGION ?? "ap-northeast-1";
-const bucketPrefix = process.env.LICENSE_UPLOADS_PREFIX ?? "LicenseUploads/";
 
 type UploadRequestBody = {
   data?: string;
   fileName?: string;
   contentType?: string;
 };
-
-function normalizePrefix(prefix: string) {
-  return prefix.endsWith("/") ? prefix : `${prefix}/`;
-}
 
 function sanitizeFileName(fileName?: string) {
   if (!fileName) {
@@ -28,13 +26,6 @@ function sanitizeFileName(fileName?: string) {
   const { name, ext } = path.parse(fileName);
   const safeName = name.replace(/[^a-zA-Z0-9._-]/g, "_") || "image";
   return `${safeName}${ext}`;
-}
-
-function encodeS3Key(key: string) {
-  return key
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
 }
 
 const s3Client = new S3Client({ region: bucketRegion });
@@ -48,18 +39,18 @@ async function uploadToS3({
   body: Buffer;
   contentType: string;
 }) {
+  await requirePrivateLicenseBucket(s3Client);
   await s3Client.send(
     new PutObjectCommand({
       Bucket: bucketName,
       Key: key,
       Body: body,
       ContentType: contentType,
+      CacheControl: "private, no-store, max-age=0",
     })
   );
 
-  return `https://${bucketName}.s3.${bucketRegion}.amazonaws.com/${encodeS3Key(
-    key
-  )}`;
+  return key;
 }
 
 export default async function handler(
@@ -72,17 +63,18 @@ export default async function handler(
     return;
   }
 
+  noStore(response);
+  let user;
+  try { user = await verifyCognitoIdToken(request.cookies?.[COGNITO_ID_TOKEN_COOKIE]); }
+  catch { return response.status(503).json({ message: '認証を確認できません。' }); }
+  if (!user?.sub) return response.status(401).json({ message: 'ログインが必要です。' });
+
   const { data, fileName, contentType }: UploadRequestBody = request.body ?? {};
 
   if (typeof data !== "string" || data.length === 0) {
     response.status(400).json({ message: "画像データが送信されていません。" });
     return;
   }
-
-  const normalizedContentType =
-    typeof contentType === "string" && contentType.trim().length > 0
-      ? contentType
-      : "application/octet-stream";
 
   let body: Buffer;
   try {
@@ -93,19 +85,25 @@ export default async function handler(
     return;
   }
 
-  const normalizedPrefix = normalizePrefix(bucketPrefix);
+  const detectedType = body.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])) ? 'image/jpeg'
+    : body.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])) ? 'image/png'
+    : body.toString('ascii', 0, 4) === 'RIFF' && body.toString('ascii', 8, 12) === 'WEBP' ? 'image/webp' : null;
+  if (!detectedType || body.length > 7 * 1024 * 1024) {
+    return response.status(400).json({ message: 'JPEG・PNG・WebPの画像（7MB以下）を指定してください。' });
+  }
+  const normalizedPrefix = ownerPrefix(user.sub);
   const objectKey = `${normalizedPrefix}${Date.now()}-${crypto.randomUUID()}-${sanitizeFileName(
     fileName
   )}`;
 
   try {
-    const url = await uploadToS3({
+    await uploadToS3({
       key: objectKey,
       body,
-      contentType: normalizedContentType,
+      contentType: detectedType,
     });
 
-    response.status(200).json({ url });
+    response.status(200).json({ url: pendingImageRoute(objectKey) });
   } catch (error) {
     console.error("Failed to upload license image", error);
     response

@@ -14,9 +14,11 @@ export type RegistrationData = {
   tel?: string;
   license?: string;
   license_file_name?: string;
+  license_image_key?: string;
   license_image_url?: string;
   license_uploaded_at?: string;
   license_file_name_2?: string;
+  license_image_key_2?: string;
   license_image_url_2?: string;
   license_uploaded_at_2?: string;
   work_place?: string;

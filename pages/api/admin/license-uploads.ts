@@ -3,6 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { scanAllItems } from "../../../lib/dynamodb";
 import type { RegistrationData } from "../../../types/registration";
 
+import { noStore, isLicenseAdmin, imageRoute } from '../../../lib/privateLicense';
+
 const USER_TABLE = process.env.USER_TABLE ?? "yasukariUserMain";
 
 type LicenseUploadItem = {
@@ -44,6 +46,11 @@ export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse<{ uploads: LicenseUploadItem[] } | { message: string }>
 ) {
+  noStore(response);
+  if (!isLicenseAdmin(request)) {
+    response.setHeader('WWW-Authenticate', 'Basic realm="Protected"');
+    return response.status(401).json({ message: 'Unauthorized' });
+  }
   if (request.method !== "GET") {
     response.setHeader("Allow", ["GET"]);
     response.status(405).json({ message: "Method Not Allowed" });
@@ -53,7 +60,7 @@ export default async function handler(
   try {
     const items = await scanAllItems<RegistrationData>({
       TableName: USER_TABLE,
-      FilterExpression: "attribute_exists(#license_url) OR attribute_exists(#license_url_2)",
+      FilterExpression: "attribute_exists(#license_url) OR attribute_exists(#license_url_2) OR attribute_exists(license_image_key) OR attribute_exists(license_image_key_2)",
       ExpressionAttributeNames: {
         "#license_url": "license_image_url",
         "#license_url_2": "license_image_url_2",
@@ -64,18 +71,18 @@ export default async function handler(
       .filter(
         (item) =>
           typeof item.license_image_url === "string" ||
-          typeof item.license_image_url_2 === "string"
+          typeof item.license_image_url_2 === "string" || Boolean(item.license_image_key || item.license_image_key_2)
       )
       .map((item) => {
         const name = buildName(item) || item.email || "-";
         const images = [
           {
-            imageUrl: item.license_image_url ?? "",
+            imageUrl: item.license_image_key || item.license_image_url ? imageRoute(item.user_id, 1) : "",
             fileName: item.license_file_name ?? "-",
             uploadedAt: item.license_uploaded_at ?? "",
           },
           {
-            imageUrl: item.license_image_url_2 ?? "",
+            imageUrl: item.license_image_key_2 || item.license_image_url_2 ? imageRoute(item.user_id, 2) : "",
             fileName: item.license_file_name_2 ?? "-",
             uploadedAt: item.license_uploaded_at_2 ?? "",
           },

@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkAccess } from './lib/rateLimit';
+import { adminLockRemaining, recordAdminFailure } from './lib/adminLockout';
 import { COGNITO_ID_TOKEN_COOKIE } from './lib/cognitoHostedUi';
 import {
-  ADMIN_BASIC_PASS,
-  ADMIN_BASIC_USER,
   MANUAL_BASIC_PASS,
   MANUAL_BASIC_USER,
   isBasicAuthValid,
@@ -45,7 +44,7 @@ const requireBasicAuth = (
     });
   }
 
-  const isValid = isBasicAuthValid(authHeader, expectedUser, expectedPass);
+  const isValid = /^Basic\s+/i.test(authHeader) && isBasicAuthValid(authHeader, expectedUser, expectedPass);
   if (!isValid) {
     return new NextResponse('Unauthorized', {
       status: 401,
@@ -57,20 +56,47 @@ const requireBasicAuth = (
 };
 
 export async function middleware(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  const isAdmin = path === '/admin' || path.startsWith('/admin/') ||
+    path === '/api/admin' || path.startsWith('/api/admin/') ||
+    (path === '/api/license-image' && /^Basic\s+/i.test(req.headers.get('authorization') ?? ''));
+  if (isAdmin) {
+    const locked = (remaining: number) => new NextResponse(
+      '管理者へのアクセスを一時停止しています。30分後に再度お試しください。',
+      { status: 503, headers: {
+        'Retry-After': String(Math.ceil(remaining / 1000)),
+        'Cache-Control': 'private, no-store',
+        'Content-Type': 'text/plain; charset=utf-8',
+      } }
+    );
+    const remaining = adminLockRemaining();
+    if (remaining) return locked(remaining);
+    const header = req.headers.get('authorization');
+    const user = process.env.ADMIN_BASIC_USER;
+    const pass = process.env.ADMIN_BASIC_PASS;
+    if (!user || !pass) return new NextResponse('管理者認証が設定されていません。', {
+      status: 503, headers: { 'Cache-Control': 'private, no-store' },
+    });
+    const authResult = requireBasicAuth(header, user, pass);
+    if (authResult) {
+      // An initial browser challenge has no credentials and is not an input attempt.
+      // Count submitted invalid credentials globally, independent of client IP.
+      if (header) {
+        const remaining = recordAdminFailure();
+        if (remaining) return locked(remaining);
+      }
+      authResult.headers.set('Cache-Control', 'private, no-store');
+      return authResult;
+    }
+    // Admin APIs need the same gate; do not run page redirects for JSON endpoints.
+    if (path === '/api/admin' || path.startsWith('/api/admin/') || path === '/api/license-image') return NextResponse.next();
+  }
+
+  if (path === '/api/license-image') return NextResponse.next();
+
   const ip = req.ip || req.headers.get('x-forwarded-for') || '0.0.0.0';
   if (checkAccess(Array.isArray(ip) ? ip[0] : ip)) {
     return NextResponse.redirect(new URL('/wait', req.url));
-  }
-
-  if (req.nextUrl.pathname.startsWith('/admin')) {
-    const authResult = requireBasicAuth(
-      req.headers.get('authorization'),
-      ADMIN_BASIC_USER,
-      ADMIN_BASIC_PASS
-    );
-    if (authResult) {
-      return authResult;
-    }
   }
 
   if (req.nextUrl.pathname.startsWith('/manual_for_system')) {
@@ -150,5 +176,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|wait).*)'],
+  matcher: ['/((?!api|wait).*)', '/api/admin/:path*', '/api/license-image'],
 };

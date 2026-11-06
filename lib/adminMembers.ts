@@ -226,7 +226,7 @@ const mapStatus = (user?: CognitoUserInfo): MemberStatus => {
 
 const hasAllRequiredRegistrationFields = (registration?: RegistrationData): boolean => {
   if (!registration) return false;
-  return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(registration[field]));
+  return REQUIRED_REGISTRATION_FIELDS.every((field) => Boolean(field === 'license_image_url' ? registration.license_image_key || registration.license_image_url : registration[field]));
 };
 
 const mapRegistrationStatus = (
