@@ -812,7 +812,7 @@ export default function MyPage() {
           <p className="text-sm text-gray-500">ログイン中のプロフィール情報を確認できます。</p>
           <section className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700">
             <h2 className="font-semibold text-gray-900">お客様の情報を守るために</h2>
-            <p className="mt-2">免許証画像は非公開での保管を前提に、認証・閲覧権限の確認や外部アクセスの制限により保護する方針です。お客様の個人情報を大切に取り扱い、安全管理の継続的な強化に取り組んでいます。</p>
+            <p className="mt-2">お客様の大切な個人情報を適切に保護し、安心してご利用いただけるよう、安全管理とセキュリティ対策の強化に継続的に取り組んでいます。</p>
           </section>
           <div
             className={`mt-3 rounded-lg border border-rose-300 bg-gradient-to-r from-rose-50 via-rose-100 to-rose-50 p-4 text-xs text-rose-900 shadow-sm ring-1 ring-rose-200/70 ${

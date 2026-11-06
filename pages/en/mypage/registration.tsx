@@ -719,7 +719,7 @@ const RegistrationPage: NextPage = () => {
                   </span>
                   <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700">
                     <p className="font-semibold">Protection of your personal information</p>
-                    <p className="mt-2">We handle your driving licence images for identity verification and the necessary registration procedures, with private storage as our policy. We work to protect your personal information through authentication, viewing permission checks and restrictions on external access.</p>
+                    <p className="mt-2">We handle your driving licence images for identity verification and the necessary registration procedures. We treat your personal information with care and continually strengthen our security safeguards so you can complete these procedures with confidence.</p>
                   </div>
                   {licenseUploads.map((upload, index) => (
                     <div
