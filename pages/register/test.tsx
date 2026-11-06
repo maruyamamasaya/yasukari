@@ -753,7 +753,11 @@ const RegisterTestPage: NextPage = () => {
                   <div>
                     <span className="block text-sm font-medium text-gray-700">免許画像アップロード（最大2枚）</span>
                     <div className="mt-3 space-y-4">
-                      {licenseUploads.map((upload, index) => (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700">
+                    <p className="font-semibold">個人情報の保護について</p>
+                    <p className="mt-2">お預かりする免許証画像は、非公開での保管を前提に、本人確認および必要な登録手続きのために取り扱います。認証・閲覧権限の確認や外部アクセスの制限など、個人情報の保護に配慮した安全管理に取り組んでいます。</p>
+                  </div>
+                  {licenseUploads.map((upload, index) => (
                         <div key={`license-upload-${index}-${upload.inputKey}`}>
                           <label
                             htmlFor={`license_file_${index}`}

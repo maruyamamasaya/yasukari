@@ -84,6 +84,10 @@ export default function LicenseUploadDetailPage() {
         ]}
       >
         <div className={formStyles.cardStack}>
+          <section className={formStyles.card} aria-label="免許証画像のセキュリティについて">
+            <h2 className={styles.sectionTitle}>免許証画像の保護について</h2>
+            <p className={styles.sectionNote}>免許証画像は非公開での保管を前提に、認証・閲覧権限の確認と外部からのアクセス制限による保護を強化しています。個人情報保護のため、画像や閲覧用URLの外部共有はお控えください。</p>
+          </section>
           {isLoading ? (
             <section className={formStyles.card}>
               <p className={styles.sectionNote}>読み込み中です…</p>
