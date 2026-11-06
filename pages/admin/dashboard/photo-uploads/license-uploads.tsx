@@ -67,7 +67,14 @@ export default function LicenseUploadListPage() {
         <div className={formStyles.cardStack}>
           <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-relaxed text-red-800" aria-label="免許証画像のセキュリティについて">
             <h2 className="text-sm font-semibold">免許証画像の保護について</h2>
-            <p className="mt-2">免許証画像は大切な個人情報として慎重に取り扱い、安心して管理できるよう、安全管理とセキュリティ対策の強化に継続的に取り組んでいます。個人情報保護のため、画像の外部共有はお控えください。</p>
+            <p className="mt-2">免許証画像は大切な個人情報として慎重に取り扱い、安心して管理できるよう、以下の保護対策を実施しました。</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              <li>既存の免許証画像を専用の非公開保存先へ移行し、旧保存先でも外部からの直接閲覧を制限しました。</li>
+              <li>画像の閲覧時に本人または管理者であることを確認し、認証・閲覧権限のないアクセスを拒否します。</li>
+              <li>画像の表示には有効期間60秒の閲覧用URLを使用し、画像や取得時の応答をキャッシュに残さないよう設定しました。</li>
+              <li>管理者認証の失敗が直近1分間に合計100回に達した場合、管理画面・管理APIへのアクセスを全管理者に対して30分間制限する仕組みを追加しました。</li>
+            </ul>
+            <p className="mt-2">個人情報保護のため、画像や閲覧用URLの外部共有はお控えください。</p>
           </section>
           <section className={formStyles.card}>
             <header className={styles.sectionHeader}>
